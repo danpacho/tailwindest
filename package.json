@@ -1,0 +1,43 @@
+{
+    "name": "tailwindest",
+    "version": "1.0.0",
+    "description": "Think diffrent, tailwind. Writing classnames like CSS in JS.",
+    "author": "danpacho",
+    "license": "MIT",
+    "private": false,
+    "homepage": "https://github.com/danpacho/tailwindest#readme",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/danpacho/tailwindest"
+    },
+    "bugs": {
+        "url": "https://github.com/danpacho/tailwindest/issues"
+    },
+    "keywords": [
+        "tailwind",
+        "css in js format",
+        "zero bundle size",
+        "just classnames"
+    ],
+    "scripts": {
+        "build": "tsc && vite build"
+    },
+    "type": "module",
+    "files": [
+        "dist"
+    ],
+    "main": "./dist/tailwindest.es.js",
+    "module": "./dist/tailwindest.es.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "require": "./dist/tailwindest.umd.js",
+            "import": "./dist/tailwindest.es.js"
+        }
+    },
+    "devDependencies": {
+        "typescript": "^4.6.4",
+        "vite": "^3.0.0",
+        "vite-plugin-dts": "^1.4.1"
+    }
+}
