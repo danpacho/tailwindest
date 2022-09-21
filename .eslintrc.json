@@ -5,6 +5,7 @@
         "node": true,
         "es6": true
     },
+    "parser": "@typescript-eslint/parser",
     "extends": [
         "eslint:recommended",
         "prettier",
@@ -13,7 +14,6 @@
         "plugin:import/recommended"
     ],
     "plugins": ["prettier", "import", "@typescript-eslint"],
-    "parser": "@typescript-eslint/parser",
     "rules": {
         "eqeqeq": "error",
         "no-var": "error",
