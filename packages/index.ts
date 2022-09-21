@@ -1,3 +1,3 @@
-const init = "HELLOW WORLD!";
+const init = "HELLOW WORLD!"
 
-export { init };
+export { init }

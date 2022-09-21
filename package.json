@@ -22,7 +22,9 @@
     "scripts": {
         "build": "tsc && vite build",
         "prettier": "prettier '**/*.{ts,md}' --check",
-        "prettier:fix": "prettier '**/*.{ts,md}' --write"
+        "prettier:fix": "prettier '**/*.{ts,md}' --write",
+        "eslint": "eslint '*.ts'",
+        "eslint:fix": "eslint --fix '*.ts'"
     },
     "type": "module",
     "files": [
@@ -38,6 +40,12 @@
         }
     },
     "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^5.38.0",
+        "@typescript-eslint/parser": "^5.38.0",
+        "eslint": "^8.23.1",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-import": "^2.26.0",
+        "eslint-plugin-prettier": "^4.2.1",
         "prettier": "^2.7.1",
         "typescript": "^4.6.4",
         "vite": "^3.0.0",
