@@ -25,6 +25,7 @@
         "prettier:fix": "prettier '**/*.{ts,md}' --write",
         "eslint": "eslint '*.ts'",
         "eslint:fix": "eslint --fix '*.ts'",
+        "class": "node ./scripts/extract && prettier './packages/types/tailwind.nested/**.ts' --write",
         "pre-commit": "lint-staged",
         "prepare": "husky install"
     },
