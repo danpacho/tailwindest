@@ -1,6 +1,6 @@
 import { writeFile } from "fs"
 
-const CLASS_ELEMENTS = [
+const CLASS = [
     ":before",
     ":after",
     ":placeholder",
@@ -69,12 +69,8 @@ const combinationAll = (a, b) => {
     return res
 }
 
-const BasicNestKeys = [
-    ...CLASS_ELEMENTS,
-    ...BREAK_CONDITIONS,
-    ...THEME_CONDITION,
-]
-const BasicCombinationNestKeys = combinationAll(CLASS_ELEMENTS, CLASS_ELEMENTS)
+const BasicNestKeys = [...CLASS, ...BREAK_CONDITIONS, ...THEME_CONDITION]
+const BasicCombinationNestKeys = combinationAll(CLASS, CLASS)
 const BreakNestKeys = combination(BREAK_CONDITIONS, BasicCombinationNestKeys)
 const ThemeNestKeys = combination(THEME_CONDITION, BasicCombinationNestKeys)
 const ThemeBreakNestKeys = combination(
@@ -147,7 +143,8 @@ const toUnionTypes = (keys, typeName) => {
 
 const FILE_LOCATION = "packages/types/tailwind.nested"
 const FILE_TYPE = "ts"
+const FILE_IDENT = "@"
 data.forEach((data) => {
-    const fileName = `${FILE_LOCATION}/${data.fileName}.${FILE_TYPE}`
+    const fileName = `${FILE_LOCATION}/${FILE_IDENT}${data.fileName}.${FILE_TYPE}`
     extract(fileName, toUnionTypes(data.types, data.typeName))
 })
