@@ -20,9 +20,8 @@
         "just classnames"
     ],
     "scripts": {
-        "build": "tsc && vite build",
-        "prettier": "prettier '**/*.{ts,md}' --check",
-        "prettier:fix": "prettier '**/*.{ts,md}' --write",
+        "prettier": "prettier '{packages,scripts}/**/**/*.{ts,js,md}' --check",
+        "prettier:fix": "prettier '{packages,scripts}/**/**/*.{ts,js,md}' --write",
         "eslint": "eslint '*.ts'",
         "eslint:fix": "eslint --fix '*.ts'",
         "class": "node ./scripts/extract && prettier './packages/types/tailwind.nested/**.ts' --write",
@@ -33,27 +32,24 @@
     "files": [
         "dist"
     ],
-    "main": "./dist/tailwindest.es.js",
-    "module": "./dist/tailwindest.es.js",
+    "main": "./dist/tailwindest.js",
+    "module": "./dist/tailwindest.js",
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
-            "require": "./dist/tailwindest.umd.js",
-            "import": "./dist/tailwindest.es.js"
+            "import": "./dist/tailwindest.js"
         }
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.38.0",
         "@typescript-eslint/parser": "^5.38.0",
-        "eslint": "^8.23.1",
+        "eslint": "^8.24.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-import": "^2.26.0",
         "eslint-plugin-prettier": "^4.2.1",
         "husky": "^8.0.1",
         "lint-staged": "^13.0.3",
         "prettier": "^2.7.1",
-        "typescript": "^4.6.4",
-        "vite": "^3.0.0",
-        "vite-plugin-dts": "^1.4.1"
+        "typescript": "^4.8.3"
     }
 }
