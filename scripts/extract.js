@@ -47,8 +47,8 @@ const CLASS = [
     ":landscape",
 ]
 
-const BREAK_CONDITIONS = ["@sm", "@md", "@lg", "@xl", "@2xl"]
-const THEME_CONDITION = ["@dark"]
+const BREAK_CONDITIONS = [":sm", ":md", ":lg", ":xl", ":2xl"]
+const THEME_CONDITION = [":dark"]
 /**
  * @param {string[]} a
  * @param {string[]} b
@@ -71,45 +71,17 @@ const combinationAll = (a, b) => {
 
 const BasicNestKeys = [...CLASS, ...BREAK_CONDITIONS, ...THEME_CONDITION]
 const BasicCombinationNestKeys = combinationAll(CLASS, CLASS)
-const BreakNestKeys = combination(BREAK_CONDITIONS, BasicCombinationNestKeys)
-const ThemeNestKeys = combination(THEME_CONDITION, BasicCombinationNestKeys)
-const ThemeBreakNestKeys = combination(
-    THEME_CONDITION,
-    combination(
-        BREAK_CONDITIONS.map(
-            (breakCondition) =>
-                //replace @ to :
-                `:${breakCondition.slice(1, breakCondition.length)}`
-        ),
-        BasicCombinationNestKeys
-    )
-)
 
 const data = [
     {
         fileName: "basic",
-        typeName: "TailwindNestedBasic",
+        typeName: "TailwindNestedBasicType",
         types: BasicNestKeys,
     },
     {
         fileName: "combination",
-        typeName: "TailwindNestedCombination",
+        typeName: "TailwindNestedCombinationType",
         types: BasicCombinationNestKeys,
-    },
-    {
-        fileName: "break",
-        typeName: "TailwindNestedBreak",
-        types: BreakNestKeys,
-    },
-    {
-        fileName: "theme",
-        typeName: "TailwindNestedTheme",
-        types: ThemeNestKeys,
-    },
-    {
-        fileName: "theme.break",
-        typeName: "TailwindNestedThemeBreak",
-        types: ThemeBreakNestKeys,
     },
 ]
 
