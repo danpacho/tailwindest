@@ -1,12 +1,12 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindGridAutoVarients =
+type TailwindGridAutoVariants =
     | "auto"
     | "min"
     | "max"
     | "fr"
     | TailwindArbitrary
-type TailwindGridAutoColumns = `grid-cols-${TailwindGridAutoVarients}`
+type TailwindGridAutoColumns = `grid-cols-${TailwindGridAutoVariants}`
 export type TailwindGridAutoColumnsType = {
     /**
      *@note Utilities for controlling the size of implicitly-created grid columns.
@@ -14,7 +14,7 @@ export type TailwindGridAutoColumnsType = {
      */
     gridAutoColumns: TailwindGridAutoColumns
 }
-type TailwindGridAutoRows = `auto-rows-${TailwindGridAutoVarients}`
+type TailwindGridAutoRows = `auto-rows-${TailwindGridAutoVariants}`
 export type TailwindGridAutoRowsType = {
     /**
      *@note Utilities for controlling the size of implicitly-created grid rows.

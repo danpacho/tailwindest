@@ -1,6 +1,6 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type GapVarients =
+type GapVariants =
     | "96"
     | "80"
     | "72"
@@ -37,7 +37,7 @@ type GapVarients =
     | "0"
     | "px"
     | TailwindArbitrary
-type TailwindGap = `gap-${GapVarients}`
+type TailwindGap = `gap-${GapVariants}`
 export type TailwindGapType = {
     /**
      *@note Utilities for controlling gutters between grid and flexbox items.
@@ -46,7 +46,7 @@ export type TailwindGapType = {
     gap: TailwindGap
 }
 
-type TailwindGapX = `gap-x-${GapVarients}`
+type TailwindGapX = `gap-x-${GapVariants}`
 export type TailwindGapXType = {
     /**
      *@note Utilities for controlling gutters between grid and flexbox items at x axis.
@@ -55,7 +55,7 @@ export type TailwindGapXType = {
     gapX: TailwindGapX
 }
 
-type TailwindGapY = `gap-y-${GapVarients}`
+type TailwindGapY = `gap-y-${GapVariants}`
 export type TailwindGapYType = {
     /**
      *@note Utilities for controlling gutters between grid and flexbox items at y axis.

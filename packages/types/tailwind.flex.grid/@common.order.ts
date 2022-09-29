@@ -1,6 +1,6 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindFlexGridOrderVarients =
+type TailwindFlexGridOrderVariants =
     | "first"
     | "last"
     | "none"
@@ -17,7 +17,7 @@ type TailwindFlexGridOrderVarients =
     | "11"
     | "12"
     | TailwindArbitrary
-type TailwindFlexGridOrder = `order-${TailwindFlexGridOrderVarients}`
+type TailwindFlexGridOrder = `order-${TailwindFlexGridOrderVariants}`
 export type TailwindFlexGridOrderType = {
     /**
      *@note Utilities for controlling the order of flex and grid items.

@@ -1,4 +1,4 @@
-type TailwindBreakVarients =
+type TailwindBreakVariants =
     | "auto"
     | "all"
     | "avoid"
@@ -7,15 +7,15 @@ type TailwindBreakVarients =
     | "left"
     | "right"
     | "column"
-type TailwindBreakAfter = `break-after-${TailwindBreakVarients}`
-type TailwindBreakBefore = `break-before-${TailwindBreakVarients}`
+type TailwindBreakAfter = `break-after-${TailwindBreakVariants}`
+type TailwindBreakBefore = `break-before-${TailwindBreakVariants}`
 
-type TailwindBreakInsideVarients =
+type TailwindBreakInsideVariants =
     | "auto"
     | "avoid"
     | "avoid-page"
     | "avoid-column"
-type TailwindBreakInside = `break-inside-${TailwindBreakInsideVarients}`
+type TailwindBreakInside = `break-inside-${TailwindBreakInsideVariants}`
 
 export type TailwindBreakType = {
     /**

@@ -1,6 +1,6 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindGridRowStartEndVarients =
+type TailwindGridRowStartEndVariants =
     | "auto"
     | "span-1"
     | "span-2"
@@ -26,7 +26,7 @@ type TailwindGridRowStartEndVarients =
     | "end-7"
     | "end-auto"
     | TailwindArbitrary
-type TailwindGridRowStartEnd = `row-${TailwindGridRowStartEndVarients}`
+type TailwindGridRowStartEnd = `row-${TailwindGridRowStartEndVariants}`
 export type TailwindGridRowStartEndType = {
     /**
      *@note Utilities for controlling how elements are sized and placed across grid rows.

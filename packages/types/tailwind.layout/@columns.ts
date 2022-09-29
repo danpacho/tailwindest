@@ -1,6 +1,6 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindColumnsVarients =
+type TailwindColumnsVariants =
     | "1"
     | "2"
     | "3"
@@ -28,7 +28,7 @@ type TailwindColumnsVarients =
     | "6xl"
     | "7xl"
     | TailwindArbitrary
-type TailwindColumns = `columns-${TailwindColumnsVarients}`
+type TailwindColumns = `columns-${TailwindColumnsVariants}`
 
 export type TailwindColumnsType = {
     /**

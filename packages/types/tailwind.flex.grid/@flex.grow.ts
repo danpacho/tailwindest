@@ -1,4 +1,4 @@
-import { TailwindArbitrary } from "./../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
 type TailwindFlexGrow = "grow" | "grow-0" | `grow-${TailwindArbitrary}`
 export type TailwindFlexGrowType = {

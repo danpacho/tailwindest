@@ -1,6 +1,6 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindZIndexVarients =
+type TailwindZIndexVariants =
     | "0"
     | "10"
     | "20"
@@ -9,7 +9,7 @@ type TailwindZIndexVarients =
     | "50"
     | "auto"
     | TailwindArbitrary
-type TailwindZIndex = `z-${TailwindZIndexVarients}`
+type TailwindZIndex = `z-${TailwindZIndexVariants}`
 export type TailwindZIndexType = {
     /**
      *@note Utilities for controlling the stack order of an element.

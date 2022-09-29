@@ -1,9 +1,9 @@
-type TailwindFlexDirectionVarients =
+type TailwindFlexDirectionVariants =
     | "row"
     | "row-reverse"
     | "col"
     | "col-reverse"
-type TailwindFlexDirection = `flex-${TailwindFlexDirectionVarients}`
+type TailwindFlexDirection = `flex-${TailwindFlexDirectionVariants}`
 export type TailwindFlexDirectionType = {
     /**
      *@note Utilities for controlling the direction of flex items.

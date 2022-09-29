@@ -1,5 +1,5 @@
-type TailwindBoxSizingVarients = "border" | "content"
-type TailwindBoxSizing = `box-${TailwindBoxSizingVarients}`
+type TailwindBoxSizingVariants = "border" | "content"
+type TailwindBoxSizing = `box-${TailwindBoxSizingVariants}`
 export type TailwindBoxSizingType = {
     /**
      *@note Utilities for controlling how the browser should calculate an element's total size.

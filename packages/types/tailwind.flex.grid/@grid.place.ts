@@ -1,5 +1,5 @@
-type TailwindGridPlaceItemsVarients = "start" | "end" | "center" | "stretch"
-type TailwindGridPlaceItems = `place-item-${TailwindGridPlaceItemsVarients}`
+type TailwindGridPlaceItemsVariants = "start" | "end" | "center" | "stretch"
+type TailwindGridPlaceItems = `place-item-${TailwindGridPlaceItemsVariants}`
 export type TailwindGridPlaceItemsType = {
     /**
      *@note Utilities for controlling how items are justified and aligned at the same time.
@@ -8,13 +8,13 @@ export type TailwindGridPlaceItemsType = {
     placeItem: TailwindGridPlaceItems
 }
 
-type TailwindGridPlaceContentVarients =
-    | TailwindGridPlaceItemsVarients
+type TailwindGridPlaceContentVariants =
+    | TailwindGridPlaceItemsVariants
     | "between"
     | "around"
     | "evenly"
 type TailwindGridPlaceContent =
-    `place-content-${TailwindGridPlaceContentVarients}`
+    `place-content-${TailwindGridPlaceContentVariants}`
 export type TailwindGridPlaceContentType = {
     /**
      *@note Utilities for controlling how content is justified and aligned at the same time.
@@ -23,8 +23,8 @@ export type TailwindGridPlaceContentType = {
     placeContent: TailwindGridPlaceContent
 }
 
-type TailwindGridPlaceSelfVarients = "auto" | TailwindGridPlaceItemsVarients
-type TailwindGridPlaceSelf = `place-self-${TailwindGridPlaceSelfVarients}`
+type TailwindGridPlaceSelfVariants = "auto" | TailwindGridPlaceItemsVariants
+type TailwindGridPlaceSelf = `place-self-${TailwindGridPlaceSelfVariants}`
 export type TailwindGridPlaceSelfType = {
     /**
      *@note Utilities for controlling how an individual item is justified and aligned at the same time.

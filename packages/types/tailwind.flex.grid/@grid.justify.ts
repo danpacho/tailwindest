@@ -1,6 +1,6 @@
-type TailwindGridJustifyItemsVarients = "start" | "end" | "center" | "stretch"
+type TailwindGridJustifyItemsVariants = "start" | "end" | "center" | "stretch"
 type TailwindGridJustifyItems =
-    `justify-items-${TailwindGridJustifyItemsVarients}`
+    `justify-items-${TailwindGridJustifyItemsVariants}`
 export type TailwindGridJustifyItemsType = {
     /**
      *@note Utilities for controlling how grid items are aligned along their inline axis.
@@ -9,8 +9,8 @@ export type TailwindGridJustifyItemsType = {
     justifyItems: TailwindGridJustifyItems
 }
 
-type TailwindGridJustifySelfVarients = "auto" | TailwindGridJustifyItemsVarients
-type TailwindGridJustifySelf = `justify-self-${TailwindGridJustifySelfVarients}`
+type TailwindGridJustifySelfVariants = "auto" | TailwindGridJustifyItemsVariants
+type TailwindGridJustifySelf = `justify-self-${TailwindGridJustifySelfVariants}`
 export type TailwindGridJustifySelfType = {
     /**
      *@note Utilities for controlling how an individual grid item is aligned along its inline axis.

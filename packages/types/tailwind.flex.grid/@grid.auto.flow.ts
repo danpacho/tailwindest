@@ -1,10 +1,10 @@
-type TailwindGridAutoFlowVarients =
+type TailwindGridAutoFlowVariants =
     | "row"
     | "col"
     | "dense"
     | "row-dense"
     | "col-dense"
-type TailwindGridAutoFlow = `grid-flow-${TailwindGridAutoFlowVarients}`
+type TailwindGridAutoFlow = `grid-flow-${TailwindGridAutoFlowVariants}`
 export type TailwindGridAutoFlowType = {
     /**
      *@note Utilities for controlling how elements in a grid are auto-placed.

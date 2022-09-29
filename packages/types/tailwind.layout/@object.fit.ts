@@ -1,13 +1,13 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindObjectFitVarients =
+type TailwindObjectFitVariants =
     | "contain"
     | "cover"
     | "fill"
     | "none"
     | "scale-down"
     | TailwindArbitrary
-type TailwindObjectFit = `object-${TailwindObjectFitVarients}`
+type TailwindObjectFit = `object-${TailwindObjectFitVariants}`
 export type TailwindObjectFitType = {
     /**
      *@note Utilities for controlling how a replaced element's content should be resized.

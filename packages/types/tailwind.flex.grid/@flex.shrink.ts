@@ -1,4 +1,4 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
 type TailwindFlexShrink = "shrink" | "shrink-0" | `shirink-${TailwindArbitrary}`
 export type TailwindFlexShrinkType = {

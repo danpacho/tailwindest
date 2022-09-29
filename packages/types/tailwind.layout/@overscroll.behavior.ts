@@ -1,4 +1,4 @@
-type TailwindOverscrollBehaviorVarients =
+type TailwindOverscrollBehaviorVariants =
     | "auto"
     | "contain"
     | "none"
@@ -10,7 +10,7 @@ type TailwindOverscrollBehaviorVarients =
     | "x-none"
 
 type TailwindOverscrollBehavior =
-    `overscroll-${TailwindOverscrollBehaviorVarients}`
+    `overscroll-${TailwindOverscrollBehaviorVariants}`
 export type TailwindOverscrollBehaviorType = {
     /**
      *@note Utilities for controlling how the browser behaves when reaching the boundary of a scrolling area.

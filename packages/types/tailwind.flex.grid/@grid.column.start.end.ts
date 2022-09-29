@@ -1,6 +1,6 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindGridColumnStartEndVarients =
+type TailwindGridColumnStartEndVariants =
     | "auto"
     | "span-1"
     | "span-2"
@@ -16,7 +16,7 @@ type TailwindGridColumnStartEndVarients =
     | "span-12"
     | "span-full"
     | TailwindArbitrary
-type TailwindGridColumn = `col-${TailwindGridColumnStartEndVarients}`
+type TailwindGridColumn = `col-${TailwindGridColumnStartEndVariants}`
 export type TailwindGridColumnType = {
     /**
      *@note Utilities for controlling how elements are sized and placed across grid columns.
@@ -25,7 +25,7 @@ export type TailwindGridColumnType = {
     gridColumn: TailwindGridColumn
 }
 
-type TailwindGridColumnDirectionVarients =
+type TailwindGridColumnDirectionVariants =
     | "1"
     | "2"
     | "3"
@@ -42,7 +42,7 @@ type TailwindGridColumnDirectionVarients =
     | "auto"
     | TailwindArbitrary
 type TailwindGridColumnStart =
-    `col-start-${TailwindGridColumnDirectionVarients}`
+    `col-start-${TailwindGridColumnDirectionVariants}`
 export type TailwindGridColumnStartType = {
     /**
      *@note Utilities for controlling how elements are sized and placed across grid columns.
@@ -51,7 +51,7 @@ export type TailwindGridColumnStartType = {
     gridColumnStart: TailwindGridColumnStart
 }
 
-type TailwindGridColumnEnd = `col-end-${TailwindGridColumnDirectionVarients}`
+type TailwindGridColumnEnd = `col-end-${TailwindGridColumnDirectionVariants}`
 export type TailwindGridColumnEndType = {
     /**
      *@note Utilities for controlling how elements are sized and placed across grid columns.

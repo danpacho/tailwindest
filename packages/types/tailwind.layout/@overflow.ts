@@ -1,4 +1,4 @@
-type TailwindOverflowVarients =
+type TailwindOverflowVariants =
     | "auto"
     | "hidden"
     | "clip"
@@ -14,7 +14,7 @@ type TailwindOverflowVarients =
     | "y-visible"
     | "x-scroll"
     | "y-scroll"
-type TailwindOverflow = `overflow-${TailwindOverflowVarients}`
+type TailwindOverflow = `overflow-${TailwindOverflowVariants}`
 export type TailwindOverflowType = {
     /**
      *@note Utilities for controlling how an element handles content that is too large for the container.

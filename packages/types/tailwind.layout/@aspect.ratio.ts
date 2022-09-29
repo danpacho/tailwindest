@@ -1,4 +1,4 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
 type TailwindAsepectRatio =
     | "aspect-auto"

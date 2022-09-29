@@ -1,8 +1,8 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
-import { MinSizingVarients, SizingVarients } from "./@sizing.varients"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
+import { MinSizingVariants, SizingVariants } from "./@sizing.varients"
 
-type TailwindSizingVarients =
-    | SizingVarients
+type TailwindSizingVariants =
+    | SizingVariants
     | "1/2"
     | "2/3"
     | "1/4"
@@ -28,7 +28,7 @@ type TailwindSizingVarients =
     | "9/12"
     | "10/12"
     | "11/12"
-type TailwindWidth = `w-${TailwindSizingVarients}`
+type TailwindWidth = `w-${TailwindSizingVariants}`
 export type TailwindWidthType = {
     /**
      *@note Utilities for setting the width of an element.
@@ -38,7 +38,7 @@ export type TailwindWidthType = {
     width: TailwindWidth
 }
 
-type TailwindMinWidth = `min-w-${MinSizingVarients}`
+type TailwindMinWidth = `min-w-${MinSizingVariants}`
 export type TailwindMinWidthType = {
     /**
      *@note Utilities for setting the minimum width of an element.
@@ -47,7 +47,7 @@ export type TailwindMinWidthType = {
     minWidth: TailwindMinWidth
 }
 
-type TailwindMaxWidthVarients =
+type TailwindMaxWidthVariants =
     | "0"
     | "none"
     | "xs"
@@ -72,7 +72,7 @@ type TailwindMaxWidthVarients =
     | "screen-xl"
     | "screen-2xl"
     | TailwindArbitrary
-type TailwindMaxWidth = `max-w-${TailwindMaxWidthVarients}`
+type TailwindMaxWidth = `max-w-${TailwindMaxWidthVariants}`
 export type TailwindMaxWidthType = {
     /**
      *@note Utilities for setting the maximum width of an element.

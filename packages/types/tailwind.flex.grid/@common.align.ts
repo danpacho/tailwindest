@@ -1,13 +1,13 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindAlignContentVarients =
+type TailwindAlignContentVariants =
     | "center"
     | "start"
     | "end"
     | "between"
     | "around"
     | "evenly"
-type TailwindAlignContent = `content-${TailwindAlignContentVarients}`
+type TailwindAlignContent = `content-${TailwindAlignContentVariants}`
 export type TailwindAlignContentType = {
     /**
      *@note Utilities for controlling how rows are positioned in multi-row flex and grid containers.
@@ -16,13 +16,13 @@ export type TailwindAlignContentType = {
     alignContent: TailwindAlignContent
 }
 
-type TailwindAlignItemsVarients =
+type TailwindAlignItemsVariants =
     | "start"
     | "end"
     | "center"
     | "baseline"
     | "stretch"
-type TailwindAlignItems = `items-${TailwindAlignItemsVarients}`
+type TailwindAlignItems = `items-${TailwindAlignItemsVariants}`
 export type TailwindAlignItemsType = {
     /**
      *@note Utilities for controlling how flex and grid items are positioned along a container's cross axis.
@@ -31,11 +31,11 @@ export type TailwindAlignItemsType = {
     alignItems: TailwindAlignItems
 }
 
-type TailwindAlignSelfVarients =
+type TailwindAlignSelfVariants =
     | "auto"
-    | TailwindAlignItemsVarients
+    | TailwindAlignItemsVariants
     | TailwindArbitrary
-type TailwindAlignSelf = `self-${TailwindAlignSelfVarients}`
+type TailwindAlignSelf = `self-${TailwindAlignSelfVariants}`
 export type TailwindAlignSelfType = {
     /**
      *@note Utilities for controlling how an individual flex or grid item is positioned along its container's cross axis.

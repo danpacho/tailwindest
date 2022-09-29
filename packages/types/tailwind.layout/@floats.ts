@@ -1,5 +1,5 @@
-type TailwindFloatsVarients = "right" | "left" | "none"
-type TailwindFloats = `float-${TailwindFloatsVarients}`
+type TailwindFloatsVariants = "right" | "left" | "none"
+type TailwindFloats = `float-${TailwindFloatsVariants}`
 export type TailwindFloatsType = {
     /**
      *@note Utilities for controlling the wrapping of content around an element.

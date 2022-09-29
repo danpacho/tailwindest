@@ -1,12 +1,12 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindFlexVarients =
+type TailwindFlexVariants =
     | "1"
     | "auto"
     | "initial"
     | "none"
     | TailwindArbitrary
-type TailwindFlex = `flex-${TailwindFlexVarients}`
+type TailwindFlex = `flex-${TailwindFlexVariants}`
 export type TailwindFlexType = {
     /**
      *@note Utilities for controlling how flex items both grow and shrink.

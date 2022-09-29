@@ -1,6 +1,6 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindGridTemplateRowsVarients =
+type TailwindGridTemplateRowsVariants =
     | "none"
     | "1"
     | "2"
@@ -9,7 +9,7 @@ type TailwindGridTemplateRowsVarients =
     | "5"
     | "6"
     | TailwindArbitrary
-type TailwindGridTemplateRows = `grid-rows-${TailwindGridTemplateRowsVarients}`
+type TailwindGridTemplateRows = `grid-rows-${TailwindGridTemplateRowsVariants}`
 export type TailwindGridTemplateRowsType = {
     /**
      *@note Utilities for specifying the rows in a grid layout.
@@ -18,7 +18,7 @@ export type TailwindGridTemplateRowsType = {
     gridTemplateRows: TailwindGridTemplateRows
 }
 
-type TailwindGridTemplateColumnsVarients =
+type TailwindGridTemplateColumnsVariants =
     | "none"
     | "1"
     | "2"
@@ -34,7 +34,7 @@ type TailwindGridTemplateColumnsVarients =
     | "12"
     | TailwindArbitrary
 type TailwindGridTemplateColumns =
-    `grid-cols-${TailwindGridTemplateColumnsVarients}`
+    `grid-cols-${TailwindGridTemplateColumnsVariants}`
 export type TailwindGridTemplateColumnsType = {
     /**
      *@note Utilities for specifying the columns in a grid layout.

@@ -1,4 +1,4 @@
-type TailwindObjectPositionVarients =
+type TailwindObjectPositionVariants =
     | "top"
     | "center"
     | "bottom"
@@ -9,7 +9,7 @@ type TailwindObjectPositionVarients =
     | "right-top"
     | "right-bottom"
 
-type TailwindObjectPosition = `object-${TailwindObjectPositionVarients}`
+type TailwindObjectPosition = `object-${TailwindObjectPositionVariants}`
 export type TailwindObjectPositionType = {
     /**
      *@note Utilities for controlling how a replaced element's content should be positioned within its container.

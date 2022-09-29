@@ -1,6 +1,6 @@
-import { TailwindArbitrary } from "./../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindFlexBasisVarients =
+type TailwindFlexBasisVariants =
     | "0"
     | "1"
     | "2"
@@ -65,7 +65,7 @@ type TailwindFlexBasisVarients =
     | "11/12"
     | "full"
     | TailwindArbitrary
-type TailwindFlexBasis = `basis-${TailwindFlexBasisVarients}`
+type TailwindFlexBasis = `basis-${TailwindFlexBasisVariants}`
 export type TailwindFlexBasisType = {
     /**
      *@note Utilities for controlling the initial size of flex items.

@@ -1,7 +1,7 @@
-import { MinSizingVarients, SizingVarients } from "./@sizing.varients"
+import { MinSizingVariants, SizingVariants } from "./@sizing.varients"
 
-type TailwindHeightVarients =
-    | SizingVarients
+type TailwindHeightVariants =
+    | SizingVariants
     | "1/2"
     | "1/3"
     | "2/3"
@@ -17,7 +17,7 @@ type TailwindHeightVarients =
     | "3/6"
     | "4/6"
     | "5/6"
-type TailwindHeight = `h-${TailwindHeightVarients}`
+type TailwindHeight = `h-${TailwindHeightVariants}`
 export type TailwindHeightType = {
     /**
      *@note Utilities for setting the height of an element.
@@ -26,7 +26,7 @@ export type TailwindHeightType = {
     height: TailwindHeight
 }
 
-type TailwindMinHeight = `min-h-${MinSizingVarients}`
+type TailwindMinHeight = `min-h-${MinSizingVariants}`
 export type TailwindMinHeightType = {
     /**
      *@note Utilities for setting the minimum height of an element.
@@ -35,8 +35,8 @@ export type TailwindMinHeightType = {
     minHeight: TailwindMinHeight
 }
 
-type TailwindMaxHeightVarients = Exclude<SizingVarients, "auto">
-type TailwindMaxHeight = `max-h-${TailwindMaxHeightVarients}`
+type TailwindMaxHeightVariants = Exclude<SizingVariants, "auto">
+type TailwindMaxHeight = `max-h-${TailwindMaxHeightVariants}`
 export type TailwindMaxHeightType = {
     /**
      *@note Utilities for setting the maximum height of an element.

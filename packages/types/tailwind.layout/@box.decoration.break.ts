@@ -1,6 +1,6 @@
-type TailwindBoxDecorationBreakVarients = "clone" | "slice"
+type TailwindBoxDecorationBreakVariants = "clone" | "slice"
 type TailwindBoxDecorationBreak =
-    `box-decoration-${TailwindBoxDecorationBreakVarients}`
+    `box-decoration-${TailwindBoxDecorationBreakVariants}`
 export type TailwindBoxDecorationBreakType = {
     /**
      *@note Utilities for controlling how element fragments should be rendered across multiple lines, columns, or pages.

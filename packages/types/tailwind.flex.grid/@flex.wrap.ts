@@ -1,11 +1,11 @@
-import { TailwindArbitrary } from "../tailwind.arbitrary"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindFlexWrapVarients =
+type TailwindFlexWrapVariants =
     | "wrap"
     | "wrap-reverse"
     | "nowrap"
     | TailwindArbitrary
-type TailwindFlexWrap = `flex-${TailwindFlexWrapVarients}`
+type TailwindFlexWrap = `flex-${TailwindFlexWrapVariants}`
 export type TailwindFlexWrapType = {
     /**
      *@note Utilities for controlling how flex items wrap.
