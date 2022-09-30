@@ -1,5 +1,5 @@
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
-import { SpacingVariants } from "../tailwind.spacing/@spacing.varients"
+import { SpacingVariants } from "../tailwind.common/@spacing.varients"
 
 export type SizingVariants =
     | SpacingVariants

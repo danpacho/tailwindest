@@ -1,4 +1,4 @@
-import { SpacingVariants } from "./@spacing.varients"
+import { SpacingVariants } from "../tailwind.common/@spacing.varients"
 
 type TailwindSpaceBetweenVariants = SpacingVariants | "reverse"
 export type TailwindSpaceBetweenType = {

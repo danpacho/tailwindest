@@ -1,4 +1,4 @@
-import { SpacingVariants } from "../tailwind.spacing/@spacing.varients"
+import { SpacingVariants } from "../tailwind.common/@spacing.varients"
 
 type TailwindTextIndent = `indent-${SpacingVariants}`
 export type TailwindTextIndentType = {
