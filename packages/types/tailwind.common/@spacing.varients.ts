@@ -1,4 +1,4 @@
-import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
+import { TailwindArbitrary } from "./@arbitrary"
 
 export type SpacingVariants =
     | TailwindArbitrary
