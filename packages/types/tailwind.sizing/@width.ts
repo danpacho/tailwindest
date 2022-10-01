@@ -42,6 +42,7 @@ type TailwindMinWidth = `min-w-${MinSizingVariants}`
 export type TailwindMinWidthType = {
     /**
      *@note Utilities for setting the minimum width of an element.
+     *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [min-width](https://tailwindcss.com/docs/min-width)
      */
     minWidth: TailwindMinWidth
@@ -76,6 +77,7 @@ type TailwindMaxWidth = `max-w-${TailwindMaxWidthVariants}`
 export type TailwindMaxWidthType = {
     /**
      *@note Utilities for setting the maximum width of an element.
+     *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [max-width](https://tailwindcss.com/docs/max-width)
      */
     maxWidth: TailwindMaxWidth

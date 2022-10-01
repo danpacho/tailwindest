@@ -21,6 +21,7 @@ type TailwindHeight = `h-${TailwindHeightVariants}`
 export type TailwindHeightType = {
     /**
      *@note Utilities for setting the height of an element.
+     *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [height](https://tailwindcss.com/docs/height)
      */
     height: TailwindHeight
@@ -30,6 +31,7 @@ type TailwindMinHeight = `min-h-${MinSizingVariants}`
 export type TailwindMinHeightType = {
     /**
      *@note Utilities for setting the minimum height of an element.
+     *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [min-height](https://tailwindcss.com/docs/min-height)
      */
     minHeight: TailwindMinHeight
@@ -40,6 +42,7 @@ type TailwindMaxHeight = `max-h-${TailwindMaxHeightVariants}`
 export type TailwindMaxHeightType = {
     /**
      *@note Utilities for setting the maximum height of an element.
+     *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [max-height](https://tailwindcss.com/docs/max-height)
      */
     maxHeight: TailwindMaxHeight
