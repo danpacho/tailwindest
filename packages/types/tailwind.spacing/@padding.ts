@@ -1,4 +1,4 @@
-import { SpacingVariants } from "../tailwind.common/@spacing.varients"
+import { TailwindSpacingVariants } from "../tailwind.common/@spacing.varients"
 
 export type TailwindPaddingType = {
     /**
@@ -6,41 +6,41 @@ export type TailwindPaddingType = {
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [padding](https://tailwindcss.com/docs/padding)
      */
-    padding: `p-${SpacingVariants}`
+    padding: `p-${TailwindSpacingVariants}`
     /**
      *@note Utilities for controlling an element's padding x.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [padding](https://tailwindcss.com/docs/padding)
      */
-    paddingX: `px-${SpacingVariants}`
+    paddingX: `px-${TailwindSpacingVariants}`
     /**
      *@note Utilities for controlling an element's padding y.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [padding](https://tailwindcss.com/docs/padding)
      */
-    paddingY: `py-${SpacingVariants}`
+    paddingY: `py-${TailwindSpacingVariants}`
     /**
      *@note Utilities for controlling an element's padding top.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [padding](https://tailwindcss.com/docs/padding)
      */
-    paddingTop: `pt-${SpacingVariants}`
+    paddingTop: `pt-${TailwindSpacingVariants}`
     /**
      *@note Utilities for controlling an element's padding bottom.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [padding](https://tailwindcss.com/docs/padding)
      */
-    paddingBottom: `pb-${SpacingVariants}`
+    paddingBottom: `pb-${TailwindSpacingVariants}`
     /**
      *@note Utilities for controlling an element's padding right.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [padding](https://tailwindcss.com/docs/padding)
      */
-    paddingRight: `pr-${SpacingVariants}`
+    paddingRight: `pr-${TailwindSpacingVariants}`
     /**
      *@note Utilities for controlling an element's padding left.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [padding](https://tailwindcss.com/docs/padding)
      */
-    paddingLeft: `pl-${SpacingVariants}`
+    paddingLeft: `pl-${TailwindSpacingVariants}`
 }

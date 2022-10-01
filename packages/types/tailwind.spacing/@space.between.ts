@@ -1,6 +1,6 @@
-import { SpacingVariants } from "../tailwind.common/@spacing.varients"
+import { TailwindSpacingVariants } from "../tailwind.common/@spacing.varients"
 
-type TailwindSpaceBetweenVariants = SpacingVariants | "reverse"
+type TailwindSpaceBetweenVariants = TailwindSpacingVariants | "reverse"
 export type TailwindSpaceBetweenType = {
     /**
      *@note Utilities for controlling the space(**margin**) between child elements `> * + *`.

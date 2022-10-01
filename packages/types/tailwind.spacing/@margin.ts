@@ -1,6 +1,6 @@
-import { SpacingVariants } from "../tailwind.common/@spacing.varients"
+import { TailwindSpacingVariants } from "../tailwind.common/@spacing.varients"
 
-type TailwindMarginVariants = SpacingVariants | "auto"
+type TailwindMarginVariants = TailwindSpacingVariants | "auto"
 export type TailwindMarginType = {
     /**
      *@note Utilities for controlling an element's margin all.

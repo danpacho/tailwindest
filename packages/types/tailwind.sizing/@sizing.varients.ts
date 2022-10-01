@@ -1,8 +1,8 @@
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
-import { SpacingVariants } from "../tailwind.common/@spacing.varients"
+import { TailwindSpacingVariants } from "../tailwind.common/@spacing.varients"
 
 export type SizingVariants =
-    | SpacingVariants
+    | TailwindSpacingVariants
     | TailwindArbitrary
     | "auto"
     | "full"

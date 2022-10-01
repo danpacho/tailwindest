@@ -1,6 +1,6 @@
 import { TailwindArbitrary } from "./@arbitrary"
 
-export type SpacingVariants =
+export type TailwindSpacingVariants =
     | TailwindArbitrary
     | "96"
     | "80"
