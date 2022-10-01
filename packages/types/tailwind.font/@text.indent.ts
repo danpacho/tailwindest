@@ -1,6 +1,6 @@
-import { SpacingVariants } from "../tailwind.common/@spacing.varients"
+import { TailwindSpacingVariants } from "../tailwind.common/@spacing.varients"
 
-type TailwindTextIndent = `indent-${SpacingVariants}`
+type TailwindTextIndent = `indent-${TailwindSpacingVariants}`
 export type TailwindTextIndentType = {
     /**
      *@note Utilities for controlling the amount of empty space shown before text in a block.
