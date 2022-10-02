@@ -1,6 +1,6 @@
 import { writeFile } from "fs"
 
-const CLASS = [
+const PSEUDO_CLASS_ELEMENTS = [
     ":before",
     ":after",
     ":placeholder",
@@ -8,6 +8,7 @@ const CLASS = [
     ":marker",
     ":selection",
     ":first-line",
+    ":first-letter",
     ":backdrop",
     ":hover",
     ":active",
@@ -49,39 +50,18 @@ const CLASS = [
 
 const BREAK_CONDITIONS = [":sm", ":md", ":lg", ":xl", ":2xl"]
 const THEME_CONDITION = [":dark"]
-/**
- * @param {string[]} a
- * @param {string[]} b
- * @returns {string[]} combination of a and b
- */
-const combination = (a, b) =>
-    a.map((a) => b.filter((b) => b !== a).map((b) => `${a}${b}`)).flat()
 
-/**
- * @param {string[]} a
- * @param {string[]} b
- * @returns {string[]} both side of combination of a and b
- */
-const combinationAll = (a, b) => {
-    const combA = combination(a, b)
-    const combB = combination(b, a)
-    const res = [...combA, ...combB]
-    return res
-}
-
-const BasicNestKeys = [...CLASS, ...BREAK_CONDITIONS, ...THEME_CONDITION]
-const BasicCombinationNestKeys = combinationAll(CLASS, CLASS)
+const BasicNestKeys = [
+    ...PSEUDO_CLASS_ELEMENTS,
+    ...BREAK_CONDITIONS,
+    ...THEME_CONDITION,
+]
 
 const data = [
     {
         fileName: "basic",
         typeName: "TailwindNestedBasicType",
         types: BasicNestKeys,
-    },
-    {
-        fileName: "combination",
-        typeName: "TailwindNestedCombinationType",
-        types: BasicCombinationNestKeys,
     },
 ]
 
@@ -113,10 +93,13 @@ const toUnionTypes = (keys, typeName) => {
     return exportType
 }
 
-const FILE_LOCATION = "packages/types/tailwind.nested"
-const FILE_TYPE = "ts"
-const FILE_IDENT = "@"
+const TYPE = {
+    LOCATION: "packages/types/tailwind.nested",
+    TYPE: "ts",
+    IDENT: "@",
+}
+
 data.forEach((data) => {
-    const fileName = `${FILE_LOCATION}/${FILE_IDENT}${data.fileName}.${FILE_TYPE}`
+    const fileName = `${TYPE.LOCATION}/${TYPE.IDENT}${data.fileName}.${TYPE.TYPE}`
     extract(fileName, toUnionTypes(data.types, data.typeName))
 })

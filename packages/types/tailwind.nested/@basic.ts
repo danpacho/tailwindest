@@ -6,6 +6,7 @@ export type TailwindNestedBasicType =
     | ":marker"
     | ":selection"
     | ":first-line"
+    | ":first-letter"
     | ":backdrop"
     | ":hover"
     | ":active"
