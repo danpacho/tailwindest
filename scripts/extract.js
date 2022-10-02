@@ -1,14 +1,16 @@
 import { writeFile } from "fs"
 
-const PSEUDO_CLASS_ELEMENTS = [
-    ":before",
-    ":after",
-    ":placeholder",
-    ":file",
-    ":marker",
-    ":selection",
-    ":first-line",
-    ":first-letter",
+const PSEUDO_ELEMENTS = [
+    "::before",
+    "::after",
+    "::placeholder",
+    "::file",
+    "::marker",
+    "::selection",
+    "::first-line",
+    "::first-letter",
+]
+const PSEUDO_CLASSES = [
     ":backdrop",
     ":hover",
     ":active",
@@ -39,20 +41,27 @@ const PSEUDO_CLASS_ELEMENTS = [
     ":focus",
     ":focus-within",
     ":focus-visible",
-    ":contrast-more",
-    ":motion-reduce",
-    ":motion-safe",
-    ":rtl",
-    ":ltr",
-    ":portrait",
-    ":landscape",
 ]
 
-const BREAK_CONDITIONS = [":sm", ":md", ":lg", ":xl", ":2xl"]
-const THEME_CONDITION = [":dark"]
+const MEDIA_CONDITIONS = [
+    "@contrast-more",
+    "@contrast-less",
+    "@motion-reduce",
+    "@motion-safe",
+    "@portrait",
+    "@landscape",
+    "@print",
+    "@rtl",
+    "@ltr",
+]
+
+const BREAK_CONDITIONS = ["@sm", "@md", "@lg", "@xl", "@2xl"]
+const THEME_CONDITION = ["@dark"]
 
 const BasicNestKeys = [
-    ...PSEUDO_CLASS_ELEMENTS,
+    ...PSEUDO_CLASSES,
+    ...PSEUDO_ELEMENTS,
+    ...MEDIA_CONDITIONS,
     ...BREAK_CONDITIONS,
     ...THEME_CONDITION,
 ]
