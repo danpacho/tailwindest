@@ -21,7 +21,7 @@ export type TailwindBlurType = {
 type TailwindBackdropBlur = `backdrop-blur-${TailwindBlurVariants}`
 export type TailwindBackdropBlurType = {
     /**
-     *@note
+     *@note Utilities for applying backdrop blur filters to an element.
      *@docs [backdrop-blur](https://tailwindcss.com/docs/backdrop-blur)
      */
     backdropBlur: TailwindBackdropBlur
