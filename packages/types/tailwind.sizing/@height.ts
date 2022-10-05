@@ -27,7 +27,7 @@ export type TailwindHeightType = {
     height: TailwindHeight
 }
 
-type TailwindMinHeight = `min-h-${MinSizingVariants}`
+type TailwindMinHeight = `min-h-${MinSizingVariants | "screen"}`
 export type TailwindMinHeightType = {
     /**
      *@note Utilities for setting the minimum height of an element.
@@ -37,7 +37,7 @@ export type TailwindMinHeightType = {
     minHeight: TailwindMinHeight
 }
 
-type TailwindMaxHeightVariants = Exclude<SizingVariants, "auto">
+type TailwindMaxHeightVariants = Exclude<SizingVariants, "auto"> | "screen"
 type TailwindMaxHeight = `max-h-${TailwindMaxHeightVariants}`
 export type TailwindMaxHeightType = {
     /**
