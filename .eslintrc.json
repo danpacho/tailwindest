@@ -26,6 +26,7 @@
         "no-var": "error",
         "prefer-const": "error",
         "no-console": "warn",
+        "prettier/prettier": ["error", { "endOfLine": "auto" }],
         "import/order": [
             "error",
             {
