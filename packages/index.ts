@@ -1,10 +1,10 @@
-import { Tailwindest } from "./types/tailwindest"
+import { Tailwindest as TailwindestType } from "./types/tailwindest"
 import { deepMerge, getTwClass } from "./utils"
 import { windestCache } from "./windest.cache"
 
 type StringKey<Key> = Extract<Key, string>
 type VariantsObject = {
-    [key: string]: Tailwindest
+    [key: string]: TailwindestType
 }
 
 /**
@@ -15,19 +15,19 @@ type VariantsObject = {
  * @returns `style` input style extractor **function**, use it for composing styles
  */
 function wind<VariantsStyle extends VariantsObject>(
-    baseStyle: Tailwindest,
+    baseStyle: TailwindestType,
     VariantsStyles: VariantsStyle
 ): {
     class: (variant?: StringKey<keyof VariantsStyle>) => string
-    style: (variant?: StringKey<keyof VariantsStyle>) => Tailwindest
+    style: (variant?: StringKey<keyof VariantsStyle>) => TailwindestType
 }
-function wind(baseStyle: Tailwindest): {
+function wind(baseStyle: TailwindestType): {
     class: () => string
-    style: () => Tailwindest
+    style: () => TailwindestType
 }
 
 function wind<VariantsStyle extends VariantsObject>(
-    baseStyle: Tailwindest,
+    baseStyle: TailwindestType,
     variantsStyles?: VariantsStyle
 ) {
     const { getClass, setClass, hasClass, getStyle, setStyle, hasStyle } =
@@ -44,9 +44,9 @@ function wind<VariantsStyle extends VariantsObject>(
             if (shouldCacheClass) {
                 const shouldCacheStyle = hasStyle(variant) === false
                 if (shouldCacheStyle) {
-                    const variantStyle: Tailwindest = deepMerge(
+                    const variantStyle: TailwindestType = deepMerge(
                         baseStyle,
-                        variantsStyles[variant] as Tailwindest
+                        variantsStyles[variant] as TailwindestType
                     )
 
                     const variantClass = getTwClass(variantStyle)
@@ -54,7 +54,7 @@ function wind<VariantsStyle extends VariantsObject>(
                     setClass(variant, variantClass)
                     return variantClass
                 }
-                const cachedStyle = getStyle(variant) as Tailwindest
+                const cachedStyle = getStyle(variant) as TailwindestType
                 const variantClass = getTwClass(cachedStyle)
                 setClass(variant, variantClass)
                 return variantClass
@@ -64,21 +64,21 @@ function wind<VariantsStyle extends VariantsObject>(
             return cachedClass
         },
 
-        style: (variant?: StringKey<keyof VariantsStyle>): Tailwindest => {
+        style: (variant?: StringKey<keyof VariantsStyle>): TailwindestType => {
             const isBase = variantsStyles === undefined || variant === undefined
             if (isBase) return baseStyle
 
             const shouldCacheStyle = hasStyle(variant) === false
             if (shouldCacheStyle && variantsStyles[variant]) {
-                const variantStyle: Tailwindest = deepMerge(
+                const variantStyle: TailwindestType = deepMerge(
                     baseStyle,
-                    variantsStyles[variant] as Tailwindest
+                    variantsStyles[variant] as TailwindestType
                 )
                 setStyle(variant, variantStyle)
                 return variantStyle
             }
 
-            const cachedStyle = getStyle(variant) as Tailwindest
+            const cachedStyle = getStyle(variant) as TailwindestType
             return cachedStyle
         },
     }
@@ -88,10 +88,10 @@ function wind<VariantsStyle extends VariantsObject>(
  * @param styles
  * @returns composed style of wind style set
  */
-function composeWind(...styles: Tailwindest[]): Tailwindest {
-    return styles.reduce<Tailwindest>(
+function composeWind(...styles: TailwindestType[]): TailwindestType {
+    return styles.reduce<TailwindestType>(
         (style, curr) => ({ ...style, ...curr }),
-        {} as Tailwindest
+        {} as TailwindestType
     )
 }
 
@@ -114,5 +114,13 @@ export type WindVariants<WindStyle> = WindStyle extends {
     : WindStyle extends (variants: infer Variants) => unknown
     ? Exclude<Variants, undefined>
     : never
+
+/**
+ * Taiwindest total type set
+ * @example
+ * type FontSize = Tailwindest["fontSize"]
+ * // Get all type of tailwind fontSize
+ */
+export type Tailwindest = TailwindestType
 
 export { wind, composeWind }
