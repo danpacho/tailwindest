@@ -9,5 +9,5 @@ export type TailwindTransitionType = {
      *@note transition shorthand syntax `<property>` `<duration>` `<timing>`
      *@docs [transition](https://tailwindcss.com/docs/transition-property)
      */
-    transition: TailwindTransition
+    transition: "transition" | TailwindTransition
 }
