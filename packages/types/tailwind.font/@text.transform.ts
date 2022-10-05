@@ -1,9 +1,8 @@
-type TailwindTextTransformVariants =
+type TailwindTextTransform =
     | "uppercase"
     | "lowercase"
     | "capitalize"
     | "normal-case"
-type TailwindTextTransform = `-${TailwindTextTransformVariants}`
 export type TailwindTextTransformType = {
     /**
      *@note Utilities for controlling the transformation of text.
