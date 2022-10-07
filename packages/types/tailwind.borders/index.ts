@@ -1,3 +1,4 @@
+import { TailwindBorderType } from "./@border"
 import {
     TailwindBorderColorType,
     TailwindDivideColorType,
@@ -21,12 +22,13 @@ import { TailwindRingOffsetColorType } from "./@ring.offset.color"
 import { TailwindRingWidthType } from "./@ring.width"
 
 export interface TailwindBorders
-    extends TailwindBorderColorType,
-        TailwindDivideColorType,
+    extends TailwindBorderType,
+        TailwindBorderColorType,
         TailwindBorderRadiusType,
         TailwindBorderStyleType,
-        TailwindDivideStyleType,
         TailwindBorderWidthType,
+        TailwindDivideColorType,
+        TailwindDivideStyleType,
         TailwindDivideWidthType,
         TailwindOutlineWidthType,
         TailwindOutlineColorType,
