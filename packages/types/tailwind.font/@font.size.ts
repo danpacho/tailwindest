@@ -19,6 +19,7 @@ type TailwindFontSize = `text-${TailwindFontSizeVariants}`
 export type TailwindFontSizeType = {
     /**
      *@note Utilities for controlling the font size of an element.
+     *@unit Base Size = `1rem` / `text-base`
      *@docs [font-size](https://tailwindcss.com/docs/font-size)
      */
     fontSize: TailwindFontSize
