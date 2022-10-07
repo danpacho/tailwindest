@@ -1,12 +1,11 @@
-import type { Tailwind } from "../tailwind"
-import type { NestStyle, TailwindestGetNest } from "./@nest.core"
+import type { NestStyle, TailwindNest, TailwindestGetNest } from "./@nest.core"
 
 type TailwindestPickNest<Style, Condition extends string> = {
     [ShouldbeOnlyOneKey in Condition]: TailwindestGetNest<Style, Condition>
 }
 
 type TailwindestNest<Condition extends string> = TailwindestPickNest<
-    NestStyle<Tailwind, Condition>,
+    NestStyle<TailwindNest, Condition>,
     Condition
 >
 

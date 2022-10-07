@@ -1,8 +1,8 @@
-import type { Tailwind } from "../tailwind"
 import type {
     NestStyle,
     RemoveIdentifier,
     TAILWINDEST_NEST_IDENTFIER,
+    TailwindNest,
     TailwindestGetNestWithTitle,
 } from "./@nest.core"
 
@@ -23,7 +23,7 @@ type TailwindestNestWithTitle<
     Condition extends string
 > = TailwindestPickNestWithTitle<
     NestStyle<
-        Tailwind,
+        TailwindNest,
         `${Title}-${RemoveIdentifier<Condition, TAILWINDEST_NEST_IDENTFIER>}`
     >,
     Condition,

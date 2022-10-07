@@ -1,3 +1,4 @@
+import { Tailwind } from "../tailwind"
 import { TailwindNestedBasicType } from "../tailwind.nested/@basic"
 
 export type TAILWINDEST_NEST_IDENTFIER = ":" | "@"
@@ -84,3 +85,8 @@ type AdjustKey<Style, Condition extends string = ""> = {
 export type NestStyle<Style, Condition extends string = ""> = {
     [key in TailwindNestedBasicType]: Style
 } & AdjustKey<Style, Condition>
+
+/**
+ * nest style
+ */
+export type TailwindNest = Omit<Tailwind, "transition" | "border">
