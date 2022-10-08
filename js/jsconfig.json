@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "CommonJS",
+        "strict": true,
+        "allowJs": true,
+        "checkJs": true,
+        "noEmit": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": ["./benchmark", "./plugin", "./scripts", "../rollup.config.mjs"],
+    "exclude": ["../packages", "../node_modules/", "../dist"]
+}
