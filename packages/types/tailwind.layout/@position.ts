@@ -55,7 +55,13 @@ type PositionValueVariants =
     | "px"
     | TailwindArbitrary
 
-type TailwindInsetVariants = "inset" | "inset-x" | "inset-y"
+type TailwindInsetVariants =
+    | "inset"
+    | "-inset"
+    | "inset-x"
+    | "-inset-x"
+    | "inset-y"
+    | "-inset-y"
 type TailwindInsetPositionValue =
     `${TailwindInsetVariants}-${PositionValueVariants}`
 export type TailwindInsetPositionValueType = {
@@ -65,7 +71,9 @@ export type TailwindInsetPositionValueType = {
      */
     inset: TailwindInsetPositionValue
 }
-type TailwindTopPositionValue = `top-${PositionValueVariants}`
+type TailwindTopPositionVariants = "top" | "-top"
+type TailwindTopPositionValue =
+    `${TailwindTopPositionVariants}-${PositionValueVariants}`
 export type TailwindTopPositionValueType = {
     /**
      *@note Utilities for controlling the placement of positioned elements.
@@ -73,7 +81,9 @@ export type TailwindTopPositionValueType = {
      */
     top: TailwindTopPositionValue
 }
-type TailwindBottomPositionValue = `bottom-${PositionValueVariants}`
+type TailwindBottomPositionVariants = "bottom" | "-bottom"
+type TailwindBottomPositionValue =
+    `${TailwindBottomPositionVariants}-${PositionValueVariants}`
 export type TailwindBottomPositionValueType = {
     /**
      *@note Utilities for controlling the placement of positioned elements.
@@ -81,7 +91,9 @@ export type TailwindBottomPositionValueType = {
      */
     bottom: TailwindBottomPositionValue
 }
-type TailwindLeftPositionValue = `left-${PositionValueVariants}`
+type TailwindLeftPositionVariants = "left" | "-left"
+type TailwindLeftPositionValue =
+    `${TailwindLeftPositionVariants}-${PositionValueVariants}`
 export type TailwindLeftPositionValueType = {
     /**
      *@note Utilities for controlling the placement of positioned elements.
@@ -89,7 +101,9 @@ export type TailwindLeftPositionValueType = {
      */
     left: TailwindLeftPositionValue
 }
-type TailwindRightPositionValue = `right-${PositionValueVariants}`
+type TailwindRightPositionVariants = "right" | "-right"
+type TailwindRightPositionValue =
+    `${TailwindRightPositionVariants}-${PositionValueVariants}`
 export type TailwindRightPositionValueType = {
     /**
      *@note Utilities for controlling the placement of positioned elements.
