@@ -9,6 +9,6 @@
         "baseUrl": ".",
         "forceConsistentCasingInFileNames": true
     },
-    "include": ["packages/**/*"],
-    "exclude": ["dist", "node_modules"]
+    "include": ["packages"],
+    "exclude": ["js", "rollup.config.mjs", "node_modules", "dist"]
 }
