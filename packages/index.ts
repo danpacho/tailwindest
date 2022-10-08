@@ -90,7 +90,7 @@ function wind<VariantsStyle extends VariantsObject>(
  */
 function composeWind(...styles: TailwindestType[]): TailwindestType {
     return styles.reduce<TailwindestType>(
-        (style, curr) => ({ ...style, ...curr }),
+        (style, curr) => deepMerge(style, curr),
         {} as TailwindestType
     )
 }
