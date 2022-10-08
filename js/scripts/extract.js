@@ -66,6 +66,9 @@ const BasicNestKeys = [
     ...THEME_CONDITION,
 ]
 
+/**
+ * @type {{fileName: string; typeName: string; types: string[]}[]}
+ */
 const data = [
     {
         fileName: "basic",
@@ -86,7 +89,9 @@ const extract = (fileName, data) => {
         }
     })
 }
+
 /**
+ * @param {string[]} keys
  * @param {string} typeName
  * @returns {string} unionType
  */
