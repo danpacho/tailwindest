@@ -23,6 +23,7 @@
         "build": "pnpm clean && rollup -c",
         "build:watch": "rollup -cw",
         "clean": "rimraf dist",
+        "bench": "node ./js/benchmark/iteration.js",
         "prettier": "prettier '{packages,js}/**/*.{ts,js,md}' --check",
         "prettier:fix": "prettier '{packages,js}/**/*.{ts,js,md}' --write",
         "eslint": "eslint '{packages,js}/**/*.{ts,js}'",
