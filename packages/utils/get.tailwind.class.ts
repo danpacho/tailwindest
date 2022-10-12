@@ -2,7 +2,11 @@ import { flattenObject } from "./flatten.object"
 import { getStyleClass } from "./get.styleclass"
 import type { NestedObject } from "./nested.object.type"
 
-const getTwClass = <T extends NestedObject>(styleObject: T): string =>
+/**
+ * @param styleObject
+ * @returns tailwind class
+ */
+const getTailwindClass = <T extends NestedObject>(styleObject: T): string =>
     getStyleClass(flattenObject(styleObject))
 
-export { getTwClass }
+export { getTailwindClass }
