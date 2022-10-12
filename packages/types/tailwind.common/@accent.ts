@@ -1,5 +1,3 @@
-import { TailwindArbitrary } from "./@arbitrary"
-
 type TailwindColorOpacity =
     | "5"
     | "10"
@@ -33,6 +31,4 @@ export type TailwindColorAccent =
     | "800"
     | "900"
 
-export type TailwindColorAccentWithOpacity =
-    | `${TailwindColorAccent}/${TailwindColorOpacity}`
-    | TailwindArbitrary
+export type TailwindColorAccentWithOpacity = `${string}/${TailwindColorOpacity}`

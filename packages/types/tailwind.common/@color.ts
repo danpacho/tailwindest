@@ -1,4 +1,4 @@
-import { TailwindColorAccent } from "./@accent"
+import { TailwindColorAccent, TailwindColorAccentWithOpacity } from "./@accent"
 import {
     TailwindColorVariants,
     TailwindColorWithNoVariants,
@@ -6,4 +6,5 @@ import {
 
 export type TailwindColor =
     | TailwindColorWithNoVariants
+    | TailwindColorAccentWithOpacity
     | `${TailwindColorVariants}-${TailwindColorAccent}`
