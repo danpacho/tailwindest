@@ -1,21 +1,25 @@
+export type CacheKey = string
+
+export interface Cache<CachedValue> {
+    get: (key: CacheKey) => undefined | CachedValue
+    set: (key: CacheKey, value: CachedValue) => void
+    has: (key: CacheKey) => boolean
+}
 /**
- * Cache the computed result with `Map`
- * @returns `get`, get cached result with `string` key
- * @returns `set`, set cached value at input `string` key
+ * cache the computed result with `Map`
+ * @returns `get`, get cached result at inquire key
+ * @returns `set`, set cached value at inquire key
+ * @returns `has`, has cached value at inquire key
  */
-const cache = <CachedKey extends string, CachedValue>(): {
-    get: (key: CachedKey) => undefined | CachedValue
-    set: (key: CachedKey, value: CachedValue) => void
-    has: (key: CachedKey) => boolean
-} => {
-    const cached = new Map<CachedKey, CachedValue>()
+const cache = <CacheValue>(): Cache<CacheValue> => {
+    const cached = new Map<CacheKey, CacheValue>()
 
     return {
-        get: (key: CachedKey) => cached.get(key),
-        set: (key: CachedKey, value: CachedValue) => {
+        get: (key: CacheKey) => cached.get(key),
+        set: (key: CacheKey, value: CacheValue) => {
             cached.set(key, value)
         },
-        has: (key: CachedKey) => cached.has(key),
+        has: (key: CacheKey) => cached.has(key),
     }
 }
 
