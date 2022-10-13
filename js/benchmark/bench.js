@@ -1,112 +1,109 @@
-import { logger } from "./logger.js"
+import { deepMerge, getTailwindClass } from "../../dist/dev/utils/index.js"
+import { benchManager } from "./bench.manager.js"
+import {
+    base,
+    test__wind$__DEV,
+    test__wind$__PROD,
+    test__wind__DEV,
+    test__wind__PROD,
+    variant,
+} from "./test.js"
 
-/** @typedef {(...arg: any[]) => any} Func*/
-/** @typedef {{label: string, iterTime: number, iteration: number}} BenchResult*/
+benchManager
+    .start()
 
-class Bench {
-    /** @type {Bench | null}*/
-    static #instance = null
+    .bench("deep merge__DEV", () => deepMerge(base, variant))
 
-    /** @type {BenchResult[]} */
-    #benchResult = []
+    .bench("deep merge -> get tw class__DEV", () =>
+        getTailwindClass(deepMerge(base, variant))
+    )
 
-    constructor() {
-        if (Bench.#instance === null) {
-            Bench.#instance = this
-        }
-    }
-    /**
-     * start bench
-     */
-    start() {
-        logger.clear().divider().header("Boot Iteration Bench 🚀").divider()
-        return this
-    }
-    /**
-     * iteration bench
-     * @param {string} label header of testing
-     * @param {Func} func iteration callback
-     * @param {number} [iteration = 100000] number of iteration
-     * @param {boolean=} displayData optional, activated by default
-     */
-    bench(label, func, iteration = 100000, displayData = true) {
-        logger.header("Bench Started!").log("\n")
+    .bench("wind class__DEV", () => test__wind__DEV.class())
+    .bench("wind class__PROD", () => test__wind__PROD.class())
 
-        const { iterTime } = this.#iterate(func, iteration)
-        const benchResult = {
-            label,
-            iterTime,
-            iteration,
-        }
-        this.#setBenchResult(benchResult)
-        logger.iterTime(benchResult)
+    .bench("wind style__DEV", () => test__wind__DEV.style(), 10000000)
+    .bench("wind style__PROD", () => test__wind__PROD.style(), 10000000)
 
-        if (displayData) {
-            const data = func()
-            logger
-                .data({
-                    label: `Data Result: ${label}`,
-                    data,
-                })
-                .divider()
-        } else {
-            logger.divider()
-        }
+    .bench("wind$ class compose__DEV", () => test__wind$__DEV.class(), 10000000)
+    .bench(
+        "wind$ class compose__PROD",
+        () => test__wind$__PROD.class(),
+        10000000
+    )
 
-        return this
-    }
+    .bench("wind$ style compose__DEV", () => test__wind$__DEV.style(), 10000000)
+    .bench(
+        "wind$ style compose__PROD",
+        () => test__wind$__PROD.style(),
+        10000000
+    )
 
-    /**
-     * itrate bench function
-     * @param {Func} func
-     * @param {number} [iteration = 100000]
-     */
-    #iterate(func, iteration = 10000) {
-        const start = performance.now()
-        for (let i = 0; i < iteration; i++) {
-            func()
-        }
-        const end = performance.now()
-        const iterTime = end - start
-        return {
-            iterTime,
-        }
-    }
+    .bench(
+        "wind$ style [warn] compose__DEV",
+        () => test__wind$__DEV.style("warn"),
+        10000000
+    )
+    .bench(
+        "wind$ style [warn] compose__PROD",
+        () => test__wind$__PROD.style("warn"),
+        10000000
+    )
 
-    /**
-     * @param {BenchResult} result
-     */
-    #setBenchResult(result) {
-        this.#benchResult.push(result)
-    }
+    .bench(
+        "wind$ class [warn] compose__DEV",
+        () => test__wind$__DEV.class("warn"),
+        10000000
+    )
+    .bench(
+        "wind$ class [warn] compose__PROD",
+        () => test__wind$__PROD.class("warn"),
+        10000000
+    )
 
-    /**
-     * print total bench results
-     */
-    getTotalBenchResult() {
-        logger.header("Bench Total Results!").log("\n")
-        if (this.#benchResult.length === 0) {
-            logger.header("No Bench, Please Add Bench ⛔️", "error").divider()
-        } else {
-            this.#benchResult.forEach(({ iterTime, label, iteration }) => {
-                logger.iterTime({
-                    iteration,
-                    iterTime,
-                    label,
-                })
+    .bench("wind$ style [pending] <multiple ❌> compose__DEV", () =>
+        test__wind$__DEV
+            .compose({
+                "::after": {
+                    "::after": {
+                        accentColor: "after:after:accent-black",
+                    },
+                },
             })
-            logger.divider()
-        }
-    }
+            .style("pending")
+    )
+    .bench("wind$ style [pending] <multiple ❌> compose__PROD", () =>
+        test__wind$__PROD
+            .compose({
+                "::after": {
+                    "::after": {
+                        accentColor: "after:after:accent-black",
+                    },
+                },
+            })
+            .style("pending")
+    )
 
-    /**
-     * get bench singleton instance
-     */
-    getInstance() {
-        return Bench.#instance ?? this
-    }
-}
+    .bench("wind$ class [pending] <multiple ❌> compose__DEV", () =>
+        test__wind$__DEV
+            .compose({
+                "::after": {
+                    "::after": {
+                        accentColor: "after:after:accent-black",
+                    },
+                },
+            })
+            .class("pending")
+    )
+    .bench("wind$ class [pending] <multiple ❌> compose__PROD", () =>
+        test__wind$__PROD
+            .compose({
+                "::after": {
+                    "::after": {
+                        accentColor: "after:after:accent-black",
+                    },
+                },
+            })
+            .class("pending")
+    )
 
-const bench = new Bench().getInstance()
-
-export { bench }
+    .getTotalBenchResult()
