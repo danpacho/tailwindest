@@ -131,9 +131,11 @@ function windCore<
         compose: function (
             ...styles: T[]
         ): ReturnType<typeof windCore<T, Styles>> {
-            const cachedBaseStyle = styleStore.has(BASE_KEY)
-                ? (styleStore.get(BASE_KEY) as T)
-                : baseStyle
+            const cachedBaseStyle = getCachedValue<T>(
+                styleStore,
+                BASE_KEY,
+                () => baseStyle
+            )
 
             const composedStyle = styles.reduce<T>(
                 (composedStyle, currStyle) =>
@@ -141,6 +143,7 @@ function windCore<
                 cachedBaseStyle
             )
             const composedClass = getTailwindClass(composedStyle)
+
             classStore.set(BASE_KEY, composedClass)
             styleStore.set(BASE_KEY, composedStyle)
 
