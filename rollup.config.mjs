@@ -58,12 +58,19 @@ function getTypeDefConfig({ input, output }) {
 }
 
 /**
- * @param {{devBuildPath: string, productionBuildPath: string}} buildPath
+ * @param {{devBuildPath: string, productionBuildPath: string, outputWatchPath: string}} buildPath
  * @returns {RollupOptions} bundle size result, `gzip`
  */
-function getBundleSizeConfig({ devBuildPath, productionBuildPath }) {
+function getBundleSizeConfig({
+    devBuildPath,
+    productionBuildPath,
+    outputWatchPath,
+}) {
     return {
         input: [devBuildPath, productionBuildPath],
+        output: {
+            dir: outputWatchPath,
+        },
         plugins: [bundleSizePlugin()],
     }
 }
@@ -99,6 +106,7 @@ export default function (args) {
         getBundleSizeConfig({
             devBuildPath: `dist/dev/${entryPoint}.js`,
             productionBuildPath: `dist/${entryPoint}.js`,
+            outputWatchPath: "dist:watch",
         }),
     ]
 }
