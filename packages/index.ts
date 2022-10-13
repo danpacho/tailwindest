@@ -1,8 +1,14 @@
-import { Tailwindest as TailwindestType } from "./types/tailwindest"
 import { cache, deepMerge, getCachedValue, getTailwindClass } from "./utils"
 
 type StringKey<Key> = Extract<Key, string>
 type VariantStyles<Key extends string, T> = Record<Key, T>
+/**
+ * @note `Tailwindest` total type set
+ * @example
+ * type FontSize = Tailwindest["fontSize"]
+ * // 📜 Get all type of tailwind fontSize
+ */
+export type Tailwindest = import("./types/tailwindest/index").Tailwindest
 
 /** @note cache key for base `style` and `class` */
 const BASE_KEY = "_" as const
@@ -16,7 +22,7 @@ const BASE_KEY = "_" as const
  * @returns `compose` composed style of wind style set
  */
 function windCore<
-    T extends TailwindestType,
+    T extends Tailwindest,
     Styles extends VariantStyles<string, T>
 >(
     baseStyle: T,
@@ -44,7 +50,7 @@ function windCore<
      */
     compose: (...styles: T[]) => ReturnType<typeof windCore<T, Styles>>
 }
-function windCore<T extends TailwindestType>(
+function windCore<T extends Tailwindest>(
     baseStyle: T
 ): {
     /**
@@ -70,7 +76,7 @@ function windCore<T extends TailwindestType>(
     compose: (...styles: T[]) => ReturnType<typeof windCore<T>>
 }
 function windCore<
-    T extends TailwindestType,
+    T extends Tailwindest,
     Styles extends VariantStyles<string, T>
 >(baseStyle: T, variantsStyles?: Styles) {
     const classStore = cache<string>()
@@ -158,7 +164,7 @@ function windCore<
  * @returns `wind$` - get `variants` input, should not `_`
  * @returns `wind` - just wind function
  */
-function createWind<T extends TailwindestType>(): {
+function createWind<T extends Tailwindest>(): {
     wind$: <Variant extends string>(
         ...variants: Variant[]
     ) => typeof windCore<T, VariantStyles<Variant, T>>
@@ -180,8 +186,8 @@ const defaultWind = createWind()
  * @returns `style` input style extractor **function**, use it for composing styles
  */
 const wind: (
-    baseStyle: TailwindestType
-) => ReturnType<typeof windCore<TailwindestType>> = defaultWind.wind
+    baseStyle: Tailwindest
+) => ReturnType<typeof windCore<Tailwindest>> = defaultWind.wind
 
 /**
  * @param ...variants tailwind variant names
@@ -191,10 +197,10 @@ const wind: (
 const wind$: <Variant extends string>(
     ...variants: Variant[]
 ) => (
-    baseStyle: TailwindestType,
-    variantsStyles: VariantStyles<Variant, TailwindestType>
+    baseStyle: Tailwindest,
+    variantsStyles: VariantStyles<Variant, Tailwindest>
 ) => ReturnType<
-    typeof windCore<TailwindestType, VariantStyles<Variant, TailwindestType>>
+    typeof windCore<Tailwindest, VariantStyles<Variant, Tailwindest>>
 > = defaultWind.wind$
 
 /**
@@ -216,13 +222,5 @@ export type WindVariants<WindStyle> = WindStyle extends {
     : WindStyle extends (variants: infer Variants) => unknown
     ? Exclude<Variants, undefined>
     : never
-
-/**
- * @note `Tailwindest` total type set
- * @example
- * type FontSize = Tailwindest["fontSize"]
- * // 📜 Get all type of tailwind fontSize
- */
-export type Tailwindest = TailwindestType
 
 export { createWind, wind, wind$ }
