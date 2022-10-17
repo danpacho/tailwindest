@@ -16,6 +16,7 @@ specifiers:
   prettier: ^2.7.1
   rimraf: ^3.0.2
   rollup: ^2.79.1
+  rollup-plugin-dts: 4.2.3
   rollup-plugin-esbuild: ^4.10.1
   rollup-plugin-terser: ^7.0.2
   typescript: ^4.8.3
@@ -36,6 +37,7 @@ devDependencies:
   prettier: 2.7.1
   rimraf: 3.0.2
   rollup: 2.79.1
+  rollup-plugin-dts: 4.2.3_gypgyaqhine6mwjfvh7icfhviq
   rollup-plugin-esbuild: 4.10.1_x5xzcocanie7kx5dltzpnaarrm
   rollup-plugin-terser: 7.0.2_rollup@2.79.1
   typescript: 4.8.4
@@ -1702,6 +1704,13 @@ packages:
       yallist: 4.0.0
     dev: true
 
+  /magic-string/0.26.7:
+    resolution: {integrity: sha512-hX9XH3ziStPoPhJxLq1syWuZMxbDvGNbVchfrdCtanC7D13888bMFow61x8axrx+GfHLtVeAx2kxL7tTGRl+Ow==}
+    engines: {node: '>=12'}
+    dependencies:
+      sourcemap-codec: 1.4.8
+    dev: true
+
   /maxmin/4.0.0:
     resolution: {integrity: sha512-+PBstm8/IM6AFVGpOBqk7ddJHZu6KSGWDHQzncOQKAY6AlMgZC7dWS2Y2MrJll4rJZqWcF76g+zWCQn9lIsfEQ==}
     engines: {node: '>=12'}
@@ -1995,6 +2004,20 @@ packages:
       glob: 7.2.3
     dev: true
 
+  /rollup-plugin-dts/4.2.3_gypgyaqhine6mwjfvh7icfhviq:
+    resolution: {integrity: sha512-jlcpItqM2efqfIiKzDB/IKOS9E9fDvbkJSGw5GtK/PqPGS9eC3R3JKyw2VvpTktZA+TNgJRMu1NTv244aTUzzQ==}
+    engines: {node: '>=v12.22.12'}
+    peerDependencies:
+      rollup: ^2.55
+      typescript: ^4.1
+    dependencies:
+      magic-string: 0.26.7
+      rollup: 2.79.1
+      typescript: 4.8.4
+    optionalDependencies:
+      '@babel/code-frame': 7.18.6
+    dev: true
+
   /rollup-plugin-esbuild/4.10.1_x5xzcocanie7kx5dltzpnaarrm:
     resolution: {integrity: sha512-/ymcRB283zjFp1JTBXO8ekxv0c9vRc2L6OTljghsLthQ4vqeDSDWa9BVz1tHiVrx6SbUnUpDPLC0K/MXK7j5TA==}
     engines: {node: '>=12'}
@@ -2136,6 +2159,10 @@ packages:
   /source-map/0.6.1:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
+    dev: true
+
+  /sourcemap-codec/1.4.8:
+    resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
     dev: true
 
   /string-argv/0.3.1:
