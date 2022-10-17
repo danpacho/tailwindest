@@ -1,5 +1,6 @@
 import path from "path"
 import typescript from "@rollup/plugin-typescript"
+import dts from "rollup-plugin-dts"
 import esbuild from "rollup-plugin-esbuild"
 import { terser } from "rollup-plugin-terser"
 import { bundleSizePlugin } from "./js/plugin/bundleSizePlugin.js"
@@ -75,6 +76,18 @@ function getBundleSizeConfig({
     }
 }
 
+/**
+ * @param {{bundleSourcePath: string, bundleResultPath: string}} buildTypePath
+ * @returns {RollupOptions} bundle size result, `gzip`
+ */
+function getBundleTypeDefConfig({ bundleSourcePath, bundleResultPath }) {
+    return {
+        input: bundleSourcePath,
+        output: [{ file: bundleResultPath, format: "es" }],
+        plugins: [dts()],
+    }
+}
+
 /**@type {"index"} */
 const entryPoint = "index"
 
@@ -102,6 +115,10 @@ export default function (args) {
             input: `packages/${entryPoint}.ts`,
             output: `dist/${entryPoint}`,
             env: "production",
+        }),
+        getBundleTypeDefConfig({
+            bundleSourcePath: `./dist/${entryPoint}.d.ts`,
+            bundleResultPath: "./dist/tailwindest.d.ts",
         }),
         getBundleSizeConfig({
             devBuildPath: `dist/dev/${entryPoint}.js`,
