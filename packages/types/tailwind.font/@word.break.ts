@@ -3,7 +3,7 @@ type TailwindWordBreak = `break-${TailwindWordBreakVariants}`
 export type TailwindWordBreakType = {
     /**
      *@note Utilities for controlling word breaks in an element.
-     *@docs [work-break](https://tailwindcss.com/docs/work-break)
+     *@docs [word-break](https://tailwindcss.com/docs/word-break)
      */
     wordBreak: TailwindWordBreak
 }

@@ -1,10 +1,12 @@
-import { TailwindColor } from "../tailwind.common/@color"
+import { PlugBase, Pluggable } from "../plugin"
 
-type TailwindTextColor = `text-${TailwindColor}`
-export type TailwindTextColorType = {
+export type TailwindTextColorType<
+    TailwindColor extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for controlling the text color of an element.
      *@docs [text-color](https://tailwindcss.com/docs/text-color)
      */
-    color: TailwindTextColor
+    color: `text-${TailwindColor | Pluggable<Plug>}`
 }
