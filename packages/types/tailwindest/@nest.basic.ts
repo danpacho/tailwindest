@@ -1,131 +1,170 @@
-import type { NestStyle, TailwindNest, TailwindestGetNest } from "./@nest.core"
+import type { NestStyle, TailwindestGetNest } from "./@nest.core"
 
 type TailwindestPickNest<Style, Condition extends string> = {
-    [ShouldbeOnlyOneKey in Condition]: TailwindestGetNest<Style, Condition>
+    [ShouldbeOnlyOneKey in Condition]?: TailwindestGetNest<Style, Condition>
 }
 
-type TailwindestNest<Condition extends string> = TailwindestPickNest<
-    NestStyle<TailwindNest, Condition>,
-    Condition
+export type TailwindestNest<
+    Tailwind,
+    Condition extends string
+> = TailwindestPickNest<NestStyle<Tailwind, Condition>, Condition>
+
+type TailwindestSm<Tailwind> = TailwindestNest<Tailwind, "@sm">
+type TailwindestMd<Tailwind> = TailwindestNest<Tailwind, "@md">
+type TailwindestLg<Tailwind> = TailwindestNest<Tailwind, "@lg">
+type TailwindestXl<Tailwind> = TailwindestNest<Tailwind, "@xl">
+type Tailwindest2Xl<Tailwind> = TailwindestNest<Tailwind, "@2xl">
+interface TailwindestSizeCondition<Tailwind>
+    extends TailwindestSm<Tailwind>,
+        TailwindestMd<Tailwind>,
+        TailwindestLg<Tailwind>,
+        TailwindestXl<Tailwind>,
+        Tailwindest2Xl<Tailwind> {}
+
+type TailwindestDark<Tailwind> = TailwindestNest<Tailwind, "@dark">
+type TailwindestContrastMore<Tailwind> = TailwindestNest<
+    Tailwind,
+    "@contrast-more"
 >
+type TailwindestContrassLess<Tailwind> = TailwindestNest<
+    Tailwind,
+    "@contrast-less"
+>
+type TailwindestMotionReduce<Tailwind> = TailwindestNest<
+    Tailwind,
+    "@motion-reduce"
+>
+type TailwindestMotionSafe<Tailwind> = TailwindestNest<Tailwind, "@motion-safe">
+type TailwindestPortrait<Tailwind> = TailwindestNest<Tailwind, "@portrait">
+type TailwindestLandscape<Tailwind> = TailwindestNest<Tailwind, "@landscape">
+type TailwindestPrint<Tailwind> = TailwindestNest<Tailwind, "@print">
 
-type TailwindestSm = TailwindestNest<"@sm">
-type TailwindestMd = TailwindestNest<"@md">
-type TailwindestLg = TailwindestNest<"@lg">
-type TailwindestXl = TailwindestNest<"@xl">
-type Tailwindest2Xl = TailwindestNest<"@2xl">
-interface TailwindestSizeCondition
-    extends TailwindestSm,
-        TailwindestMd,
-        TailwindestLg,
-        TailwindestXl,
-        Tailwindest2Xl {}
+type TailwindestLTR<Tailwind> = TailwindestNest<Tailwind, "@ltr">
+type TailwindestRTL<Tailwind> = TailwindestNest<Tailwind, "@rtl">
+interface TailwindestMedia<Tailwind>
+    extends TailwindestDark<Tailwind>,
+        TailwindestRTL<Tailwind>,
+        TailwindestLTR<Tailwind>,
+        TailwindestPrint<Tailwind>,
+        TailwindestPortrait<Tailwind>,
+        TailwindestLandscape<Tailwind>,
+        TailwindestMotionSafe<Tailwind>,
+        TailwindestContrastMore<Tailwind>,
+        TailwindestContrassLess<Tailwind>,
+        TailwindestMotionReduce<Tailwind> {}
 
-type TailwindestDark = TailwindestNest<"@dark">
-type TailwindestContrastMore = TailwindestNest<"@contrast-more">
-type TailwindestContrassLess = TailwindestNest<"@contrast-less">
-type TailwindestMotionReduce = TailwindestNest<"@motion-reduce">
-type TailwindestMotionSafe = TailwindestNest<"@motion-safe">
-type TailwindestPortrait = TailwindestNest<"@portrait">
-type TailwindestLandscape = TailwindestNest<"@landscape">
-type TailwindestPrint = TailwindestNest<"@print">
+type TailwindestBefore<Tailwind> = TailwindestNest<Tailwind, "::before">
+type TailwindestAfter<Tailwind> = TailwindestNest<Tailwind, "::after">
+type TailwindestPlaceholder<Tailwind> = TailwindestNest<
+    Tailwind,
+    "::placeholder"
+>
+type TailwindestFile<Tailwind> = TailwindestNest<Tailwind, "::file">
+type TailwindestMarker<Tailwind> = TailwindestNest<Tailwind, "::marker">
+type TailwindestSelection<Tailwind> = TailwindestNest<Tailwind, "::selection">
+type TailwindestFirstLine<Tailwind> = TailwindestNest<Tailwind, "::first-line">
+type TailwindestFirstLetter<Tailwind> = TailwindestNest<
+    Tailwind,
+    "::first-letter"
+>
+interface TailwindestPseudoElements<Tailwind>
+    extends TailwindestBefore<Tailwind>,
+        TailwindestFile<Tailwind>,
+        TailwindestAfter<Tailwind>,
+        TailwindestMarker<Tailwind>,
+        TailwindestSelection<Tailwind>,
+        TailwindestFirstLine<Tailwind>,
+        TailwindestFirstLetter<Tailwind>,
+        TailwindestPlaceholder<Tailwind> {}
 
-type TailwindestLTR = TailwindestNest<"@ltr">
-type TailwindestRTL = TailwindestNest<"@rtl">
-interface TailwindestMedia
-    extends TailwindestDark,
-        TailwindestContrastMore,
-        TailwindestContrassLess,
-        TailwindestMotionReduce,
-        TailwindestMotionSafe,
-        TailwindestPortrait,
-        TailwindestPrint,
-        TailwindestLandscape,
-        TailwindestRTL,
-        TailwindestLTR {}
+type TailwindestBackdrop<Tailwind> = TailwindestNest<Tailwind, ":backdrop">
+type TailwindestHover<Tailwind> = TailwindestNest<Tailwind, ":hover">
+type TailwindestActive<Tailwind> = TailwindestNest<Tailwind, ":active">
+type TailwindestFirst<Tailwind> = TailwindestNest<Tailwind, ":first">
+type TailwindestLast<Tailwind> = TailwindestNest<Tailwind, ":last">
+type TailwindestOnly<Tailwind> = TailwindestNest<Tailwind, ":only">
+type TailwindestOdd<Tailwind> = TailwindestNest<Tailwind, ":odd">
+type TailwindestEven<Tailwind> = TailwindestNest<Tailwind, ":even">
+type TailwindestFirstOfType<Tailwind> = TailwindestNest<
+    Tailwind,
+    ":first-of-type"
+>
+type TailwindestLastOfType<Tailwind> = TailwindestNest<
+    Tailwind,
+    ":last-of-type"
+>
+type TailwindestOnlyOfType<Tailwind> = TailwindestNest<
+    Tailwind,
+    ":only-of-type"
+>
+type TailwindestEmpty<Tailwind> = TailwindestNest<Tailwind, ":empty">
+type TailwindestEnabled<Tailwind> = TailwindestNest<Tailwind, ":enabled">
+type TailwindestIndeterminate<Tailwind> = TailwindestNest<
+    Tailwind,
+    ":indeterminate"
+>
+type TailwindestDefault<Tailwind> = TailwindestNest<Tailwind, ":default">
+type TailwindestRequired<Tailwind> = TailwindestNest<Tailwind, ":required">
+type TailwindestValid<Tailwind> = TailwindestNest<Tailwind, ":valid">
+type TailwindestInvalid<Tailwind> = TailwindestNest<Tailwind, ":invalid">
+type TailwindestInRange<Tailwind> = TailwindestNest<Tailwind, ":in-range">
+type TailwindestOutOfRange<Tailwind> = TailwindestNest<
+    Tailwind,
+    ":out-of-range"
+>
+type TailwindestPlaceholderShown<Tailwind> = TailwindestNest<
+    Tailwind,
+    ":placeholder-shown"
+>
+type TailwindestAutofill<Tailwind> = TailwindestNest<Tailwind, ":autofill">
+type TailwindestReadonly<Tailwind> = TailwindestNest<Tailwind, ":read-only">
+type TailwindestChecked<Tailwind> = TailwindestNest<Tailwind, ":checked">
+type TailwindestDisabled<Tailwind> = TailwindestNest<Tailwind, ":disabled">
+type TailwindestVisited<Tailwind> = TailwindestNest<Tailwind, ":visited">
+type TailwindestTarget<Tailwind> = TailwindestNest<Tailwind, ":target">
+type TailwindestFocus<Tailwind> = TailwindestNest<Tailwind, ":focus">
+type TailwindestFocusWithin<Tailwind> = TailwindestNest<
+    Tailwind,
+    ":focus-within"
+>
+type TailwindestFocusVisible<Tailwind> = TailwindestNest<
+    Tailwind,
+    ":focus-visible"
+>
+interface TailwindestPseudoClass<Tailwind>
+    extends TailwindestLast<Tailwind>,
+        TailwindestOnly<Tailwind>,
+        TailwindestOdd<Tailwind>,
+        TailwindestEven<Tailwind>,
+        TailwindestFirst<Tailwind>,
+        TailwindestEmpty<Tailwind>,
+        TailwindestValid<Tailwind>,
+        TailwindestFocus<Tailwind>,
+        TailwindestHover<Tailwind>,
+        TailwindestActive<Tailwind>,
+        TailwindestTarget<Tailwind>,
+        TailwindestChecked<Tailwind>,
+        TailwindestVisited<Tailwind>,
+        TailwindestInvalid<Tailwind>,
+        TailwindestInRange<Tailwind>,
+        TailwindestEnabled<Tailwind>,
+        TailwindestDefault<Tailwind>,
+        TailwindestRequired<Tailwind>,
+        TailwindestAutofill<Tailwind>,
+        TailwindestBackdrop<Tailwind>,
+        TailwindestReadonly<Tailwind>,
+        TailwindestDisabled<Tailwind>,
+        TailwindestOutOfRange<Tailwind>,
+        TailwindestLastOfType<Tailwind>,
+        TailwindestOnlyOfType<Tailwind>,
+        TailwindestFirstOfType<Tailwind>,
+        TailwindestFocusWithin<Tailwind>,
+        TailwindestFocusVisible<Tailwind>,
+        TailwindestIndeterminate<Tailwind>,
+        TailwindestPlaceholderShown<Tailwind> {}
 
-type TailwindestBefore = TailwindestNest<"::before">
-type TailwindestAfter = TailwindestNest<"::after">
-type TailwindestPlaceholder = TailwindestNest<"::placeholder">
-type TailwindestFile = TailwindestNest<"::file">
-type TailwindestMarker = TailwindestNest<"::marker">
-type TailwindestSelection = TailwindestNest<"::selection">
-type TailwindestFirstLine = TailwindestNest<"::first-line">
-type TailwindestFirstLetter = TailwindestNest<"::first-letter">
-interface TailwindestPseudoElements
-    extends TailwindestBefore,
-        TailwindestAfter,
-        TailwindestPlaceholder,
-        TailwindestFile,
-        TailwindestMarker,
-        TailwindestSelection,
-        TailwindestFirstLine,
-        TailwindestFirstLetter {}
-
-type TailwindestBackdrop = TailwindestNest<":backdrop">
-type TailwindestHover = TailwindestNest<":hover">
-type TailwindestActive = TailwindestNest<":active">
-type TailwindestFirst = TailwindestNest<":first">
-type TailwindestLast = TailwindestNest<":last">
-type TailwindestOnly = TailwindestNest<":only">
-type TailwindestOdd = TailwindestNest<":odd">
-type TailwindestEven = TailwindestNest<":even">
-type TailwindestFirstOfType = TailwindestNest<":first-of-type">
-type TailwindestLastOfType = TailwindestNest<":last-of-type">
-type TailwindestOnlyOfType = TailwindestNest<":only-of-type">
-type TailwindestEmpty = TailwindestNest<":empty">
-type TailwindestEnabled = TailwindestNest<":enabled">
-type TailwindestIndeterminate = TailwindestNest<":indeterminate">
-type TailwindestDefault = TailwindestNest<":default">
-type TailwindestRequired = TailwindestNest<":required">
-type TailwindestValid = TailwindestNest<":valid">
-type TailwindestInvalid = TailwindestNest<":invalid">
-type TailwindestInRange = TailwindestNest<":in-range">
-type TailwindestOutOfRange = TailwindestNest<":out-of-range">
-type TailwindestPlaceholderShown = TailwindestNest<":placeholder-shown">
-type TailwindestAutofill = TailwindestNest<":autofill">
-type TailwindestReadonly = TailwindestNest<":read-only">
-type TailwindestChecked = TailwindestNest<":checked">
-type TailwindestDisabled = TailwindestNest<":disabled">
-type TailwindestVisited = TailwindestNest<":visited">
-type TailwindestTarget = TailwindestNest<":target">
-type TailwindestFocus = TailwindestNest<":focus">
-type TailwindestFocusWithin = TailwindestNest<":focus-within">
-type TailwindestFocustVisible = TailwindestNest<":focus-visible">
-interface TailwindestPseudoClass
-    extends TailwindestBackdrop,
-        TailwindestHover,
-        TailwindestActive,
-        TailwindestFirst,
-        TailwindestLast,
-        TailwindestOnly,
-        TailwindestOdd,
-        TailwindestEven,
-        TailwindestFirstOfType,
-        TailwindestLastOfType,
-        TailwindestOnlyOfType,
-        TailwindestEmpty,
-        TailwindestEnabled,
-        TailwindestIndeterminate,
-        TailwindestDefault,
-        TailwindestRequired,
-        TailwindestValid,
-        TailwindestInvalid,
-        TailwindestInRange,
-        TailwindestOutOfRange,
-        TailwindestPlaceholderShown,
-        TailwindestAutofill,
-        TailwindestReadonly,
-        TailwindestChecked,
-        TailwindestDisabled,
-        TailwindestVisited,
-        TailwindestTarget,
-        TailwindestFocus,
-        TailwindestFocusWithin,
-        TailwindestFocustVisible {}
-
-export interface TailwindestNestBasic
-    extends TailwindestSizeCondition,
-        TailwindestMedia,
-        TailwindestPseudoElements,
-        TailwindestPseudoClass {}
+export interface TailwindestNestBasic<Tailwind>
+    extends TailwindestMedia<Tailwind>,
+        TailwindestPseudoClass<Tailwind>,
+        TailwindestSizeCondition<Tailwind>,
+        TailwindestPseudoElements<Tailwind> {}

@@ -2,16 +2,15 @@ import type {
     NestStyle,
     RemoveIdentifier,
     TAILWINDEST_NEST_IDENTFIER,
-    TailwindNest,
     TailwindestGetNestWithTitle,
 } from "./@nest.core"
 
 type TailwindestPickNestWithTitle<
     Style,
-    Condition extends string,
-    Title extends string
+    Title extends string,
+    Condition extends string
 > = {
-    [ShouldbeOnlyOneKey in Condition]: TailwindestGetNestWithTitle<
+    [ShouldbeOnlyOneKey in Condition]?: TailwindestGetNestWithTitle<
         Style,
         "",
         `${Title}-${RemoveIdentifier<Condition, TAILWINDEST_NEST_IDENTFIER>}`
@@ -19,205 +18,399 @@ type TailwindestPickNestWithTitle<
 }
 
 type TailwindestNestWithTitle<
+    Style,
     Title extends "group" | "peer",
     Condition extends string
 > = TailwindestPickNestWithTitle<
     NestStyle<
-        TailwindNest,
+        Style,
         `${Title}-${RemoveIdentifier<Condition, TAILWINDEST_NEST_IDENTFIER>}`
     >,
-    Condition,
-    Title
+    Title,
+    Condition
 >
 
-type TailwindestGroupBackdrop = TailwindestNestWithTitle<"group", ":backdrop">
-type TailwindestGroupHover = TailwindestNestWithTitle<"group", ":hover">
-type TailwindestGroupActive = TailwindestNestWithTitle<"group", ":active">
-type TailwindestGroupFirst = TailwindestNestWithTitle<"group", ":first">
-type TailwindestGroupLast = TailwindestNestWithTitle<"group", ":last">
-type TailwindestGroupOnly = TailwindestNestWithTitle<"group", ":only">
-type TailwindestGroupOdd = TailwindestNestWithTitle<"group", ":odd">
-type TailwindestGroupEven = TailwindestNestWithTitle<"group", ":even">
-type TailwindestGroupFirstOfType = TailwindestNestWithTitle<
+type TailwindestGroupBackdrop<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":backdrop"
+>
+type TailwindestGroupHover<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":hover"
+>
+type TailwindestGroupActive<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":active"
+>
+type TailwindestGroupFirst<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":first"
+>
+type TailwindestGroupLast<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":last"
+>
+type TailwindestGroupOnly<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":only"
+>
+type TailwindestGroupOdd<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":odd"
+>
+type TailwindestGroupEven<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":even"
+>
+type TailwindestGroupFirstOfType<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "group",
     ":first-of-type"
 >
-type TailwindestGroupLastOfType = TailwindestNestWithTitle<
+type TailwindestGroupLastOfType<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "group",
     ":last-of-type"
 >
-type TailwindestGroupOnlyOfType = TailwindestNestWithTitle<
+type TailwindestGroupOnlyOfType<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "group",
     ":only-of-type"
 >
-type TailwindestGroupEmpty = TailwindestNestWithTitle<"group", ":empty">
-type TailwindestGroupEnabled = TailwindestNestWithTitle<"group", ":enabled">
-type TailwindestGroupIndeterminate = TailwindestNestWithTitle<
+type TailwindestGroupEmpty<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":empty"
+>
+type TailwindestGroupEnabled<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":enabled"
+>
+type TailwindestGroupIndeterminate<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "group",
     ":indeterminate"
 >
-type TailwindestGroupDefault = TailwindestNestWithTitle<"group", ":default">
-type TailwindestGroupRequired = TailwindestNestWithTitle<"group", ":required">
-type TailwindestGroupValid = TailwindestNestWithTitle<"group", ":valid">
-type TailwindestGroupInvalid = TailwindestNestWithTitle<"group", ":invalid">
-type TailwindestGroupInRange = TailwindestNestWithTitle<"group", ":in-range">
-type TailwindestGroupOutOfRange = TailwindestNestWithTitle<
+type TailwindestGroupDefault<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":default"
+>
+type TailwindestGroupRequired<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":required"
+>
+type TailwindestGroupValid<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":valid"
+>
+type TailwindestGroupInvalid<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":invalid"
+>
+type TailwindestGroupInRange<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":in-range"
+>
+type TailwindestGroupOutOfRange<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "group",
     ":out-of-range"
 >
-type TailwindestGroupPlaceholderShown = TailwindestNestWithTitle<
+type TailwindestGroupPlaceholderShown<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "group",
     ":placeholder-shown"
 >
-type TailwindestGroupAutofill = TailwindestNestWithTitle<"group", ":autofill">
-type TailwindestGroupReadonly = TailwindestNestWithTitle<"group", ":read-only">
-type TailwindestGroupChecked = TailwindestNestWithTitle<"group", ":checked">
-type TailwindestGroupDisabled = TailwindestNestWithTitle<"group", ":disabled">
-type TailwindestGroupVisited = TailwindestNestWithTitle<"group", ":visited">
-type TailwindestGroupTarget = TailwindestNestWithTitle<"group", ":target">
-type TailwindestGroupFocus = TailwindestNestWithTitle<"group", ":focus">
-type TailwindestGroupFocusWithin = TailwindestNestWithTitle<
+type TailwindestGroupAutofill<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":autofill"
+>
+type TailwindestGroupReadonly<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":read-only"
+>
+type TailwindestGroupChecked<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":checked"
+>
+type TailwindestGroupDisabled<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":disabled"
+>
+type TailwindestGroupVisited<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":visited"
+>
+type TailwindestGroupTarget<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":target"
+>
+type TailwindestGroupFocus<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "group",
+    ":focus"
+>
+type TailwindestGroupFocusWithin<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "group",
     ":focus-within"
 >
-type TailwindestGroupFocustVisible = TailwindestNestWithTitle<
+type TailwindestGroupFocustVisible<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "group",
     ":focus-visible"
 >
 
-interface TailwindestGroupPseudoClass
-    extends TailwindestGroupBackdrop,
-        TailwindestGroupHover,
-        TailwindestGroupActive,
-        TailwindestGroupFirst,
-        TailwindestGroupLast,
-        TailwindestGroupOnly,
-        TailwindestGroupOdd,
-        TailwindestGroupEven,
-        TailwindestGroupFirstOfType,
-        TailwindestGroupLastOfType,
-        TailwindestGroupOnlyOfType,
-        TailwindestGroupEmpty,
-        TailwindestGroupEnabled,
-        TailwindestGroupIndeterminate,
-        TailwindestGroupDefault,
-        TailwindestGroupRequired,
-        TailwindestGroupValid,
-        TailwindestGroupInvalid,
-        TailwindestGroupInRange,
-        TailwindestGroupOutOfRange,
-        TailwindestGroupPlaceholderShown,
-        TailwindestGroupAutofill,
-        TailwindestGroupReadonly,
-        TailwindestGroupChecked,
-        TailwindestGroupDisabled,
-        TailwindestGroupVisited,
-        TailwindestGroupTarget,
-        TailwindestGroupFocus,
-        TailwindestGroupFocusWithin,
-        TailwindestGroupFocustVisible {}
-type TailwindestPeerBackdrop = TailwindestNestWithTitle<"peer", ":backdrop">
-type TailwindestPeerHover = TailwindestNestWithTitle<"peer", ":hover">
-type TailwindestPeerActive = TailwindestNestWithTitle<"peer", ":active">
-type TailwindestPeerFirst = TailwindestNestWithTitle<"peer", ":first">
-type TailwindestPeerLast = TailwindestNestWithTitle<"peer", ":last">
-type TailwindestPeerOnly = TailwindestNestWithTitle<"peer", ":only">
-type TailwindestPeerOdd = TailwindestNestWithTitle<"peer", ":odd">
-type TailwindestPeerEven = TailwindestNestWithTitle<"peer", ":even">
-type TailwindestPeerFirstOfType = TailwindestNestWithTitle<
+interface TailwindestGroupPseudoClass<Tailwind>
+    extends TailwindestGroupOdd<Tailwind>,
+        TailwindestGroupLast<Tailwind>,
+        TailwindestGroupOnly<Tailwind>,
+        TailwindestGroupEven<Tailwind>,
+        TailwindestGroupFirst<Tailwind>,
+        TailwindestGroupHover<Tailwind>,
+        TailwindestGroupEmpty<Tailwind>,
+        TailwindestGroupValid<Tailwind>,
+        TailwindestGroupFocus<Tailwind>,
+        TailwindestGroupActive<Tailwind>,
+        TailwindestGroupTarget<Tailwind>,
+        TailwindestGroupEnabled<Tailwind>,
+        TailwindestGroupInRange<Tailwind>,
+        TailwindestGroupVisited<Tailwind>,
+        TailwindestGroupChecked<Tailwind>,
+        TailwindestGroupInvalid<Tailwind>,
+        TailwindestGroupDefault<Tailwind>,
+        TailwindestGroupAutofill<Tailwind>,
+        TailwindestGroupBackdrop<Tailwind>,
+        TailwindestGroupRequired<Tailwind>,
+        TailwindestGroupDisabled<Tailwind>,
+        TailwindestGroupReadonly<Tailwind>,
+        TailwindestGroupOutOfRange<Tailwind>,
+        TailwindestGroupLastOfType<Tailwind>,
+        TailwindestGroupOnlyOfType<Tailwind>,
+        TailwindestGroupFirstOfType<Tailwind>,
+        TailwindestGroupFocusWithin<Tailwind>,
+        TailwindestGroupIndeterminate<Tailwind>,
+        TailwindestGroupFocustVisible<Tailwind>,
+        TailwindestGroupPlaceholderShown<Tailwind> {}
+
+type TailwindestPeerBackdrop<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":backdrop"
+>
+type TailwindestPeerHover<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":hover"
+>
+type TailwindestPeerActive<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":active"
+>
+type TailwindestPeerFirst<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":first"
+>
+type TailwindestPeerLast<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":last"
+>
+type TailwindestPeerOnly<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":only"
+>
+type TailwindestPeerOdd<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":odd"
+>
+type TailwindestPeerEven<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":even"
+>
+type TailwindestPeerFirstOfType<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "peer",
     ":first-of-type"
 >
-type TailwindestPeerLastOfType = TailwindestNestWithTitle<
+type TailwindestPeerLastOfType<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "peer",
     ":last-of-type"
 >
-type TailwindestPeerOnlyOfType = TailwindestNestWithTitle<
+type TailwindestPeerOnlyOfType<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "peer",
     ":only-of-type"
 >
-type TailwindestPeerEmpty = TailwindestNestWithTitle<"peer", ":empty">
-type TailwindestPeerEnabled = TailwindestNestWithTitle<"peer", ":enabled">
-type TailwindestPeerIndeterminate = TailwindestNestWithTitle<
+type TailwindestPeerEmpty<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":empty"
+>
+type TailwindestPeerEnabled<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":enabled"
+>
+type TailwindestPeerIndeterminate<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "peer",
     ":indeterminate"
 >
-type TailwindestPeerDefault = TailwindestNestWithTitle<"peer", ":default">
-type TailwindestPeerRequired = TailwindestNestWithTitle<"peer", ":required">
-type TailwindestPeerValid = TailwindestNestWithTitle<"peer", ":valid">
-type TailwindestPeerInvalid = TailwindestNestWithTitle<"peer", ":invalid">
-type TailwindestPeerInRange = TailwindestNestWithTitle<"peer", ":in-range">
-type TailwindestPeerOutOfRange = TailwindestNestWithTitle<
+type TailwindestPeerDefault<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":default"
+>
+type TailwindestPeerRequired<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":required"
+>
+type TailwindestPeerValid<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":valid"
+>
+type TailwindestPeerInvalid<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":invalid"
+>
+type TailwindestPeerInRange<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":in-range"
+>
+type TailwindestPeerOutOfRange<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "peer",
     ":out-of-range"
 >
-type TailwindestPeerPlaceholderShown = TailwindestNestWithTitle<
+type TailwindestPeerPlaceholderShown<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "peer",
     ":placeholder-shown"
 >
-type TailwindestPeerAutofill = TailwindestNestWithTitle<"peer", ":autofill">
-type TailwindestPeerReadonly = TailwindestNestWithTitle<"peer", ":read-only">
-type TailwindestPeerChecked = TailwindestNestWithTitle<"peer", ":checked">
-type TailwindestPeerDisabled = TailwindestNestWithTitle<"peer", ":disabled">
-type TailwindestPeerVisited = TailwindestNestWithTitle<"peer", ":visited">
-type TailwindestPeerTarget = TailwindestNestWithTitle<"peer", ":target">
-type TailwindestPeerFocus = TailwindestNestWithTitle<"peer", ":focus">
-type TailwindestPeerFocusWithin = TailwindestNestWithTitle<
+type TailwindestPeerAutofill<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":autofill"
+>
+type TailwindestPeerReadonly<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":read-only"
+>
+type TailwindestPeerChecked<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":checked"
+>
+type TailwindestPeerDisabled<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":disabled"
+>
+type TailwindestPeerVisited<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":visited"
+>
+type TailwindestPeerTarget<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":target"
+>
+type TailwindestPeerFocus<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
+    "peer",
+    ":focus"
+>
+type TailwindestPeerFocusWithin<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "peer",
     ":focus-within"
 >
-type TailwindestPeerFocustVisible = TailwindestNestWithTitle<
+type TailwindestPeerFocustVisible<Tailwind> = TailwindestNestWithTitle<
+    Tailwind,
     "peer",
     ":focus-visible"
 >
-interface TailwindestPeerPseudoClass
-    extends TailwindestPeerBackdrop,
-        TailwindestPeerHover,
-        TailwindestPeerActive,
-        TailwindestPeerFirst,
-        TailwindestPeerLast,
-        TailwindestPeerOnly,
-        TailwindestPeerOdd,
-        TailwindestPeerEven,
-        TailwindestPeerFirstOfType,
-        TailwindestPeerLastOfType,
-        TailwindestPeerOnlyOfType,
-        TailwindestPeerEmpty,
-        TailwindestPeerEnabled,
-        TailwindestPeerIndeterminate,
-        TailwindestPeerDefault,
-        TailwindestPeerRequired,
-        TailwindestPeerValid,
-        TailwindestPeerInvalid,
-        TailwindestPeerInRange,
-        TailwindestPeerOutOfRange,
-        TailwindestPeerPlaceholderShown,
-        TailwindestPeerAutofill,
-        TailwindestPeerReadonly,
-        TailwindestPeerChecked,
-        TailwindestPeerDisabled,
-        TailwindestPeerVisited,
-        TailwindestPeerTarget,
-        TailwindestPeerFocus,
-        TailwindestPeerFocusWithin,
-        TailwindestPeerFocustVisible {}
+interface TailwindestPeerPseudoClass<Tailwind>
+    extends TailwindestPeerOdd<Tailwind>,
+        TailwindestPeerLast<Tailwind>,
+        TailwindestPeerOnly<Tailwind>,
+        TailwindestPeerEven<Tailwind>,
+        TailwindestPeerFirst<Tailwind>,
+        TailwindestPeerEmpty<Tailwind>,
+        TailwindestPeerHover<Tailwind>,
+        TailwindestPeerFocus<Tailwind>,
+        TailwindestPeerValid<Tailwind>,
+        TailwindestPeerActive<Tailwind>,
+        TailwindestPeerTarget<Tailwind>,
+        TailwindestPeerChecked<Tailwind>,
+        TailwindestPeerVisited<Tailwind>,
+        TailwindestPeerInvalid<Tailwind>,
+        TailwindestPeerInRange<Tailwind>,
+        TailwindestPeerEnabled<Tailwind>,
+        TailwindestPeerDefault<Tailwind>,
+        TailwindestPeerDisabled<Tailwind>,
+        TailwindestPeerBackdrop<Tailwind>,
+        TailwindestPeerAutofill<Tailwind>,
+        TailwindestPeerReadonly<Tailwind>,
+        TailwindestPeerRequired<Tailwind>,
+        TailwindestPeerOutOfRange<Tailwind>,
+        TailwindestPeerLastOfType<Tailwind>,
+        TailwindestPeerOnlyOfType<Tailwind>,
+        TailwindestPeerFirstOfType<Tailwind>,
+        TailwindestPeerFocusWithin<Tailwind>,
+        TailwindestPeerIndeterminate<Tailwind>,
+        TailwindestPeerFocustVisible<Tailwind>,
+        TailwindestPeerPlaceholderShown<Tailwind> {}
 
-type TailwindestGroup = {
+type TailwindestGroup<Tailwind> = {
     /**
      *@note Styling based on parent state (`group-{pseudo-class}`)
      *@docs [group](https://tailwindcss.com/docs/hover-focus-and-other-states#styling-based-on-parent-state)
      */
-    "@group": TailwindestGroupPseudoClass
+    "@group"?: TailwindestGroupPseudoClass<Tailwind>
 }
 
-type TailwindestPeer = {
+type TailwindestPeer<Tailwind> = {
     /**
      *@note Styling based on sibling state (`peer-{pseudo-class}`)
      *@docs [peer](https://tailwindcss.com/docs/hover-focus-and-other-states#styling-based-on-sibling-state)
      */
-    "@peer": TailwindestPeerPseudoClass
+    "@peer"?: TailwindestPeerPseudoClass<Tailwind>
 }
 
-export interface TailwindestNestExtends
-    extends TailwindestGroup,
-        TailwindestPeer {}
+export interface TailwindestNestExtends<Tailwind>
+    extends TailwindestGroup<Tailwind>,
+        TailwindestPeer<Tailwind> {}
