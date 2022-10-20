@@ -1,10 +1,12 @@
-import { TailwindColor } from "../tailwind.common/@color"
+import { PlugBase, Pluggable } from "../plugin"
 
-type TailwindCaretColor = `caret-${TailwindColor}`
-export type TailwindCaretColorType = {
+export type TailwindCaretColorType<
+    TailwindColor extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for controlling the color of the text input cursor.
      *@docs [caret-color](https://tailwindcss.com/docs/caret-color)
      */
-    caretColor: TailwindCaretColor
+    caretColor: `caret-${TailwindColor | Pluggable<Plug>}`
 }

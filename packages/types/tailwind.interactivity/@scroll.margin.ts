@@ -1,46 +1,59 @@
-import { TailwindSpacingVariants } from "../tailwind.common/@spacing.varients"
+import { PlugBase, Pluggable } from "../plugin"
 
-export type TailwindScrollMarginType = {
+type TailwindScrollMargin<TailwindSpacing, Plug extends PlugBase = ""> =
+    | TailwindSpacing
+    | Pluggable<Plug>
+
+export type TailwindScrollMarginType<
+    TailwindSpacing extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for controlling the scroll offset around items in a snap container.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-margin](https://tailwindcss.com/docs/scroll-margin)
      */
-    scrollMargin: `scroll-m-${TailwindSpacingVariants}`
+    scrollMargin: `scroll-m-${TailwindScrollMargin<TailwindSpacing, Plug>}`
     /**
      *@note Utilities for controlling the scroll offset around items in a snap container left direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-margin](https://tailwindcss.com/docs/scroll-margin)
      */
-    scrollMarginLeft: `scroll-ml-${TailwindSpacingVariants}`
+    scrollMarginLeft: `scroll-ml-${TailwindScrollMargin<TailwindSpacing, Plug>}`
     /**
      *@note Utilities for controlling the scroll offset around items in a snap container right direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-margin](https://tailwindcss.com/docs/scroll-margin)
      */
-    scrollMarginRight: `scroll-mr-${TailwindSpacingVariants}`
+    scrollMarginRight: `scroll-mr-${TailwindScrollMargin<
+        TailwindSpacing,
+        Plug
+    >}`
     /**
      *@note Utilities for controlling the scroll offset around items in a snap container top direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-margin](https://tailwindcss.com/docs/scroll-margin)
      */
-    scrollMarginTop: `scroll-mt-${TailwindSpacingVariants}`
+    scrollMarginTop: `scroll-mt-${TailwindScrollMargin<TailwindSpacing, Plug>}`
     /**
      *@note Utilities for controlling the scroll offset around items in a snap container bottom direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-margin](https://tailwindcss.com/docs/scroll-margin)
      */
-    scrollMarginBottom: `scroll-mb-${TailwindSpacingVariants}`
+    scrollMarginBottom: `scroll-mb-${TailwindScrollMargin<
+        TailwindSpacing,
+        Plug
+    >}`
     /**
      *@note Utilities for controlling the scroll offset around items in a snap container x direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-margin](https://tailwindcss.com/docs/scroll-margin)
      */
-    scrollMarginX: `scroll-mx-${TailwindSpacingVariants}`
+    scrollMarginX: `scroll-mx-${TailwindScrollMargin<TailwindSpacing, Plug>}`
     /**
      *@note Utilities for controlling the scroll offset around items in a snap container y direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-margin](https://tailwindcss.com/docs/scroll-margin)
      */
-    scrollMarginY: `scroll-my-${TailwindSpacingVariants}`
+    scrollMarginY: `scroll-my-${TailwindScrollMargin<TailwindSpacing, Plug>}`
 }

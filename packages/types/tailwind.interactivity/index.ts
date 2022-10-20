@@ -14,19 +14,45 @@ import { TailwindTouchActionType } from "./@touch.action"
 import { TailwindUserSlectType } from "./@user.slect"
 import { TailwindWillChangeType } from "./@will.change"
 
-export interface TailwindInteractivity
-    extends TailwindAccentColorType,
-        TailwindAppearanceType,
-        TailwindCaretColorType,
-        TailwindCursorType,
-        TailwindPointerEventsType,
-        TailwindResizeType,
-        TailwindScrollBehaviorType,
-        TailwindScrollMarginType,
-        TailwindScrollPaddingType,
-        TailwindScrollSnapAlignType,
-        TailwindScrollSnapStopType,
-        TailwindScrollSnapTypeType,
-        TailwindTouchActionType,
+export interface TailwindInteractivity<
+    TailwindColor extends string,
+    TailwindSpacing extends string,
+    InteractivityPlug extends {
+        cursor?: string
+        willChange?: string
+        caretColor?: string
+        accentColor?: string
+        scrollMargin?: string
+        scrollPadding?: string
+    } = {
+        cursor: ""
+        willChange: ""
+        caretColor: ""
+        accentColor: ""
+        scrollMargin: ""
+        scrollPadding: ""
+    }
+> extends TailwindResizeType,
         TailwindUserSlectType,
-        TailwindWillChangeType {}
+        TailwindAppearanceType,
+        TailwindTouchActionType,
+        TailwindPointerEventsType,
+        TailwindScrollBehaviorType,
+        TailwindScrollSnapTypeType,
+        TailwindScrollSnapStopType,
+        TailwindScrollSnapAlignType,
+        TailwindCursorType<InteractivityPlug["cursor"]>,
+        TailwindWillChangeType<InteractivityPlug["willChange"]>,
+        TailwindCaretColorType<TailwindColor, InteractivityPlug["caretColor"]>,
+        TailwindScrollPaddingType<
+            TailwindSpacing,
+            InteractivityPlug["scrollPadding"]
+        >,
+        TailwindScrollMarginType<
+            TailwindSpacing,
+            InteractivityPlug["scrollMargin"]
+        >,
+        TailwindAccentColorType<
+            TailwindColor,
+            InteractivityPlug["accentColor"]
+        > {}
