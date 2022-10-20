@@ -1,3 +1,4 @@
+import { PluginOption } from "../plugin"
 import { TailwindBackdropOpacityType } from "./@backdrop.opacity"
 import { TailwindBackdropBlurType, TailwindBlurType } from "./@blur"
 import {
@@ -18,21 +19,46 @@ import { TailwindBackdropInvertType, TailwindInvertType } from "./@invert"
 import { TailwindBackdropSaturateType, TailwindSaturateType } from "./@saturate"
 import { TailwindBackdropSepiaType, TailwindSepiaType } from "./@sepia"
 
-export interface TailwindFilters
-    extends TailwindBackdropOpacityType,
-        TailwindBackdropBlurType,
-        TailwindBlurType,
-        TailwindBackdropBrigthnessType,
-        TailwindBrigtnessType,
-        TailwindContrastType,
-        TailwindDropShadowType,
-        TailwindBackdropGrayscaleType,
-        TailwindGrayscaleType,
-        TailwindBackdropHueRotateType,
-        TailwindHueRotateType,
-        TailwindBackdropInvertType,
-        TailwindInvertType,
-        TailwindBackdropSaturateType,
-        TailwindSaturateType,
-        TailwindBackdropSepiaType,
-        TailwindSepiaType {}
+type FiltersPluginKey =
+    | "dropShadow"
+    | "blur"
+    | "contrast"
+    | "grayscale"
+    | "hueRotate"
+    | "invert"
+    | "opacity"
+    | "saturate"
+    | "sepia"
+    | "backdropBrightness"
+    | "backdropBlur"
+    | "backdropContrast"
+    | "backdropGrayscale"
+    | "backdropHueRotate"
+    | "backdropInvert"
+    | "backdropOpacity"
+    | "backdropSaturate"
+    | "backdropSepia"
+    | "brightness"
+
+export interface TailwindFilters<
+    FiltersPlug extends PluginOption<FiltersPluginKey> = PluginOption<
+        FiltersPluginKey,
+        ""
+    >
+> extends TailwindBlurType<FiltersPlug["blur"]>,
+        TailwindBrigtnessType<FiltersPlug["brightness"]>,
+        TailwindContrastType<FiltersPlug["contrast"]>,
+        TailwindDropShadowType<FiltersPlug["dropShadow"]>,
+        TailwindGrayscaleType<FiltersPlug["grayscale"]>,
+        TailwindHueRotateType<FiltersPlug["hueRotate"]>,
+        TailwindInvertType<FiltersPlug["invert"]>,
+        TailwindSaturateType<FiltersPlug["saturate"]>,
+        TailwindSepiaType<FiltersPlug["sepia"]>,
+        TailwindBackdropOpacityType<FiltersPlug["backdropOpacity"]>,
+        TailwindBackdropBlurType<FiltersPlug["backdropBlur"]>,
+        TailwindBackdropBrigthnessType<FiltersPlug["backdropBrightness"]>,
+        TailwindBackdropGrayscaleType<FiltersPlug["backdropGrayscale"]>,
+        TailwindBackdropSepiaType<FiltersPlug["backdropSepia"]>,
+        TailwindBackdropHueRotateType<FiltersPlug["backdropHueRotate"]>,
+        TailwindBackdropInvertType<FiltersPlug["backdropInvert"]>,
+        TailwindBackdropSaturateType<FiltersPlug["backdropSaturate"]> {}

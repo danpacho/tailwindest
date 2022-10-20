@@ -1,6 +1,7 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindBrigtnessVariants =
+type TailwindBrigtnessVariants<Plug extends PlugBase = ""> =
     | "0"
     | "50"
     | "75"
@@ -12,22 +13,25 @@ type TailwindBrigtnessVariants =
     | "125"
     | "150"
     | "200"
+    | Pluggable<Plug>
     | TailwindArbitrary
-type TailwindBrigtness = `brightness-${TailwindBrigtnessVariants}`
-export type TailwindBrigtnessType = {
+
+type TailwindBrigtness<Plug extends PlugBase = ""> =
+    `brightness-${TailwindBrigtnessVariants<Plug>}`
+export type TailwindBrigtnessType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for applying brightness filters to an element.
      *@docs [brightness](https://tailwindcss.com/docs/)
      */
-    filterBrigthness: TailwindBrigtness
+    filterBrigthness: TailwindBrigtness<Plug>
 }
 
-type TailwindBackdropBrigthness =
-    `backdrop-brigthness-${TailwindBrigtnessVariants}`
-export type TailwindBackdropBrigthnessType = {
+type TailwindBackdropBrigthness<Plug extends PlugBase = ""> =
+    `backdrop-brigthness-${TailwindBrigtnessVariants<Plug>}`
+export type TailwindBackdropBrigthnessType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for applying backdrop brightness filters to an element.
      *@docs [backdrop-brigthness](https://tailwindcss.com/docs/backdrop-brigthness)
      */
-    backdropBrightness: TailwindBackdropBrigthness
+    backdropBrightness: TailwindBackdropBrigthness<Plug>
 }

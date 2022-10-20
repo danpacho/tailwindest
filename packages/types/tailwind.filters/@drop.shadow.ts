@@ -1,11 +1,23 @@
-type TailwindDropShadowVariants = "sm" | "md" | "lg" | "xl" | "2xl" | "none"
-type TailwindDropShadow =
+import { PlugBase, Pluggable } from "../plugin"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
+
+type TailwindDropShadowVariants<Plug extends PlugBase = ""> =
+    | "sm"
+    | "md"
+    | "lg"
+    | "xl"
+    | "2xl"
+    | "none"
+    | Pluggable<Plug>
+    | TailwindArbitrary
+
+type TailwindDropShadow<Plug extends PlugBase = ""> =
     | "drop-shadow"
-    | `drop-shadow-${TailwindDropShadowVariants}`
-export type TailwindDropShadowType = {
+    | `drop-shadow-${TailwindDropShadowVariants<Plug>}`
+export type TailwindDropShadowType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for applying drop-shadow filters to an element.
      *@docs [drop-shadow](https://tailwindcss.com/docs/drop-shadow)
      */
-    filterDropShadow: TailwindDropShadow
+    filterDropShadow: TailwindDropShadow<Plug>
 }
