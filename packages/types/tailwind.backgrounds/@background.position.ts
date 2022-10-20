@@ -1,4 +1,7 @@
-type TailwindBackgroundPositionVariants =
+import { PlugBase, Pluggable } from "../plugin"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
+
+type TailwindBackgroundPositionVariants<Plug extends PlugBase = ""> =
     | "bottom"
     | "top"
     | "center"
@@ -8,11 +11,15 @@ type TailwindBackgroundPositionVariants =
     | "right"
     | "right-bottom"
     | "right-top"
-type TailwindBackgroundPosition = `bg-${TailwindBackgroundPositionVariants}`
-export type TailwindBackgroundPositionType = {
+    | TailwindArbitrary
+    | Pluggable<Plug>
+
+type TailwindBackgroundPosition<Plug extends PlugBase = ""> =
+    `bg-${TailwindBackgroundPositionVariants<Plug>}`
+export type TailwindBackgroundPositionType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling the position of an element's background image.
      *@docs [background-position](https://tailwindcss.com/docs/background-position)
      */
-    backgroundPosition: TailwindBackgroundPosition
+    backgroundPosition: TailwindBackgroundPosition<Plug>
 }
