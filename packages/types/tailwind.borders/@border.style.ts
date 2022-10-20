@@ -5,6 +5,7 @@ export type TailwindBorderStyleVariants =
     | "double"
     | "hidden"
     | "none"
+
 type TailwindBorderStyle = `border-${TailwindBorderStyleVariants}`
 export type TailwindBorderStyleType = {
     /**

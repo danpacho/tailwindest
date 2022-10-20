@@ -1,10 +1,12 @@
-import { TailwindColor } from "../tailwind.common/@color"
+import { PlugBase, Pluggable } from "../plugin"
 
-type TailwindRingOffsetColor = `ring-offset-${TailwindColor}`
-export type TailwindRingOffsetColorType = {
+export type TailwindRingOffsetColorType<
+    TailwindColor extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for setting the color of outline ring offsets.
      *@docs [ring-offset-color](https://tailwindcss.com/docs/ring-offset-color)
      */
-    ringOffsetColor: TailwindRingOffsetColor
+    ringOffsetColor: `ring-offset-${TailwindColor | Pluggable<Plug>}`
 }
