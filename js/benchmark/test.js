@@ -1,7 +1,7 @@
 import { wind$ as wind$__DEV, wind as wind__DEV } from "../../dist/dev/index.js"
 import { wind$ as wind$__PROD, wind as wind__PROD } from "../../dist/index.js"
 
-/** @typedef {import('../../dist/types/tailwindest/index').Tailwindest} Tailwindest */
+/** @typedef {import('../../dist/tailwindest').Tailwindest} Tailwindest */
 
 /** @type {Tailwindest} */
 const base = {
@@ -108,6 +108,8 @@ const test__wind__DEV = wind__DEV(base)
  * @production
  * @note `wind`, no variants mode
  */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 const test__wind__PROD = wind__PROD(base)
 
 /**
