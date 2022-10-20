@@ -1,4 +1,4 @@
-export type CacheKey = string
+export type CacheKey = string | symbol
 
 export interface Cache<CachedValue> {
     get: (key: CacheKey) => undefined | CachedValue
@@ -12,14 +12,14 @@ export interface Cache<CachedValue> {
  * @returns `has`, has cached value at inquire key
  */
 const cache = <CacheValue>(): Cache<CacheValue> => {
-    const cached = new Map<CacheKey, CacheValue>()
+    const store = new Map<CacheKey, CacheValue>()
 
     return {
-        get: (key: CacheKey) => cached.get(key),
+        get: (key: CacheKey) => store.get(key),
         set: (key: CacheKey, value: CacheValue) => {
-            cached.set(key, value)
+            store.set(key, value)
         },
-        has: (key: CacheKey) => cached.has(key),
+        has: (key: CacheKey) => store.has(key),
     }
 }
 
