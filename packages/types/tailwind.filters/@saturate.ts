@@ -1,26 +1,31 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindSaturateVariants =
+type TailwindSaturateVariants<Plug extends PlugBase = ""> =
     | "0"
     | "50"
     | "100"
     | "150"
     | "200"
+    | Pluggable<Plug>
     | TailwindArbitrary
-type TailwindSaturate = `saturate-${TailwindSaturateVariants}`
-export type TailwindSaturateType = {
+
+type TailwindSaturate<Plug extends PlugBase = ""> =
+    `saturate-${TailwindSaturateVariants<Plug>}`
+export type TailwindSaturateType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for applying saturation filters to an element.
      *@docs [saturate](https://tailwindcss.com/docs/saturate)
      */
-    filterSaturate: TailwindSaturate
+    filterSaturate: TailwindSaturate<Plug>
 }
 
-type TailwindBackdropSaturate = `backdrop-saturate-${TailwindSaturateVariants}`
-export type TailwindBackdropSaturateType = {
+type TailwindBackdropSaturate<Plug extends PlugBase = ""> =
+    `backdrop-saturate-${TailwindSaturateVariants<Plug>}`
+export type TailwindBackdropSaturateType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for applying backdrop saturation filters to an element.
      *@docs [backdrop-saturate](https://tailwindcss.com/docs/backdrop-saturate)
      */
-    backdropSaturate: TailwindBackdropSaturate
+    backdropSaturate: TailwindBackdropSaturate<Plug>
 }

@@ -20,25 +20,58 @@ import { TailwindTextOverflowType } from "./@text.overflow"
 import { TailwindTextTransformType } from "./@text.transform"
 import { TailwindTextUnderlineOffsetType } from "./@text.underline.offset"
 
-export interface TailwindFont
-    extends TailwindContentType,
-        TailwindFontFamilyType,
-        TailwindFontSizeType,
-        TailwindFontSmoothingType,
-        TailwindFontStyleType,
-        TailwindFontVariantNumericType,
-        TailwindFontWeightType,
-        TailwindLetterSpacingType,
-        TailwindLineHeightType,
-        TailwindListStylePositionType,
-        TailwindListStyleTypeType,
-        TailwindTextAlignType,
-        TailwindTextColorType,
-        TailwindTextDecorationType,
-        TailwindTextDecorationColorType,
-        TailwindTextDecorationStyleType,
-        TailwindTextDecorationThicknessType,
-        TailwindTextIndentType,
+export interface TailwindFont<
+    TailwindColor extends string,
+    FontPlug extends {
+        content?: string
+        fontFamily?: string
+        fontSize?: string
+        fontWeight?: string
+        textColor?: string
+        textIndent?: string
+        textDecorationColor?: string
+        textDecorationThickness?: string
+        textUnderlineOffset?: string
+        letterSpacing?: string
+        lineHeight?: string
+        listStyleType?: string
+    } = {
+        content: ""
+        fontFamily: ""
+        fontSize: ""
+        fontWeight: ""
+        textColor: ""
+        textIndent: ""
+        textDecorationColor: ""
+        textDecorationThickness: ""
+        textUnderlineOffset: ""
+        letterSpacing: ""
+        lineHeight: ""
+        listStyleType: ""
+    }
+> extends TailwindTextAlignType,
         TailwindTextOverflowType,
         TailwindTextTransformType,
-        TailwindTextUnderlineOffsetType {}
+        TailwindTextDecorationType,
+        TailwindTextDecorationStyleType,
+        TailwindFontStyleType,
+        TailwindFontSmoothingType,
+        TailwindFontVariantNumericType,
+        TailwindContentType<FontPlug["content"]>,
+        TailwindFontSizeType<FontPlug["fontSize"]>,
+        TailwindFontWeightType<FontPlug["fontSize"]>,
+        TailwindFontFamilyType<FontPlug["fontFamily"]>,
+        TailwindTextColorType<TailwindColor, FontPlug["textColor"]>,
+        TailwindTextIndentType<TailwindColor, FontPlug["textIndent"]>,
+        TailwindTextDecorationColorType<
+            TailwindColor,
+            FontPlug["textDecorationColor"]
+        >,
+        TailwindTextDecorationThicknessType<
+            FontPlug["textDecorationThickness"]
+        >,
+        TailwindTextUnderlineOffsetType<FontPlug["textUnderlineOffset"]>,
+        TailwindLetterSpacingType<FontPlug["letterSpacing"]>,
+        TailwindListStyleTypeType<FontPlug["listStyleType"]>,
+        TailwindLineHeightType<FontPlug["lineHeight"]>,
+        TailwindListStylePositionType {}

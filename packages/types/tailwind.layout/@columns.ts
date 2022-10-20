@@ -1,6 +1,7 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindColumnsVariants =
+type TailwindColumnsVariants<Plug extends PlugBase = ""> =
     | "1"
     | "2"
     | "3"
@@ -27,13 +28,16 @@ type TailwindColumnsVariants =
     | "5xl"
     | "6xl"
     | "7xl"
+    | Pluggable<Plug>
     | TailwindArbitrary
-type TailwindColumns = `columns-${TailwindColumnsVariants}`
 
-export type TailwindColumnsType = {
+type TailwindColumns<Plug extends PlugBase = ""> =
+    `columns-${TailwindColumnsVariants<Plug>}`
+
+export type TailwindColumnsType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling the number of columns within an element.
      *@docs [columns](https://tailwindcss.com/docs/columns)
      */
-    columns: TailwindColumns
+    columns: TailwindColumns<Plug>
 }

@@ -1,3 +1,4 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "./@arbitrary"
 
 export type TailwindColorVariants =
@@ -23,10 +24,11 @@ export type TailwindColorVariants =
     | "rose"
     | "purple"
 
-export type TailwindColorWithNoVariants =
+export type TailwindColorWithNoVariants<Plug extends PlugBase = ""> =
     | "inherit"
     | "current"
     | "transparent"
     | "black"
     | "white"
+    | Pluggable<Plug>
     | TailwindArbitrary

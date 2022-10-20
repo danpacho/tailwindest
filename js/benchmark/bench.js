@@ -18,8 +18,8 @@ benchManager
         getTailwindClass(deepMerge(base, variant))
     )
 
-    .bench("wind class__DEV", () => test__wind__DEV.class())
-    .bench("wind class__PROD", () => test__wind__PROD.class())
+    .bench("wind class__DEV", () => test__wind__DEV.class(), 10000000)
+    .bench("wind class__PROD", () => test__wind__PROD.class(), 10000000)
 
     .bench("wind style__DEV", () => test__wind__DEV.style(), 10000000)
     .bench("wind style__PROD", () => test__wind__PROD.style(), 10000000)
@@ -64,8 +64,8 @@ benchManager
         test__wind$__DEV
             .compose({
                 "::after": {
-                    "::after": {
-                        accentColor: "after:after:accent-black",
+                    "::before": {
+                        accentColor: "after:before:accent-amber-100",
                     },
                 },
             })
@@ -75,8 +75,8 @@ benchManager
         test__wind$__PROD
             .compose({
                 "::after": {
-                    "::after": {
-                        accentColor: "after:after:accent-black",
+                    "::before": {
+                        accentColor: "after:before:accent-amber-100",
                     },
                 },
             })
@@ -87,8 +87,8 @@ benchManager
         test__wind$__DEV
             .compose({
                 "::after": {
-                    "::after": {
-                        accentColor: "after:after:accent-black",
+                    "::before": {
+                        accentColor: "after:before:accent-amber-100",
                     },
                 },
             })
@@ -98,8 +98,8 @@ benchManager
         test__wind$__PROD
             .compose({
                 "::after": {
-                    "::after": {
-                        accentColor: "after:after:accent-black",
+                    "::before": {
+                        accentColor: "after:before:accent-amber-100",
                     },
                 },
             })

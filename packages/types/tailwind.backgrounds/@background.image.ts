@@ -1,4 +1,7 @@
-type TailwindBackgroundImageVariants =
+import { PlugBase, Pluggable } from "../plugin"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
+
+type TailwindBackgroundImageVariants<Plug extends PlugBase = ""> =
     | "t"
     | "tr"
     | "r"
@@ -7,13 +10,16 @@ type TailwindBackgroundImageVariants =
     | "bl"
     | "l"
     | "tl"
-type TailwindBackgroundImage =
+    | Pluggable<Plug>
+    | TailwindArbitrary
+
+type TailwindBackgroundImage<Plug extends PlugBase = ""> =
     | "bg-none"
-    | `bg-gradient-to-${TailwindBackgroundImageVariants}`
-export type TailwindBackgroundImageType = {
+    | `bg-gradient-to-${TailwindBackgroundImageVariants<Plug>}`
+export type TailwindBackgroundImageType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling an element's background image.
      *@docs [background-image](https://tailwindcss.com/docs/background-image)
      */
-    backgroundImage: TailwindBackgroundImage
+    backgroundImage: TailwindBackgroundImage<Plug>
 }

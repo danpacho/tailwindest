@@ -1,3 +1,4 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
 type TailwindTransitionDurationVariants =
@@ -10,12 +11,14 @@ type TailwindTransitionDurationVariants =
     | "700"
     | "1000"
     | TailwindArbitrary
-type TailwindTransitionDuration =
-    `duration-${TailwindTransitionDurationVariants}`
-export type TailwindTransitionDurationType = {
+
+type TailwindTransitionDuration<Plug extends PlugBase = ""> = `duration-${
+    | TailwindTransitionDurationVariants
+    | Pluggable<Plug>}`
+export type TailwindTransitionDurationType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling the duration of CSS transitions.
      *@docs [transition-duration](https://tailwindcss.com/docs/transition-duration)
      */
-    transitionDuration: TailwindTransitionDuration
+    transitionDuration: TailwindTransitionDuration<Plug>
 }

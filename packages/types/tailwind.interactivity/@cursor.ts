@@ -1,6 +1,7 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindCursorVariants =
+type TailwindCursorVariants<Plug extends PlugBase = ""> =
     | "auto"
     | "default"
     | "pointer"
@@ -37,12 +38,15 @@ type TailwindCursorVariants =
     | "nwse-resize"
     | "zoom-in"
     | "zoom-out"
+    | Pluggable<Plug>
     | TailwindArbitrary
-type TailwindCursor = `cursor-${TailwindCursorVariants}`
-export type TailwindCursorType = {
+
+type TailwindCursor<Plug extends PlugBase = ""> =
+    `cursor-${TailwindCursorVariants<Plug>}`
+export type TailwindCursorType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling the cursor style when hovering over an element.
      *@docs [cursor](https://tailwindcss.com/docs/cursor)
      */
-    cursor: TailwindCursor
+    cursor: TailwindCursor<Plug>
 }

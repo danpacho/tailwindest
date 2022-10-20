@@ -1,10 +1,12 @@
-import { TailwindColor } from "../tailwind.common/@color"
+import { PlugBase, Pluggable } from "../plugin"
 
-type TailwindFill = `fill-${TailwindColor}`
-export type TailwindFillType = {
+export type TailwindFillType<
+    TailwindColor extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for styling the fill of SVG elements.
      *@docs [fill](https://tailwindcss.com/docs/fill)
      */
-    fill: TailwindFill
+    fill: `fill-${TailwindColor | Pluggable<Plug>}`
 }

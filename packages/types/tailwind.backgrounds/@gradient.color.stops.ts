@@ -1,22 +1,36 @@
-import { TailwindColor } from "../tailwind.common/@color"
+import { PlugBase, Pluggable } from "../plugin"
 
-type TailwindGradientFrom = `from-${TailwindColor}`
-type TailwindGradientVia = `via-${TailwindColor}`
-type TailwindGradientTo = `to-${TailwindColor}`
-export type TailwindGradientColorStopsType = {
+type TailwindGradientColorStops<
+    TailwindColor extends string,
+    Plug extends PlugBase = ""
+> = TailwindColor | Pluggable<Plug>
+
+export type TailwindGradientColorStopsType<
+    TailwindColor extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for controlling the color stops in background gradients start.
      *@docs [gradient-color-stops](https://tailwindcss.com/docs/gradient-color-stops)
      */
-    backgroundImageGradientStart: TailwindGradientFrom
+    backgroundImageGradientStart: `from-${TailwindGradientColorStops<
+        TailwindColor,
+        Plug
+    >}`
     /**
      *@note Utilities for controlling the color stops in background gradients middle.
      *@docs [gradient-color-stops](https://tailwindcss.com/docs/gradient-color-stops)
      */
-    backgroundImageGradientMiddle: TailwindGradientVia
+    backgroundImageGradientMiddle: `via-${TailwindGradientColorStops<
+        TailwindColor,
+        Plug
+    >}`
     /**
      *@note Utilities for controlling the color stops in background gradients end.
      *@docs [gradient-color-stops](https://tailwindcss.com/docs/gradient-color-stops)
      */
-    backgroundImageGradientEnd: TailwindGradientTo
+    backgroundImageGradientEnd: `to-${TailwindGradientColorStops<
+        TailwindColor,
+        Plug
+    >}`
 }

@@ -1,38 +1,67 @@
-import { TailwindAccessbility } from "./tailwind.accessibility"
-import { TailwindBackgrounds } from "./tailwind.backgrounds"
-import { TailwindBorders } from "./tailwind.borders"
-import { TailwindEffects } from "./tailwind.effects"
-import { TailwindFilters } from "./tailwind.filters"
-import {
+import type { TailwindAccessbility } from "./tailwind.accessibility"
+import type { TailwindBackgrounds } from "./tailwind.backgrounds"
+import type { TailwindBorders } from "./tailwind.borders"
+import type { TailwindColor } from "./tailwind.common/@color"
+import type { TailwindSpacingVariants } from "./tailwind.common/@spacing.varients"
+import type { TailwindEffects } from "./tailwind.effects"
+import type { TailwindFilters } from "./tailwind.filters"
+import type {
     TailwindFlex,
     TailwindFlexGridCommon,
     TailwindGrid,
 } from "./tailwind.flex.grid"
-import { TailwindFont } from "./tailwind.font"
-import { TailwindInteractivity } from "./tailwind.interactivity"
-import { TailwindLayout } from "./tailwind.layout"
-import { TailwindSizing } from "./tailwind.sizing"
-import { TailwindSpacing } from "./tailwind.spacing"
-import { TailwindSvg } from "./tailwind.svg"
-import { TailwindTables } from "./tailwind.tables"
-import { TailwindTransforms } from "./tailwind.transforms"
-import { TailwindTransitionAnimation } from "./tailwind.transition.animation"
+import type { TailwindFont } from "./tailwind.font"
+import type { TailwindInteractivity } from "./tailwind.interactivity"
+import type { TailwindLayout } from "./tailwind.layout"
+import type {
+    TailwindDefaultGlobalPlugOption,
+    TailwindDefaultStylePlug,
+    TailwindGlobalPlugOption,
+    TailwindStylePlugOption,
+} from "./tailwind.plugin.option"
+import type { TailwindSizing } from "./tailwind.sizing"
+import type { TailwindSpacing } from "./tailwind.spacing"
+import type { TailwindSvg } from "./tailwind.svg"
+import type { TailwindTables } from "./tailwind.tables"
+import type { TailwindTransforms } from "./tailwind.transforms"
+import type { TailwindTransitionAnimation } from "./tailwind.transition.animation"
 
-export interface Tailwind
-    extends TailwindFlex,
-        TailwindFlexGridCommon,
-        TailwindGrid,
-        TailwindLayout,
-        TailwindSizing,
-        TailwindSpacing,
-        TailwindFont,
-        TailwindBackgrounds,
-        TailwindBorders,
-        TailwindEffects,
-        TailwindFilters,
-        TailwindTables,
-        TailwindTransitionAnimation,
-        TailwindTransforms,
-        TailwindInteractivity,
-        TailwindSvg,
-        TailwindAccessbility {}
+export interface Tailwind<
+    GlobalPlugOption extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
+    StylePlugOption extends TailwindStylePlugOption = TailwindDefaultStylePlug
+> extends TailwindAccessbility,
+        TailwindGrid<StylePlugOption>,
+        TailwindFilters<StylePlugOption>,
+        TailwindTransitionAnimation<StylePlugOption>,
+        TailwindFont<TailwindColor<GlobalPlugOption>, StylePlugOption>,
+        TailwindBorders<TailwindColor<GlobalPlugOption>, StylePlugOption>,
+        TailwindEffects<TailwindColor<GlobalPlugOption>, StylePlugOption>,
+        TailwindBackgrounds<TailwindColor<GlobalPlugOption>, StylePlugOption>,
+        TailwindFlex<TailwindSpacingVariants<GlobalPlugOption["sizing"]>>,
+        TailwindFlexGridCommon<
+            TailwindSpacingVariants<GlobalPlugOption["sizing"]>,
+            StylePlugOption
+        >,
+        TailwindSizing<
+            TailwindSpacingVariants<GlobalPlugOption["sizing"]>,
+            StylePlugOption
+        >,
+        TailwindSpacing<
+            TailwindSpacingVariants<GlobalPlugOption["sizing"]>,
+            StylePlugOption
+        >,
+        TailwindTables<TailwindSpacingVariants<GlobalPlugOption["sizing"]>>,
+        TailwindTransforms<
+            TailwindSpacingVariants<GlobalPlugOption["sizing"]>,
+            StylePlugOption
+        >,
+        TailwindSvg<TailwindColor<GlobalPlugOption>, StylePlugOption>,
+        TailwindLayout<
+            TailwindSpacingVariants<GlobalPlugOption["sizing"]>,
+            StylePlugOption
+        >,
+        TailwindInteractivity<
+            TailwindColor<GlobalPlugOption>,
+            TailwindSpacingVariants<GlobalPlugOption["sizing"]>,
+            StylePlugOption
+        > {}

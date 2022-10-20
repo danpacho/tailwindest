@@ -1,6 +1,7 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindLineHeightVariants =
+type TailwindLineHeightVariants<Plug extends PlugBase = ""> =
     | "3"
     | "4"
     | "5"
@@ -15,12 +16,15 @@ type TailwindLineHeightVariants =
     | "normal"
     | "relaxed"
     | "loose"
+    | Pluggable<Plug>
     | TailwindArbitrary
-type TailwindLineHeight = `leading-${TailwindLineHeightVariants}`
-export type TailwindLineHeightType = {
+
+type TailwindLineHeight<Plug extends PlugBase = ""> =
+    `leading-${TailwindLineHeightVariants<Plug>}`
+export type TailwindLineHeightType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling the leading (line height) of an element.
      *@docs [line-height](https://tailwindcss.com/docs/line-height)
      */
-    lineHeight: TailwindLineHeight
+    lineHeight: TailwindLineHeight<Plug>
 }

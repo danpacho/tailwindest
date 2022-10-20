@@ -1,13 +1,9 @@
-import type { Tailwind } from "../tailwind"
 import type { TailwindestNestBasic } from "./@nest.basic"
+import type { RemoveUnusedNestProperty } from "./@nest.core"
 import type { TailwindestNestExtends } from "./@nest.extends"
 
-interface TailwindestTypeSet
-    extends Tailwind,
-        TailwindestNestBasic,
-        TailwindestNestExtends {}
+export interface TailwindestNestTypeSet<T>
+    extends TailwindestNestBasic<RemoveUnusedNestProperty<T>>,
+        TailwindestNestExtends<RemoveUnusedNestProperty<T>> {}
 
-type DeepPartial<T> = {
-    [Key in keyof T]?: DeepPartial<T[Key]>
-}
-export type Tailwindest = DeepPartial<TailwindestTypeSet>
+export type TailwindestTypeSet<T> = TailwindestNestTypeSet<T> & T

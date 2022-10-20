@@ -1,7 +1,8 @@
-import { MinSizingVariants, SizingVariants } from "./@sizing.varients"
+import { PlugBase, Pluggable } from "../plugin"
+import { MinSizingVariants, SizingVariants } from "./@sizing.variants"
 
-type TailwindHeightVariants =
-    | SizingVariants
+type TailwindHeightVariants<TailwindSpacing extends string> =
+    | SizingVariants<TailwindSpacing>
     | "1/2"
     | "1/3"
     | "2/3"
@@ -17,33 +18,42 @@ type TailwindHeightVariants =
     | "3/6"
     | "4/6"
     | "5/6"
-type TailwindHeight = `h-${TailwindHeightVariants}`
-export type TailwindHeightType = {
+export type TailwindHeightType<
+    TailwindSpacing extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for setting the height of an element.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [height](https://tailwindcss.com/docs/height)
      */
-    height: TailwindHeight
+    height: `h-${TailwindHeightVariants<TailwindSpacing> | Pluggable<Plug>}`
 }
 
-type TailwindMinHeight = `min-h-${MinSizingVariants | "screen"}`
-export type TailwindMinHeightType = {
+type TailwindMinHeight<Plug extends PlugBase = ""> = `min-h-${
+    | "screen"
+    | MinSizingVariants
+    | Pluggable<Plug>}`
+export type TailwindMinHeightType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for setting the minimum height of an element.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [min-height](https://tailwindcss.com/docs/min-height)
      */
-    minHeight: TailwindMinHeight
+    minHeight: TailwindMinHeight<Plug>
 }
 
-type TailwindMaxHeightVariants = Exclude<SizingVariants, "auto"> | "screen"
-type TailwindMaxHeight = `max-h-${TailwindMaxHeightVariants}`
-export type TailwindMaxHeightType = {
+export type TailwindMaxHeightType<
+    TailwindSpacing extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for setting the maximum height of an element.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [max-height](https://tailwindcss.com/docs/max-height)
      */
-    maxHeight: TailwindMaxHeight
+    maxHeight: `max-h-${
+        | "screen"
+        | Exclude<SizingVariants<TailwindSpacing>, "auto">
+        | Pluggable<Plug>}`
 }

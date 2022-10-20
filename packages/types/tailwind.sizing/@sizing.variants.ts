@@ -1,15 +1,13 @@
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
-import { TailwindSpacingVariants } from "../tailwind.common/@spacing.varients"
 
-export type SizingVariants =
-    | TailwindSpacingVariants
-    | TailwindArbitrary
+export type SizingVariants<TailwindSpacing extends string> =
     | "auto"
     | "full"
     | "screen"
     | "min"
     | "max"
     | "fit"
+    | TailwindSpacing
 
 export type MinSizingVariants =
     | "0"

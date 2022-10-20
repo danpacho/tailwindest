@@ -1,7 +1,7 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "./@arbitrary"
 
-export type TailwindSpacingVariants =
-    | TailwindArbitrary
+export type TailwindSpacingVariants<Plug extends PlugBase = ""> =
     | "96"
     | "80"
     | "72"
@@ -37,3 +37,5 @@ export type TailwindSpacingVariants =
     | "0.5"
     | "0"
     | "px"
+    | Pluggable<Plug>
+    | TailwindArbitrary

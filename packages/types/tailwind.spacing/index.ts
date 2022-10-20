@@ -1,8 +1,18 @@
 import { TailwindMarginType } from "./@margin"
 import { TailwindPaddingType } from "./@padding"
-import { TailwindSpaceBetweenType } from "./@space.between"
+import { TailwindSpaceType } from "./@space.between"
 
-export interface TailwindSpacing
-    extends TailwindMarginType,
-        TailwindPaddingType,
-        TailwindSpaceBetweenType {}
+export interface TailwindSpacing<
+    TailwindSpacing extends string,
+    SpacingPlug extends {
+        padding?: string
+        margin?: string
+        space?: string
+    } = {
+        padding: ""
+        margin: ""
+        space: ""
+    }
+> extends TailwindMarginType<TailwindSpacing, SpacingPlug["margin"]>,
+        TailwindPaddingType<TailwindSpacing, SpacingPlug["padding"]>,
+        TailwindSpaceType<TailwindSpacing, SpacingPlug["space"]> {}

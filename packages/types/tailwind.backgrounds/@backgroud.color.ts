@@ -1,10 +1,12 @@
-import { TailwindColor } from "../tailwind.common/@color"
+import { PlugBase, Pluggable } from "../plugin"
 
-type TailwindBackgroundColor = `bg-${TailwindColor}`
-export type TailwindBackgroundColorType = {
+export type TailwindBackgroundColorType<
+    TailwindColor extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for controlling an element's background color.
      *@docs [background-color](https://tailwindcss.com/docs/background-color)
      */
-    backgroundColor: TailwindBackgroundColor
+    backgroundColor: `bg-${TailwindColor | Pluggable<Plug>}`
 }

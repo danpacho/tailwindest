@@ -1,6 +1,7 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindBackdropOpacityVariants =
+type TailwindBackdropOpacityVariants<Plug extends PlugBase = ""> =
     | "0"
     | "5"
     | "10"
@@ -16,13 +17,15 @@ type TailwindBackdropOpacityVariants =
     | "90"
     | "95"
     | "100"
+    | Pluggable<Plug>
     | TailwindArbitrary
-type TailwindBackdropOpacity =
-    `backdrop-opacity-${TailwindBackdropOpacityVariants}`
-export type TailwindBackdropOpacityType = {
+
+type TailwindBackdropOpacity<Plug extends PlugBase = ""> =
+    `backdrop-opacity-${TailwindBackdropOpacityVariants<Plug>}`
+export type TailwindBackdropOpacityType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for applying backdrop opacity filters to an element.
      *@docs [backdrop-opacity](https://tailwindcss.com/docs/backdrop-opacity)
      */
-    backdropOpacity: TailwindBackdropOpacity
+    backdropOpacity: TailwindBackdropOpacity<Plug>
 }

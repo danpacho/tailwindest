@@ -1,9 +1,19 @@
-type TailwindFontFamilyVariants = "sans" | "serif" | "mono"
-type TailwindFontFamily = `font-${TailwindFontFamilyVariants}`
-export type TailwindFontFamilyType = {
+import { PlugBase, Pluggable } from "../plugin"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
+
+type TailwindFontFamilyVariants<Plug extends PlugBase = ""> =
+    | "sans"
+    | "serif"
+    | "mono"
+    | Pluggable<Plug>
+    | TailwindArbitrary
+
+type TailwindFontFamily<Plug extends PlugBase = ""> =
+    `font-${TailwindFontFamilyVariants<Plug>}`
+export type TailwindFontFamilyType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling the font family of an element.
      *@docs [font-family](https://tailwindcss.com/docs/font-family)
      */
-    fontFamily: TailwindFontFamily
+    fontFamily: TailwindFontFamily<Plug>
 }

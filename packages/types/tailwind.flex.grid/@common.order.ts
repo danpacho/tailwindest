@@ -1,6 +1,7 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindFlexGridOrderVariants =
+type TailwindFlexGridOrderVariants<Plug extends PlugBase = ""> =
     | "first"
     | "last"
     | "none"
@@ -16,12 +17,15 @@ type TailwindFlexGridOrderVariants =
     | "10"
     | "11"
     | "12"
+    | Pluggable<Plug>
     | TailwindArbitrary
-type TailwindFlexGridOrder = `order-${TailwindFlexGridOrderVariants}`
-export type TailwindFlexGridOrderType = {
+
+type TailwindFlexGridOrder<Plug extends PlugBase = ""> =
+    `order-${TailwindFlexGridOrderVariants<Plug>}`
+export type TailwindFlexGridOrderType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling the order of flex and grid items.
      *@docs [order](https://tailwindcss.com/docs/order)
      */
-    order: TailwindFlexGridOrder
+    order: TailwindFlexGridOrder<Plug>
 }

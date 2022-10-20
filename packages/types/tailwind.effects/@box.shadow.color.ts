@@ -1,10 +1,12 @@
-import { TailwindColor } from "../tailwind.common/@color"
+import { PlugBase, Pluggable } from "../plugin"
 
-type TailwindBoxShadowColor = `shadow-${TailwindColor}`
-export type TailwindBoxShadowColorType = {
+export type TailwindBoxShadowColorType<
+    TailwindColor extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for controlling the color of a box shadow.
      *@docs [box-shadow-color](https://tailwindcss.com/docs/box-shadow-color)
      */
-    boxShadowColor: TailwindBoxShadowColor
+    boxShadowColor: `shadow-${TailwindColor | Pluggable<Plug>}`
 }

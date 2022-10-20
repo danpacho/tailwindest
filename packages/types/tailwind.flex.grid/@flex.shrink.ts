@@ -1,10 +1,15 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindFlexShrink = "shrink" | "shrink-0" | `shirink-${TailwindArbitrary}`
-export type TailwindFlexShrinkType = {
+type TailwindFlexShrink<Plug extends PlugBase = ""> =
+    | "shrink"
+    | "shrink-0"
+    | `shirink-${TailwindArbitrary | Pluggable<Plug>}`
+
+export type TailwindFlexShrinkType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling how flex items shrink.
      *@docs [flex-shrink](https://tailwindcss.com/docs/flex-shrink)
      */
-    flexShrink: TailwindFlexShrink
+    flexShrink: TailwindFlexShrink<Plug>
 }

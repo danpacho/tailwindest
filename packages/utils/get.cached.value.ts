@@ -1,4 +1,4 @@
-import type { Cache } from "./cache"
+import type { Cache, CacheKey } from "./cache"
 
 type CacheFindFallback<T> = () => T
 
@@ -10,7 +10,7 @@ type CacheFindFallback<T> = () => T
  */
 const getCachedValue = <CacheValue>(
     store: Cache<CacheValue>,
-    key: string,
+    key: CacheKey,
     cacheFindFallback: CacheFindFallback<CacheValue>
 ): CacheValue => {
     if (store.has(key)) return store.get(key) as CacheValue

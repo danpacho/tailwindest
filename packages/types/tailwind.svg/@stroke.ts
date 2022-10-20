@@ -1,10 +1,12 @@
-import { TailwindColor } from "../tailwind.common/@color"
+import { PlugBase, Pluggable } from "../plugin"
 
-type TailwindStroke = `stroke-${TailwindColor}`
-export type TailwindStrokeType = {
+export type TailwindStrokeType<
+    TailwindColor extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for styling the stroke of SVG elements.
      *@docs [stroke](https://tailwindcss.com/docs/stroke)
      */
-    stroke: TailwindStroke
+    stroke: `stroke-${TailwindColor | Pluggable<Plug>}`
 }

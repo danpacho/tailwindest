@@ -1,10 +1,12 @@
-import { TailwindColor } from "../tailwind.common/@color"
+import { PlugBase, Pluggable } from "../plugin"
 
-type TailwindOutlineColor = `outline-${TailwindColor}`
-export type TailwindOutlineColorType = {
+export type TailwindOutlineColorType<
+    TailwindColor extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for controlling the color of an element's outline.
      *@docs [outline-color](https://tailwindcss.com/docs/outline-color)
      */
-    outlineColor: TailwindOutlineColor
+    outlineColor: `outline-${TailwindColor | Pluggable<Plug>}`
 }

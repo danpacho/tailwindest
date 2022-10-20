@@ -1,10 +1,12 @@
-import { TailwindSpacingVariants } from "../tailwind.common/@spacing.varients"
+import { PlugBase, Pluggable } from "../plugin"
 
-type TailwindTextIndent = `indent-${TailwindSpacingVariants}`
-export type TailwindTextIndentType = {
+export type TailwindTextIndentType<
+    TailwindSpacing extends string,
+    Plug extends PlugBase = ""
+> = {
     /**
      *@note Utilities for controlling the amount of empty space shown before text in a block.
      *@docs [text-indent](https://tailwindcss.com/docs/text-indent)
      */
-    textIndent: TailwindTextIndent
+    textIndent: `indent-${TailwindSpacing | Pluggable<Plug>}`
 }

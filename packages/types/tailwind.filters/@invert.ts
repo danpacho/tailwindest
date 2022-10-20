@@ -1,22 +1,28 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindInvertVariants = "0" | TailwindArbitrary
-type TailwindInvert = "invert" | `invert-${TailwindInvertVariants}`
-export type TailwindInvertType = {
+type TailwindInvertVariants<Plug extends PlugBase = ""> = Pluggable<
+    "0" | Plug | TailwindArbitrary
+>
+
+type TailwindInvert<Plug extends PlugBase = ""> =
+    | "invert"
+    | `invert-${TailwindInvertVariants<Plug>}`
+export type TailwindInvertType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for applying invert filters to an element.
      *@docs [invert](https://tailwindcss.com/docs/invert)
      */
-    filterInvert: TailwindInvert
+    filterInvert: TailwindInvert<Plug>
 }
 
-type TailwindBackdropInvert =
+type TailwindBackdropInvert<Plug extends PlugBase = ""> =
     | "backdrop-invert"
-    | `backdrop-invert-${TailwindInvertVariants}`
-export type TailwindBackdropInvertType = {
+    | `backdrop-invert-${TailwindInvertVariants<Plug>}`
+export type TailwindBackdropInvertType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for applying backdrop invert filters to an element.
      *@docs [backdrop-invert](https://tailwindcss.com/docs/backdrop-invert)
      */
-    backdropInvert: TailwindBackdropInvert
+    backdropInvert: TailwindBackdropInvert<Plug>
 }

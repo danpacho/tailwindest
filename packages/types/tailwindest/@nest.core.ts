@@ -1,5 +1,4 @@
-import { Tailwind } from "../tailwind"
-import { TailwindNestedBasicType } from "../tailwind.nested/@basic"
+import type { TailwindNestedBasicType } from "../tailwind.nested/@basic"
 
 export type TAILWINDEST_NEST_IDENTFIER = ":" | "@"
 /**
@@ -43,7 +42,7 @@ type AddParentKeyAtChild<
     Title extends string,
     TitleHeader extends string = ""
 > = {
-    [Key in keyof ObjectType]: ObjectType[Key] extends string
+    [Key in keyof ObjectType]?: ObjectType[Key] extends string
         ? CombinateToNest<ObjectType[Key], Title>
         : Key extends string
         ? AddParentKeyAtChild<
@@ -71,11 +70,11 @@ export type TailwindestGetNestWithTitle<
  * remove identifier at child style's key
  */
 type AdjustKey<Style, Condition extends string = ""> = {
-    [key in keyof Style]: Style[key] extends string
+    [Key in keyof Style]?: Style[Key] extends string
         ? `${RemoveIdentifierAddNest<
               Condition,
               TAILWINDEST_NEST_IDENTFIER
-          >}${Style[key]}`
+          >}${Style[Key]}`
         : never
 }
 
@@ -83,10 +82,10 @@ type AdjustKey<Style, Condition extends string = ""> = {
  * add nest style
  */
 export type NestStyle<Style, Condition extends string = ""> = {
-    [key in TailwindNestedBasicType]: Style
+    [key in Exclude<TailwindNestedBasicType, Condition>]?: Style
 } & AdjustKey<Style, Condition>
 
-/**
- * nest style
- */
-export type TailwindNest = Omit<Tailwind, "transition" | "border">
+export type RemoveUnusedNestProperty<Tailwindest> = Omit<
+    Tailwindest,
+    "transition" | "border"
+>

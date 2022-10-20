@@ -1,6 +1,7 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindGridRowStartEndVariants =
+type TailwindGridRowVariants<Plug extends PlugBase = ""> =
     | "auto"
     | "span-1"
     | "span-2"
@@ -9,28 +10,48 @@ type TailwindGridRowStartEndVariants =
     | "span-5"
     | "span-6"
     | "span-full"
-    | "start-1"
-    | "start-2"
-    | "start-3"
-    | "start-4"
-    | "start-5"
-    | "start-6"
-    | "start-7"
-    | "start-auto"
-    | "end-1"
-    | "end-2"
-    | "end-3"
-    | "end-4"
-    | "end-5"
-    | "end-6"
-    | "end-7"
-    | "end-auto"
+    | Pluggable<Plug>
     | TailwindArbitrary
-type TailwindGridRowStartEnd = `row-${TailwindGridRowStartEndVariants}`
-export type TailwindGridRowStartEndType = {
+
+type TailwindGridRow<Plug extends PlugBase = ""> =
+    `row-${TailwindGridRowVariants<Plug>}`
+export type TailwindGridRowType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling how elements are sized and placed across grid rows.
      *@docs [grid-row](https://tailwindcss.com/docs/grid-row)
      */
-    gridRow: TailwindGridRowStartEnd
+    gridRow: TailwindGridRow<Plug>
+}
+
+type TailwindGridRowDirectionVariants =
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "auto"
+    | TailwindArbitrary
+
+type TailwindGridRowStart<Plug extends PlugBase = ""> = `row-start-${
+    | TailwindGridRowDirectionVariants
+    | Pluggable<Plug>}`
+export type TailwindGridRowStartType<Plug extends PlugBase = ""> = {
+    /**
+     *@note Utilities for controlling how elements are sized and placed across grid rows start.
+     *@docs [grid-row-start](https://tailwindcss.com/docs/grid-row)
+     */
+    gridRowStart?: TailwindGridRowStart<Plug>
+}
+
+type TailwindGridRowEnd<Plug extends PlugBase = ""> = `row-end-${
+    | TailwindGridRowDirectionVariants
+    | Pluggable<Plug>}`
+export type TailwindGridRowEndType<Plug extends PlugBase = ""> = {
+    /**
+     *@note Utilities for controlling how elements are sized and placed across grid rows end.
+     *@docs [grid-row-end](https://tailwindcss.com/docs/grid-row)
+     */
+    gridRowEnd?: TailwindGridRowEnd<Plug>
 }

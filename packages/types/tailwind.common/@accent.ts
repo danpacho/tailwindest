@@ -1,4 +1,6 @@
-type TailwindColorOpacity =
+import { PlugBase, Pluggable } from "../plugin"
+
+type TailwindOpacity<Plug extends PlugBase = ""> =
     | "5"
     | "10"
     | "15"
@@ -18,6 +20,7 @@ type TailwindColorOpacity =
     | "85"
     | "90"
     | "95"
+    | Pluggable<Plug>
 
 export type TailwindColorAccent =
     | "50"
@@ -31,4 +34,5 @@ export type TailwindColorAccent =
     | "800"
     | "900"
 
-export type TailwindColorAccentWithOpacity = `${string}/${TailwindColorOpacity}`
+export type TailwindColorWithOpacity<Plug extends PlugBase = ""> =
+    `${string}/${TailwindOpacity<Plug>}`
