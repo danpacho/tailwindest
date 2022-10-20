@@ -2,7 +2,7 @@ import { TailwindBorderCollapseType } from "./@border.collapse"
 import { TailwindBorderSpacingType } from "./@border.spacing"
 import { TailwindTableLayoutType } from "./@table.layout"
 
-export interface TailwindTables
+export interface TailwindTables<T extends string>
     extends TailwindBorderCollapseType,
-        TailwindBorderSpacingType,
+        TailwindBorderSpacingType<T>,
         TailwindTableLayoutType {}
