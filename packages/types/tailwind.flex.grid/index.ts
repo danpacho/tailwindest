@@ -24,7 +24,11 @@ import {
     TailwindGridAutoRowsType,
 } from "./@grid.auto"
 import { TailwindGridAutoFlowType } from "./@grid.auto.flow"
-import { TailwindGridColumnType } from "./@grid.column.start.end"
+import {
+    TailwindGridColumnEndType,
+    TailwindGridColumnStartType,
+    TailwindGridColumnType,
+} from "./@grid.column.start.end"
 import {
     TailwindGridJustifyItemsType,
     TailwindGridJustifySelfType,
@@ -34,40 +38,91 @@ import {
     TailwindGridPlaceItemsType,
     TailwindGridPlaceSelfType,
 } from "./@grid.place"
-import { TailwindGridRowStartEndType } from "./@grid.row.start.end"
+import {
+    TailwindGridRowEndType,
+    TailwindGridRowStartType,
+    TailwindGridRowType,
+} from "./@grid.row.start.end"
 import {
     TailwindGridTemplateColumnsType,
     TailwindGridTemplateRowsType,
 } from "./@grid.template"
 
-export interface TailwindFlexGridCommon
-    extends TailwindAlignContentType,
+export interface TailwindFlexGridCommon<
+    TailwindSpacing extends string,
+    FlexGridCommonPlug extends {
+        gap?: string
+        order?: string
+    } = {
+        gap: ""
+        order: ""
+    }
+> extends TailwindAlignSelfType,
         TailwindAlignItemsType,
-        TailwindAlignSelfType,
-        TailwindGapType,
-        TailwindGapXType,
-        TailwindGapYType,
+        TailwindAlignContentType,
         TailwindJustifyContentType,
-        TailwindFlexGridOrderType {}
+        TailwindFlexGridOrderType<FlexGridCommonPlug["order"]>,
+        TailwindGapType<TailwindSpacing, FlexGridCommonPlug["gap"]>,
+        TailwindGapXType<TailwindSpacing, FlexGridCommonPlug["gap"]>,
+        TailwindGapYType<TailwindSpacing, FlexGridCommonPlug["gap"]> {}
 
-export interface TailwindFlex
-    extends TailwindFlexType,
-        TailwindFlexBasisType,
+export interface TailwindFlex<
+    TailwindSpacing extends string,
+    FlexPlug extends {
+        flex?: string
+        flexBasis?: string
+        flexGrow?: string
+        flexShrink?: string
+    } = {
+        flex: ""
+        flexBasis: ""
+        flexGrow: ""
+        flexShrink: ""
+    }
+> extends TailwindFlexWrapType,
         TailwindFlexDirectionType,
-        TailwindFlexGrowType,
-        TailwindFlexShrinkType,
-        TailwindFlexWrapType {}
+        TailwindFlexType<FlexPlug["flex"]>,
+        TailwindFlexGrowType<FlexPlug["flexGrow"]>,
+        TailwindFlexShrinkType<FlexPlug["flexShrink"]>,
+        TailwindFlexBasisType<TailwindSpacing, FlexPlug["flexBasis"]> {}
 
-export interface TailwindGrid
-    extends TailwindGridAutoColumnsType,
-        TailwindGridAutoRowsType,
-        TailwindGridAutoFlowType,
-        TailwindGridColumnType,
-        TailwindGridJustifyItemsType,
-        TailwindGridJustifySelfType,
-        TailwindGridPlaceContentType,
-        TailwindGridPlaceItemsType,
+export interface TailwindGrid<
+    GridPlug extends {
+        gridAutoColumns?: string
+        gridAutoRows?: string
+        gridColumn?: string
+        gridColumnStart?: string
+        gridColumnEnd?: string
+        gridRow?: string
+        gridRowEnd?: string
+        gridRowStart?: string
+        gridTemplateColumns?: string
+        gridTemplateRows?: string
+    } = {
+        gridAutoColumns: ""
+        gridAutoRows: ""
+        gridColumn: ""
+        gridColumnStart: ""
+        gridColumnEnd: ""
+        gridRow: ""
+        gridRowEnd: ""
+        gridRowStart: ""
+        gridTemplateColumns: ""
+        gridTemplateRows: ""
+    }
+> extends TailwindGridAutoFlowType,
         TailwindGridPlaceSelfType,
-        TailwindGridRowStartEndType,
-        TailwindGridTemplateColumnsType,
-        TailwindGridTemplateRowsType {}
+        TailwindGridPlaceItemsType,
+        TailwindGridJustifySelfType,
+        TailwindGridJustifyItemsType,
+        TailwindGridPlaceContentType,
+        TailwindGridRowType<GridPlug["gridRow"]>,
+        TailwindGridRowEndType<GridPlug["gridRowEnd"]>,
+        TailwindGridRowStartType<GridPlug["gridRowStart"]>,
+        TailwindGridColumnType<GridPlug["gridColumn"]>,
+        TailwindGridColumnEndType<GridPlug["gridColumnEnd"]>,
+        TailwindGridColumnStartType<GridPlug["gridColumnStart"]>,
+        TailwindGridAutoRowsType<GridPlug["gridAutoRows"]>,
+        TailwindGridAutoColumnsType<GridPlug["gridAutoColumns"]>,
+        TailwindGridTemplateRowsType<GridPlug["gridTemplateRows"]>,
+        TailwindGridTemplateColumnsType<GridPlug["gridTemplateColumns"]> {}

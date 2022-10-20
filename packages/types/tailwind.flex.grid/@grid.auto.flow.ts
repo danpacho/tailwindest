@@ -4,6 +4,7 @@ type TailwindGridAutoFlowVariants =
     | "dense"
     | "row-dense"
     | "col-dense"
+
 type TailwindGridAutoFlow = `grid-flow-${TailwindGridAutoFlowVariants}`
 export type TailwindGridAutoFlowType = {
     /**

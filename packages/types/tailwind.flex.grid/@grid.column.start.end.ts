@@ -1,6 +1,7 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindGridColumnStartEndVariants =
+type TailwindGridColumnVariants<Plug extends PlugBase = ""> =
     | "auto"
     | "span-1"
     | "span-2"
@@ -15,14 +16,17 @@ type TailwindGridColumnStartEndVariants =
     | "span-11"
     | "span-12"
     | "span-full"
+    | Pluggable<Plug>
     | TailwindArbitrary
-type TailwindGridColumn = `col-${TailwindGridColumnStartEndVariants}`
-export type TailwindGridColumnType = {
+
+type TailwindGridColumn<Plug extends PlugBase = ""> =
+    `col-${TailwindGridColumnVariants<Plug>}`
+export type TailwindGridColumnType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling how elements are sized and placed across grid columns.
      *@docs [grid-column](https://tailwindcss.com/docs/grid-column)
      */
-    gridColumn: TailwindGridColumn
+    gridColumn: TailwindGridColumn<Plug>
 }
 
 type TailwindGridColumnDirectionVariants =
@@ -41,21 +45,25 @@ type TailwindGridColumnDirectionVariants =
     | "13"
     | "auto"
     | TailwindArbitrary
-type TailwindGridColumnStart =
-    `col-start-${TailwindGridColumnDirectionVariants}`
-export type TailwindGridColumnStartType = {
+
+type TailwindGridColumnStart<Plug extends PlugBase = ""> = `col-start-${
+    | TailwindGridColumnDirectionVariants
+    | Pluggable<Plug>}`
+export type TailwindGridColumnStartType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling how elements are sized and placed across grid columns.
      *@docs [grid-column](https://tailwindcss.com/docs/grid-column)
      */
-    gridColumnStart: TailwindGridColumnStart
+    gridColumnStart: TailwindGridColumnStart<Plug>
 }
 
-type TailwindGridColumnEnd = `col-end-${TailwindGridColumnDirectionVariants}`
-export type TailwindGridColumnEndType = {
+type TailwindGridColumnEnd<Plug extends PlugBase = ""> = `col-end-${
+    | TailwindGridColumnDirectionVariants
+    | Pluggable<Plug>}`
+export type TailwindGridColumnEndType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling how elements are sized and placed across grid columns.
      *@docs [grid-column](https://tailwindcss.com/docs/grid-column)
      */
-    gridColumnEnd: TailwindGridColumnEnd
+    gridColumnEnd: TailwindGridColumnEnd<Plug>
 }

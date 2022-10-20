@@ -1,6 +1,7 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindGridTemplateRowsVariants =
+type TailwindGridTemplateRowsVariants<Plug extends PlugBase = ""> =
     | "none"
     | "1"
     | "2"
@@ -8,37 +9,44 @@ type TailwindGridTemplateRowsVariants =
     | "4"
     | "5"
     | "6"
+    | Pluggable<Plug>
     | TailwindArbitrary
-type TailwindGridTemplateRows = `grid-rows-${TailwindGridTemplateRowsVariants}`
-export type TailwindGridTemplateRowsType = {
+
+type TailwindGridTemplateRows<Plug extends PlugBase = ""> =
+    `grid-rows-${TailwindGridTemplateRowsVariants<Plug>}`
+export type TailwindGridTemplateRowsType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for specifying the rows in a grid layout.
      *@docs [grid-template-rows](https://tailwindcss.com/docs/grid-template-rows)
      */
-    gridTemplateRows: TailwindGridTemplateRows
+    gridTemplateRows: TailwindGridTemplateRows<Plug>
 }
 
-type TailwindGridTemplateColumnsVariants =
-    | "none"
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "11"
-    | "12"
-    | TailwindArbitrary
-type TailwindGridTemplateColumns =
-    `grid-cols-${TailwindGridTemplateColumnsVariants}`
-export type TailwindGridTemplateColumnsType = {
+type TailwindGridTemplateColumnsVariants<Plug extends PlugBase = ""> =
+    Pluggable<
+        | "none"
+        | "1"
+        | "2"
+        | "3"
+        | "4"
+        | "5"
+        | "6"
+        | "7"
+        | "8"
+        | "9"
+        | "10"
+        | "11"
+        | "12"
+        | Plug
+        | TailwindArbitrary
+    >
+
+type TailwindGridTemplateColumns<Plug extends PlugBase = ""> =
+    `grid-cols-${TailwindGridTemplateColumnsVariants<Plug>}`
+export type TailwindGridTemplateColumnsType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for specifying the columns in a grid layout.
      *@docs [grid-template-columns](https://tailwindcss.com/docs/grid-template-columns)
      */
-    gridTemplateColumns: TailwindGridTemplateColumns
+    gridTemplateColumns: TailwindGridTemplateColumns<Plug>
 }
