@@ -1,3 +1,4 @@
+import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
 type TailwindTransitionDelayVariants =
@@ -10,11 +11,14 @@ type TailwindTransitionDelayVariants =
     | "700"
     | "1000"
     | TailwindArbitrary
-type TailwindTransitionDelay = `delay-${TailwindTransitionDelayVariants}`
-export type TailwindTransitionDelayType = {
+
+type TailwindTransitionDelay<Plug extends PlugBase = ""> = `delay-${
+    | TailwindTransitionDelayVariants
+    | Pluggable<Plug>}`
+export type TailwindTransitionDelayType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling the delay of CSS transitions.
      *@docs [transition-delay](https://tailwindcss.com/docs/transition-delay)
      */
-    transitionDelay: TailwindTransitionDelay
+    transitionDelay: TailwindTransitionDelay<Plug>
 }

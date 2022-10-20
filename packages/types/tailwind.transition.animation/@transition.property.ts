@@ -1,3 +1,6 @@
+import { PlugBase, Pluggable } from "../plugin"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
+
 type TailwindTransitionPropertyVariants =
     | "none"
     | "all"
@@ -5,13 +8,15 @@ type TailwindTransitionPropertyVariants =
     | "opacity"
     | "shadow"
     | "transform"
-type TailwindTransitionProperty =
+    | TailwindArbitrary
+
+type TailwindTransitionProperty<Plug extends PlugBase = ""> =
     | "transition"
-    | `transition-${TailwindTransitionPropertyVariants}`
-export type TailwindTransitionPropertyType = {
+    | `transition-${TailwindTransitionPropertyVariants | Pluggable<Plug>}`
+export type TailwindTransitionPropertyType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for controlling which CSS properties transition.
      *@docs [transition-property](https://tailwindcss.com/docs/transition-property)
      */
-    transitionProperty: TailwindTransitionProperty
+    transitionProperty: TailwindTransitionProperty<Plug>
 }
