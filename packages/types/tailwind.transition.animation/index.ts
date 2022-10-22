@@ -57,11 +57,12 @@ export interface TailwindTransitionAnimation<
     }
 > extends TailwindAnimationType<TransitionAnimationPlug["animation"]>,
         TailwindTransitionType<
-            ToPluginWithTitle<
-                "transition",
-                TailwindTransitionPropertyVariants,
-                TransitionAnimationPlug["transitionProperty"]
-            >,
+            | ToPluginWithTitle<
+                  "transition",
+                  TailwindTransitionPropertyVariants,
+                  TransitionAnimationPlug["transitionProperty"]
+              >
+            | "transition",
             ToPluginWithTitle<
                 "duration",
                 TailwindTransitionDurationVariants,
