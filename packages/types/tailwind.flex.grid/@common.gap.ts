@@ -1,34 +1,19 @@
-import { PlugBase, Pluggable } from "../plugin"
+import { PluginVariants } from "../plugin"
 
-export type TailwindGapType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+export type TailwindGapType<Gap extends string> = {
     /**
      *@note Utilities for controlling gutters between grid and flexbox items.
      *@docs [gap](https://tailwindcss.com/docs/gap)
      */
-    gap: `gap-${TailwindSpacing | Pluggable<Plug>}`
-}
-
-export type TailwindGapXType<
-    TaiwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+    gap: PluginVariants<"gap", Gap>
     /**
      *@note Utilities for controlling gutters between grid and flexbox items at x axis.
      *@docs [gap](https://tailwindcss.com/docs/gap)
      */
-    gapX: `gap-x-${TaiwindSpacing | Pluggable<Plug>}`
-}
-
-export type TailwindGapYType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+    gapX: PluginVariants<"gap-x", Gap>
     /**
      *@note Utilities for controlling gutters between grid and flexbox items at y axis.
      *@docs [gap](https://tailwindcss.com/docs/gap)
      */
-    gapY: `gap-y-${TailwindSpacing | Pluggable<Plug>}`
+    gapY: PluginVariants<"gap-y", Gap>
 }
