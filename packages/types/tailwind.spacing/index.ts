@@ -1,3 +1,4 @@
+import { Pluggable } from "../plugin"
 import { TailwindMarginType } from "./@margin"
 import { TailwindPaddingType } from "./@padding"
 import { TailwindSpaceType } from "./@space.between"
@@ -13,6 +14,10 @@ export interface TailwindSpacing<
         margin: ""
         space: ""
     }
-> extends TailwindMarginType<TailwindSpacing, SpacingPlug["margin"]>,
-        TailwindPaddingType<TailwindSpacing, SpacingPlug["padding"]>,
-        TailwindSpaceType<TailwindSpacing, SpacingPlug["space"]> {}
+> extends TailwindMarginType<
+            TailwindSpacing | Pluggable<SpacingPlug["margin"]>
+        >,
+        TailwindPaddingType<
+            TailwindSpacing | Pluggable<SpacingPlug["padding"]>
+        >,
+        TailwindSpaceType<TailwindSpacing | Pluggable<SpacingPlug["space"]>> {}

@@ -1,54 +1,51 @@
-import { PlugBase, Pluggable } from "../plugin"
+import { PluginVariantsWithDirection } from "../plugin"
 
 type TailwindMarginVariants<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = TailwindSpacing | "auto" | Pluggable<Plug>
+    Direction extends string,
+    TailwindSpacing extends string
+> = PluginVariantsWithDirection<Direction, TailwindSpacing | "auto">
 
-export type TailwindMarginType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+export type TailwindMarginType<Margin extends string> = {
     /**
      *@note Utilities for controlling an element's margin all.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [margin](https://tailwindcss.com/docs/margin)
      */
-    margin: `m-${TailwindMarginVariants<TailwindSpacing, Plug>}`
+    margin: TailwindMarginVariants<"m", Margin>
     /**
      *@note Utilities for controlling an element's margin x.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [margin](https://tailwindcss.com/docs/margin)
      */
-    marginX: `mx-${TailwindMarginVariants<TailwindSpacing, Plug>}`
+    marginX: TailwindMarginVariants<"mx", Margin>
     /**
      *@note Utilities for controlling an element's margin y.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [margin](https://tailwindcss.com/docs/margin)
      */
-    marginY: `my-${TailwindMarginVariants<TailwindSpacing, Plug>}`
+    marginY: TailwindMarginVariants<"my", Margin>
     /**
      *@note Utilities for controlling an element's margin top.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [margin](https://tailwindcss.com/docs/margin)
      */
-    marginTop: `mt-${TailwindMarginVariants<TailwindSpacing, Plug>}`
+    marginTop: TailwindMarginVariants<"mt", Margin>
     /**
      *@note Utilities for controlling an element's margin bottom.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [margin](https://tailwindcss.com/docs/margin)
      */
-    marginBottom: `mb-${TailwindMarginVariants<TailwindSpacing, Plug>}`
+    marginBottom: TailwindMarginVariants<"mb", Margin>
     /**
      *@note Utilities for controlling an element's margin right.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [margin](https://tailwindcss.com/docs/margin)
      */
-    marginRight: `mr-${TailwindMarginVariants<TailwindSpacing, Plug>}`
+    marginRight: TailwindMarginVariants<"mr", Margin>
     /**
      *@note Utilities for controlling an element's margin left.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [margin](https://tailwindcss.com/docs/margin)
      */
-    marginLeft: `ml-${TailwindMarginVariants<TailwindSpacing, Plug>}`
+    marginLeft: TailwindMarginVariants<"ml", Margin>
 }
