@@ -1,3 +1,4 @@
+import { Pluggable } from "../plugin"
 import { TailwindAccentColorType } from "./@accent.color"
 import { TailwindAppearanceType } from "./@appearance"
 import { TailwindCaretColorType } from "./@caret.color"
@@ -45,12 +46,10 @@ export interface TailwindInteractivity<
         TailwindWillChangeType<InteractivityPlug["willChange"]>,
         TailwindCaretColorType<TailwindColor, InteractivityPlug["caretColor"]>,
         TailwindScrollPaddingType<
-            TailwindSpacing,
-            InteractivityPlug["scrollPadding"]
+            TailwindSpacing | Pluggable<InteractivityPlug["scrollPadding"]>
         >,
         TailwindScrollMarginType<
-            TailwindSpacing,
-            InteractivityPlug["scrollMargin"]
+            TailwindSpacing | Pluggable<InteractivityPlug["scrollMargin"]>
         >,
         TailwindAccentColorType<
             TailwindColor,
