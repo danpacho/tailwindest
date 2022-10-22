@@ -1,22 +1,19 @@
-import { PlugBase, Pluggable } from "../plugin"
+import { PluginVariants } from "../plugin"
 
-export type TailwindBorderSpacingType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+export type TailwindBorderSpacingType<BorderSpacing extends string> = {
     /**
      *@note Utilities for controlling the spacing between table borders.
      *@docs [border-spacing](https://tailwindcss.com/docs/border-spacing)
      */
-    borderSpacing: `border-spacing-${TailwindSpacing | Pluggable<Plug>}`
+    borderSpacing: PluginVariants<"border-spacing", BorderSpacing>
     /**
      *@note Utilities for controlling the spacing between table borders x direction.
      *@docs [border-spacing](https://tailwindcss.com/docs/border-spacing)
      */
-    borderSpacingX: `border-spacing-x-${TailwindSpacing | Pluggable<Plug>}`
+    borderSpacingX: PluginVariants<"border-spacing-x", BorderSpacing>
     /**
      *@note Utilities for controlling the spacing between table borders y direction.
      *@docs [border-spacing](https://tailwindcss.com/docs/border-spacing)
      */
-    borderSpacingY: `border-spacing-y-${TailwindSpacing | Pluggable<Plug>}`
+    borderSpacingY: PluginVariants<"border-spacing-y", BorderSpacing>
 }
