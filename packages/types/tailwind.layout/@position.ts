@@ -1,4 +1,4 @@
-import { PlugBase, Pluggable } from "../plugin"
+import { PluginVariantsWithDirection } from "../plugin"
 
 type TailwindPosition = "static" | "fixed" | "absolute" | "sticky" | "relative"
 export type TailwindPositionType = {
@@ -9,7 +9,7 @@ export type TailwindPositionType = {
     position: TailwindPosition
 }
 
-type PositionValueCommonVariants<TailwindSpacing extends string> =
+type TailwindPositionValueVariants<TailwindSpacing extends string> =
     | TailwindSpacing
     | "auto"
     | "1/2"
@@ -20,98 +20,38 @@ type PositionValueCommonVariants<TailwindSpacing extends string> =
     | "3/4"
     | "full"
 
-type TailwindInsetVariants =
-    | "inset"
-    | "-inset"
-    | "inset-x"
-    | "-inset-x"
-    | "inset-y"
-    | "-inset-y"
-type TailwindInsetPositionValue<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = `${TailwindInsetVariants}-${
-    | PositionValueCommonVariants<TailwindSpacing>
-    | Pluggable<Plug>}`
-export type TailwindInsetPositionValueType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+type TailwindPositionValue<
+    PositionType extends string,
+    TailwindSpacing extends string
+> = PluginVariantsWithDirection<
+    PositionType,
+    TailwindPositionValueVariants<TailwindSpacing>
+>
+
+export type TailwindPositionValueType<PositionValue extends string> = {
     /**
      *@note Utilities for controlling the placement of positioned elements.
      *@docs [inset](https://tailwindcss.com/docs/top-right-bottom-left)
      */
-    inset: TailwindInsetPositionValue<TailwindSpacing, Plug>
-}
-
-type TailwindTopPositionVariants = "top" | "-top"
-type TailwindTopPositionValue<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = `${TailwindTopPositionVariants}-${
-    | PositionValueCommonVariants<TailwindSpacing>
-    | Pluggable<Plug>}`
-export type TailwindTopPositionValueType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+    inset: TailwindPositionValue<"inset" | "inset-x" | "inset-y", PositionValue>
     /**
      *@note Utilities for controlling the placement of positioned elements.
      *@docs [top](https://tailwindcss.com/docs/top-right-bottom-left)
      */
-    top: TailwindTopPositionValue<TailwindSpacing, Plug>
-}
-
-type TailwindBottomPositionVariants = "bottom" | "-bottom"
-type TailwindBottomPositionValue<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = `${TailwindBottomPositionVariants}-${
-    | PositionValueCommonVariants<TailwindSpacing>
-    | Pluggable<Plug>}`
-export type TailwindBottomPositionValueType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+    top: TailwindPositionValue<"top", PositionValue>
     /**
      *@note Utilities for controlling the placement of positioned elements.
      *@docs [top](https://tailwindcss.com/docs/top-right-bottom-left)
      */
-    bottom: TailwindBottomPositionValue<TailwindSpacing, Plug>
-}
-
-type TailwindLeftPositionVariants = "left" | "-left"
-type TailwindLeftPositionValue<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = `${TailwindLeftPositionVariants}-${
-    | PositionValueCommonVariants<TailwindSpacing>
-    | Pluggable<Plug>}`
-export type TailwindLeftPositionValueType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+    bottom: TailwindPositionValue<"bottom", PositionValue>
     /**
      *@note Utilities for controlling the placement of positioned elements.
      *@docs [top](https://tailwindcss.com/docs/top-right-bottom-left)
      */
-    left: TailwindLeftPositionValue<TailwindSpacing, Plug>
-}
-
-type TailwindRightPositionVariants = "right" | "-right"
-type TailwindRightPositionValue<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = `${TailwindRightPositionVariants}-${
-    | PositionValueCommonVariants<TailwindSpacing>
-    | Pluggable<Plug>}`
-export type TailwindRightPositionValueType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+    left: TailwindPositionValue<"left", PositionValue>
     /**
      *@note Utilities for controlling the placement of positioned elements.
      *@docs [top](https://tailwindcss.com/docs/top-right-bottom-left)
      */
-    right: TailwindRightPositionValue<TailwindSpacing, Plug>
+    right: TailwindPositionValue<"right", PositionValue>
 }

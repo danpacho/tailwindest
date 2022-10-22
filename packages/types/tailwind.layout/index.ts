@@ -1,3 +1,4 @@
+import { Pluggable } from "../plugin"
 import { TailwindAsepectRatioType } from "./@aspect.ratio"
 import { TailwindBoxDecorationBreakType } from "./@box.decoration.break"
 import { TailwindBoxSizingType } from "./@box.sizing"
@@ -12,14 +13,7 @@ import { TailwindObjectFitType } from "./@object.fit"
 import { TailwindObjectPositionType } from "./@object.position"
 import { TailwindOverflowType } from "./@overflow"
 import { TailwindOverscrollBehaviorType } from "./@overscroll.behavior"
-import {
-    TailwindBottomPositionValueType,
-    TailwindInsetPositionValueType,
-    TailwindLeftPositionValueType,
-    TailwindPositionType,
-    TailwindRightPositionValueType,
-    TailwindTopPositionValueType,
-} from "./@position"
+import { TailwindPositionType, TailwindPositionValueType } from "./@position"
 import { TailwindVisibilityType } from "./@visibility"
 import { TailwindZIndexType } from "./@z.index"
 
@@ -55,8 +49,6 @@ export interface TailwindLayout<
         TailwindAsepectRatioType<LayoutPlug["aspectRatio"]>,
         TailwindObjectPositionType<LayoutPlug["objectPosition"]>,
         TailwindPositionType,
-        TailwindTopPositionValueType<GlobalPlug, LayoutPlug["inset"]>,
-        TailwindBottomPositionValueType<GlobalPlug, LayoutPlug["inset"]>,
-        TailwindRightPositionValueType<GlobalPlug, LayoutPlug["inset"]>,
-        TailwindLeftPositionValueType<GlobalPlug, LayoutPlug["inset"]>,
-        TailwindInsetPositionValueType<GlobalPlug, LayoutPlug["inset"]> {}
+        TailwindPositionValueType<
+            GlobalPlug | Pluggable<LayoutPlug["inset"]>
+        > {}
