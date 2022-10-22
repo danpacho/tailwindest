@@ -1,5 +1,3 @@
-import type { TailwindNestedBasicType } from "../tailwind.nested/@basic"
-
 export type TAILWINDEST_NEST_IDENTFIER = ":" | "@"
 /**
  * @example "::before" -> "before:"
@@ -81,8 +79,12 @@ type AdjustKey<Style, Condition extends string = ""> = {
 /**
  * add nest style
  */
-export type NestStyle<Style, Condition extends string = ""> = {
-    [key in Exclude<TailwindNestedBasicType, Condition>]?: Style
+export type NestStyle<
+    Nest extends string,
+    Style,
+    Condition extends string = ""
+> = {
+    [key in Exclude<Nest, Condition>]?: Style
 } & AdjustKey<Style, Condition>
 
 export type RemoveUnusedNestProperty<Tailwindest> = Omit<
