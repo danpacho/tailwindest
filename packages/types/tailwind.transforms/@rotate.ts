@@ -1,4 +1,4 @@
-import { PlugBase, Pluggable } from "../plugin"
+import { PlugBase, Pluggable, PluginVariantsWithDirection } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
 type TailwindRotateVariants<Plug extends PlugBase = ""> =
@@ -14,14 +14,14 @@ type TailwindRotateVariants<Plug extends PlugBase = ""> =
     | TailwindArbitrary
     | Pluggable<Plug>
 
-type TailwindRotate<Plug extends PlugBase = ""> =
-    | `rotate-${TailwindRotateVariants<Plug>}`
-    | `-rotate-${TailwindRotateVariants<Plug>}`
 export type TailwindRotateType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for rotating elements with transform.
      *@docs [rotate](https://tailwindcss.com/docs/rotate)
      *@unit Gap `1` = `1deg`
      */
-    transformRotate: TailwindRotate<Plug>
+    transformRotate: PluginVariantsWithDirection<
+        "rotate",
+        TailwindRotateVariants<Plug>
+    >
 }
