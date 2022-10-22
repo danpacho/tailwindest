@@ -1,78 +1,77 @@
-import { PlugBase, Pluggable } from "../plugin"
+import { PluginVariants } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindBorderWidthVariants<Plug extends PlugBase = ""> =
+type TailwindBorderWidth<Plug extends string> =
     | "0"
     | "2"
     | "4"
     | "6"
     | "8"
     | TailwindArbitrary
-    | Pluggable<Plug>
+    | Plug
 
-type TailwindBorderWidth<Key extends string, Plug extends PlugBase = ""> =
-    | Key
-    | `${Key}-${TailwindBorderWidthVariants<Plug>}`
-
-export type TailwindBorderWidthType<Plug extends PlugBase = ""> = {
+export type TailwindBorderWidthType<Plug extends string> = {
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderWidth: TailwindBorderWidth<"border", Plug>
+    borderWidth: PluginVariants<"border", TailwindBorderWidth<Plug>>
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderXWidth: TailwindBorderWidth<"border-x", Plug>
+    borderXWidth: PluginVariants<"border-x", TailwindBorderWidth<Plug>>
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderYWidth: TailwindBorderWidth<"border-y", Plug>
+    borderYWidth: PluginVariants<"border-y", TailwindBorderWidth<Plug>>
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderTopWidth: TailwindBorderWidth<"border-t", Plug>
+    borderTopWidth: PluginVariants<"border-t", TailwindBorderWidth<Plug>>
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderBottomWidth: TailwindBorderWidth<"border-b", Plug>
+    borderBottomWidth: PluginVariants<"border-b", TailwindBorderWidth<Plug>>
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderLeftWidth: TailwindBorderWidth<"border-l", Plug>
+    borderLeftWidth: PluginVariants<"border-l", TailwindBorderWidth<Plug>>
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderRightWidth: TailwindBorderWidth<"border-r", Plug>
+    borderRightWidth: PluginVariants<"border-r", TailwindBorderWidth<Plug>>
 }
 
-type TailwindDivideWidth<Key extends string, Plug extends PlugBase = ""> =
-    | Key
-    | `${Key}-${Exclude<TailwindBorderWidthVariants<Plug>, "6"> | "reverse"}`
-export type TailwindDivideWidthType<Plug extends PlugBase = ""> = {
+export type TailwindDivideWidthType<Plug extends string> = {
     /**
      *@note Utilities for controlling the border width between elements.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [divide-width](https://tailwindcss.com/docs/divide-width)
      */
-    divideX: TailwindDivideWidth<"divide-x", Plug>
+    divideX: PluginVariants<
+        "divide-x",
+        Exclude<TailwindBorderWidth<Plug>, "6"> | "reverse"
+    >
     /**
      *@note Utilities for controlling the border width between elements.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [divide-width](https://tailwindcss.com/docs/divide-width)
      */
-    divideY: TailwindDivideWidth<"divide-y", Plug>
+    divideY: PluginVariants<
+        "divide-y",
+        Exclude<TailwindBorderWidth<Plug>, "6"> | "reverse"
+    >
 }
