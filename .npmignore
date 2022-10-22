@@ -12,6 +12,10 @@ node_modules
 
 # Build
 dist:watch
+dist/index.d.ts
+dist/types/*
+dist/utils/*
+dist/dev/*
 
 # Editor directories and files
 .vscode/*
