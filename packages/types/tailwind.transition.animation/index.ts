@@ -1,9 +1,46 @@
+import { ToPluginWithTitle } from "../plugin"
+import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 import { TailwindAnimationType } from "./@animation"
 import { TailwindTransitionType } from "./@transition"
-import { TailwindTransitionDelayType } from "./@transition.delay"
-import { TailwindTransitionDurationType } from "./@transition.duration"
-import { TailwindTransitionPropertyType } from "./@transition.property"
-import { TailwindTransitionTimingFunctionType } from "./@transition.timing.function"
+
+type TailwindTransitionPropertyVariants =
+    | "none"
+    | "all"
+    | "colors"
+    | "opacity"
+    | "shadow"
+    | "transform"
+    | TailwindArbitrary
+
+type TailwindTransitionTimingFunctionVariants =
+    | "in"
+    | "out"
+    | "linear"
+    | "in-out"
+    | TailwindArbitrary
+
+type TailwindTransitionDurationVariants =
+    | "75"
+    | "100"
+    | "150"
+    | "200"
+    | "300"
+    | "500"
+    | "700"
+    | "1000"
+    | TailwindArbitrary
+
+type TailwindTransitionDelayVariants =
+    | "75"
+    | "100"
+    | "150"
+    | "200"
+    | "300"
+    | "500"
+    | "700"
+    | "1000"
+    | TailwindArbitrary
+
 export interface TailwindTransitionAnimation<
     TransitionAnimationPlug extends {
         animation?: string
@@ -19,18 +56,25 @@ export interface TailwindTransitionAnimation<
         transitionTimingFunction: ""
     }
 > extends TailwindAnimationType<TransitionAnimationPlug["animation"]>,
-        TailwindTransitionDelayType<TransitionAnimationPlug["transitionDelay"]>,
-        TailwindTransitionDurationType<
-            TransitionAnimationPlug["transitionDuration"]
-        >,
-        TailwindTransitionPropertyType<
-            TransitionAnimationPlug["transitionProperty"]
-        >,
-        TailwindTransitionTimingFunctionType<
-            TransitionAnimationPlug["transitionTimingFunction"]
-        >,
         TailwindTransitionType<
-            TransitionAnimationPlug["transitionProperty"],
-            TransitionAnimationPlug["transitionDuration"],
-            TransitionAnimationPlug["transitionTimingFunction"]
+            ToPluginWithTitle<
+                "transition",
+                TailwindTransitionPropertyVariants,
+                TransitionAnimationPlug["transitionProperty"]
+            >,
+            ToPluginWithTitle<
+                "duration",
+                TailwindTransitionDurationVariants,
+                TransitionAnimationPlug["transitionDuration"]
+            >,
+            ToPluginWithTitle<
+                "ease",
+                TailwindTransitionTimingFunctionVariants,
+                TransitionAnimationPlug["transitionTimingFunction"]
+            >,
+            ToPluginWithTitle<
+                "delay",
+                TailwindTransitionDelayVariants,
+                TransitionAnimationPlug["transitionDelay"]
+            >
         > {}
