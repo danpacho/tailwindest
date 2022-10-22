@@ -1,65 +1,46 @@
-import { PlugBase, Pluggable } from "../plugin"
+import { PluginVariantsWithDirection } from "../plugin"
 
-type TailwindScrollPadding<TailwindSpacing, Plug extends PlugBase = ""> =
-    | TailwindSpacing
-    | Pluggable<Plug>
-
-export type TailwindScrollPaddingType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+export type TailwindScrollPaddingType<ScrollPadding extends string> = {
     /**
      *@note Utilities for controlling an element's scroll offset within a snap container.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-padding](https://tailwindcss.com/docs/scroll-padding)
      */
-    scrollPadding: `scroll-p-${TailwindScrollPadding<TailwindSpacing, Plug>}`
+    scrollPadding: PluginVariantsWithDirection<"scroll-p", ScrollPadding>
     /**
      *@note Utilities for controlling an element's scroll offset within a snap container left direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-padding](https://tailwindcss.com/docs/scroll-padding)
      */
-    scrollPaddingLeft: `scroll-pl-${TailwindScrollPadding<
-        TailwindSpacing,
-        Plug
-    >}`
+    scrollPaddingLeft: PluginVariantsWithDirection<"scroll-pl", ScrollPadding>
     /**
      *@note Utilities for controlling an element's scroll offset within a snap container right direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-padding](https://tailwindcss.com/docs/scroll-padding)
      */
-    scrollPaddingRight: `scroll-pr-${TailwindScrollPadding<
-        TailwindSpacing,
-        Plug
-    >}`
+    scrollPaddingRight: PluginVariantsWithDirection<"scroll-pr", ScrollPadding>
     /**
      *@note Utilities for controlling an element's scroll offset within a snap container top direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-padding](https://tailwindcss.com/docs/scroll-padding)
      */
-    scrollPaddingTop: `scroll-pt-${TailwindScrollPadding<
-        TailwindSpacing,
-        Plug
-    >}`
+    scrollPaddingTop: PluginVariantsWithDirection<"scroll-pt", ScrollPadding>
     /**
      *@note Utilities for controlling an element's scroll offset within a snap container bottom direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-padding](https://tailwindcss.com/docs/scroll-padding)
      */
-    scrollPaddingBottom: `scroll-pb-${TailwindScrollPadding<
-        TailwindSpacing,
-        Plug
-    >}`
+    scrollPaddingBottom: PluginVariantsWithDirection<"scroll-pb", ScrollPadding>
     /**
      *@note Utilities for controlling an element's scroll offset within a snap container x direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-padding](https://tailwindcss.com/docs/scroll-padding)
      */
-    scrollPaddingX: `scroll-px-${TailwindScrollPadding<TailwindSpacing, Plug>}`
+    scrollPaddingX: PluginVariantsWithDirection<"scroll-px", ScrollPadding>
     /**
      *@note Utilities for controlling an element's scroll offset within a snap container y direction.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [scroll-padding](https://tailwindcss.com/docs/scroll-padding)
      */
-    scrollPaddingY: `scroll-py-${TailwindScrollPadding<TailwindSpacing, Plug>}`
+    scrollPaddingY: PluginVariantsWithDirection<"scroll-py", ScrollPadding>
 }

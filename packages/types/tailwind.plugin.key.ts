@@ -5,6 +5,47 @@
 export type TailwindGlobalPluginKey = "color" | "opacity" | "sizing"
 
 /**
+ * @note Nest conditions
+ * @note sholud be only **one** string literal
+ * @example
+ * type MyTailwindest = Tailwindest<{
+ *      screens: {
+ *          conditionA: "@my-condition",
+ *          // ✅ only one string union
+ *          conditionB: "@dont-do-this" | "@dont-do-this-plz"
+ *          // ❌ more than one string union
+ *      }
+ * }>
+ */
+export type TailwindNestPluginKey =
+    | "conditionA"
+    | "conditionB"
+    | "conditionC"
+    | "conditionD"
+    | "conditionE"
+    | "conditionF"
+    | "conditionG"
+    | "conditionH"
+    | "conditionI"
+    | "conditionJ"
+    | "conditionK"
+    | "conditionL"
+    | "conditionM"
+    | "conditionN"
+    | "conditionO"
+    | "conditionP"
+    | "conditionQ"
+    | "conditionR"
+    | "conditionS"
+    | "conditionT"
+    | "conditionU"
+    | "conditionV"
+    | "conditionW"
+    | "conditionX"
+    | "conditionY"
+    | "conditionZ"
+
+/**
  * @note Style supported list
  * @docs [configuration-reference](https://tailwindcss.com/docs/theme#configuration-reference)
  */

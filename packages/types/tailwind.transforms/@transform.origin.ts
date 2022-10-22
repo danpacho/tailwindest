@@ -1,4 +1,4 @@
-import { PlugBase, Pluggable } from "../plugin"
+import { PlugBase, Pluggable, PluginVariants } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
 type TailwindTransformOriginVariants<Plug extends PlugBase = ""> =
@@ -14,12 +14,13 @@ type TailwindTransformOriginVariants<Plug extends PlugBase = ""> =
     | TailwindArbitrary
     | Pluggable<Plug>
 
-type TailwindTransformOrigin<Plug extends PlugBase = ""> =
-    `origin-${TailwindTransformOriginVariants<Plug>}`
 export type TailwindTransformOriginType<Plug extends PlugBase = ""> = {
     /**
      *@note Utilities for specifying the origin for an element's transformations.
      *@docs [transform-origin](https://tailwindcss.com/docs/transform-origin)
      */
-    transformOrigin: TailwindTransformOrigin<Plug>
+    transformOrigin: PluginVariants<
+        "origin",
+        TailwindTransformOriginVariants<Plug>
+    >
 }

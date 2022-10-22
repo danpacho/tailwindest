@@ -1,4 +1,4 @@
-import { TailwindBorderType } from "./@border"
+import { Pluggable } from "../plugin"
 import {
     TailwindBorderColorType,
     TailwindDivideColorType,
@@ -53,10 +53,11 @@ export interface TailwindBorders<
 > extends TailwindOutlineStyleType,
         TailwindDivideStyleType,
         TailwindBorderStyleType,
-        TailwindBorderWidthType<BordersPlug["borderWidth"]>,
+        TailwindBorderWidthType<Pluggable<BordersPlug["borderWidth"]>>,
         TailwindBorderRadiusType<BordersPlug["borderRadius"]>,
-        TailwindBorderColorType<TailwindColor, BordersPlug["borderColor"]>,
-        TailwindBorderType<TailwindColor, BordersPlug["borderWidth"]>,
+        TailwindBorderColorType<
+            TailwindColor | Pluggable<BordersPlug["borderColor"]>
+        >,
         TailwindRingWidthType<BordersPlug["ringWidth"]>,
         TailwindRingColorType<TailwindColor, BordersPlug["ringColor"]>,
         TailwindRingOffsetColorType<
@@ -67,5 +68,7 @@ export interface TailwindBorders<
         TailwindOutlineOffsetType<BordersPlug["outlineOffset"]>,
         TailwindOutlineWidthType<BordersPlug["outlineWidth"]>,
         TailwindOutlineColorType<TailwindColor, BordersPlug["outlineColor"]>,
-        TailwindDivideWidthType<BordersPlug["divideWidth"]>,
-        TailwindDivideColorType<TailwindColor, BordersPlug["divideColor"]> {}
+        TailwindDivideWidthType<Pluggable<BordersPlug["divideWidth"]>>,
+        TailwindDivideColorType<
+            TailwindColor | Pluggable<BordersPlug["divideColor"]>
+        > {}

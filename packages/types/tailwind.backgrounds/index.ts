@@ -1,3 +1,4 @@
+import { Pluggable } from "../plugin"
 import { TailwindBackgroundColorType } from "./@backgroud.color"
 import { TailwindBackgroundAttachmentType } from "./@background.attachment"
 import { TailwindBackgroundClipType } from "./@background.clip"
@@ -35,6 +36,5 @@ export interface TailwindBackgrounds<
             BackgroundsPlug["backgroundColor"]
         >,
         TailwindGradientColorStopsType<
-            TailwindColor,
-            BackgroundsPlug["gradientColorStops"]
+            TailwindColor | Pluggable<BackgroundsPlug["gradientColorStops"]>
         > {}

@@ -1,3 +1,4 @@
+import type { TailwindestNestKey } from "./types/plugin.nest"
 import type { TailwindWithOption } from "./types/tailwind.plugin"
 import type {
     TailwindDefaultGlobalPlugOption,
@@ -6,68 +7,73 @@ import type {
     TailwindStylePlugOption,
 } from "./types/tailwind.plugin.option"
 import type { TailwindestTypeSet } from "./types/tailwindest"
-import { TailwindestNest } from "./types/tailwindest/@nest.basic"
 import { cache, deepMerge, getCachedValue, getTailwindClass } from "./utils"
 
 /**
- * @note add custome property at `tailwind.config.js`
- * @note `CASE1`: define custom style type
+ * @note Add custome property at `tailwind.config.js`
+ * @note `Case1 ✅` Define custom style type
+ * @docs [tailwind-configuration](https://tailwindcss.com/docs/configuration)
  * @example
  * type MyTailwindest = Tailwindest<{
- * //       ✅ Add color, opacity, spacing global type
+ *          // ✅ Add color, opacity, spacing, screens global type
  *          color: "my-color1" | "my-color2",
  *          opacity: "12.5"
  *          spacing: "0.25" | "0.5" | "0.75",
+ *          screens: {
+ *              // ✅ only one string union
+ *              conditionA: "@do-this",
+ *              // ❌ more than one string union
+ *              conditionB: "@dont-do-this" | "@dont-do-this-plz"
+ *          }
  *      },
  *      {
- * //       ✅ Add "my-flex", "my-shadow1" & "my-shadow2"
+ *          // ✅ Add "my-flex", "my-shadow1" & "my-shadow2"
  *          display: "my-flex",
  *          shadow: "my-shadow1" | "my-shadow2"
  *      }
  * >
- * @note `CASE2`: pick specific type
+ * @note `Case2 ✅` Pick specific type
  * @example
- * // ✅ Get all type of MyTailwindest fontSize
+ * // ✅ Get MyTailwindest's fontSize
  * type FontSize = MyTailwindest["fontSize"]
  */
 export type Tailwindest<
     TailwindCustom extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
     CustomExtends extends TailwindStylePlugOption = TailwindDefaultStylePlug
-> = Partial<
-    TailwindestTypeSet<TailwindWithOption<TailwindCustom, CustomExtends>>
+> = TailwindCustom["screens"] extends Record<string, unknown>
+    ? Partial<
+          TailwindestTypeSet<
+              TailwindWithOption<TailwindCustom, CustomExtends>,
+              TailwindestNestKey<TailwindCustom["screens"]>,
+              TailwindCustom["screens"]
+          >
+      >
+    : Partial<
+          TailwindestTypeSet<
+              TailwindWithOption<TailwindCustom, CustomExtends>,
+              TailwindestNestKey
+          >
+      >
+
+type ToString<MightBeString> = Extract<MightBeString, string>
+type VariantsStyles<Variant extends string, StyleType> = Record<
+    Variant,
+    StyleType
 >
-
-/**
- * @note extend screen type, should be one screen key
- * @example
- * type MyMid = TailwindestScreens<MyTailwindest, "@my-mid">
- * // ✅ @my-md screen type
- */
-export type TailwindestScreens<
-    Tailwind,
-    OnlyOneScreenKey extends string
-> = TailwindestNest<Tailwind, OnlyOneScreenKey>
-
-type StringKey<Key> = Extract<Key, string>
-type VariantsStyles<Key extends string, T> = Record<Key, T>
 
 /** @note base cache key for `style` and `class` */
 const BASE_KEY = Symbol()
 
-type WindVariant<
+type WindCoreVariant<
     StyleType,
     VariantsStylesType extends VariantsStyles<string, StyleType>
 > = ReturnType<typeof windCore<StyleType, VariantsStylesType>>
 
-type Wind<StyleType> = ReturnType<typeof windCore<StyleType>>
+type WindCore<StyleType> = ReturnType<typeof windCore<StyleType>>
 
 /**
  * @param style style object
- * @param variantsStyles **optional** variants style objects
- * @note variant is key of `variantsStyles`
- * @returns `class` tailwind class extractor `function`
- * @returns `style` input style extractor `function`, use it to compose styles
- * @returns `compose` style set
+ * @param variantsStyles optional variants style objects
  */
 function windCore<
     StyleType,
@@ -77,63 +83,63 @@ function windCore<
     variantsStyles: VariantsStylesType
 ): {
     /**
-     * @note class extractor `function`
+     * @note Class extractor `function`
      * @example
-     * // ✅ define box with "container" | "input" variants
+     * // ✅ Define box with "container" | "input" variants
      * const box = wind$("container", "input")({ ...baseStyle })
      *
-     * // ✅ get container variant class string
+     * // ✅ Get container variant class string
      * const container = box.class("container")
      *
-     * // ✅ get baseStyle class string
+     * // ✅ Get baseStyle class string
      * const boxBase = box.class()
      */
-    class: (variant?: StringKey<keyof VariantsStylesType>) => string
+    class: (variant?: ToString<keyof VariantsStylesType>) => string
     /**
-     * @note input style extractor `function`, use it to compose styles
+     * @note Input style extractor `function`, use it to compose styles
      * @example
-     * // ✅ get "box" variant style object
+     * // ✅ Get "box" variant style object
      * const boxStyle = wind$("box")({ ...baseStyle }).style("box")
      */
-    style: (variant?: StringKey<keyof VariantsStylesType>) => StyleType
+    style: (variant?: ToString<keyof VariantsStylesType>) => StyleType
     /**
-     * @note `compose` multiple styles to one object
+     * @note Compose multiple styles into one object
      * @example
-     * // ✅ get composed result of baseStyle & border.style()
+     * // ✅ Get composed result of baseStyle & border.style()
      * const boxBorder = wind$("box")({ ...baseStyle }).compose(border.style())
      */
     compose: (
         ...styles: StyleType[]
-    ) => WindVariant<StyleType, VariantsStylesType>
+    ) => WindCoreVariant<StyleType, VariantsStylesType>
 }
 function windCore<StyleType>(style: StyleType): {
     /**
-     * @note class extractor `function`
+     * @note Class extractor `function`
      * @example
-     * // ✅ define btn style
+     * // ✅ Define btn style
      * const button = wind()({ ...btnStyle })
      *
-     * // ✅ get btn class string
+     * // ✅ Get btn class string
      * const buttonClass = button.class()
      */
     class: () => string
     /**
-     * @note input style extractor `function`, use it to compose styles
+     * @note Input style extractor `function`, use it to compose styles
      * @example
-     * // ✅ define btn style
+     * // ✅ Define btn style
      * const button = wind()({ ...btnStyle })
      *
-     * // ✅ get button style object
+     * // ✅ Get button style object
      * const butonStyle = button.style()
      */
     style: () => StyleType
     /**
-     * @note `compose` multiple styles to one object
+     * @note Compose multiple styles into one object
      * @example
-     * // ✅ get composed result of btnStyle & border.style()
+     * // ✅ Get composed result of btnStyle & border.style()
      * const buttonWithBorder = wind({ ...btnStyle }).compose(border.style())
      */
-    compose: (...styles: StyleType[]) => Wind<StyleType>
+    compose: (...styles: StyleType[]) => WindCore<StyleType>
 }
 function windCore<
     StyleType,
@@ -145,7 +151,7 @@ function windCore<
     classStore.set(BASE_KEY, getTailwindClass(style))
 
     return {
-        class: (variant?: StringKey<keyof VariantsStylesType>) => {
+        class: (variant?: ToString<keyof VariantsStylesType>) => {
             const cachedBaseStyle = getCachedValue<StyleType>(
                 styleStore,
                 BASE_KEY,
@@ -178,7 +184,7 @@ function windCore<
             return cachedVariantClass
         },
 
-        style: (variant?: StringKey<keyof VariantsStylesType>): StyleType => {
+        style: (variant?: ToString<keyof VariantsStylesType>): StyleType => {
             const cachedBaseStyle = getCachedValue<StyleType>(
                 styleStore,
                 BASE_KEY,
@@ -202,7 +208,7 @@ function windCore<
 
         compose: function (
             ...styles: StyleType[]
-        ): WindVariant<StyleType, VariantsStylesType> {
+        ): WindCoreVariant<StyleType, VariantsStylesType> {
             const cachedBaseStyle = getCachedValue<StyleType>(
                 styleStore,
                 BASE_KEY,
@@ -225,68 +231,91 @@ function windCore<
 }
 
 /**
- * @note create `wind` functions with custom `style` type
- * @returns `wind` - just wind function
+ * @note Create `wind` with custom `style` type
+ * @returns Custom `wind` - style sheet function
  * @example
  * // ✅ Add "my-color1" | "my-color2"
  * type MyTailwindest = Tailwindest<{
  *     color: "my-color1" | "my-color2",
  * }>
- * // ✅ Adapt type with generic
- * const { wind: styled, wind$: styled$ } = createWind<MyTailwindest>()
+ *
+ * // ✅ Adapt type in generic
+ * // ✅ Rename for non-duplicated imports
+ * const { wind: style, wind$: style$ } = createWind<MyTailwindest>()
+ *
+ * export { style, style$ }
  */
-function createWind<StyleType>(): {
-    wind$: <Variant extends string>(
-        ...variants: Variant[]
-    ) => typeof windCore<StyleType, VariantsStyles<Variant, StyleType>>
-    wind: typeof windCore<StyleType>
-}
-function createWind() {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const wind$ = (...variantsNames: string[]) => windCore
+function createWind<StyleType>() {
+    const wind$ = <Variant extends string>(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ...variantNames: Variant[]
+    ): typeof windCore<StyleType, VariantsStyles<Variant, StyleType>> =>
+        windCore
+    const wind: typeof windCore<StyleType> = windCore
     return {
         wind$,
-        wind: windCore,
+        wind,
     }
 }
 
 const defaultWind = createWind<Tailwindest>()
 /**
- * @param style style object
- * @returns `class` tailwind class extractor `function`
- * @returns `style` input style extractor `function`, use it to compose styles
- */
-const wind: (style: Tailwindest) => Wind<Tailwindest> = defaultWind.wind
-
-/**
- * @param ...variants tailwind variant names
- * @returns `wind$(...variants)` tailwind style generator like `wind`
- */
-const wind$: <Variant extends string>(
-    ...variants: Variant[]
-) => (
-    baseStyle: Tailwindest,
-    variantsStyles: VariantsStyles<Variant, Tailwindest>
-) => WindVariant<Tailwindest, VariantsStyles<Variant, Tailwindest>> =
-    defaultWind.wind$
-
-/**
- * @note get variants `union` type of `wind` style,
- * @returns `string union` or `never`
+ * @note Basic wind function
+ * @note Create complex `tailwind` style definition
  * @example
- * type BtnWithSuccessFail = WindVariants<typeof success_fail_btn>
- * // ✅ "success" | "fail"
- * type BtnWithNoVariants = WindVariants<typeof no_variants_btn>
- * // ❌ never
+ * // ✅ Create complex style with wind
+ * const box = wind(
+ *   { ...boxStyle },
+ * )
+ * // ✅ Use class
+ * const boxClass = box.class()
+ *
+ * // 📸 Pre-consolidate as class string for render performance
+ * const container = wind(
+ *   { ...containerStyle },
+ * ).class()
  */
-export type WindVariants<WindStyle> = WindStyle extends {
+const wind = defaultWind.wind
+
+/**
+ * @note Variants wind function
+ * @note Create complex `tailwind` style definition with variants
+ * @example
+ * // ✅ Create complex variant styles with wind$
+ * const button = wind$("success", "fail")(
+ *   { ...buttonBaseStyle },
+ *   {
+ *       // ✅ Define variants style
+ *       success: { ...successStyle },
+ *       fail: { ...failStyle },
+ *   }
+ * )
+ * // ✅ Get base style without argument
+ * const buttonBaseClass = button.class()
+ *
+ * // ✅ Get specific variants with argument
+ * const buttonSuccessClass = button.class("success")
+ */
+const wind$ = defaultWind.wind$
+
+/**
+ * @note Get variants `union` type of `wind`
+ * @returns Type `string union` or `never`
+ * @example
+ * // ✅ Get "success" | "fail"
+ * type BtnVariants = WindVariants<typeof SUCCESS_FAIL_BTN>
+ *
+ * // ❌ Get never
+ * type BtnVariants2 = WindVariants<typeof NO_VARIANTS_BTN>
+ */
+export type WindVariants<TypeofWind> = TypeofWind extends {
     style: (variants: infer Variants) => unknown
     class: (variants: infer Variants) => unknown
 }
     ? Variants extends string
         ? Variants
         : never
-    : WindStyle extends (variants: infer Variants) => unknown
+    : TypeofWind extends (variants: infer Variants) => unknown
     ? Exclude<Variants, undefined>
     : never
 

@@ -1,14 +1,11 @@
 //COMMON
+import { Pluggable } from "../plugin"
 import {
     TailwindAlignContentType,
     TailwindAlignItemsType,
     TailwindAlignSelfType,
 } from "./@common.align"
-import {
-    TailwindGapType,
-    TailwindGapXType,
-    TailwindGapYType,
-} from "./@common.gap"
+import { TailwindGapType } from "./@common.gap"
 import { TailwindJustifyContentType } from "./@common.justify"
 import { TailwindFlexGridOrderType } from "./@common.order"
 //FLEX
@@ -62,9 +59,9 @@ export interface TailwindFlexGridCommon<
         TailwindAlignContentType,
         TailwindJustifyContentType,
         TailwindFlexGridOrderType<FlexGridCommonPlug["order"]>,
-        TailwindGapType<TailwindSpacing, FlexGridCommonPlug["gap"]>,
-        TailwindGapXType<TailwindSpacing, FlexGridCommonPlug["gap"]>,
-        TailwindGapYType<TailwindSpacing, FlexGridCommonPlug["gap"]> {}
+        TailwindGapType<
+            TailwindSpacing | Pluggable<FlexGridCommonPlug["gap"]>
+        > {}
 
 export interface TailwindFlex<
     TailwindSpacing extends string,

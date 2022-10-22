@@ -1,59 +1,53 @@
-import { PlugBase, Pluggable } from "../plugin"
+import { PluginVariants } from "../plugin"
 
-type TailwindBorderColor<
-    Key extends string,
-    TailwindColor extends string,
-    Plug extends PlugBase = ""
-> = Key | `${Key}-${TailwindColor | Pluggable<Plug>}`
-
-export type TailwindBorderColorType<
-    TailwindColor extends string,
-    Plug extends PlugBase = ""
-> = {
+export type TailwindBorderColorType<BorderColor extends string> = {
+    /**
+     *@note border shorthand syntax
+     *@note `<color>` `border-solid`
+     *@docs [border](https://tailwindcss.com/docs/border-width)
+     */
+    border: `${PluginVariants<"border", BorderColor>} border-solid`
     /**
      *@note Utilities for controlling the color of an element's borders.
      *@docs [border-color](https://tailwindcss.com/docs/border-color)
      */
-    borderColor: TailwindBorderColor<"border", TailwindColor, Plug>
+    borderColor: PluginVariants<"border", BorderColor>
     /**
      *@note Utilities for controlling the color of an element's borders.
      *@docs [border-color](https://tailwindcss.com/docs/border-color)
      */
-    borderXColor: TailwindBorderColor<"border-x", TailwindColor, Plug>
+    borderXColor: PluginVariants<"border-x", BorderColor>
     /**
      *@note Utilities for controlling the color of an element's borders.
      *@docs [border-color](https://tailwindcss.com/docs/border-color)
      */
-    borderYColor: TailwindBorderColor<"border-y", TailwindColor, Plug>
+    borderYColor: PluginVariants<"border-y", BorderColor>
     /**
      *@note Utilities for controlling the color of an element's borders.
      *@docs [border-color](https://tailwindcss.com/docs/border-color)
      */
-    borderTopColor: TailwindBorderColor<"border-t", TailwindColor, Plug>
+    borderTopColor: PluginVariants<"border-t", BorderColor>
     /**
      *@note Utilities for controlling the color of an element's borders.
      *@docs [border-color](https://tailwindcss.com/docs/border-color)
      */
-    borderBottomColor: TailwindBorderColor<"border-b", TailwindColor, Plug>
+    borderBottomColor: PluginVariants<"border-b", BorderColor>
     /**
      *@note Utilities for controlling the color of an element's borders.
      *@docs [border-color](https://tailwindcss.com/docs/border-color)
      */
-    borderLeftColor: TailwindBorderColor<"border-l", TailwindColor, Plug>
+    borderLeftColor: PluginVariants<"border-l", BorderColor>
     /**
      *@note Utilities for controlling the color of an element's borders.
      *@docs [border-color](https://tailwindcss.com/docs/border-color)
      */
-    borderRightColor: TailwindBorderColor<"border-r", TailwindColor, Plug>
+    borderRightColor: PluginVariants<"border-r", BorderColor>
 }
 
-export type TailwindDivideColorType<
-    TailwindColor extends string,
-    Plug extends PlugBase = ""
-> = {
+export type TailwindDivideColorType<BorderColor extends string> = {
     /**
      *@note Utilities for controlling the border color between elements.
      *@docs [divide-color](https://tailwindcss.com/docs/divide-color)
      */
-    divideColor: TailwindBorderColor<"divide", TailwindColor, Plug>
+    divideColor: PluginVariants<"divide", BorderColor>
 }

@@ -1,24 +1,21 @@
-import { PlugBase, Pluggable } from "../plugin"
+import { PluginVariantsWithDirection } from "../plugin"
 
 type TailwindSpaceVariants<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = TailwindSpacing | "reverse" | Pluggable<Plug>
+    Direction extends string,
+    TailwindSpacing extends string
+> = PluginVariantsWithDirection<Direction, TailwindSpacing | "reverse ">
 
-export type TailwindSpaceType<
-    TailwindSpacing extends string,
-    Plug extends PlugBase = ""
-> = {
+export type TailwindSpaceType<Space extends string> = {
     /**
      *@note Utilities for controlling the space(**margin**) between child elements `> * + *`.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [space](https://tailwindcss.com/docs/space)
      */
-    spaceX: `space-x-${TailwindSpaceVariants<TailwindSpacing, Plug>}`
+    spaceX: TailwindSpaceVariants<"space-x", Space>
     /**
      *@note Utilities for controlling the space(**margin**) between child elements `> * + *`.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@docs [space](https://tailwindcss.com/docs/space)
      */
-    spaceY: `space-y-${TailwindSpaceVariants<TailwindSpacing, Plug>}`
+    spaceY: TailwindSpaceVariants<"space-y", Space>
 }

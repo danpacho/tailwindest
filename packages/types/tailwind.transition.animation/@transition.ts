@@ -1,29 +1,38 @@
-import { PlugBase } from "../plugin"
-import { TailwindTransitionDurationType } from "./@transition.duration"
-import { TailwindTransitionPropertyType } from "./@transition.property"
-import { TailwindTransitionTimingFunctionType } from "./@transition.timing.function"
-
 type TailwindTransition<
-    TransitionPropertyPlug extends PlugBase = "",
-    TransitionDurationPlug extends PlugBase = "",
-    TransitionTimingFunctionPlug extends PlugBase = ""
-> = `${TailwindTransitionPropertyType<TransitionPropertyPlug>["transitionProperty"]} ${TailwindTransitionDurationType<TransitionDurationPlug>["transitionDuration"]} ${TailwindTransitionTimingFunctionType<TransitionTimingFunctionPlug>["transitionTimingFunction"]}`
+    TransitionProperty extends string,
+    TransitionTimingFunction extends string
+> = `${TransitionProperty} ${TransitionTimingFunction}` | "transition"
 
 export type TailwindTransitionType<
-    TransitionPropertyPlug extends PlugBase = "",
-    TransitionDurationPlug extends PlugBase = "",
-    TransitionTimingFunctionPlug extends PlugBase = ""
+    TransitionProperty extends string,
+    TransitionDuration extends string,
+    TransitionTimingFunction extends string,
+    TransitionDelay extends string
 > = {
     /**
-     *@note `CSS` [shorthand syntax](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions#defining_transitions)
-     *@note `<property>` `<duration>` `<timing>`
+     *@note transition shorthand syntax
+     *@note `<property>` `<timing>`
      *@docs [transition](https://tailwindcss.com/docs/transition-property)
      */
-    transition:
-        | "transition"
-        | TailwindTransition<
-              TransitionPropertyPlug,
-              TransitionDurationPlug,
-              TransitionTimingFunctionPlug
-          >
+    transition: TailwindTransition<TransitionProperty, TransitionTimingFunction>
+    /**
+     *@note Utilities for controlling which CSS properties transition.
+     *@docs [transition-property](https://tailwindcss.com/docs/transition-property)
+     */
+    transitionProperty: TransitionProperty
+    /**
+     *@note Utilities for controlling the duration of CSS transitions.
+     *@docs [transition-duration](https://tailwindcss.com/docs/transition-duration)
+     */
+    transitionDuration: TransitionDuration
+    /**
+     *@note Utilities for controlling the easing of CSS transitions.
+     *@docs [transition-timing-function](https://tailwindcss.com/docs/transition-timing-function)
+     */
+    transitionTimingFunction: TransitionTimingFunction
+    /**
+     *@note Utilities for controlling the delay of CSS transitions.
+     *@docs [transition-delay](https://tailwindcss.com/docs/transition-delay)
+     */
+    transitionDelay: TransitionDelay
 }

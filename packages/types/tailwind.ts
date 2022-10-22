@@ -33,11 +33,15 @@ export interface Tailwind<
         TailwindGrid<StylePlugOption>,
         TailwindFilters<StylePlugOption>,
         TailwindTransitionAnimation<StylePlugOption>,
+        TailwindSvg<TailwindColor<GlobalPlugOption>, StylePlugOption>,
         TailwindFont<TailwindColor<GlobalPlugOption>, StylePlugOption>,
         TailwindBorders<TailwindColor<GlobalPlugOption>, StylePlugOption>,
         TailwindEffects<TailwindColor<GlobalPlugOption>, StylePlugOption>,
         TailwindBackgrounds<TailwindColor<GlobalPlugOption>, StylePlugOption>,
-        TailwindFlex<TailwindSpacingVariants<GlobalPlugOption["sizing"]>>,
+        TailwindFlex<
+            TailwindSpacingVariants<GlobalPlugOption["color"]>,
+            StylePlugOption
+        >,
         TailwindFlexGridCommon<
             TailwindSpacingVariants<GlobalPlugOption["sizing"]>,
             StylePlugOption
@@ -55,7 +59,6 @@ export interface Tailwind<
             TailwindSpacingVariants<GlobalPlugOption["sizing"]>,
             StylePlugOption
         >,
-        TailwindSvg<TailwindColor<GlobalPlugOption>, StylePlugOption>,
         TailwindLayout<
             TailwindSpacingVariants<GlobalPlugOption["sizing"]>,
             StylePlugOption
