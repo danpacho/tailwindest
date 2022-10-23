@@ -1,6 +1,10 @@
 import { PluginVariants } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
+type PluginVariantsIncludeSelf<Title extends string, Value extends string> =
+    | PluginVariants<Title, Value>
+    | Title
+
 type TailwindBorderWidth<Plug extends string> =
     | "0"
     | "2"
@@ -16,62 +20,83 @@ export type TailwindBorderWidthType<Plug extends string> = {
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderWidth: PluginVariants<"border", TailwindBorderWidth<Plug>>
+    borderWidth: PluginVariantsIncludeSelf<"border", TailwindBorderWidth<Plug>>
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderXWidth: PluginVariants<"border-x", TailwindBorderWidth<Plug>>
+    borderXWidth: PluginVariantsIncludeSelf<
+        "border-x",
+        TailwindBorderWidth<Plug>
+    >
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderYWidth: PluginVariants<"border-y", TailwindBorderWidth<Plug>>
+    borderYWidth: PluginVariantsIncludeSelf<
+        "border-y",
+        TailwindBorderWidth<Plug>
+    >
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderTopWidth: PluginVariants<"border-t", TailwindBorderWidth<Plug>>
+    borderTopWidth: PluginVariantsIncludeSelf<
+        "border-t",
+        TailwindBorderWidth<Plug>
+    >
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderBottomWidth: PluginVariants<"border-b", TailwindBorderWidth<Plug>>
+    borderBottomWidth: PluginVariantsIncludeSelf<
+        "border-b",
+        TailwindBorderWidth<Plug>
+    >
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderLeftWidth: PluginVariants<"border-l", TailwindBorderWidth<Plug>>
+    borderLeftWidth: PluginVariantsIncludeSelf<
+        "border-l",
+        TailwindBorderWidth<Plug>
+    >
     /**
      *@note Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [border-width](https://tailwindcss.com/docs/border-width)
      */
-    borderRightWidth: PluginVariants<"border-r", TailwindBorderWidth<Plug>>
+    borderRightWidth: PluginVariantsIncludeSelf<
+        "border-r",
+        TailwindBorderWidth<Plug>
+    >
 }
+
+type TailwindDivideWidth<Plug extends string> =
+    | "0"
+    | "2"
+    | "4"
+    | "8"
+    | "reverse"
+    | Plug
+    | TailwindArbitrary
 
 export type TailwindDivideWidthType<Plug extends string> = {
     /**
-     *@note Utilities for controlling the border width between elements.
+     *@note Utilities for controlling the border width between x-axis elements.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [divide-width](https://tailwindcss.com/docs/divide-width)
      */
-    divideX: PluginVariants<
-        "divide-x",
-        Exclude<TailwindBorderWidth<Plug>, "6"> | "reverse"
-    >
+    divideX: PluginVariantsIncludeSelf<"divide-x", TailwindDivideWidth<Plug>>
     /**
-     *@note Utilities for controlling the border width between elements.
+     *@note Utilities for controlling the border width between y-axis elements.
      *@unit Gap `2` = `2px` = `0.125rem`
      *@docs [divide-width](https://tailwindcss.com/docs/divide-width)
      */
-    divideY: PluginVariants<
-        "divide-y",
-        Exclude<TailwindBorderWidth<Plug>, "6"> | "reverse"
-    >
+    divideY: PluginVariantsIncludeSelf<"divide-y", TailwindDivideWidth<Plug>>
 }
