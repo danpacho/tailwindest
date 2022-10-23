@@ -1,7 +1,7 @@
 import { wind$ as wind$__DEV, wind as wind__DEV } from "../../dist/dev/index.js"
 import { wind$ as wind$__PROD, wind as wind__PROD } from "../../dist/index.js"
 
-/** @typedef {import('../../dist/tailwindest').Tailwindest} Tailwindest */
+/** @typedef {import('../../dist/index').Tailwindest} Tailwindest */
 
 /** @type {Tailwindest} */
 const base = {
@@ -19,7 +19,7 @@ const base = {
             accentColor: "first-letter:after:accent-amber-100",
         },
     },
-    borderWidth: "border",
+    borderWidth: "border-2",
     borderColor: "border-black",
     borderRadius: "rounded-sm",
 
@@ -27,8 +27,8 @@ const base = {
     fontWeight: "font-bold",
     color: "text-black",
 
-    transition: "transition duration-75 ease-out",
-    border: "border border-solid border-amber-200",
+    transition: "transition ease-out",
+    border: "border-amber-200 border-solid",
     "@dark": {
         backgroundColor: "dark:bg-neutral-800",
         color: "dark:text-white",
@@ -61,8 +61,8 @@ const variant = {
     color: "text-white",
     alignContent: "content-end",
     ringColor: "ring-amber-400",
-    transition: "transition duration-200 ease-linear",
-    border: "border border-solid border-red-400",
+    transition: "transition ease-linear",
+    border: "border-red-400 border-solid",
     "@dark": {
         backgroundColor: "dark:bg-red-500",
         color: "dark:text-white",
@@ -108,8 +108,6 @@ const test__wind__DEV = wind__DEV(base)
  * @production
  * @note `wind`, no variants mode
  */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 const test__wind__PROD = wind__PROD(base)
 
 /**

@@ -60,50 +60,37 @@ benchManager
         10000000
     )
 
-    .bench("wind$ style [pending] <multiple ❌> compose__DEV", () =>
-        test__wind$__DEV
-            .compose({
-                "::after": {
-                    "::before": {
-                        accentColor: "after:before:accent-amber-100",
-                    },
-                },
-            })
-            .style("pending")
+    .bench("⛔️ live compose wind$ [warn] & [pending] into wind__DEV", () =>
+        test__wind__DEV
+            .compose(
+                test__wind$__DEV.style("warn"),
+                test__wind$__DEV.style("pending")
+            )
+            .class()
     )
-    .bench("wind$ style [pending] <multiple ❌> compose__PROD", () =>
-        test__wind$__PROD
-            .compose({
-                "::after": {
-                    "::before": {
-                        accentColor: "after:before:accent-amber-100",
-                    },
-                },
-            })
-            .style("pending")
+    .bench("⛔️ live compose wind$ [warn] & [pending] into wind__PROD", () =>
+        test__wind__PROD
+            .compose(
+                test__wind$__PROD.style("warn"),
+                test__wind$__PROD.style("pending")
+            )
+            .class()
     )
-
-    .bench("wind$ class [pending] <multiple ❌> compose__DEV", () =>
-        test__wind$__DEV
-            .compose({
-                "::after": {
-                    "::before": {
-                        accentColor: "after:before:accent-amber-100",
-                    },
-                },
-            })
-            .class("pending")
+    .bench("⛔️ live compose wind$ [pending] & [warn] into wind__DEV", () =>
+        test__wind__DEV
+            .compose(
+                test__wind$__DEV.style("pending"),
+                test__wind$__DEV.style("warn")
+            )
+            .class()
     )
-    .bench("wind$ class [pending] <multiple ❌> compose__PROD", () =>
-        test__wind$__PROD
-            .compose({
-                "::after": {
-                    "::before": {
-                        accentColor: "after:before:accent-amber-100",
-                    },
-                },
-            })
-            .class("pending")
+    .bench("⛔️ live compose wind$ [pending] & [warn] into wind__PROD", () =>
+        test__wind__PROD
+            .compose(
+                test__wind$__PROD.style("pending"),
+                test__wind$__PROD.style("warn")
+            )
+            .class()
     )
 
     .getTotalBenchResult()
