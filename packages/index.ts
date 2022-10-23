@@ -11,8 +11,8 @@ import { cache, deepMerge, getCachedValue, getTailwindClass } from "./utils"
 
 /**
  * @note Add custome property at `tailwind.config.js`
- * @note `Case1 ✅` Define custom style type
  * @docs [tailwind-configuration](https://tailwindcss.com/docs/configuration)
+ * @note `Case1` Define custom style type
  * @example
  * type MyTailwindest = Tailwindest<{
  *          // ✅ Add color, opacity, spacing, screens global type
@@ -25,14 +25,14 @@ import { cache, deepMerge, getCachedValue, getTailwindClass } from "./utils"
  *              // ❌ more than one string union
  *              conditionB: "@dont-do-this" | "@dont-do-this-plz"
  *          }
- *      },
+ *      }
  *      {
  *          // ✅ Add "my-flex", "my-shadow1" & "my-shadow2"
  *          display: "my-flex",
  *          shadow: "my-shadow1" | "my-shadow2"
  *      }
  * >
- * @note `Case2 ✅` Pick specific type
+ * @note `Case2` Pick specific type
  * @example
  * // ✅ Get MyTailwindest's fontSize
  * type FontSize = MyTailwindest["fontSize"]
@@ -63,13 +63,6 @@ type VariantsStyles<Variant extends string, StyleType> = Record<
 
 /** @note base cache key for `style` and `class` */
 const BASE_KEY = Symbol()
-
-type WindCoreVariant<
-    StyleType,
-    VariantsStylesType extends VariantsStyles<string, StyleType>
-> = ReturnType<typeof windCore<StyleType, VariantsStylesType>>
-
-type WindCore<StyleType> = ReturnType<typeof windCore<StyleType>>
 
 /**
  * @param style style object
@@ -105,12 +98,19 @@ function windCore<
     /**
      * @note Compose multiple styles into one object
      * @example
-     * // ✅ Get composed result of baseStyle & border.style()
-     * const boxBorder = wind$("box")({ ...baseStyle }).compose(border.style())
+     * // ✅ Get composed result of baseStyle & flexStyle & borderStyle
+     * const box = wind$("active", "disabled")(
+     *      { ...baseStyle },
+     *      {
+     *          active: {},
+     *          disabled: {},
+     *      }
+     * ).compose(flexStyle, borderStyle)
      */
-    compose: (
-        ...styles: StyleType[]
-    ) => WindCoreVariant<StyleType, VariantsStylesType>
+    compose: (...styles: StyleType[]) => {
+        class: (variant?: ToString<keyof VariantsStylesType>) => string
+        style: (variant?: ToString<keyof VariantsStylesType>) => StyleType
+    }
 }
 function windCore<StyleType>(style: StyleType): {
     /**
@@ -136,10 +136,15 @@ function windCore<StyleType>(style: StyleType): {
     /**
      * @note Compose multiple styles into one object
      * @example
-     * // ✅ Get composed result of btnStyle & border.style()
-     * const buttonWithBorder = wind({ ...btnStyle }).compose(border.style())
+     * // ✅ Get composed result of btnStyle & borderStyle
+     * const buttonWithBorder = wind(
+     *      { ...btnStyle },
+     * ).compose(borderStyle)
      */
-    compose: (...styles: StyleType[]) => WindCore<StyleType>
+    compose: (...styles: StyleType[]) => {
+        class: () => string
+        style: () => StyleType
+    }
 }
 function windCore<
     StyleType,
@@ -206,9 +211,7 @@ function windCore<
             return cachedVariantStyle
         },
 
-        compose: function (
-            ...styles: StyleType[]
-        ): WindCoreVariant<StyleType, VariantsStylesType> {
+        compose: function (...styles: StyleType[]) {
             const cachedBaseStyle = getCachedValue<StyleType>(
                 styleStore,
                 BASE_KEY,
@@ -216,8 +219,7 @@ function windCore<
             )
 
             const composedStyle = styles.reduce<StyleType>(
-                (composedStyle, currStyle) =>
-                    deepMerge(composedStyle, currStyle),
+                (accStyle, currStyle) => deepMerge(accStyle, currStyle),
                 cachedBaseStyle
             )
             const composedClass = getTailwindClass(composedStyle)
@@ -225,22 +227,24 @@ function windCore<
             classStore.set(BASE_KEY, composedClass)
             styleStore.set(BASE_KEY, composedStyle)
 
-            return this
+            return {
+                class: this.class,
+                style: this.style,
+            }
         },
     }
 }
 
 /**
  * @note Create `wind` with custom `style` type
- * @returns Custom `wind` - style sheet function
  * @example
  * // ✅ Add "my-color1" | "my-color2"
  * type MyTailwindest = Tailwindest<{
  *     color: "my-color1" | "my-color2",
  * }>
  *
- * // ✅ Adapt type in generic
- * // ✅ Rename for non-duplicated imports
+ * // ✅ Adapt custom type in generic
+ * // ✅ Rename it for non-duplicated imports
  * const { wind: style, wind$: style$ } = createWind<MyTailwindest>()
  *
  * export { style, style$ }
@@ -259,9 +263,10 @@ function createWind<StyleType>() {
 }
 
 const defaultWind = createWind<Tailwindest>()
+
 /**
+ * @note Create complex `tailwind` style definition with `wind`
  * @note Basic wind function
- * @note Create complex `tailwind` style definition
  * @example
  * // ✅ Create complex style with wind
  * const box = wind(
@@ -278,8 +283,8 @@ const defaultWind = createWind<Tailwindest>()
 const wind = defaultWind.wind
 
 /**
+ * @note Create complex `tailwind` style definition with variants with `wind$`
  * @note Variants wind function
- * @note Create complex `tailwind` style definition with variants
  * @example
  * // ✅ Create complex variant styles with wind$
  * const button = wind$("success", "fail")(
@@ -299,7 +304,7 @@ const wind = defaultWind.wind
 const wind$ = defaultWind.wind$
 
 /**
- * @note Get variants `union` type of `wind`
+ * @note Get variants `union` of `wind`
  * @returns Type `string union` or `never`
  * @example
  * // ✅ Get "success" | "fail"
