@@ -15,10 +15,12 @@ const deepMerge = <T>(...obj: T[]): T =>
                 if (typeof value === "string") {
                     ;(merged as NestedObject)[key] = value
                 } else {
-                    ;(merged as NestedObject)[key] = deepMerge(
-                        (merged as NestedObject)[key],
-                        value
-                    )
+                    if (value) {
+                        ;(merged as NestedObject)[key] = deepMerge(
+                            (merged as NestedObject)[key],
+                            value
+                        )
+                    }
                 }
             }
         }
