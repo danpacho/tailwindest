@@ -44,6 +44,6 @@ const wind$ = defaultWind.wind$
 
 export * from "./tailwindest"
 export * from "./wind.variants"
-export { createVariants } from "./utils"
+export * from "./utils"
 export { createWind } from "./create.wind"
 export { wind, wind$ }
