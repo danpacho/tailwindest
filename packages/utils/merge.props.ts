@@ -1,4 +1,4 @@
-import { wind } from "../wind"
+import { deepMerge, getTailwindClass } from "../core"
 
 /**
  * @note Usefull for merging style props
@@ -23,6 +23,6 @@ import { wind } from "../wind"
  * ```
  */
 const mergeProps = <T>(baseStyle: T, styleProps: T) =>
-    wind(baseStyle).compose(styleProps).class()
+    getTailwindClass(deepMerge(baseStyle, styleProps))
 
 export { mergeProps }
