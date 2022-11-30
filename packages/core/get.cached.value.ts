@@ -1,4 +1,4 @@
-import type { Cache, CacheKey } from "./cache"
+import type { Cache } from "./cache"
 
 type CacheFindFallback<T> = () => T
 
@@ -8,8 +8,8 @@ type CacheFindFallback<T> = () => T
  * @param cacheFindFallback when cache is not found, caching it
  * @returns cached value
  */
-const getCachedValue = <CacheValue>(
-    store: Cache<CacheValue>,
+const getCachedValue = <CacheKey, CacheValue>(
+    store: Cache<CacheKey, CacheValue>,
     key: CacheKey,
     cacheFindFallback: CacheFindFallback<CacheValue>
 ): CacheValue => {
