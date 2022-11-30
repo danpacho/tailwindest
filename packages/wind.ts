@@ -13,7 +13,7 @@ export type WindVariantsKey<Variants> = ToString<
 >
 /** @note base cache key for `style` and `class` */
 const BASE_KEY = Symbol()
-
+type WindCacheKey = string | symbol | number
 /**
  * @param style style object
  * @param variantsStyles optional variants style objects
@@ -139,8 +139,8 @@ function wind<
     StyleType,
     VariantsStylesType extends VariantsStyles<string, StyleType>
 >(style: StyleType, variantsStyles?: VariantsStylesType) {
-    const classCacheStore = cache<string>()
-    const styleCacheStore = cache<StyleType>()
+    const classCacheStore = cache<WindCacheKey, string>()
+    const styleCacheStore = cache<WindCacheKey, StyleType>()
 
     classCacheStore.set(BASE_KEY, getTailwindClass(style))
 
@@ -152,7 +152,7 @@ function wind<
                 keyof VariantsStylesType
             >) ?? undefined
         ) => {
-            const cachedBaseStyle = getCachedValue<StyleType>(
+            const cachedBaseStyle = getCachedValue(
                 styleCacheStore,
                 BASE_KEY,
                 () => style
@@ -166,7 +166,7 @@ function wind<
             const isBase = variantsStyles === undefined || variant === undefined
             if (isBase) return cachedBaseClass
 
-            const cachedVariantStyle = getCachedValue<StyleType>(
+            const cachedVariantStyle = getCachedValue(
                 styleCacheStore,
                 variant,
                 () =>
@@ -191,7 +191,7 @@ function wind<
                 keyof VariantsStylesType
             >) ?? undefined
         ): StyleType => {
-            const cachedBaseStyle = getCachedValue<StyleType>(
+            const cachedBaseStyle = getCachedValue(
                 styleCacheStore,
                 BASE_KEY,
                 () => style
@@ -200,7 +200,7 @@ function wind<
             const isBase = variantsStyles === undefined || variant === undefined
             if (isBase) return cachedBaseStyle
 
-            const cachedVariantStyle = getCachedValue<StyleType>(
+            const cachedVariantStyle = getCachedValue(
                 styleCacheStore,
                 variant,
                 () =>
@@ -213,7 +213,7 @@ function wind<
         },
 
         compose: function (...styles: StyleType[]) {
-            const cachedBaseStyle = getCachedValue<StyleType>(
+            const cachedBaseStyle = getCachedValue(
                 styleCacheStore,
                 BASE_KEY,
                 () => style
