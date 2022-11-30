@@ -1,5 +1,13 @@
-import { wind$ as wind$__DEV, wind as wind__DEV } from "../../dist/dev/index.js"
-import { wind$ as wind$__PROD, wind as wind__PROD } from "../../dist/index.js"
+import {
+    createVariants as createVariants__DEV,
+    wind$ as wind$__DEV,
+    wind as wind__DEV,
+} from "../../dist/dev/index.js"
+import {
+    createVariants as createVariants__PROD,
+    wind$ as wind$__PROD,
+    wind as wind__PROD,
+} from "../../dist/index.js"
 
 /** @typedef {import('../../dist/index').Tailwindest} Tailwindest */
 
@@ -108,6 +116,8 @@ const test__wind__DEV = wind__DEV(base)
  * @production
  * @note `wind`, no variants mode
  */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-nocheck
 const test__wind__PROD = wind__PROD(base)
 
 /**
@@ -225,6 +235,16 @@ const test__wind$__PROD = wind$__PROD("warn", "pending")(
     }
 ).compose(base, centerize)
 
+const variants__PROD = createVariants__PROD({
+    size: test__wind$__PROD,
+    bg: test__wind$__PROD,
+})
+
+const variants__DEV = createVariants__DEV({
+    size: test__wind$__PROD,
+    bg: test__wind$__PROD,
+})
+
 export {
     base,
     variant,
@@ -232,4 +252,6 @@ export {
     test__wind$__PROD,
     test__wind__DEV,
     test__wind__PROD,
+    variants__DEV,
+    variants__PROD,
 }

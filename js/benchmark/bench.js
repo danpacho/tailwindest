@@ -1,4 +1,5 @@
-import { deepMerge, getTailwindClass } from "../../dist/dev/utils/index.js"
+import { deepMerge, getTailwindClass } from "../../dist/dev/core/index.js"
+import { mergeProps } from "../../dist/index.js"
 import { benchManager } from "./bench.manager.js"
 import {
     base,
@@ -7,6 +8,8 @@ import {
     test__wind__DEV,
     test__wind__PROD,
     variant,
+    variants__DEV,
+    variants__PROD,
 } from "./test.js"
 
 benchManager
@@ -58,6 +61,31 @@ benchManager
         "wind$ class [warn] compose__PROD",
         () => test__wind$__PROD.class("warn"),
         10000000
+    )
+
+    .bench(
+        "variants__DEV",
+        () =>
+            variants__DEV({
+                bg: "pending",
+                size: "warn",
+            }),
+        10000000
+    )
+    .bench(
+        "variants__PROD",
+        () =>
+            variants__PROD({
+                bg: "pending",
+                size: "warn",
+            }),
+        10000000
+    )
+
+    .bench("merge props", () =>
+        mergeProps(test__wind$__PROD.style(), {
+            display: "grid",
+        })
     )
 
     .bench("⛔️ live compose wind$ [warn] & [pending] into wind__DEV", () =>
