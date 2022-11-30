@@ -107,6 +107,11 @@ export default function (args) {
             env: "development",
         }),
         getESMConfig({
+            input: `packages/core/${entryPoint}.ts`,
+            output: `dist/dev/core/${entryPoint}`,
+            env: "development",
+        }),
+        getESMConfig({
             input: `packages/utils/${entryPoint}.ts`,
             output: `dist/dev/utils/${entryPoint}`,
             env: "development",
