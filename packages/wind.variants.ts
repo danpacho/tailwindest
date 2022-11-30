@@ -1,14 +1,17 @@
-import { WindVariantsKey } from "./wind"
+import type { WindVariantsKey } from "./wind"
 
 /**
- * @note Get variants `union` of `wind`
- * @returns Type `string union` or `never`
+ * @note Get variants type set of `wind$` or `createVariants`
+ * @returns Type `string union` or `object` or `never`
  * @example
  * // ✅ Get "success" | "fail"
- * type BtnVariants = WindVariants<typeof SUCCESS_FAIL_BTN>
+ * type Variants = WindVariants<typeof btnSuccessFail>
+ *
+ *  // ✅ Get { size: "sm" | "md" | "lg", type: "success" | "fail" }
+ * type ComplexVariants = WindVariants<typeof complexBtn>
  *
  * // ❌ Get never
- * type BtnVariants2 = WindVariants<typeof NO_VARIANTS_BTN>
+ * type NoVariants = WindVariants<typeof btnNoVariants>
  */
 export type WindVariants<TypeofWind> = TypeofWind extends {
     style: (variants: infer Variants) => unknown
@@ -17,6 +20,6 @@ export type WindVariants<TypeofWind> = TypeofWind extends {
     ? Variants extends string
         ? WindVariantsKey<Variants>
         : never
-    : TypeofWind extends (variants: infer Variants) => unknown
-    ? WindVariantsKey<Variants>
+    : TypeofWind extends (VariantsOption: infer VariantsOption) => unknown
+    ? VariantsOption
     : never
