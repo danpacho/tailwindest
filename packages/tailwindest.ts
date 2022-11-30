@@ -1,12 +1,12 @@
-import { TailwindestNestKey } from "./types/plugin.nest"
-import { TailwindWithOption } from "./types/tailwind.plugin"
-import {
+import type { TailwindestNestKey } from "./types/plugin.nest"
+import type { TailwindWithOption } from "./types/tailwind.plugin"
+import type {
     TailwindDefaultGlobalPlugOption,
     TailwindDefaultStylePlug,
     TailwindGlobalPlugOption,
     TailwindStylePlugOption,
 } from "./types/tailwind.plugin.option"
-import { TailwindestTypeSet } from "./types/tailwindest"
+import type { TailwindestTypeSet } from "./types/tailwindest"
 
 /**
  * @note Add custome property at `tailwind.config.js`
