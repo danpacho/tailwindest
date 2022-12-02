@@ -95,7 +95,7 @@ const entryPoint = "index"
  * @param {*} args
  * @returns {RollupOptions[]} rollup build config
  */
-export default function (args) {
+export default function () {
     return [
         getTypeDefConfig({
             input: `packages/${entryPoint}.ts`,
