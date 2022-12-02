@@ -7,13 +7,17 @@ export type VariantsStyles<Variant extends string, StyleType> = Record<
 > & {
     default?: WindVariantsKey<Variant>
 }
+
 type DefaultWindVariantOptionKey = "default"
 export type WindVariantsKey<Variants> = ToString<
     Exclude<Variants, DefaultWindVariantOptionKey | undefined | null>
 >
+
 /** @note base cache key for `style` and `class` */
 const BASE_KEY = Symbol()
 type WindCacheKey = string | symbol | number
+
+type ClassNameType = string
 /**
  * @param style style object
  * @param variantsStyles optional variants style objects
@@ -45,7 +49,9 @@ function wind<
      * // ✅ Get baseStyle class string, set to "flex"
      * const flex = box.class()
      */
-    class: (variant?: WindVariantsKey<keyof VariantsStylesType>) => string
+    class: (
+        variant?: WindVariantsKey<keyof VariantsStylesType>
+    ) => ClassNameType
     /**
      * @note Input style extractor `function`, use it to compose styles
      * @example
@@ -77,7 +83,9 @@ function wind<
      * ).compose(flexStyle, borderStyle)
      */
     compose: (...styles: StyleType[]) => {
-        class: (variant?: WindVariantsKey<keyof VariantsStylesType>) => string
+        class: (
+            variant?: WindVariantsKey<keyof VariantsStylesType>
+        ) => ClassNameType
         style: (
             variant?: WindVariantsKey<keyof VariantsStylesType>
         ) => StyleType
@@ -93,7 +101,7 @@ function wind<StyleType>(style: StyleType): {
      * // ✅ Get btn class string
      * const buttonClass = button.class()
      */
-    class: () => string
+    class: () => ClassNameType
     /**
      * @note Input style extractor `function`, use it to compose styles
      * @example
@@ -122,7 +130,7 @@ function wind<StyleType>(style: StyleType): {
          * // ✅ Get btn class string
          * const buttonClass = button.class()
          */
-        class: () => string
+        class: () => ClassNameType
         /**
          * @note Input style extractor `function`, use it to compose styles
          * @example
@@ -139,10 +147,8 @@ function wind<
     StyleType,
     VariantsStylesType extends VariantsStyles<string, StyleType>
 >(style: StyleType, variantsStyles?: VariantsStylesType) {
-    const classCacheStore = cache<WindCacheKey, string>()
+    const classCacheStore = cache<WindCacheKey, ClassNameType>()
     const styleCacheStore = cache<WindCacheKey, StyleType>()
-
-    classCacheStore.set(BASE_KEY, getTailwindClass(style))
 
     return {
         class: (
