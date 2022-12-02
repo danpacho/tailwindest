@@ -17,13 +17,13 @@ describe(label.unit("Type NestedObject"), () => {
         alignItems: "items-center",
     } as const
 
-    test(label.case("object infered as NestedObject"), () => {
+    test(label.case("object inferred as NestedObject"), () => {
         expectType<NestedObject>(nestedObject)
         expectType<NestedObject>(tailwindStyle)
     })
 
     test(
-        label.case("const asserted style props infered as Tailwindest"),
+        label.case("const asserted style props inferred as Tailwindest"),
         () => {
             expectType<Tailwindest>(tailwindStyle)
         }
