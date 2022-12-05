@@ -7,15 +7,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
 *.local
 
 # Build
 dist:watch
+dist/dev/*
 dist/index.d.ts
 dist/types/*
+dist/core/*
 dist/utils/*
-dist/dev/*
+dist/index.d.ts
+dist/wind.d.ts
+dist/wind.variants.d.ts
+dist/create.wind.d.ts
 
 # Editor directories and files
 .vscode/*
