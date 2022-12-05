@@ -46,8 +46,8 @@ export type TailwindFlexBasisType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for controlling the initial size of flex items.
-     *@docs [flex-basis](https://tailwindcss.com/docs/flex-basis)
+     *@description Utilities for controlling the initial size of flex items.
+     *@see {@link https://tailwindcss.com/docs/flex-basis flex basis}
      */
     flexBasis: TailwindFlexBasis<TailwindSpacing, Plug>
 }

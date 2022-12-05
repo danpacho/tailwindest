@@ -5,8 +5,8 @@ export type TailwindTextDecorationColorType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for controlling the color of text decorations.
-     *@docs [text-decoration](https://tailwindcss.com/docs/text-decoration)
+     *@description Utilities for controlling the color of text decorations.
+     *@see {@link https://tailwindcss.com/docs/text-decoration text decoration}
      */
     textDecorationColor: `decoration-${TailwindColor | Pluggable<Plug>}`
 }

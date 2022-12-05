@@ -5,8 +5,8 @@ type TailwindTextTransform =
     | "normal-case"
 export type TailwindTextTransformType = {
     /**
-     *@note Utilities for controlling the transformation of text.
-     *@docs [text-transform](https://tailwindcss.com/docs/text-transform)
+     *@description Utilities for controlling the transformation of text.
+     *@see {@link https://tailwindcss.com/docs/text-transform text transform}
      */
     textTransform: TailwindTextTransform
 }

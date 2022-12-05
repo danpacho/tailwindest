@@ -3,8 +3,8 @@ import { PluginVariantsWithDirection } from "../plugin"
 type TailwindPosition = "static" | "fixed" | "absolute" | "sticky" | "relative"
 export type TailwindPositionType = {
     /**
-     *@note Utilities for controlling how an element is positioned in the DOM.
-     *@docs [position](https://tailwindcss.com/docs/position)
+     *@description Utilities for controlling how an element is positioned in the DOM.
+     *@see {@link https://tailwindcss.com/docs/position position}
      */
     position: TailwindPosition
 }
@@ -30,28 +30,28 @@ type TailwindPositionValue<
 
 export type TailwindPositionValueType<PositionValue extends string> = {
     /**
-     *@note Utilities for controlling the placement of positioned elements.
-     *@docs [inset](https://tailwindcss.com/docs/top-right-bottom-left)
+     *@description Utilities for controlling the placement of positioned elements.
+     *@see {@link https://tailwindcss.com/docs/top-right-bottom-left inset}
      */
     inset: TailwindPositionValue<"inset" | "inset-x" | "inset-y", PositionValue>
     /**
-     *@note Utilities for controlling the placement of positioned elements.
-     *@docs [top](https://tailwindcss.com/docs/top-right-bottom-left)
+     *@description Utilities for controlling the placement of positioned elements.
+     *@see {@link https://tailwindcss.com/docs/top-right-bottom-left top}
      */
     top: TailwindPositionValue<"top", PositionValue>
     /**
-     *@note Utilities for controlling the placement of positioned elements.
-     *@docs [top](https://tailwindcss.com/docs/top-right-bottom-left)
+     *@description Utilities for controlling the placement of positioned elements.
+     *@see {@link https://tailwindcss.com/docs/top-right-bottom-left bottom}
      */
     bottom: TailwindPositionValue<"bottom", PositionValue>
     /**
-     *@note Utilities for controlling the placement of positioned elements.
-     *@docs [top](https://tailwindcss.com/docs/top-right-bottom-left)
+     *@description Utilities for controlling the placement of positioned elements.
+     *@see {@link https://tailwindcss.com/docs/top-right-bottom-left left}
      */
     left: TailwindPositionValue<"left", PositionValue>
     /**
-     *@note Utilities for controlling the placement of positioned elements.
-     *@docs [top](https://tailwindcss.com/docs/top-right-bottom-left)
+     *@description Utilities for controlling the placement of positioned elements.
+     *@see {@link https://tailwindcss.com/docs/top-right-bottom-left right}
      */
     right: TailwindPositionValue<"right", PositionValue>
 }

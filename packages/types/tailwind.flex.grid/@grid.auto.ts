@@ -14,8 +14,8 @@ type TailwindGridAutoColumns<Plug extends PlugBase = ""> = `grid-cols-${
 
 export type TailwindGridAutoColumnsType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the size of implicitly-created grid columns.
-     *@docs [grid-auto-columns](https://tailwindcss.com/docs/grid-auto-columns)
+     *@description Utilities for controlling the size of implicitly-created grid columns.
+     *@see {@link https://tailwindcss.com/docs/grid-auto-columns grid auto columns}
      */
     gridAutoColumns: TailwindGridAutoColumns<Plug>
 }
@@ -26,8 +26,8 @@ type TailwindGridAutoRows<Plug extends PlugBase = ""> = `auto-rows-${
 
 export type TailwindGridAutoRowsType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the size of implicitly-created grid rows.
-     *@docs [grid-auto-rows](https://tailwindcss.com/docs/grid-auto-rows)
+     *@description Utilities for controlling the size of implicitly-created grid rows.
+     *@see {@link https://tailwindcss.com/docs/grid-auto-rows grid auto rows}
      */
     gridAutoRows: TailwindGridAutoRows<Plug>
 }

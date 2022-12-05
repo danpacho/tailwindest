@@ -339,16 +339,18 @@ interface TailwindestPeerPseudoClass<Nest extends string, Tailwind>
 
 type TailwindestGroup<Nest extends string, Tailwind> = {
     /**
-     *@note Styling based on parent state (`group-{pseudo-class}`)
-     *@docs [group](https://tailwindcss.com/docs/hover-focus-and-other-states#styling-based-on-parent-state)
+     *@description Styling based on parent state
+     *@description `group-{pseudo-class}`
+     *@see {@link https://tailwindcss.com/docs/hover-focus-and-other-states#styling-based-on-parent-state group}
      */
     "@group"?: TailwindestGroupPseudoClass<Nest, Tailwind>
 }
 
 type TailwindestPeer<Nest extends string, Tailwind> = {
     /**
-     *@note Styling based on sibling state (`peer-{pseudo-class}`)
-     *@docs [peer](https://tailwindcss.com/docs/hover-focus-and-other-states#styling-based-on-sibling-state)
+     *@description Styling based on sibling state
+     *@description `peer-{pseudo-class}`
+     *@see {@link https://tailwindcss.com/docs/hover-focus-and-other-states#styling-based-on-sibling-state peer}
      */
     "@peer"?: TailwindestPeerPseudoClass<Nest, Tailwind>
 }

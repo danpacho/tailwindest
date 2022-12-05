@@ -17,8 +17,8 @@ type TailwindGridRow<Plug extends PlugBase = ""> =
     `row-${TailwindGridRowVariants<Plug>}`
 export type TailwindGridRowType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling how elements are sized and placed across grid rows.
-     *@docs [grid-row](https://tailwindcss.com/docs/grid-row)
+     *@description Utilities for controlling how elements are sized and placed across grid rows.
+     *@see {@link https://tailwindcss.com/docs/grid-row grid row}
      */
     gridRow: TailwindGridRow<Plug>
 }
@@ -39,8 +39,8 @@ type TailwindGridRowStart<Plug extends PlugBase = ""> = `row-start-${
     | Pluggable<Plug>}`
 export type TailwindGridRowStartType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling how elements are sized and placed across grid rows start.
-     *@docs [grid-row-start](https://tailwindcss.com/docs/grid-row)
+     *@description Utilities for controlling how elements are sized and placed across grid rows start.
+     *@see {@link https://tailwindcss.com/docs/grid-row grid row start}
      */
     gridRowStart?: TailwindGridRowStart<Plug>
 }
@@ -50,8 +50,8 @@ type TailwindGridRowEnd<Plug extends PlugBase = ""> = `row-end-${
     | Pluggable<Plug>}`
 export type TailwindGridRowEndType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling how elements are sized and placed across grid rows end.
-     *@docs [grid-row-end](https://tailwindcss.com/docs/grid-row)
+     *@description Utilities for controlling how elements are sized and placed across grid rows end.
+     *@see {@link https://tailwindcss.com/docs/grid-row grid row end}
      */
     gridRowEnd?: TailwindGridRowEnd<Plug>
 }

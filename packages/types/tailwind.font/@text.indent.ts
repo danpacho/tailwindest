@@ -5,8 +5,8 @@ export type TailwindTextIndentType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for controlling the amount of empty space shown before text in a block.
-     *@docs [text-indent](https://tailwindcss.com/docs/text-indent)
+     *@description Utilities for controlling the amount of empty space shown before text in a block.
+     *@see {@link https://tailwindcss.com/docs/text-indent text indent}
      */
     textIndent: `indent-${TailwindSpacing | Pluggable<Plug>}`
 }

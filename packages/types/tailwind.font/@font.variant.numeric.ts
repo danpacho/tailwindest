@@ -10,8 +10,8 @@ type TailwindFontVariantNumeric =
     | "stacked-fractions"
 export type TailwindFontVariantNumericType = {
     /**
-     *@note Utilities for controlling the variant of numbers.
-     *@docs [font-variant-numeric](https://tailwindcss.com/docs/font-variant-numeric)
+     *@description Utilities for controlling the variant of numbers.
+     *@see {@link https://tailwindcss.com/docs/font-variant-numeric font variant numeric}
      */
     fontVariantNumeric: TailwindFontVariantNumeric
 }

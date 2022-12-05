@@ -20,8 +20,8 @@ type TailwindMixBlendModeVariants =
 type TailwindMixBlendMode = `mix-blend-${TailwindMixBlendModeVariants}`
 export type TailwindMixBlendModeType = {
     /**
-     *@note
-     *@docs [mix-blend-mode](https://tailwindcss.com/docs/mix-blend-mode)
+     *@description
+     *@see {@link https://tailwindcss.com/docs/mix-blend-mode mix blend mode}
      */
     mixBlendMode: TailwindMixBlendMode
 }

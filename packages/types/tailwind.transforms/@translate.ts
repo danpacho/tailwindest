@@ -2,21 +2,21 @@ import { PluginVariantsWithDirection } from "../plugin"
 
 export type TailwindTranslateType<Translate extends string> = {
     /**
-     *@note Utilities for translating elements with transform.
+     *@description Utilities for translating elements with transform.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [translate](https://tailwindcss.com/docs/translate)
+     *@see {@link https://tailwindcss.com/docs/translate translate}
      */
     transformTranslate: PluginVariantsWithDirection<"translate", Translate>
     /**
-     *@note Utilities for translating elements with transform x direction.
+     *@description Utilities for translating elements with transform x direction.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [translate](https://tailwindcss.com/docs/translate)
+     *@see {@link https://tailwindcss.com/docs/translate translate-x}
      */
     transformTranslateX: PluginVariantsWithDirection<"translate-x", Translate>
     /**
-     *@note Utilities for translating elements with transform y direction.
+     *@description Utilities for translating elements with transform y direction.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [translate](https://tailwindcss.com/docs/translate)
+     *@see {@link https://tailwindcss.com/docs/translate translate-y}
      */
     transformTranslateY: PluginVariantsWithDirection<"translate-y", Translate>
 }

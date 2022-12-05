@@ -1,7 +1,7 @@
 import { deepMerge, getTailwindClass } from "../core"
 
 /**
- * @note Usefull for merging style props
+ * @description Usefull for merging style props
  * @param baseStyle base `wind.style()`
  * @returns merged style class `string`
  * @example

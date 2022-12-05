@@ -13,8 +13,8 @@ type TailwindListStyleType<Plug extends PlugBase = ""> =
 
 export type TailwindListStyleTypeType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the bullet/number style of a list.
-     *@docs [list-style-type](https://tailwindcss.com/docs/list-style-type)
+     *@description Utilities for controlling the bullet/number style of a list.
+     *@see {@link https://tailwindcss.com/docs/list-style-type list style type}
      */
     listStyleType: TailwindListStyleType<Plug>
 }

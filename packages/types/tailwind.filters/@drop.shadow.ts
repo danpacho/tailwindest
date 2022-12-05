@@ -16,8 +16,8 @@ type TailwindDropShadow<Plug extends PlugBase = ""> =
     | `drop-shadow-${TailwindDropShadowVariants<Plug>}`
 export type TailwindDropShadowType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying drop-shadow filters to an element.
-     *@docs [drop-shadow](https://tailwindcss.com/docs/drop-shadow)
+     *@description Utilities for applying drop-shadow filters to an element.
+     *@see {@link https://tailwindcss.com/docs/drop-shadow drop shadow}
      */
     filterDropShadow: TailwindDropShadow<Plug>
 }

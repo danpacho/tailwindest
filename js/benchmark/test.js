@@ -108,13 +108,13 @@ const variant = {
 
 /**
  * @development
- * @note `wind`, no variants mode
+ * @description `wind`, no variants mode
  */
 const test__wind__DEV = wind__DEV(base)
 
 /**
  * @production
- * @note `wind`, no variants mode
+ * @description `wind`, no variants mode
  */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-nocheck
@@ -122,7 +122,7 @@ const test__wind__PROD = wind__PROD(base)
 
 /**
  * @production
- * @note centerize style, composed to the `wind$`
+ * @description centerize style, composed to the `wind$`
  */
 const centerize = wind__PROD({
     display: "flex",
@@ -133,8 +133,8 @@ const centerize = wind__PROD({
 
 /**
  * @development
- * @note `wind$` with `warn` | `pending` variants
- * @note compose with `base` & `centerize` styles
+ * @description `wind$` with `warn` | `pending` variants
+ * @description compose with `base` & `centerize` styles
  */
 const test__wind$__DEV = wind$__DEV("warn", "pending")(
     {
@@ -185,8 +185,8 @@ const test__wind$__DEV = wind$__DEV("warn", "pending")(
 
 /**
  * @production
- * @note `wind$` with `warn` | `pending` variants
- * @note compose with `base` & `centerize` styles
+ * @description `wind$` with `warn` | `pending` variants
+ * @description compose with `base` & `centerize` styles
  */
 const test__wind$__PROD = wind$__PROD("warn", "pending")(
     {

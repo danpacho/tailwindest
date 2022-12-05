@@ -7,45 +7,45 @@ type TailwindMarginVariants<
 
 export type TailwindMarginType<Margin extends string> = {
     /**
-     *@note Utilities for controlling an element's margin all.
+     *@description Utilities for controlling an element's margin all.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [margin](https://tailwindcss.com/docs/margin)
+     *@see {@link https://tailwindcss.com/docs/margin margin}
      */
     margin: TailwindMarginVariants<"m", Margin>
     /**
-     *@note Utilities for controlling an element's margin x.
+     *@description Utilities for controlling an element's margin x.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [margin](https://tailwindcss.com/docs/margin)
+     *@see {@link https://tailwindcss.com/docs/margin margin-x}
      */
     marginX: TailwindMarginVariants<"mx", Margin>
     /**
-     *@note Utilities for controlling an element's margin y.
+     *@description Utilities for controlling an element's margin y.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [margin](https://tailwindcss.com/docs/margin)
+     *@see {@link https://tailwindcss.com/docs/margin margin-y}
      */
     marginY: TailwindMarginVariants<"my", Margin>
     /**
-     *@note Utilities for controlling an element's margin top.
+     *@description Utilities for controlling an element's margin top.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [margin](https://tailwindcss.com/docs/margin)
+     *@see {@link https://tailwindcss.com/docs/margin margin-top}
      */
     marginTop: TailwindMarginVariants<"mt", Margin>
     /**
-     *@note Utilities for controlling an element's margin bottom.
+     *@description Utilities for controlling an element's margin bottom.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [margin](https://tailwindcss.com/docs/margin)
+     *@see {@link https://tailwindcss.com/docs/margin margin-bottom}
      */
     marginBottom: TailwindMarginVariants<"mb", Margin>
     /**
-     *@note Utilities for controlling an element's margin right.
+     *@description Utilities for controlling an element's margin right.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [margin](https://tailwindcss.com/docs/margin)
+     *@see {@link https://tailwindcss.com/docs/margin margin-right}
      */
     marginRight: TailwindMarginVariants<"mr", Margin>
     /**
-     *@note Utilities for controlling an element's margin left.
+     *@description Utilities for controlling an element's margin left.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [margin](https://tailwindcss.com/docs/margin)
+     *@see {@link https://tailwindcss.com/docs/margin margin-left}
      */
     marginLeft: TailwindMarginVariants<"ml", Margin>
 }

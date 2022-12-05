@@ -10,29 +10,29 @@ export type TailwindTransitionType<
     TransitionDelay extends string
 > = {
     /**
-     *@note transition shorthand syntax
-     *@note `<property>` `<timing>`
-     *@docs [transition](https://tailwindcss.com/docs/transition-property)
+     *@description transition shorthand syntax
+     *@description `<property>` `<timing>`
+     *@see {@link https://tailwindcss.com/docs/transition-property transition}
      */
     transition: TailwindTransition<TransitionProperty, TransitionTimingFunction>
     /**
-     *@note Utilities for controlling which CSS properties transition.
-     *@docs [transition-property](https://tailwindcss.com/docs/transition-property)
+     *@description Utilities for controlling which CSS properties transition.
+     *@see {@link https://tailwindcss.com/docs/transition-property transition property}
      */
     transitionProperty: TransitionProperty
     /**
-     *@note Utilities for controlling the duration of CSS transitions.
-     *@docs [transition-duration](https://tailwindcss.com/docs/transition-duration)
+     *@description Utilities for controlling the duration of CSS transitions.
+     *@see {@link https://tailwindcss.com/docs/transition-duration transition duration}
      */
     transitionDuration: TransitionDuration
     /**
-     *@note Utilities for controlling the easing of CSS transitions.
-     *@docs [transition-timing-function](https://tailwindcss.com/docs/transition-timing-function)
+     *@description Utilities for controlling the easing of CSS transitions.
+     *@see {@link https://tailwindcss.com/docs/transition-timing-function transition timing function}
      */
     transitionTimingFunction: TransitionTimingFunction
     /**
-     *@note Utilities for controlling the delay of CSS transitions.
-     *@docs [transition-delay](https://tailwindcss.com/docs/transition-delay)
+     *@description Utilities for controlling the delay of CSS transitions.
+     *@see {@link https://tailwindcss.com/docs/transition-delay transition delay}
      */
     transitionDelay: TransitionDelay
 }

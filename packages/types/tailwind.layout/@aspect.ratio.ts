@@ -10,8 +10,8 @@ type TailwindAsepectRatio<Plug extends PlugBase = ""> =
 
 export type TailwindAsepectRatioType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the aspect ratio of an element.
-     *@docs [aspect-ratio](https://tailwindcss.com/docs/aspect-ratio)
+     *@description Utilities for controlling the aspect ratio of an element.
+     *@see {@link https://tailwindcss.com/docs/aspect-ratio aspect ratio}
      */
     aspectRatio: TailwindAsepectRatio<Plug>
 }

@@ -16,8 +16,8 @@ type TailwindTransformOriginVariants<Plug extends PlugBase = ""> =
 
 export type TailwindTransformOriginType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for specifying the origin for an element's transformations.
-     *@docs [transform-origin](https://tailwindcss.com/docs/transform-origin)
+     *@description Utilities for specifying the origin for an element's transformations.
+     *@see {@link https://tailwindcss.com/docs/transform-origin transform origin}
      */
     transformOrigin: PluginVariants<
         "origin",

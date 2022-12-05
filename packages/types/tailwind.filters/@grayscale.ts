@@ -10,8 +10,8 @@ type TailwindGrayscale<Plug extends PlugBase = ""> =
     | `grayscale-${TailwindGrayscaleVariants<Plug>}`
 export type TailwindGrayscaleType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying grayscale filters to an element.
-     *@docs [grayscale](https://tailwindcss.com/docs/grayscale)
+     *@description Utilities for applying grayscale filters to an element.
+     *@see {@link https://tailwindcss.com/docs/grayscale grayscale}
      */
     filterGrayscale: TailwindGrayscale<Plug>
 }
@@ -21,8 +21,8 @@ type TailwindBackdropGrayscale<Plug extends PlugBase = ""> =
     | `backdrop-grayscale-${TailwindGrayscaleVariants<Plug>}`
 export type TailwindBackdropGrayscaleType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying backdrop grayscale filters to an element.
-     *@docs [backdrop-grayscale](https://tailwindcss.com/docs/backdrop-grayscale)
+     *@description Utilities for applying backdrop grayscale filters to an element.
+     *@see {@link https://tailwindcss.com/docs/backdrop-grayscale backdrop grayscale}
      */
     backdropGrayscale: TailwindBackdropGrayscale<Plug>
 }

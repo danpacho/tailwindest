@@ -5,8 +5,8 @@ export type TailwindAccentColorType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for controlling the accented color of a form control.
-     *@docs [accent-color](https://tailwindcss.com/docs/accent-color)
+     *@description Utilities for controlling the accented color of a form control.
+     *@see {@link https://tailwindcss.com/docs/accent-color accent color}
      */
     accentColor: `accent-${TailwindColor | Pluggable<Plug>}`
 }

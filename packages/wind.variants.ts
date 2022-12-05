@@ -1,16 +1,16 @@
 import type { WindVariantsKey } from "./wind"
 
 /**
- * @note Get variants type set of `wind$` or `createVariants`
+ * @description Get variants type set at `wind$` or `createVariants`
  * @returns Type `string union` or `object` or `never`
  * @example
- * // ✅ Get "success" | "fail"
+ * // ✅ "success" | "fail"
  * type Variants = WindVariants<typeof btnSuccessFail>
  *
- *  // ✅ Get { size: "sm" | "md" | "lg", type: "success" | "fail" }
+ * // ✅ { bg: "red" | "blue", type: "success" | "fail" }
  * type ComplexVariants = WindVariants<typeof complexBtn>
  *
- * // ❌ Get never
+ * // ❌ never
  * type NoVariants = WindVariants<typeof btnNoVariants>
  */
 export type WindVariants<TypeofWind> = TypeofWind extends {

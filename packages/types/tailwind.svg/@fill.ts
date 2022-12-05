@@ -5,8 +5,8 @@ export type TailwindFillType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for styling the fill of SVG elements.
-     *@docs [fill](https://tailwindcss.com/docs/fill)
+     *@description Utilities for styling the fill of SVG elements.
+     *@see {@link https://tailwindcss.com/docs/fill fill}
      */
     fill: `fill-${TailwindColor | Pluggable<Plug>}`
 }

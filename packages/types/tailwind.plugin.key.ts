@@ -1,12 +1,12 @@
 /**
- * @note Global style supported list
- * @docs [configuration-reference](https://tailwindcss.com/docs/theme#configuration-reference)
+ * @description Global style supported list
+ * @see {@link https://tailwindcss.com/docs/theme#configuration-reference configuration reference}
  */
 export type TailwindGlobalPluginKey = "color" | "opacity" | "sizing"
 
 /**
- * @note Nest conditions
- * @note sholud be only **one** string literal
+ * @description Nest conditions
+ * @description sholud be only **one** string literal
  * @example
  * type MyTailwindest = Tailwindest<{
  *      screens: {
@@ -46,8 +46,8 @@ export type TailwindNestPluginKey =
     | "conditionZ"
 
 /**
- * @note Style supported list
- * @docs [configuration-reference](https://tailwindcss.com/docs/theme#configuration-reference)
+ * @description Style supported list
+ * @see {@link https://tailwindcss.com/docs/theme#configuration-reference configuration reference}
  */
 export type TailwindStylePluginKey =
     | "columns"

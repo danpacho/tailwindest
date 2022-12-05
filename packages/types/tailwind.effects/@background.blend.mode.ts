@@ -19,8 +19,8 @@ type TailwindBackgroundBlendMode =
     `bg-blend-${TailwindBackgroundBlendModeVariants}`
 export type TailwindBackgroundBlendModeType = {
     /**
-     *@note Utilities for controlling how an element's background image should blend with its background color.
-     *@docs [background-blend-mode](https://tailwindcss.com/docs/background-blend-mode)
+     *@description Utilities for controlling how an element's background image should blend with its background color.
+     *@see {@link https://tailwindcss.com/docs/background-blend-mode background blend mode}
      */
     backgroundBlendMode: TailwindBackgroundBlendMode
 }

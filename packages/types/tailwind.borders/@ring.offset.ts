@@ -14,8 +14,8 @@ type TailwindRingOffsetWidth<Plug extends PlugBase = ""> =
     `ring-offset-${TailwindRingOffsetWidthVariants<Plug>}`
 export type TailwindRingOffsetWidthType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for simulating an offset when adding outline rings.
-     *@docs [ring-offset-width](https://tailwindcss.com/docs/ring-offset-width)
+     *@description Utilities for simulating an offset when adding outline rings.
+     *@see {@link https://tailwindcss.com/docs/ring-offset-width ring offset width}
      */
     ringOffsetWidth: TailwindRingOffsetWidth<Plug>
 }

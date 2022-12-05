@@ -12,8 +12,8 @@ type TailwindTouchActionVariants =
 type TailwindTouchAction = `touch-${TailwindTouchActionVariants}`
 export type TailwindTouchActionType = {
     /**
-     *@note Utilities for controlling how an element can be scrolled and zoomed on touchscreens.
-     *@docs [touch-action](https://tailwindcss.com/docs/touch-action)
+     *@description Utilities for controlling how an element can be scrolled and zoomed on touchscreens.
+     *@see {@link https://tailwindcss.com/docs/touch-action touch action}
      */
     touchAction: TailwindTouchAction
 }

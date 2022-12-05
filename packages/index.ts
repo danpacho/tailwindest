@@ -4,8 +4,8 @@ import type { Tailwindest } from "./tailwindest"
 const defaultWind = createWind<Tailwindest>()
 
 /**
- * @note Create complex `tailwind` style definition with `wind`
- * @note Basic wind funcation
+ * @description Create complex `tailwind` style definition with `wind`
+ * @description Basic wind funcation
  * @example
  * // ✅ Create complex style with wind
  * const box = wind(
@@ -22,8 +22,8 @@ const defaultWind = createWind<Tailwindest>()
 const wind = defaultWind.wind
 
 /**
- * @note Create complex `tailwind` style definition with variants with `wind$`
- * @note Variants wind function
+ * @description Create complex `tailwind` style definition with variants with `wind$`
+ * @description Variants wind function
  * @example
  * // ✅ Create complex variant styles with wind$
  * const button = wind$("success", "fail")(

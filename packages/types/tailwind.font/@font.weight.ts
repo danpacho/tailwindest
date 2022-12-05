@@ -18,8 +18,8 @@ type TailwindFontWeight<Plug extends PlugBase = ""> =
     `font-${TailwindFontWeightVariants<Plug>}`
 export type TailwindFontWeightType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the font weight of an element.
-     *@docs [font-weight](https://tailwindcss.com/docs/font-weight)
+     *@description Utilities for controlling the font weight of an element.
+     *@see {@link https://tailwindcss.com/docs/font-weight font weight}
      */
     fontWeight: TailwindFontWeight<Plug>
 }

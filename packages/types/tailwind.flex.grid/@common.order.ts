@@ -24,8 +24,8 @@ type TailwindFlexGridOrder<Plug extends PlugBase = ""> =
     `order-${TailwindFlexGridOrderVariants<Plug>}`
 export type TailwindFlexGridOrderType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the order of flex and grid items.
-     *@docs [order](https://tailwindcss.com/docs/order)
+     *@description Utilities for controlling the order of flex and grid items.
+     *@see {@link https://tailwindcss.com/docs/order order}
      */
     order: TailwindFlexGridOrder<Plug>
 }

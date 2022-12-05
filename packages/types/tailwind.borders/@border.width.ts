@@ -16,60 +16,60 @@ type TailwindBorderWidth<Plug extends string> =
 
 export type TailwindBorderWidthType<Plug extends string> = {
     /**
-     *@note Utilities for controlling the width of an element's borders.
+     *@description Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
-     *@docs [border-width](https://tailwindcss.com/docs/border-width)
+     *@see {@link https://tailwindcss.com/docs/border-width border-width}
      */
     borderWidth: PluginVariantsIncludeSelf<"border", TailwindBorderWidth<Plug>>
     /**
-     *@note Utilities for controlling the width of an element's borders.
+     *@description Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
-     *@docs [border-width](https://tailwindcss.com/docs/border-width)
+     *@see {@link https://tailwindcss.com/docs/border-width border-x-width}
      */
     borderXWidth: PluginVariantsIncludeSelf<
         "border-x",
         TailwindBorderWidth<Plug>
     >
     /**
-     *@note Utilities for controlling the width of an element's borders.
+     *@description Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
-     *@docs [border-width](https://tailwindcss.com/docs/border-width)
+     *@see {@link https://tailwindcss.com/docs/border-width border-y-width}
      */
     borderYWidth: PluginVariantsIncludeSelf<
         "border-y",
         TailwindBorderWidth<Plug>
     >
     /**
-     *@note Utilities for controlling the width of an element's borders.
+     *@description Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
-     *@docs [border-width](https://tailwindcss.com/docs/border-width)
+     *@see {@link https://tailwindcss.com/docs/border-width border-top-width}
      */
     borderTopWidth: PluginVariantsIncludeSelf<
         "border-t",
         TailwindBorderWidth<Plug>
     >
     /**
-     *@note Utilities for controlling the width of an element's borders.
+     *@description Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
-     *@docs [border-width](https://tailwindcss.com/docs/border-width)
+     *@see {@link https://tailwindcss.com/docs/border-width border-bottom-width}
      */
     borderBottomWidth: PluginVariantsIncludeSelf<
         "border-b",
         TailwindBorderWidth<Plug>
     >
     /**
-     *@note Utilities for controlling the width of an element's borders.
+     *@description Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
-     *@docs [border-width](https://tailwindcss.com/docs/border-width)
+     *@see {@link https://tailwindcss.com/docs/border-width border-left-width}
      */
     borderLeftWidth: PluginVariantsIncludeSelf<
         "border-l",
         TailwindBorderWidth<Plug>
     >
     /**
-     *@note Utilities for controlling the width of an element's borders.
+     *@description Utilities for controlling the width of an element's borders.
      *@unit Gap `2` = `2px` = `0.125rem`
-     *@docs [border-width](https://tailwindcss.com/docs/border-width)
+     *@see {@link https://tailwindcss.com/docs/border-width border-right-width}
      */
     borderRightWidth: PluginVariantsIncludeSelf<
         "border-r",
@@ -88,15 +88,15 @@ type TailwindDivideWidth<Plug extends string> =
 
 export type TailwindDivideWidthType<Plug extends string> = {
     /**
-     *@note Utilities for controlling the border width between x-axis elements.
+     *@description Utilities for controlling the border width between x-axis elements.
      *@unit Gap `2` = `2px` = `0.125rem`
-     *@docs [divide-width](https://tailwindcss.com/docs/divide-width)
+     *@see {@link https://tailwindcss.com/docs/divide-width divide-x-width}
      */
     divideX: PluginVariantsIncludeSelf<"divide-x", TailwindDivideWidth<Plug>>
     /**
-     *@note Utilities for controlling the border width between y-axis elements.
+     *@description Utilities for controlling the border width between y-axis elements.
      *@unit Gap `2` = `2px` = `0.125rem`
-     *@docs [divide-width](https://tailwindcss.com/docs/divide-width)
+     *@see {@link https://tailwindcss.com/docs/divide-width divide-y-width}
      */
     divideY: PluginVariantsIncludeSelf<"divide-y", TailwindDivideWidth<Plug>>
 }

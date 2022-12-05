@@ -13,7 +13,7 @@ type VariantsKeys<T extends VariantsStyle> = {
 }
 
 /**
- * @note Create complex variants combination
+ * @description Create complex variants combination
  * @param variantsStyle variants style sets
  * @example
  * // ✅ Create wind$ variants style sets

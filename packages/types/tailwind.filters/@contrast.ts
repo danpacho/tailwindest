@@ -8,8 +8,8 @@ type TailwindContrast<Plug extends PlugBase = ""> =
     `contrast-${TailwindContrastVariants<Plug>}`
 export type TailwindContrastType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying contrast filters to an element.
-     *@docs [contrast](https://tailwindcss.com/docs/contrast)
+     *@description Utilities for applying contrast filters to an element.
+     *@see {@link https://tailwindcss.com/docs/contrast contrast}
      */
     filterContrast: TailwindContrast<Plug>
 }

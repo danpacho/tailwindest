@@ -8,8 +8,8 @@ type TailwindTextAlignVariants =
 type TailwindTextAlign = `text-${TailwindTextAlignVariants}`
 export type TailwindTextAlignType = {
     /**
-     *@note Utilities for controlling the alignment of text.
-     *@docs [text-align](https://tailwindcss.com/docs/text-align)
+     *@description Utilities for controlling the alignment of text.
+     *@see {@link https://tailwindcss.com/docs/text-align text align}
      */
     textAlign: TailwindTextAlign
 }

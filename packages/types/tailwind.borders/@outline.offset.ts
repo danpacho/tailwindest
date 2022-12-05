@@ -14,8 +14,8 @@ type TailwindOutlineOffset<Plug extends PlugBase = ""> =
     `outline-offset-${TailwindOutlineOffsetVariants<Plug>}`
 export type TailwindOutlineOffsetType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the offset of an element's outline.
-     *@docs [outline-offset](https://tailwindcss.com/docs/outline-offset)
+     *@description Utilities for controlling the offset of an element's outline.
+     *@see {@link https://tailwindcss.com/docs/outline-offset outline offset}
      */
     outlineOffset: TailwindOutlineOffset<Plug>
 }

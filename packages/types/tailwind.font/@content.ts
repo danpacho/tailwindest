@@ -8,8 +8,8 @@ type TailwindContent<Plug extends PlugBase = ""> =
 
 export type TailwindContentType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling word breaks in an element.
-     *@docs [content](https://tailwindcss.com/docs/content)
+     *@description Utilities for controlling word breaks in an element.
+     *@see {@link https://tailwindcss.com/docs/content content}
      */
     content: TailwindContent<Plug>
 }

@@ -7,8 +7,8 @@ type TailwindWhitespaceVariants =
 type TailwindWhitespace = `whitespace-${TailwindWhitespaceVariants}`
 export type TailwindWhitespaceType = {
     /**
-     *@note Utilities for controlling an element's white-space property.
-     *@docs [whitespace](https://tailwindcss.com/docs/whitespace)
+     *@description Utilities for controlling an element's white-space property.
+     *@see {@link https://tailwindcss.com/docs/whitespace whitespace}
      */
     whitespace: TailwindWhitespace
 }

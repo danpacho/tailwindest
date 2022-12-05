@@ -8,8 +8,8 @@ type TailwindFlexGrow<Plug extends PlugBase = ""> =
 
 export type TailwindFlexGrowType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling how flex items grow.
-     *@docs [flex-grow](https://tailwindcss.com/docs/flex-grow)
+     *@description Utilities for controlling how flex items grow.
+     *@see {@link https://tailwindcss.com/docs/flex-grow flex grow}
      */
     flexGrow: TailwindFlexGrow<Plug>
 }

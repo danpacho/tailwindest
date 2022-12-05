@@ -5,8 +5,8 @@ type TailwindTextDecoration =
     | "no-underline"
 export type TailwindTextDecorationType = {
     /**
-     *@note Utilities for controlling the decoration of text.
-     *@docs [text-decoration](https://tailwindcss.com/docs/text-decoration)
+     *@description Utilities for controlling the decoration of text.
+     *@see {@link https://tailwindcss.com/docs/text-decoration text decoration}
      */
     textDecorationLine: TailwindTextDecoration
 }

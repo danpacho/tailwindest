@@ -16,8 +16,8 @@ type TailwindRingWidth<Plug extends PlugBase = ""> =
     | `ring-${TailwindRingWidthVariants<Plug>}`
 export type TailwindRingWidthType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for creating outline rings with box-shadows.
-     *@docs [ring-width](https://tailwindcss.com/docs/ring-width)
+     *@description Utilities for creating outline rings with box-shadows.
+     *@see {@link https://tailwindcss.com/docs/ring-width ring width}
      */
     ringWidth: TailwindRingWidth<Plug>
 }

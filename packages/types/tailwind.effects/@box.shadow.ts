@@ -14,8 +14,8 @@ type TailwindBoxShadow<Plug extends PlugBase = ""> =
     | `shadow-${TailwindBoxShadowVariants<Plug>}`
 export type TailwindBoxShadowType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the box shadow of an element.
-     *@docs [box-shadow](https://tailwindcss.com/docs/box-shadow)
+     *@description Utilities for controlling the box shadow of an element.
+     *@see {@link https://tailwindcss.com/docs/box-shadow box shadow}
      */
     boxShadow: TailwindBoxShadow<Plug>
 }

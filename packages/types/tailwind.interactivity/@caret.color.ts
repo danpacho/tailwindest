@@ -5,8 +5,8 @@ export type TailwindCaretColorType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for controlling the color of the text input cursor.
-     *@docs [caret-color](https://tailwindcss.com/docs/caret-color)
+     *@description Utilities for controlling the color of the text input cursor.
+     *@see {@link https://tailwindcss.com/docs/caret-color caret color}
      */
     caretColor: `caret-${TailwindColor | Pluggable<Plug>}`
 }

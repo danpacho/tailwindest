@@ -8,8 +8,8 @@ type TailwindJustifyContentVariants =
 type TailwindJustifyContent = `justify-${TailwindJustifyContentVariants}`
 export type TailwindJustifyContentType = {
     /**
-     *@note Utilities for controlling how flex and grid items are positioned along a container's main axis.
-     *@docs [justify-content](https://tailwindcss.com/docs/justify-content)
+     *@description Utilities for controlling how flex and grid items are positioned along a container's main axis.
+     *@see {@link https://tailwindcss.com/docs/justify-content justify content}
      */
     justifyContent: TailwindJustifyContent
 }

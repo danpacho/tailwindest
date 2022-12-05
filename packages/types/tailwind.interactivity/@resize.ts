@@ -2,8 +2,8 @@ type TailwindResizeVariants = "none" | "x" | "y"
 type TailwindResize = "resize" | `resize-${TailwindResizeVariants}`
 export type TailwindResizeType = {
     /**
-     *@note Utilities for controlling how an element can be resized.
-     *@docs [resize](https://tailwindcss.com/docs/resize)
+     *@description Utilities for controlling how an element can be resized.
+     *@see {@link https://tailwindcss.com/docs/resize resize}
      */
     resize: TailwindResize
 }

@@ -14,8 +14,8 @@ type TailwindOutlineWidth<Plug extends PlugBase = ""> =
     `outline-${TailwindOutlineWidthVariants<Plug>}`
 export type TailwindOutlineWidthType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the width of an element's outline.
-     *@docs [outline-width](https://tailwindcss.com/docs/outline-width)
+     *@description Utilities for controlling the width of an element's outline.
+     *@see {@link https://tailwindcss.com/docs/outline-width outline width}
      */
     outlineWidth: TailwindOutlineWidth<Plug>
 }

@@ -5,8 +5,8 @@ export type TailwindStrokeType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for styling the stroke of SVG elements.
-     *@docs [stroke](https://tailwindcss.com/docs/stroke)
+     *@description Utilities for styling the stroke of SVG elements.
+     *@see {@link https://tailwindcss.com/docs/stroke stroke}
      */
     stroke: `stroke-${TailwindColor | Pluggable<Plug>}`
 }

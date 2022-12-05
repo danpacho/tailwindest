@@ -16,8 +16,8 @@ type TailwindOpacityVariants =
 type TailwindOpacity = `opacity-${TailwindOpacityVariants}`
 export type TailwindOpacityType = {
     /**
-     *@note Utilities for controlling the opacity of an element.
-     *@docs [opacity](https://tailwindcss.com/docs/opacity)
+     *@description Utilities for controlling the opacity of an element.
+     *@see {@link https://tailwindcss.com/docs/opacity opacity}
      */
     opacity: TailwindOpacity
 }

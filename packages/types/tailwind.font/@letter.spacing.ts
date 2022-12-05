@@ -15,8 +15,8 @@ type TailwindLetterSpacing<Plug extends PlugBase = ""> =
     `tracking-${TailwindLetterSpacingVariants<Plug>}`
 export type TailwindLetterSpacingType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the tracking (letter spacing) of an element.
-     *@docs [letter-spacing](https://tailwindcss.com/docs/letter-spacing)
+     *@description Utilities for controlling the tracking (letter spacing) of an element.
+     *@see {@link https://tailwindcss.com/docs/letter-spacing letter spacing}
      */
     letterSpacing: TailwindLetterSpacing<Plug>
 }

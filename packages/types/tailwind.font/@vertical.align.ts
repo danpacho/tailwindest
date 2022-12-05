@@ -10,8 +10,8 @@ type TailwindVerticalAlignVariants =
 type TailwindVerticalAlign = `align-${TailwindVerticalAlignVariants}`
 export type TailwindVerticalAlignType = {
     /**
-     *@note Utilities for controlling the vertical alignment of an inline or table-cell box.
-     *@docs [vertical-align](https://tailwindcss.com/docs/vertical-align)
+     *@description Utilities for controlling the vertical alignment of an inline or table-cell box.
+     *@see {@link https://tailwindcss.com/docs/vertical-align vertical align}
      */
     verticalAlign: TailwindVerticalAlign
 }

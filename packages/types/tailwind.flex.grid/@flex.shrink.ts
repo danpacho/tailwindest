@@ -8,8 +8,8 @@ type TailwindFlexShrink<Plug extends PlugBase = ""> =
 
 export type TailwindFlexShrinkType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling how flex items shrink.
-     *@docs [flex-shrink](https://tailwindcss.com/docs/flex-shrink)
+     *@description Utilities for controlling how flex items shrink.
+     *@see {@link https://tailwindcss.com/docs/flex-shrink flex shrink}
      */
     flexShrink: TailwindFlexShrink<Plug>
 }

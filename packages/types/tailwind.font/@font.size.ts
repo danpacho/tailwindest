@@ -22,9 +22,9 @@ type TailwindFontSize<Plug extends PlugBase = ""> =
     `text-${TailwindFontSizeVariants<Plug>}`
 export type TailwindFontSizeType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the font size of an element.
+     *@description Utilities for controlling the font size of an element.
      *@unit Base Size = `1rem` / `text-base`
-     *@docs [font-size](https://tailwindcss.com/docs/font-size)
+     *@see {@link https://tailwindcss.com/docs/font-size font size}
      */
     fontSize: TailwindFontSize<Plug>
 }

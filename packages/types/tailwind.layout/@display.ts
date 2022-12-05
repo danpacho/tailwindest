@@ -23,8 +23,8 @@ type TailwindDisplay =
 
 export type TailwindDisplayType = {
     /**
-     *@note Utilities for controlling the display box type of an element.
-     *@docs [display](https://tailwindcss.com/docs/display)
+     *@description Utilities for controlling the display box type of an element.
+     *@see {@link https://tailwindcss.com/docs/display display}
      */
     display: TailwindDisplay
 }

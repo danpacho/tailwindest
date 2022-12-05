@@ -18,8 +18,8 @@ type TailwindBlur<Plug extends PlugBase = ""> =
 
 export type TailwindBlurType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying blur filters to an element.
-     *@docs [blur](https://tailwindcss.com/docs/blur)
+     *@description Utilities for applying blur filters to an element.
+     *@see {@link https://tailwindcss.com/docs/blur blur}
      */
     filterBlur: TailwindBlur<Plug>
 }
@@ -28,8 +28,8 @@ type TailwindBackdropBlur<Plug extends PlugBase = ""> =
     `backdrop-blur-${TailwindBlurVariants<Plug>}`
 export type TailwindBackdropBlurType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying backdrop blur filters to an element.
-     *@docs [backdrop-blur](https://tailwindcss.com/docs/backdrop-blur)
+     *@description Utilities for applying backdrop blur filters to an element.
+     *@see {@link https://tailwindcss.com/docs/backdrop-blur backdrop blur}
      */
     backdropBlur: TailwindBackdropBlur<Plug>
 }

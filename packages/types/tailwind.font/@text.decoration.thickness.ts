@@ -16,8 +16,8 @@ type TailwindTextDecorationThickness<Plug extends PlugBase = ""> =
     `decoration-${TailwindTextDecorationThicknessVariants<Plug>}`
 export type TailwindTextDecorationThicknessType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the thickness of text decorations.
-     *@docs [text-decoration-thickness](https://tailwindcss.com/docs/text-decoration-thickness)
+     *@description Utilities for controlling the thickness of text decorations.
+     *@see {@link https://tailwindcss.com/docs/text-decoration-thickness text decoration thickness}
      */
     textDecorationThickness: TailwindTextDecorationThickness<Plug>
 }

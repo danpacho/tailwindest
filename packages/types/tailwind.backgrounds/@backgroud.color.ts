@@ -5,8 +5,8 @@ export type TailwindBackgroundColorType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for controlling an element's background color.
-     *@docs [background-color](https://tailwindcss.com/docs/background-color)
+     *@description Utilities for controlling an element's background color.
+     *@see {@link https://tailwindcss.com/docs/background-color background color}
      */
     backgroundColor: `bg-${TailwindColor | Pluggable<Plug>}`
 }

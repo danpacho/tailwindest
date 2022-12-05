@@ -13,8 +13,8 @@ type TailwindOverscrollBehavior =
     `overscroll-${TailwindOverscrollBehaviorVariants}`
 export type TailwindOverscrollBehaviorType = {
     /**
-     *@note Utilities for controlling how the browser behaves when reaching the boundary of a scrolling area.
-     *@docs [overscroll-behavior](https://tailwindcss.com/docs/overscroll-behavior)
+     *@description Utilities for controlling how the browser behaves when reaching the boundary of a scrolling area.
+     *@see {@link https://tailwindcss.com/docs/overscroll-behavior overscroll behavior}
      */
     overscrollBehavior: TailwindOverscrollBehavior
 }

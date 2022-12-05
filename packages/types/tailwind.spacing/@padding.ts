@@ -2,45 +2,45 @@ import { PluginVariantsWithDirection } from "../plugin"
 
 export type TailwindPaddingType<Padding extends string> = {
     /**
-     *@note Utilities for controlling an element's padding all.
+     *@description Utilities for controlling an element's padding all.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [padding](https://tailwindcss.com/docs/padding)
+     *@see {@link https://tailwindcss.com/docs/padding padding}
      */
     padding: PluginVariantsWithDirection<"p", Padding>
     /**
-     *@note Utilities for controlling an element's padding x.
+     *@description Utilities for controlling an element's padding x.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [padding](https://tailwindcss.com/docs/padding)
+     *@see {@link https://tailwindcss.com/docs/padding padding-x}
      */
     paddingX: PluginVariantsWithDirection<"px", Padding>
     /**
-     *@note Utilities for controlling an element's padding y.
+     *@description Utilities for controlling an element's padding y.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [padding](https://tailwindcss.com/docs/padding)
+     *@see {@link https://tailwindcss.com/docs/padding padding-y}
      */
     paddingY: PluginVariantsWithDirection<"py", Padding>
     /**
-     *@note Utilities for controlling an element's padding top.
+     *@description Utilities for controlling an element's padding top.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [padding](https://tailwindcss.com/docs/padding)
+     *@see {@link https://tailwindcss.com/docs/padding padding-top}
      */
     paddingTop: PluginVariantsWithDirection<"pt", Padding>
     /**
-     *@note Utilities for controlling an element's padding bottom.
+     *@description Utilities for controlling an element's padding bottom.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [padding](https://tailwindcss.com/docs/padding)
+     *@see {@link https://tailwindcss.com/docs/padding padding-bottom}
      */
     paddingBottom: PluginVariantsWithDirection<"pb", Padding>
     /**
-     *@note Utilities for controlling an element's padding right.
+     *@description Utilities for controlling an element's padding right.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [padding](https://tailwindcss.com/docs/padding)
+     *@see {@link https://tailwindcss.com/docs/padding padding-right}
      */
     paddingRight: PluginVariantsWithDirection<"pr", Padding>
     /**
-     *@note Utilities for controlling an element's padding left.
+     *@description Utilities for controlling an element's padding left.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [padding](https://tailwindcss.com/docs/padding)
+     *@see {@link https://tailwindcss.com/docs/padding padding-left}
      */
     paddingLeft: PluginVariantsWithDirection<"pl", Padding>
 }

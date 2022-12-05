@@ -9,14 +9,14 @@ import type {
 import type { TailwindestTypeSet } from "./types/tailwindest"
 
 /**
- * @note Add custome property at `tailwind.config.js`
- * @docs [tailwind-configuration](https://tailwindcss.com/docs/configuration)
- * @note `Case1` Define custom style type
+ * @description Add custom property type defined at `tailwind.config.js`
+ * @see {@link https://tailwindcss.com/docs/configuration tailwind configuration}
+ *  Define custom style type
  * @example
- * type MyTailwindest = Tailwindest<{
- *          // ✅ Add color, opacity, spacing, screens global type
+ *
+ * type Custom = Tailwindest<{
+ *          // ✅ Add color, spacing, screens global type
  *          color: "my-color1" | "my-color2",
- *          opacity: "12.5"
  *          spacing: "0.25" | "0.5" | "0.75",
  *          screens: {
  *              // ✅ only one string union
@@ -31,10 +31,11 @@ import type { TailwindestTypeSet } from "./types/tailwindest"
  *          shadow: "my-shadow1" | "my-shadow2"
  *      }
  * >
- * @note `Case2` Pick specific type
+ * @description Pick specific type
  * @example
- * // ✅ Get MyTailwindest's fontSize
- * type FontSize = MyTailwindest["fontSize"]
+ *
+ * // ✅ Get Custom fontSize
+ * type FontSize = Custom["fontSize"]
  */
 export type Tailwindest<
     TailwindCustom extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,

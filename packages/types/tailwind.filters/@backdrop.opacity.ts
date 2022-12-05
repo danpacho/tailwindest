@@ -24,8 +24,8 @@ type TailwindBackdropOpacity<Plug extends PlugBase = ""> =
     `backdrop-opacity-${TailwindBackdropOpacityVariants<Plug>}`
 export type TailwindBackdropOpacityType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying backdrop opacity filters to an element.
-     *@docs [backdrop-opacity](https://tailwindcss.com/docs/backdrop-opacity)
+     *@description Utilities for applying backdrop opacity filters to an element.
+     *@see {@link https://tailwindcss.com/docs/backdrop-opacity backdrop opacity}
      */
     backdropOpacity: TailwindBackdropOpacity<Plug>
 }

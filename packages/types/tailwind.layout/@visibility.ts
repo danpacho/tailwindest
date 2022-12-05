@@ -1,8 +1,8 @@
 type TailwindVisibility = "visible" | "invisible"
 export type TailwindVisibilityType = {
     /**
-     *@note Utilities for controlling the visibility of an element.
-     *@docs [visibility](https://tailwindcss.com/docs/visibility)
+     *@description Utilities for controlling the visibility of an element.
+     *@see {@link https://tailwindcss.com/docs/visibility visibility}
      */
     visibility: TailwindVisibility
 }

@@ -17,8 +17,8 @@ type TailwindOverflowVariants =
 type TailwindOverflow = `overflow-${TailwindOverflowVariants}`
 export type TailwindOverflowType = {
     /**
-     *@note Utilities for controlling how an element handles content that is too large for the container.
-     *@docs [overflow](https://tailwindcss.com/docs/overflow)
+     *@description Utilities for controlling how an element handles content that is too large for the container.
+     *@see {@link https://tailwindcss.com/docs/overflow overflow}
      */
     overflow: TailwindOverflow
 }

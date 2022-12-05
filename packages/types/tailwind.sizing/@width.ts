@@ -34,9 +34,9 @@ export type TailwindWidthType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for setting the width of an element.
+     *@description Utilities for setting the width of an element.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [width](https://tailwindcss.com/docs/width)
+     *@see {@link https://tailwindcss.com/docs/width width}
      */
     width: `w-${TailwindSizingVariants<TailwindSpacing> | Pluggable<Plug>}`
 }
@@ -46,9 +46,9 @@ type TailwindMinWidth<Plug extends PlugBase = ""> = `min-w-${
     | Pluggable<Plug>}`
 export type TailwindMinWidthType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for setting the minimum width of an element.
+     *@description Utilities for setting the minimum width of an element.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [min-width](https://tailwindcss.com/docs/min-width)
+     *@see {@link https://tailwindcss.com/docs/min-width min-width}
      */
     minWidth: TailwindMinWidth<Plug>
 }
@@ -85,9 +85,9 @@ type TailwindMaxWidth<Plug extends PlugBase = ""> =
     `max-w-${TailwindMaxWidthVariants<Plug>}`
 export type TailwindMaxWidthType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for setting the maximum width of an element.
+     *@description Utilities for setting the maximum width of an element.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [max-width](https://tailwindcss.com/docs/max-width)
+     *@see {@link https://tailwindcss.com/docs/max-width max-width}
      */
     maxWidth: TailwindMaxWidth<Plug>
 }

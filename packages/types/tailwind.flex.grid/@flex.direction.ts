@@ -6,8 +6,8 @@ type TailwindFlexDirectionVariants =
 type TailwindFlexDirection = `flex-${TailwindFlexDirectionVariants}`
 export type TailwindFlexDirectionType = {
     /**
-     *@note Utilities for controlling the direction of flex items.
-     *@docs [flex-direction](https://tailwindcss.com/docs/flex-direction)
+     *@description Utilities for controlling the direction of flex items.
+     *@see {@link https://tailwindcss.com/docs/flex-direction flex direction}
      */
     flexDirection: TailwindFlexDirection
 }

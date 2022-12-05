@@ -9,8 +9,8 @@ export type TailwindBorderStyleVariants =
 type TailwindBorderStyle = `border-${TailwindBorderStyleVariants}`
 export type TailwindBorderStyleType = {
     /**
-     *@note Utilities for controlling the style of an element's borders.
-     *@docs [border-style](https://tailwindcss.com/docs/border-style)
+     *@description Utilities for controlling the style of an element's borders.
+     *@see {@link https://tailwindcss.com/docs/border-style border style}
      */
     borderStyle: TailwindBorderStyle
 }
@@ -18,8 +18,8 @@ export type TailwindBorderStyleType = {
 type TailwindDivideStyle = `divide-${TailwindBorderStyleVariants}`
 export type TailwindDivideStyleType = {
     /**
-     *@note Utilities for controlling the border style between elements.
-     *@docs [divide-style](https://tailwindcss.com/docs/divide-style)
+     *@description Utilities for controlling the border style between elements.
+     *@see {@link https://tailwindcss.com/docs/divide-style divide style}
      */
     divideStyle: TailwindDivideStyle
 }

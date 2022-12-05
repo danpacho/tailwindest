@@ -10,8 +10,8 @@ type TailwindInvert<Plug extends PlugBase = ""> =
     | `invert-${TailwindInvertVariants<Plug>}`
 export type TailwindInvertType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying invert filters to an element.
-     *@docs [invert](https://tailwindcss.com/docs/invert)
+     *@description Utilities for applying invert filters to an element.
+     *@see {@link https://tailwindcss.com/docs/invert invert}
      */
     filterInvert: TailwindInvert<Plug>
 }
@@ -21,8 +21,8 @@ type TailwindBackdropInvert<Plug extends PlugBase = ""> =
     | `backdrop-invert-${TailwindInvertVariants<Plug>}`
 export type TailwindBackdropInvertType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying backdrop invert filters to an element.
-     *@docs [backdrop-invert](https://tailwindcss.com/docs/backdrop-invert)
+     *@description Utilities for applying backdrop invert filters to an element.
+     *@see {@link https://tailwindcss.com/docs/backdrop-invert backdrop invert}
      */
     backdropInvert: TailwindBackdropInvert<Plug>
 }

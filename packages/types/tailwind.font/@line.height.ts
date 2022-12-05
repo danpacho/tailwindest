@@ -23,8 +23,8 @@ type TailwindLineHeight<Plug extends PlugBase = ""> =
     `leading-${TailwindLineHeightVariants<Plug>}`
 export type TailwindLineHeightType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the leading (line height) of an element.
-     *@docs [line-height](https://tailwindcss.com/docs/line-height)
+     *@description Utilities for controlling the leading (line height) of an element.
+     *@see {@link https://tailwindcss.com/docs/line-height line height}
      */
     lineHeight: TailwindLineHeight<Plug>
 }

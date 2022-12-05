@@ -8,8 +8,8 @@ type TailwindGridAutoFlowVariants =
 type TailwindGridAutoFlow = `grid-flow-${TailwindGridAutoFlowVariants}`
 export type TailwindGridAutoFlowType = {
     /**
-     *@note Utilities for controlling how elements in a grid are auto-placed.
-     *@docs [grid-auto-flow](https://tailwindcss.com/docs/grid-auto-flow)
+     *@description Utilities for controlling how elements in a grid are auto-placed.
+     *@see {@link https://tailwindcss.com/docs/grid-auto-flow grid auto flow}
      */
     gridAutoFlow: TailwindGridAutoFlow
 }

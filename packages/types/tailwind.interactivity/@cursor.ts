@@ -45,8 +45,8 @@ type TailwindCursor<Plug extends PlugBase = ""> =
     `cursor-${TailwindCursorVariants<Plug>}`
 export type TailwindCursorType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the cursor style when hovering over an element.
-     *@docs [cursor](https://tailwindcss.com/docs/cursor)
+     *@description Utilities for controlling the cursor style when hovering over an element.
+     *@see {@link https://tailwindcss.com/docs/cursor cursor}
      */
     cursor: TailwindCursor<Plug>
 }

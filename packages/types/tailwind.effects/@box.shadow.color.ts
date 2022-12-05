@@ -5,8 +5,8 @@ export type TailwindBoxShadowColorType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for controlling the color of a box shadow.
-     *@docs [box-shadow-color](https://tailwindcss.com/docs/box-shadow-color)
+     *@description Utilities for controlling the color of a box shadow.
+     *@see {@link https://tailwindcss.com/docs/box-shadow-color box shadow color}
      */
     boxShadowColor: `shadow-${TailwindColor | Pluggable<Plug>}`
 }

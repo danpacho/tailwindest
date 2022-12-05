@@ -16,8 +16,8 @@ type TailwindTextUnderlineOffset<Plug extends PlugBase = ""> =
 
 export type TailwindTextUnderlineOffsetType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the offset of a text underline.
-     *@docs [text-underline-offset](https://tailwindcss.com/docs/text-underline-offset)
+     *@description Utilities for controlling the offset of a text underline.
+     *@see {@link https://tailwindcss.com/docs/text-underline-offset text underline offset}
      */
     textUnderlineOffset: TailwindTextUnderlineOffset<Plug>
 }

@@ -16,8 +16,8 @@ type TailwindRotateVariants<Plug extends PlugBase = ""> =
 
 export type TailwindRotateType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for rotating elements with transform.
-     *@docs [rotate](https://tailwindcss.com/docs/rotate)
+     *@description Utilities for rotating elements with transform.
+     *@see {@link https://tailwindcss.com/docs/rotate rotate}
      *@unit Gap `1` = `1deg`
      */
     transformRotate: PluginVariantsWithDirection<

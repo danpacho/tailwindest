@@ -10,8 +10,8 @@ type TailwindObjectFitVariants =
 type TailwindObjectFit = `object-${TailwindObjectFitVariants}`
 export type TailwindObjectFitType = {
     /**
-     *@note Utilities for controlling how a replaced element's content should be resized.
-     *@docs [object-fit](https://tailwindcss.com/docs/object-fit)
+     *@description Utilities for controlling how a replaced element's content should be resized.
+     *@see {@link https://tailwindcss.com/docs/object-fit object fit}
      */
     objectFit: TailwindObjectFit
 }

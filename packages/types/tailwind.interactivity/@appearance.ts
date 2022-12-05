@@ -1,8 +1,8 @@
 type TailwindAppearance = "appearance-none"
 export type TailwindAppearanceType = {
     /**
-     *@note Utilities for suppressing native form control styling.
-     *@docs [appearance](https://tailwindcss.com/docs/appearance)
+     *@description Utilities for suppressing native form control styling.
+     *@see {@link https://tailwindcss.com/docs/appearance appearance}
      */
     appearance: TailwindAppearance
 }

@@ -1,7 +1,7 @@
 import { VariantsStyles, wind as windCore } from "./wind"
 
 /**
- * @note Create `wind` with custom `style` type
+ * @description Create `wind` with custom `style` type
  * @example
  * // ✅ Add "my-color1" | "my-color2"
  * type MyTailwindest = Tailwindest<{

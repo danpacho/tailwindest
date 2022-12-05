@@ -13,7 +13,7 @@ export type WindVariantsKey<Variants> = ToString<
     Exclude<Variants, DefaultWindVariantOptionKey | undefined | null>
 >
 
-/** @note base cache key for `style` and `class` */
+/** Base cache key for `style` and `class` */
 const BASE_KEY = Symbol()
 type WindCacheKey = string | symbol | number
 
@@ -30,7 +30,7 @@ function wind<
     variantsStyles: VariantsStylesType
 ): {
     /**
-     * @note Class extractor `function`
+     * Class extractor `function`
      * @example
      * // ✅ Define box with "container" | "flex" variants
      * const box = wind$("container", "flex")(
@@ -53,7 +53,7 @@ function wind<
         variant?: WindVariantsKey<keyof VariantsStylesType>
     ) => ClassNameType
     /**
-     * @note Input style extractor `function`, use it to compose styles
+     * Input style extractor `function`, use it to compose styles
      * @example
      * // ✅ Define box with "container" | "flex" variants
      * const box = wind$("container", "flex")(
@@ -71,7 +71,7 @@ function wind<
      */
     style: (variant?: WindVariantsKey<keyof VariantsStylesType>) => StyleType
     /**
-     * @note Compose multiple styles into one object
+     * Compose multiple styles into one object
      * @example
      * // ✅ Get composed result of baseStyle & flexStyle & borderStyle
      * const btn = wind$("active", "disabled")(
@@ -93,7 +93,7 @@ function wind<
 }
 function wind<StyleType>(style: StyleType): {
     /**
-     * @note Class extractor `function`
+     * Class extractor `function`
      * @example
      * // ✅ Define btn style
      * const button = wind()({ ...btnStyle })
@@ -103,7 +103,7 @@ function wind<StyleType>(style: StyleType): {
      */
     class: () => ClassNameType
     /**
-     * @note Input style extractor `function`, use it to compose styles
+     * Input style extractor `function`, use it to compose styles
      * @example
      * // ✅ Define btn style
      * const button = wind()({ ...btnStyle })
@@ -113,7 +113,7 @@ function wind<StyleType>(style: StyleType): {
      */
     style: () => StyleType
     /**
-     * @note Compose multiple styles into one object
+     * Compose multiple styles into one object
      * @example
      * // ✅ Get composed result of btnStyle & borderStyle
      * const buttonWithBorder = wind(
@@ -122,7 +122,7 @@ function wind<StyleType>(style: StyleType): {
      */
     compose: (...styles: StyleType[]) => {
         /**
-         * @note Class extractor `function`
+         * Class extractor `function`
          * @example
          * // ✅ Define btn style
          * const button = wind()({ ...btnStyle })
@@ -132,7 +132,7 @@ function wind<StyleType>(style: StyleType): {
          */
         class: () => ClassNameType
         /**
-         * @note Input style extractor `function`, use it to compose styles
+         * Input style extractor `function`, use it to compose styles
          * @example
          * // ✅ Define btn style
          * const button = wind()({ ...btnStyle })

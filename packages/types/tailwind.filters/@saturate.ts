@@ -14,8 +14,8 @@ type TailwindSaturate<Plug extends PlugBase = ""> =
     `saturate-${TailwindSaturateVariants<Plug>}`
 export type TailwindSaturateType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying saturation filters to an element.
-     *@docs [saturate](https://tailwindcss.com/docs/saturate)
+     *@description Utilities for applying saturation filters to an element.
+     *@see {@link https://tailwindcss.com/docs/saturate saturate}
      */
     filterSaturate: TailwindSaturate<Plug>
 }
@@ -24,8 +24,8 @@ type TailwindBackdropSaturate<Plug extends PlugBase = ""> =
     `backdrop-saturate-${TailwindSaturateVariants<Plug>}`
 export type TailwindBackdropSaturateType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying backdrop saturation filters to an element.
-     *@docs [backdrop-saturate](https://tailwindcss.com/docs/backdrop-saturate)
+     *@description Utilities for applying backdrop saturation filters to an element.
+     *@see {@link https://tailwindcss.com/docs/backdrop-saturate backdrop saturate}
      */
     backdropSaturate: TailwindBackdropSaturate<Plug>
 }

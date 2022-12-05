@@ -5,8 +5,8 @@ export type TailwindRingOffsetColorType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for setting the color of outline ring offsets.
-     *@docs [ring-offset-color](https://tailwindcss.com/docs/ring-offset-color)
+     *@description Utilities for setting the color of outline ring offsets.
+     *@see {@link https://tailwindcss.com/docs/ring-offset-color ring offset color}
      */
     ringOffsetColor: `ring-offset-${TailwindColor | Pluggable<Plug>}`
 }

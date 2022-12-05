@@ -8,8 +8,8 @@ type TailwindTextDecorationStyle =
     `decoration-${TailwindTextDecorationStyleVariants}`
 export type TailwindTextDecorationStyleType = {
     /**
-     *@note Utilities for controlling the style of text decorations.
-     *@docs [texto-decoration-style](https://tailwindcss.com/docs/texto-decoration-style)
+     *@description Utilities for controlling the style of text decorations.
+     *@see {@link https://tailwindcss.com/docs/text-decoration-style text decoration style}
      */
     textDecorationStyle: TailwindTextDecorationStyle
 }

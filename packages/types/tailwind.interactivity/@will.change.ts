@@ -13,8 +13,8 @@ type TailwindWillChange<Plug extends PlugBase = ""> = `will-change-${
     | Pluggable<Plug>}`
 export type TailwindWillChangeType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for optimizing upcoming animations of elements that are expected to change.
-     *@docs [will-change](https://tailwindcss.com/docs/will-change)
+     *@description Utilities for optimizing upcoming animations of elements that are expected to change.
+     *@see {@link https://tailwindcss.com/docs/will-change will change}
      */
     willChange: TailwindWillChange<Plug>
 }

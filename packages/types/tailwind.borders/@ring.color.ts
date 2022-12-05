@@ -5,8 +5,8 @@ export type TailwindRingColorType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for setting the color of outline rings.
-     *@docs [ring-color](https://tailwindcss.com/docs/ring-color)
+     *@description Utilities for setting the color of outline rings.
+     *@see {@link https://tailwindcss.com/docs/ring-color ring color}
      */
     ringColor: `ring-${TailwindColor | Pluggable<Plug>}`
 }

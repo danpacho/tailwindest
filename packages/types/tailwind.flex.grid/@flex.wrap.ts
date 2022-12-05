@@ -8,8 +8,8 @@ type TailwindFlexWrapVariants =
 type TailwindFlexWrap = `flex-${TailwindFlexWrapVariants}`
 export type TailwindFlexWrapType = {
     /**
-     *@note Utilities for controlling how flex items wrap.
-     *@docs [flex-wrap](https://tailwindcss.com/docs/flex-wrap)
+     *@description Utilities for controlling how flex items wrap.
+     *@see {@link https://tailwindcss.com/docs/flex-wrap flex wrap}
      */
     flexWrap: TailwindFlexWrap
 }

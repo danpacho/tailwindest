@@ -5,8 +5,8 @@ type TailwindBackgroundRepeat =
     | `bg-repeat-${TailwindBackgroundRepeatVariants}`
 export type TailwindBackgroundRepeatType = {
     /**
-     *@note Utilities for controlling the repetition of an element's background image.
-     *@docs [background-repeat](https://tailwindcss.com/docs/background-repeat)
+     *@description Utilities for controlling the repetition of an element's background image.
+     *@see {@link https://tailwindcss.com/docs/background-repeat background repeat}
      */
     backgroundRepeat: TailwindBackgroundRepeat
 }

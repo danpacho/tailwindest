@@ -10,8 +10,8 @@ type TailwindSepia<Plug extends PlugBase = ""> =
     | `sepia-${TailwindSepiaVariants<Plug>}`
 export type TailwindSepiaType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying sepia filters to an element.
-     *@docs [sepia](https://tailwindcss.com/docs/sepia)
+     *@description Utilities for applying sepia filters to an element.
+     *@see {@link https://tailwindcss.com/docs/sepia sepia}
      */
     filterSepia: TailwindSepia<Plug>
 }
@@ -20,8 +20,8 @@ type TailwindBackdropSepia<Plug extends PlugBase = ""> =
     `backdrop-sepia-${TailwindSepiaVariants<Plug>}`
 export type TailwindBackdropSepiaType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for applying backdrop sepia filters to an element.
-     *@docs [backdrop-sepia](https://tailwindcss.com/docs/backdrop-sepia)
+     *@description Utilities for applying backdrop sepia filters to an element.
+     *@see {@link https://tailwindcss.com/docs/backdrop-sepia backdrop sepia}
      */
     backdropSepia: TailwindBackdropSepia<Plug>
 }

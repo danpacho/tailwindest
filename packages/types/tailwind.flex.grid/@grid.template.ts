@@ -16,8 +16,8 @@ type TailwindGridTemplateRows<Plug extends PlugBase = ""> =
     `grid-rows-${TailwindGridTemplateRowsVariants<Plug>}`
 export type TailwindGridTemplateRowsType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for specifying the rows in a grid layout.
-     *@docs [grid-template-rows](https://tailwindcss.com/docs/grid-template-rows)
+     *@description Utilities for specifying the rows in a grid layout.
+     *@see {@link https://tailwindcss.com/docs/grid-template-rows grid template rows}
      */
     gridTemplateRows: TailwindGridTemplateRows<Plug>
 }
@@ -45,8 +45,8 @@ type TailwindGridTemplateColumns<Plug extends PlugBase = ""> =
     `grid-cols-${TailwindGridTemplateColumnsVariants<Plug>}`
 export type TailwindGridTemplateColumnsType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for specifying the columns in a grid layout.
-     *@docs [grid-template-columns](https://tailwindcss.com/docs/grid-template-columns)
+     *@description Utilities for specifying the columns in a grid layout.
+     *@see {@link https://tailwindcss.com/docs/grid-template-columns grid template columns}
      */
     gridTemplateColumns: TailwindGridTemplateColumns<Plug>
 }

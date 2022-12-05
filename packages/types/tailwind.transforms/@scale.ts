@@ -2,18 +2,18 @@ import { PluginVariantsWithDirection } from "../plugin"
 
 export type TailwindScaleType<Scale extends string> = {
     /**
-     *@note Utilities for scaling elements with transform.
-     *@docs [scale](https://tailwindcss.com/docs/scale)
+     *@description Utilities for scaling elements with transform.
+     *@see {@link https://tailwindcss.com/docs/scale scale}
      */
     transformScale: PluginVariantsWithDirection<"scale", Scale>
     /**
-     *@note Utilities for scaling elements with transform x direction.
-     *@docs [scale](https://tailwindcss.com/docs/scale)
+     *@description Utilities for scaling elements with transform x direction.
+     *@see {@link https://tailwindcss.com/docs/scale scale-x}
      */
     transformScaleX: PluginVariantsWithDirection<"scale", Scale>
     /**
-     *@note Utilities for scaling elements with transform y direction.
-     *@docs [scale](https://tailwindcss.com/docs/scale)
+     *@description Utilities for scaling elements with transform y direction.
+     *@see {@link https://tailwindcss.com/docs/scale scale-y}
      */
     transformScaleY: PluginVariantsWithDirection<"scale", Scale>
 }

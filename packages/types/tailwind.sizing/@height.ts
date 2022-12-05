@@ -23,9 +23,9 @@ export type TailwindHeightType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for setting the height of an element.
+     *@description Utilities for setting the height of an element.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [height](https://tailwindcss.com/docs/height)
+     *@see {@link https://tailwindcss.com/docs/height height}
      */
     height: `h-${TailwindHeightVariants<TailwindSpacing> | Pluggable<Plug>}`
 }
@@ -36,9 +36,9 @@ type TailwindMinHeight<Plug extends PlugBase = ""> = `min-h-${
     | Pluggable<Plug>}`
 export type TailwindMinHeightType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for setting the minimum height of an element.
+     *@description Utilities for setting the minimum height of an element.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [min-height](https://tailwindcss.com/docs/min-height)
+     *@see {@link https://tailwindcss.com/docs/min-height min-height}
      */
     minHeight: TailwindMinHeight<Plug>
 }
@@ -48,9 +48,9 @@ export type TailwindMaxHeightType<
     Plug extends PlugBase = ""
 > = {
     /**
-     *@note Utilities for setting the maximum height of an element.
+     *@description Utilities for setting the maximum height of an element.
      *@unit Gap `1` = `4px` = `0.25rem`
-     *@docs [max-height](https://tailwindcss.com/docs/max-height)
+     *@see {@link https://tailwindcss.com/docs/max-height max-height}
      */
     maxHeight: `max-h-${
         | "screen"

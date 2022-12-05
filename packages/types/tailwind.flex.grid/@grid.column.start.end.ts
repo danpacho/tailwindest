@@ -23,8 +23,8 @@ type TailwindGridColumn<Plug extends PlugBase = ""> =
     `col-${TailwindGridColumnVariants<Plug>}`
 export type TailwindGridColumnType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling how elements are sized and placed across grid columns.
-     *@docs [grid-column](https://tailwindcss.com/docs/grid-column)
+     *@description Utilities for controlling how elements are sized and placed across grid columns.
+     *@see {@link https://tailwindcss.com/docs/grid-column grid column}
      */
     gridColumn: TailwindGridColumn<Plug>
 }
@@ -51,8 +51,8 @@ type TailwindGridColumnStart<Plug extends PlugBase = ""> = `col-start-${
     | Pluggable<Plug>}`
 export type TailwindGridColumnStartType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling how elements are sized and placed across grid columns.
-     *@docs [grid-column](https://tailwindcss.com/docs/grid-column)
+     *@description Utilities for controlling how elements are sized and placed across grid columns.
+     *@see {@link https://tailwindcss.com/docs/grid-column grid column start}
      */
     gridColumnStart: TailwindGridColumnStart<Plug>
 }
@@ -62,8 +62,8 @@ type TailwindGridColumnEnd<Plug extends PlugBase = ""> = `col-end-${
     | Pluggable<Plug>}`
 export type TailwindGridColumnEndType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling how elements are sized and placed across grid columns.
-     *@docs [grid-column](https://tailwindcss.com/docs/grid-column)
+     *@description Utilities for controlling how elements are sized and placed across grid columns.
+     *@see {@link https://tailwindcss.com/docs/grid-column grid column end}
      */
     gridColumnEnd: TailwindGridColumnEnd<Plug>
 }

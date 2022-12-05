@@ -14,8 +14,8 @@ type TailwindAnimation<Plug extends PlugBase = ""> =
     `animate-${TailwindAnimationVariants<Plug>}`
 export type TailwindAnimationType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for animating elements with CSS animations.
-     *@docs [animation](https://tailwindcss.com/docs/animation)
+     *@description Utilities for animating elements with CSS animations.
+     *@see {@link https://tailwindcss.com/docs/animation animation}
      */
     animation: TailwindAnimation<Plug>
 }

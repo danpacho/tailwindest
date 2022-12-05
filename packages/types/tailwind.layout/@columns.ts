@@ -36,8 +36,8 @@ type TailwindColumns<Plug extends PlugBase = ""> =
 
 export type TailwindColumnsType<Plug extends PlugBase = ""> = {
     /**
-     *@note Utilities for controlling the number of columns within an element.
-     *@docs [columns](https://tailwindcss.com/docs/columns)
+     *@description Utilities for controlling the number of columns within an element.
+     *@see {@link https://tailwindcss.com/docs/columns columns}
      */
     columns: TailwindColumns<Plug>
 }
