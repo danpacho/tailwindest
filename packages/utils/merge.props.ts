@@ -5,21 +5,28 @@ import { deepMerge, getTailwindClass } from "../core"
  * @param baseStyle base `wind.style()`
  * @returns merged style class `string`
  * @example
- * ```jsx
+ * ```tsx
  * // ✅ Text wind style
  * const text = wind({
  *      ...textStyle
  * }).style()
  *
  * // ✅ Add specific style props
- * const Text = ({
- *     color,
- *     children,
- * }) => (
- *      <p className={mergeProps(text, { color })}>
- *          {children}
- *      </p>
- * )
+const Text = (
+    props: React.PropsWithChildren<
+        Pick<
+            Tailwindest,
+            | "color"
+            | "fontWeight"
+        >
+    >
+) => {
+    const { children, ...option } = props
+    return (
+        <p className={mergeProps(text, option)}>
+            {children}
+        </p>
+)}
  * ```
  */
 const mergeProps = <T>(baseStyle: T, styleProps: T) =>
