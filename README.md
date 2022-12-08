@@ -30,24 +30,30 @@ const helloBox = wind({
 }).class()
 ```
 
+<br />
+
 # Design Goals
 
 > Make
-> **_Readable_ / _Reusable_ / _Flexible_**
+> **_Readable_** / **_Reusable_** / **_Flexible_**
 > className
+
+<br />
 
 # Recommended for
 
-1. Strictly **typed `tailwind`**
+1. Strictly **typed** **`tailwind`**
 2. Love **css in js like syntax**
-3. Make **design system with `tailwind`**
+3. Make **design system with** **`tailwind`**
 4. **Refactoring** lover
+
+<br />
 
 # Worth it?
 
 ## 🏛️ Fully typed
 
-> Autocompleted by `typescript`, `tailwind` is literally insane.
+> **Autocompleted** by **`typescript`**, **`tailwind`** is literally insane.
 
 ## 💅 Similar to css in js
 
@@ -55,19 +61,19 @@ const helloBox = wind({
 
 ## 🔮 Variants
 
-> **Variants based conditional styling**, Inspired by **`stitches`** & **\*\***`vanilla-extract`\*\*
+> **Variants based conditional styling**, Inspired by **`stitches`** & **`vanilla-extract`**
 >
 > Practical and Intuitive.
 
 ## 🧬 Official Document
 
-> **Hover** the property, you will **get document `link`.**
+> **Hover** the property, you will **get document** **`link`**.
 >
 > <img src="./assets/docs.png" width="420" />
 
 ## 🍦 Atomic Size
 
-> **Gzip, `614B` tiny library.**
+> Gzip, **`614B`** **_tiny_ library**.
 >
 > Don’t worry about bundle size.
 
@@ -82,6 +88,8 @@ const helloBox = wind({
 >
 > **Complex / Conditional style**
 > = **`tailwindest`**
+
+<br />
 
 # Start
 
