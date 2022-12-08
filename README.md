@@ -7,7 +7,7 @@
 <br />
 <br />
 
-**Fully typed className package** for the _**tailwindcss**_
+**Fully typed className package** for the **`tailwindcss`**
 
 <br />
 
@@ -33,7 +33,7 @@ const helloBox = wind({
 # Design Goals
 
 > Make
-> **_`Readable`_ / _`Reusable`_ / _`Flexible`_**
+> **_Readable_ / _Reusable_ / _Flexible_**
 > className
 
 # Recommended for
@@ -55,7 +55,7 @@ const helloBox = wind({
 
 ## 🔮 Variants
 
-> **Variants based conditional styling**, Inspired by **`stitches`** & **`vanilla-extract`**
+> **Variants based conditional styling**, Inspired by **`stitches`** & **\*\***`vanilla-extract`\*\*
 >
 > Practical and Intuitive.
 
