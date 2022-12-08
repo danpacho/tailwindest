@@ -38,9 +38,9 @@ const helloBox = wind({
 
 # Recommended for
 
-1. Strictly **typed tailwindcss**
+1. Strictly **typed `tailwind`**
 2. Love **css in js like syntax**
-3. Make **design system with tailwindcss**
+3. Make **design system with `tailwind`**
 4. **Refactoring** lover
 
 # Worth it?
