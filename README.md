@@ -1,10 +1,10 @@
+<br />
+
 <div align="center">
 
 <img src="./assets/tailwindest.banner.png" width="525" alt="tailwindest banner" />
 
 </div>
-
-<br />
 
 # Design Goals
 
@@ -12,16 +12,12 @@
 > **_Readable_** / **_Reusable_** / **_Flexible_**
 > className
 
-<br />
-
 # Recommended for
 
 1. Strictly **typed** **`tailwind`**
 2. Love **css in js like syntax**
 3. Make **design system with** **`tailwind`**
 4. **Refactoring** lover
-
-<br />
 
 # Worth it?
 
@@ -62,8 +58,6 @@
 >
 > **Complex / Conditional style**
 > = **`tailwindest`**
-
-<br />
 
 # Start
 
