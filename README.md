@@ -2,11 +2,12 @@
 
 <div align="center">
 
-<img src="./assets/tailwindest.banner.png" width="500" alt="tailwindest banner" />
+<img src="./assets/tailwindest.banner.png" width="525" alt="tailwindest banner" />
 
 <br />
+<br />
 
-**Fully typed className package** for the **`tailwindcss`**
+**Fully typed className package** for the _**tailwindcss**_
 
 <br />
 
@@ -54,7 +55,7 @@ const helloBox = wind({
 
 ## 🔮 Variants
 
-> **Variants based conditional styling**, Inspired by `stitches` & `vanilla-extract`
+> **Variants based conditional styling**, Inspired by **`stitches`** & **`vanilla-extract`**
 >
 > Practical and Intuitive.
 
