@@ -35,7 +35,7 @@ function wind<
      * // ✅ Define box with "container" | "flex" variants
      * const box = wind$("container", "flex")(
      *      {
-     *         ...defaultStyle,
+     *         ...commonStyle,
      *      },
      *      {
      *          container: { ...containerStyle },
@@ -58,7 +58,7 @@ function wind<
      * // ✅ Define box with "container" | "flex" variants
      * const box = wind$("container", "flex")(
      *      {
-     *         ...defaultStyle,
+     *         ...commonStyle,
      *      },
      *      {
      *          container: { ...containerStyle },
@@ -73,9 +73,9 @@ function wind<
     /**
      * Compose multiple styles into one object
      * @example
-     * // ✅ Get composed result of baseStyle & flexStyle & borderStyle
+     * // ✅ Get composed result of commonStyle & flexStyle & borderStyle
      * const btn = wind$("active", "disabled")(
-     *      { ...baseStyle },
+     *      { ...commonStyle },
      *      {
      *          active: { ...activeStyle },
      *          disabled: { ...defaultStyle },
