@@ -1,7 +1,8 @@
 # Boost up tailwindcss DX
 
 <div align="center">
-<img src="./assets/tailwindest.banner.png" height="150" alt="tailwindest banner" />
+
+<img src="./assets/tailwindest.banner.png" width="500" alt="tailwindest banner" />
 
 <br />
 
