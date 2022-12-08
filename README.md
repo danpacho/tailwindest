@@ -5,7 +5,7 @@
 
 <br />
 
-### **Fully typed className package** for the **`tailwindcss`**
+**Fully typed className package** for the **`tailwindcss`**
 
 <br />
 
@@ -27,8 +27,6 @@ const helloBox = wind({
     },
 }).class()
 ```
-
-<br />
 
 # Design Goals
 
