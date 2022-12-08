@@ -1,41 +1,15 @@
-# Boost up tailwindcss DX
-
 <div align="center">
 
 <img src="./assets/tailwindest.banner.png" width="525" alt="tailwindest banner" />
 
-<br />
-<br />
-
-**Fully typed className package** for the **`tailwindcss`**
-
-<br />
-
 </div>
-
-```ts
-const helloBox = wind({
-    display: "flex",
-    alignItems: "items-center",
-    justifyContent: "justify-center",
-
-    padding: "p-4",
-    margin: "m-4",
-
-    borderRadius: "rounded-md",
-    backgroundColor: "bg-white",
-    "@dark": {
-        backgroundColor: "dark:bg-neutral-900",
-    },
-}).class()
-```
 
 <br />
 
 # Design Goals
 
 > Make
-> <span style="color:tomato">**_Readable_**</span> / <span style="color:tomato">**_Reusable_**</span> / <span style="color:tomato">**_Flexible_**</span>
+> **_Readable_** / **_Reusable_** / **_Flexible_**
 > className
 
 <br />
@@ -53,7 +27,7 @@ const helloBox = wind({
 
 ## 🏛️ Fully typed
 
-> **Autocompleted** by <span style="color:tomato">**`typescript`**</span>, <span style="color:tomato">**`tailwind`**</span> is literally insane.
+> **Autocompleted** by **`typescript`**, **`tailwind`** is literally insane.
 
 ## 💅 Similar to css in js
 
@@ -61,33 +35,33 @@ const helloBox = wind({
 
 ## 🔮 Variants
 
-> **Variants based conditional styling**, Inspitomato by <span style="color:tomato">**`stitches`**</span> & <span style="color:tomato">**`vanilla-extract`**</span>
+> **Variants based conditional styling**, Inspitomato by **`stitches`** & **`vanilla-extract`**
 >
 > Practical and Intuitive.
 
 ## 🧬 Official Document
 
-> **Hover** the property, you will **get document** <span style="color:tomato">**`link`**</span>
+> **Hover** the property, you will **get document** **`link`**
 >
 > <img src="./assets/docs.png" width="420" />
 
 ## 🍦 Atomic Size
 
-> Gzip, <span style="color:tomato">**`614B`**</span> **_tiny_ library**.
+> Gzip, **`614B`** **_tiny_ library**.
 >
 > Don’t worry about bundle size.
 
 ## 🔌 Custom value? Yeas.
 
-> **Support extended custom values**, defined in <span style="color:tomato">**`tailwind.config.js`**</span>
+> **Support extended custom values**, defined in **`tailwind.config.js`**
 
 ## 🔥 Combine Power of Inline & Tailwindest
 
 > **Short / Simple style**
-> = pure <span style="color:tomato">**`inline class`**</span>
+> = pure **`inline class`**
 >
 > **Complex / Conditional style**
-> = <span style="color:tomato">**`tailwindest`**</span>
+> = **`tailwindest`**
 
 <br />
 
