@@ -1,4 +1,4 @@
-import type { WindVariantsKey } from "./wind"
+import type { VariantsList } from "./wind"
 
 /**
  * @description Get variants type set at `wind$` or `createVariants`
@@ -18,7 +18,7 @@ export type WindVariants<TypeofWind> = TypeofWind extends {
     class: (variants: infer Variants) => unknown
 }
     ? Variants extends string
-        ? WindVariantsKey<Variants>
+        ? VariantsList<Variants>
         : never
     : TypeofWind extends (VariantsOption: infer VariantsOption) => unknown
     ? VariantsOption
