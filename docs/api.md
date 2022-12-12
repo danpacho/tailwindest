@@ -2,7 +2,70 @@
 
 # 🛠️ API Reference
 
-Api reference of `tailwindest`
+**Api reference** of `tailwindest`
+
+-   [🛠️ API Reference](#️-api-reference)
+-   [`wind` - basic styling](#wind---basic-styling)
+    -   [Briefly](#briefly)
+    -   [1. Type Definition](#1-type-definition)
+    -   [2. Spec](#2-spec)
+        -   [Usage](#usage)
+        -   [Parameter: `style`](#parameter-style)
+        -   [Example](#example)
+    -   [3. Returns](#3-returns)
+-   [`wind$` - conditional styling](#wind---conditional-styling)
+    -   [Briefly](#briefly-1)
+    -   [1. Type Definition](#1-type-definition-1)
+    -   [2. Spec](#2-spec-1)
+        -   [Usage](#usage-1)
+        -   [Parameter: `...variantNames`](#parameter-variantnames)
+        -   [Example](#example-1)
+        -   [Parameter: `style`](#parameter-style-1)
+        -   [Example](#example-2)
+    -   [3. Returns](#3-returns-1)
+-   [`createVariants`](#createvariants)
+    -   [Briefly](#briefly-2)
+    -   [1. Type Definition](#1-type-definition-2)
+    -   [2. Spec](#2-spec-2)
+        -   [Usage](#usage-2)
+        -   [Parameter: `variantsStyle`](#parameter-variantsstyle)
+        -   [Parameter: `variantsOption`](#parameter-variantsoption)
+        -   [Example](#example-3)
+    -   [3. Returns](#3-returns-2)
+-   [`mergeProps`](#mergeprops)
+    -   [Briefly](#briefly-3)
+    -   [1. Type definition](#1-type-definition-3)
+    -   [2. Spec](#2-spec-3)
+        -   [Usage](#usage-3)
+        -   [Parameter: `baseStyle`](#parameter-basestyle)
+        -   [Parameter: `styleProps`](#parameter-styleprops)
+        -   [Example](#example-4)
+-   [`Tailwindest`](#tailwindest)
+    -   [Briefly](#briefly-4)
+    -   [1. Type definition](#1-type-definition-4)
+    -   [2. Spec](#2-spec-4)
+        -   [Usage](#usage-4)
+        -   [Generic Parameter: `TailwindGlobal`](#generic-parameter-tailwindglobal)
+        -   [Generic Parameter: `TailwindStyle`](#generic-parameter-tailwindstyle)
+        -   [Example](#example-5)
+-   [`createWind`](#createwind)
+    -   [Briefly](#briefly-5)
+    -   [1. Type definition](#1-type-definition-5)
+    -   [2. Spec](#2-spec-5)
+        -   [Usage](#usage-5)
+        -   [Generic Parameter: `StyleType`](#generic-parameter-styletype)
+        -   [Example](#example-6)
+-   [`WindVariants`](#windvariants)
+    -   [Briefly](#briefly-6)
+    -   [1. Type definition](#1-type-definition-6)
+    -   [2. Spec](#2-spec-6)
+        -   [Usage](#usage-6)
+        -   [Generic Parameter: `TypeofWind`](#generic-parameter-typeofwind)
+        -   [Example](#example-7)
+
+<br />
+
+---
 
 <br />
 
@@ -35,7 +98,7 @@ wind(style)
 
 ### Parameter: `style`
 
--   type: `Tailwindest` or generic `T`
+-   type: `Tailwindest`
 -   usage: Define tailwind style
 
 ### Example
@@ -48,9 +111,9 @@ const center = wind({
 })
 ```
 
-### 3. Returns
+## 3. Returns
 
--   `class` - returns className `string`
+-   `class` - returns **className `string`**
 
     ### Usage
 
@@ -71,7 +134,7 @@ const center = wind({
     // flex items-center justify-center
     ```
 
--   `style` - returns input stylesheet `object`
+-   `style` - returns input **stylesheet `object`**
 
     ### Usage
 
@@ -88,13 +151,15 @@ const center = wind({
     })
 
     const baseStyle = base.style()
-    const _baseStyle = {
+    /*
+    {
         display: "flex",
         alignItems: "items-center",
     }
+     */
     ```
 
--   `compose` - **compose** `stylesheet` `object`
+-   `compose` - **compose** **`stylesheet`** **`object`**
 
     ### Usage
 
@@ -104,12 +169,12 @@ const center = wind({
 
     ### Parameter: `...styles`
 
-    -   type: `Array<Tailwindest>` or generic `T[]`
-    -   usage: compose `...styles` into one `stylesheet` `object`
+    -   type: `Array<Tailwindest>`
+    -   usage: **compose** `...styles` into **one `stylesheet`** **`object`**
 
     ### Example
 
-    1. Define compose target stylesheet
+    1. Make `wind` instances
 
         ```ts
         const center = wind({
@@ -117,6 +182,7 @@ const center = wind({
             alignItems: "items-center",
             justifyContent: "justify-center",
         })
+
         const border = wind({
             borderWidth: "border",
             borderColor: "border-gray-50",
@@ -136,10 +202,11 @@ const center = wind({
 
         ```ts
         const boxClass = box.class() =
-        const _boxClass = "flex items-center justify-center border border-gray-50 rounded-sm bg-white"
+        // "flex items-center justify-center border border-gray-50 rounded-sm bg-white"
 
         const boxStyle = box.style()
-        const _boxStyle = {
+        /*
+        {
             display: "flex",
             alignItems: "items-center",
             justifyContent: "justify-center",
@@ -148,9 +215,14 @@ const center = wind({
             borderRadius: "rounded-sm",
             backgroundColor: "bg-white",
         }
+         */
         ```
 
+<br />
+
 ---
+
+<br />
 
 # `wind$` - conditional styling
 
@@ -187,11 +259,11 @@ wind$(...variantNames)(style, variantsStyles)
 ### Parameter: `...variantNames`
 
 -   type: `Array<string>`
--   usage: Define type of variants name
+-   usage: **Define type of variants name**
 
 ### Example
 
-1.  list of `string`
+1.  List of **`string`** argument
 
 ```ts
 const button = wind$(
@@ -202,7 +274,7 @@ const button = wind$(
 )(/* variant style */)
 ```
 
-2. `Array<string> as const` with _**spread (...string[]) operator**_
+2. **`Array<string> as const`** with **spread (`...string[]`) operator**
 
 ```ts
 const buttonVariants = ["warning", "pending", "disabled", "success"] as const
@@ -212,16 +284,18 @@ const button = wind$(...buttonVariants)(/* variant style */)
 
 ### Parameter: `style`
 
--   type: `Tailwindest` or generic `T`
+-   type: `Tailwindest`
 -   usage: Define **base** or **common** `stylesheet` of variants
 
 ### Example
 
-첫번째 stylesheet인자는 2가지 사용방법이 있습니다.
+The first `stylesheet` factor, `style`, has two ways of using it.
 
-1.  기본 variant style로 사용
+1. **Use as default _variant_ style**
 
-    > **`default` variant를 명시적으로 정의하지 않은 경우**
+    > **Note**
+    >
+    > **If default variant is not explicitly defined**
 
     ```ts
     const button = wind$("warning", "success")(
@@ -239,9 +313,11 @@ const button = wind$(...buttonVariants)(/* variant style */)
     )
     ```
 
-2.  공통 style로 사용
+2. **Use as a _common_ style**
 
-    > **`default` variant를 명시적으로 정의한 경우**
+    > **Note**
+    >
+    > **If default variant is explicitly defined**
 
     ```ts
     const button = wind$(
@@ -267,19 +343,19 @@ const button = wind$(...buttonVariants)(/* variant style */)
     )
     ```
 
-    > **Note**
+    > **Note** What if I set `defaultVariant`?
     >
-    > `defaultVariant`를 설정하면?
-    >
-    > `variant`의 기본 인자로 `defaultVariant`가 설정됩니다.
+    > **The default factor for `variant` is set to `defaultVariant`**.
     >
     > ```ts
-    > const defaultButtonClass = button.class("default")
-    > const defaultButtonClass = button.class()
+    > const defaultButtonClass1 = button.class("default")
+    > const defaultButtonClass1 = button.class()
+    > // defaultButtonClass1 === defaultButtonClass2
     > // same
     >
     > const defaultButtonStyle = button.style("default")
     > const defaultButtonStyle = button.style()
+    > // defaultButtonStyle1 === defaultButtonStyle2
     > // same
     > ```
 
@@ -287,7 +363,7 @@ const button = wind$(...buttonVariants)(/* variant style */)
 
 _internally `wind` and `wind$` share same core function._
 
--   `class` - returns className `string`
+-   `class` - returns **className `string`**
 
     ### Usage
 
@@ -295,6 +371,8 @@ _internally `wind` and `wind$` share same core function._
     wind$(...variantNames)(style, variantsStyles).class()
     ```
 
+    > **Note**
+    >
     > Argument will be typed as given variants `string` `literal` type
 
     ### Example
@@ -307,7 +385,7 @@ _internally `wind` and `wind$` share same core function._
     const successButtonClass = button.class("success")
     ```
 
--   `style` - returns input `stylesheet` `object`
+-   `style` - returns **input `stylesheet` `object`**
 
     ### Usage
 
@@ -325,45 +403,51 @@ _internally `wind` and `wind$` share same core function._
     const successButtonStyle = button.style("success")
     ```
 
--   `compose` - **compose** `stylesheet` `object`
+-   `compose` - **compose `stylesheet` `object`**
 
-`wind`의 `compose`와 동일한 기능을 수행합니다.
+    Performs the same function as `compose` in `wind`.
 
-> **Note** 💡
->
-> **variant input을 제공받는 경우**, 해당 variant의 stylesheet이 우선순위에 있다는 것을 기억하세요!
->
-> ```ts
-> const displayGrid = wind({
->     display: "grid",
-> })
->
-> const variant = wind$("displayFlex")(
->     {},
->     {
->         displayFlex: {
->             display: "flex",
->         },
->     }
-> ).compose(displayGrid.style())
->
-> const willBeFlex = variant.style("displayFlex")
-> const _willBeFlex = {
->     display: "flex",
-> }
-> ```
->
-> `display`는 variant `"displayFlex"`의 "flex"값이 도출됩니다.
->
-> 즉 variant의 `stylesheet`이 `compose`의 `stylesheet`를 덮어씁니다!
+    > **Note** **When receiving variable input**
+    >
+    > **Remember that variant's `stylesheet` is the top priority!**
+    >
+    > ```ts
+    > const displayGrid = wind({
+    >     display: "grid",
+    > })
+    >
+    > const variant = wind$("shouldBeFlex")(
+    >     {},
+    >     {
+    >         shouldBeFlex: {
+    >             display: "flex",
+    >         },
+    >     }
+    > ).compose(displayGrid.style())
+    >
+    > const IamFlexMan = variant.style("shouldBeFlex")
+    > /*
+    > {
+    >     display: "flex",
+    > }
+    > */
+    > ```
+    >
+    > `display` is derived from the value of `flex` of variable in `displayFlex`
+    >
+    > In other words, the variable's `stylesheet` will overwrite the argument of `compose` `stylesheet`!
+
+<br />
 
 ---
+
+<br />
 
 # `createVariants`
 
 ## Briefly
 
-복잡한 variants style를 구현하고 싶은 경우에 사용합니다.
+**If you want to implement a complex variety style**.
 
 ## 1. Type Definition
 
@@ -373,7 +457,7 @@ declare const createVariants: <T extends VariantsStyle>(
 ) => (variantsOption: VariantsKeys<T>) => string
 ```
 
-## 2. Spec - complex variants
+## 2. Spec
 
 ### Usage
 
@@ -383,25 +467,25 @@ createVariants(variantsStyle)(variantsOption)
 
 ### Parameter: `variantsStyle`
 
--   type: `Record<string, Tailwindest>` or generic `Record<string, T>`
--   usage: Define complex variants style
+-   type: `Record<string, typeof wind$>`
+-   usage: **Define complex variants** style
 
 ### Parameter: `variantsOption`
 
 -   type: `VariantsKeys<T>`
--   usage: Get specific variant combination
+-   usage: **Get** specific **variant combination object**
 
 ### Example
 
-> **Note**🍀
+> **Note**
 >
-> variants를 **작은 단위로 쪼개서** 합성하는 방식을 사용하세요.
+> Use the method of **splitting variants into smaller units and assembling them**.
 >
-> 마치 레고 블럭처럼 스타일을 조립할 수 있습니다.
+> You can assemble styles like **Lego blocks**.
 
-아래 예제에서는 **size**와 **color** variant를 가지는 버튼을 만들어봅니다.
+In the example below, we will create a button with **`size`** and **`color`** variants.
 
-1.  **size** variants 정의
+1.  **size** variants
 
     ```ts
     const btnSize = wind$(
@@ -428,7 +512,7 @@ createVariants(variantsStyle)(variantsOption)
     )
     ```
 
-2.  **color** variants 정의
+2.  **color** variants
 
     ```ts
     const btnColor = wind$("red", "blue")(
@@ -452,7 +536,7 @@ createVariants(variantsStyle)(variantsOption)
     )
     ```
 
-3.  **color**, **size** variants를 합성하는 스타일 생성
+3.  Create a style that synthesizes **color**, **size** variants
 
     ```ts
     const btn = createVariants({
@@ -461,15 +545,15 @@ createVariants(variantsStyle)(variantsOption)
     })
     ```
 
-    > **Note**
+    > **Note** **color, size variant combination count**
     >
-    > **color, size variants 조합 갯수**
+    > = (number of color variants) X (number of size variants)
     >
-    > = [3 + (1 = 인자를 제공하지 않는 경우)] X [2 + (1 = 인자를 제공하지 않는 경우)]
+    > = [3 + (1 = factor not provided)] X [2 + (1 = factor not provided)]
     >
-    > = 4 X 3 = 12 (가지)
+    > = 4 X 3 = 12 (Case)
 
-4.  variants 지정하기
+4.  variants
 
     ```ts
     const btnSm = btn({
@@ -487,30 +571,38 @@ createVariants(variantsStyle)(variantsOption)
     const btnMd = btn({
         size: "md",
     })
-    if (btnMd === btnDefault) {
-        const weAreSame =
-            "border rounded p-2 text-black bg-white border-gray-100"
-    }
+
+    // btnMd === btnDefault, same!
+    const same = "border rounded p-2 text-black bg-white border-gray-100"
     ```
 
 ## 3. Returns
 
-variant class `string`
+combination of variant **className `string`**
+
+<br />
 
 ---
+
+<br />
 
 # `mergeProps`
 
 ## Briefly
 
-**`stylesheet` `object`를 병합**하고 싶은 경우 사용합니다.
+**Use this if you want to merge `stylesheet`**.
 
-prop으로 특정 스타일을 유연하게 변경할 수 있게 만들때 유용합니다.
+> **Note** usefulness of `mergeProps`
+>
+> Useful for making certain styles flexible with `prop`.
 
 ## 1. Type definition
 
 ```ts
-declare const mergeProps: <T>(baseStyle: T, styleProps: T) => string
+declare const mergeProps: <T extends NestedObject>(
+    baseStyle: T,
+    styleProps: T
+) => string
 ```
 
 ## 2. Spec
@@ -523,19 +615,19 @@ mergeProps(baseStyle, styleProps)
 
 ### Parameter: `baseStyle`
 
--   type: generic `T`
+-   type: generic `T extends NestedObject`
 -   usage: default style for merge targets
 
 ### Parameter: `styleProps`
 
--   type: generic `T`
+-   type: type `T` inferred as first argument type
 -   usage: if the key of `styleProps` is equal to the key of `baseStyle`, the value of `styleProps` is overwritten
 
 ### Example
 
-`Text` component가 **font size**를 유동적으로 변경하는 props를 받는 예제입니다.
+Applying **fontSize** after receiving `size prop` from `Text`.
 
-먼저 기본적인 text style을 정의하겠습니다.
+First, let's define the basic text style.
 
 ```tsx
 const text = wind({
@@ -547,7 +639,7 @@ const text = wind({
 
 `text`는 `stylesheet` `object`입니다.
 
-이제 **가변적인 font size**를 가질 수 있는 Text component를 정의해보겠습니다.
+Now let's define a `Text` that can have **variable font size**.
 
 ```tsx
 interface TextProps {
@@ -566,7 +658,7 @@ const Text = ({ children, size = "text-base" }: TextProps) => (
 )
 ```
 
-이제 Text component는 `size` props를 통해 font size를 자유롭게 조정할 수 있습니다.
+`Text` can now adjust the **font size** via **`size props`**.
 
 ```tsx
 import { Text } from "./text"
@@ -580,31 +672,36 @@ const SomeComponent = () => (
 )
 ```
 
+<br />
+
 ---
+
+<br />
 
 # `Tailwindest`
 
 ## Briefly
 
-`tailwind.config.js`에 정의된 custom value가 추가된 타입을 제작할 때 사용합니다. 혹은 props로 전달할 타입을 pick할 때 사용합니다.
+1. Use to create a type with a custom value defined in **`tailwind.config.js`**.
+2. Use to **pick the `tailwind` type** for `prop` typing.
 
 ## 1. Type definition
 
 ```ts
 type Tailwindest<
-    TailwindCustom extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
-    CustomExtends extends TailwindStylePlugOption = TailwindDefaultStylePlug
-> = TailwindCustom["screens"] extends Record<string, unknown>
+    TailwindGlobal extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
+    TailwindStyle extends TailwindStylePlugOption = TailwindDefaultStylePlug
+> = TailwindGlobal["screens"] extends Record<string, unknown>
     ? Partial<
           TailwindestTypeSet<
-              TailwindWithOption<TailwindCustom, CustomExtends>,
-              TailwindestNestKey<TailwindCustom["screens"]>,
-              TailwindCustom["screens"]
+              TailwindWithOption<TailwindGlobal, TailwindStyle>,
+              TailwindestNestKey<TailwindGlobal["screens"]>,
+              TailwindGlobal["screens"]
           >
       >
     : Partial<
           TailwindestTypeSet<
-              TailwindWithOption<TailwindCustom, CustomExtends>,
+              TailwindWithOption<TailwindGlobal, TailwindStyle>,
               TailwindestNestKey
           >
       >
@@ -622,45 +719,51 @@ type Tailwindest<
 
 2. customized tailwind type
 
+    > Add property at `tailwind.config.js`
+
     ```ts
-    Tailwindest<TailwindCustom, CustomExtends>
+    Tailwindest<TailwindGlobal, TailwindStyle>
     ```
 
-### Generic Parameter: `TailwindCustom`
+### Generic Parameter: `TailwindGlobal`
 
--   type: all property is **optional**
+-   type: all property is **[ optional ]**
+
+    > **Note**
+    >
+    > type `Custom` = `string literal union`
+
     ```ts
     type TailwindCustom = {
-        color: TailwindCustom
-        opacity: TailwindCustom
-        sizing: TailwindCustom
-        screens: {
-            conditionA: BreakConditionA
-            conditionB: BreakConditionB
+        color?: Custom
+        opacity?: Custom
+        sizing?: Custom
+        screens?: {
+            conditionA?: ShouldBeOneStringLiteral
+            conditionB?: ShouldBeOneStringLiteral
             // ...condition C to Z
         }
     }
     ```
--   usage: add global property
 
-    -   `color`: font color, background color, border color, ring color, ...etc
-    -   `opacity`: opacity of all color. (bg-gray-100/15 ...etc)
-    -   `sizing`: padding, margin, ...etc,
-    -   `screens`: break condition like `@md`, `@lg`, ...etc,
+-   usage: add **global property**
 
-        > **Warning**
-        >
-        > `screens` type
+    -   **`color`**: font color, background color, border color, ring color, ...etc
+    -   **`opacity`**: opacity of all color. (bg-gray-100/15 ...etc)
+    -   **`sizing`**: padding, margin, ...etc,
+    -   **`screens`**: break condition like `@md`, `@lg`, ...etc,
+
+        > **Warning** `ShouldBeOneStringLiteral` type in `screens`
         >
         > ```ts
         > screens: {
-        >     conditionA: BreakConditionA
-        >     conditionB: BreakConditionB
+        >     conditionA: ShouldBeOneStringLiteral
+        >     conditionB: ShouldBeOneStringLiteral
         >     // ...condition C to Z
         > }
         > ```
         >
-        > All condition **SHOULD BE** **ONLY ONE** `string literal union`
+        > `ShouldBeOneStringLiteral` **SHOULD BE ONLY ONE** `string literal union` type
         >
         > ⭕️ **DO LIKE THIS**
         >
@@ -671,6 +774,8 @@ type Tailwindest<
         > }
         > ```
         >
+        > if you set multiple condition in each conditions, **then typescript can't infer property exactly**.
+        >
         > ❌ **DON'T DO LIKE THIS**
         >
         > ```ts
@@ -679,118 +784,121 @@ type Tailwindest<
         > }
         > ```
 
-### Generic Parameter: `CustomExtends`
+### Generic Parameter: `TailwindStyle`
 
--   type: all property is **optional**
+-   type: all property is **[ optional ]**
+
+    > **Note**
+    >
+    > type `Custom` = `string literal union`
 
     ```ts
-    type CustomExtends = {
-        columns: Custom
-        animation: Custom
-        aspectRatio: Custom
-        backdropBlur: Custom
-        backdropBrightness: Custom
-        backdropContrast: Custom
-        backdropGrayscale: Custom
-        backdropHueRotate: Custom
-        backdropInvert: Custom
-        backdropOpacity: Custom
-        backdropSaturate: Custom
-        backdropSepia: Custom
-        backgroundColor: Custom
-        backgroundImage: Custom
-        backgroundPosition: Custom
-        backgroundSize: Custom
-        blur: Custom
-        brightness: Custom
-        borderColor: Custom
-        borderRadius: Custom
-        borderSpacing: Custom
-        borderWidth: Custom
-        boxShadow: Custom
-        boxShadowColor: Custom
-        caretColor: Custom
-        accentColor: Custom
-        contrast: Custom
-        content: Custom
-        cursor: Custom
-        divideColor: Custom
-        divideWidth: Custom
-        dropShadow: Custom
-        fill: Custom
-        grayscale: Custom
-        hueRotate: Custom
-        invert: Custom
-        flex: Custom
-        flexBasis: Custom
-        flexGrow: Custom
-        flexShrink: Custom
-        fontFamily: Custom
-        fontSize: Custom
-        fontWeight: Custom
-        gap: Custom
-        gradientColorStops: Custom
-        gridAutoColumns: Custom
-        gridAutoRows: Custom
-        gridColumn: Custom
-        gridColumnEnd: Custom
-        gridColumnStart: Custom
-        gridRow: Custom
-        gridRowStart: Custom
-        gridRowEnd: Custom
-        gridTemplateColumns: Custom
-        gridTemplateRows: Custom
-        height: Custom
-        inset: Custom
-        letterSpacing: Custom
-        lineHeight: Custom
-        listStyleType: Custom
-        margin: Custom
-        maxHeight: Custom
-        maxWidth: Custom
-        minHeight: Custom
-        minWidth: Custom
-        objectPosition: Custom
-        opacity: Custom
-        order: Custom
-        padding: Custom
-        outlineColor: Custom
-        outlineOffset: Custom
-        outlineWidth: Custom
-        ringColor: Custom
-        ringOffsetColor: Custom
-        ringOffsetWidth: Custom
-        ringWidth: Custom
-        rotate: Custom
-        saturate: Custom
-        scale: Custom
-        scrollMargin: Custom
-        scrollPadding: Custom
-        sepia: Custom
-        skew: Custom
-        space: Custom
-        stroke: Custom
-        strokeWidth: Custom
-        textColor: Custom
-        textDecorationColor: Custom
-        textDecorationThickness: Custom
-        textUnderlineOffset: Custom
-        textIndent: Custom
-        transformOrigin: Custom
-        transitionDelay: Custom
-        transitionDuration: Custom
-        transitionProperty: Custom
-        transitionTimingFunction: Custom
-        translate: Custom
-        width: Custom
-        willChange: Custom
-        zIndex: Custom
+    type TailwindStyle = {
+        columns?: Custom
+        animation?: Custom
+        aspectRatio?: Custom
+        backdropBlur?: Custom
+        backdropBrightness?: Custom
+        backdropContrast?: Custom
+        backdropGrayscale?: Custom
+        backdropHueRotate?: Custom
+        backdropInvert?: Custom
+        backdropOpacity?: Custom
+        backdropSaturate?: Custom
+        backdropSepia?: Custom
+        backgroundColor?: Custom
+        backgroundImage?: Custom
+        backgroundPosition?: Custom
+        backgroundSize?: Custom
+        blur?: Custom
+        brightness?: Custom
+        borderColor?: Custom
+        borderRadius?: Custom
+        borderSpacing?: Custom
+        borderWidth?: Custom
+        boxShadow?: Custom
+        boxShadowColor?: Custom
+        caretColor?: Custom
+        accentColor?: Custom
+        contrast?: Custom
+        content?: Custom
+        cursor?: Custom
+        divideColor?: Custom
+        divideWidth?: Custom
+        dropShadow?: Custom
+        fill?: Custom
+        grayscale?: Custom
+        hueRotate?: Custom
+        invert?: Custom
+        flex?: Custom
+        flexBasis?: Custom
+        flexGrow?: Custom
+        flexShrink?: Custom
+        fontFamily?: Custom
+        fontSize?: Custom
+        fontWeight?: Custom
+        gap?: Custom
+        gradientColorStops?: Custom
+        gridAutoColumns?: Custom
+        gridAutoRows?: Custom
+        gridColumn?: Custom
+        gridColumnEnd?: Custom
+        gridColumnStart?: Custom
+        gridRow?: Custom
+        gridRowStart?: Custom
+        gridRowEnd?: Custom
+        gridTemplateColumns?: Custom
+        gridTemplateRows?: Custom
+        height?: Custom
+        inset?: Custom
+        letterSpacing?: Custom
+        lineHeight?: Custom
+        listStyleType?: Custom
+        margin?: Custom
+        maxHeight?: Custom
+        maxWidth?: Custom
+        minHeight?: Custom
+        minWidth?: Custom
+        objectPosition?: Custom
+        opacity?: Custom
+        order?: Custom
+        padding?: Custom
+        outlineColor?: Custom
+        outlineOffset?: Custom
+        outlineWidth?: Custom
+        ringColor?: Custom
+        ringOffsetColor?: Custom
+        ringOffsetWidth?: Custom
+        ringWidth?: Custom
+        rotate?: Custom
+        saturate?: Custom
+        scale?: Custom
+        scrollMargin?: Custom
+        scrollPadding?: Custom
+        sepia?: Custom
+        skew?: Custom
+        space?: Custom
+        stroke?: Custom
+        strokeWidth?: Custom
+        textColor?: Custom
+        textDecorationColor?: Custom
+        textDecorationThickness?: Custom
+        textUnderlineOffset?: Custom
+        textIndent?: Custom
+        transformOrigin?: Custom
+        transitionDelay?: Custom
+        transitionDuration?: Custom
+        transitionProperty?: Custom
+        transitionTimingFunction?: Custom
+        translate?: Custom
+        width?: Custom
+        willChange?: Custom
+        zIndex?: Custom
     }
     ```
 
 -   usage:
     -   add specific property
-    -   `Custom` is `string literal union`
 
 ### Example
 
@@ -818,6 +926,46 @@ type MyCustom = Tailwindest<
 >
 ```
 
+> **Note**: `Tailwindest` type **supports only `2 depth` nesting**
+>
+> ```ts
+> const onlyTwoDepth = wind({
+>     "@dark": {
+>         ":hover": {
+>             /** all property is autocompleted */
+>         },
+>     },
+>     "@md": {
+>         "@dark": {
+>             /** all property is autocompleted */
+>         },
+>     },
+> })
+> ```
+>
+> But supports 3 depth for `@peer` and `@group`
+>
+> ```ts
+> const threeDepthForPeerAndGroup = wind({
+>     "@peer": {
+>         ":hover": {
+>             ":active": {
+>                 /** all property is autocompleted */
+>             },
+>         },
+>     },
+>     "@group": {
+>         ":hover": {
+>             ":active": {
+>                 /** all property is autocompleted */
+>             },
+>         },
+>     },
+> })
+> ```
+>
+> Technically if depth increase to 3, string literal type calculation performance will be decreased too far (TS server calculation performance low, meaning lower DX).
+
 Pick specific tailwind value
 
 -   basic type
@@ -844,13 +992,17 @@ Pick specific tailwind value
     const Box = (props: BoxProps) => <div bg={props.bg}>{...}</div>
     ```
 
+<br />
+
 ---
+
+<br />
 
 # `createWind`
 
 ## Briefly
 
-`tailwind.config.js`에 정의된 custom value이 추가된 `wind` 및 `wind$` 함수를 제작하고 싶은경우 사용합니다.
+Use to **create `wind` and `wind$` functions** with custom values defined in `tailwind.config.js`.
 
 ## 1. Type definition
 
@@ -885,17 +1037,17 @@ declare const createWind: <StyleType>() => {
 ### Usage
 
 ```ts
-createWind<CustomTailwindestType>()
+createWind<StyleType>()
 ```
 
-### Generic Parameter: `CustomTailwindestType`
+### Generic Parameter: `StyleType`
 
--   type: customized `Tailwindest`
+-   type: generic `StyleType extends NestedObject`
 -   usage: plug customized tailwind type in `wind` and `wind$`
 
 ### Example
 
-1. Define customized `Tailwindest`
+1. Define **customized `Tailwindest`**
 
 ```ts
 type MyCustom = Tailwindest<{
@@ -903,7 +1055,7 @@ type MyCustom = Tailwindest<{
 }>
 ```
 
-2. Plug type at the `createWind` generic `CustomTailwindestType`
+2. Plug type at the `createWind` generic `StyleType`
 
 ```ts
 const { wind, wind$ } = createWind<MyCustom>()
@@ -919,9 +1071,11 @@ export { tw, tw$ }
 
 4. Import customized `wind`(`tw`) and `wind$`(`tw$`) and use it
 
+> **Note**
+>
 > functionality of returned `tw` and `tw$` is same as `wind` and `wind$`.
 
--   `tw`: export name you want to.
+-   `tw`: same as `wind`
 
     ```ts
     import { tw } from "@style/tailwindest"
@@ -936,7 +1090,7 @@ export { tw, tw$ }
     const yeasStyle = yeas.style()
     ```
 
--   `tw$`: export name you want to.
+-   `tw$`: same as `wind$`
 
     ```ts
     import { tw$ } from "@style/tailwindest"
@@ -960,6 +1114,12 @@ export { tw, tw$ }
     const ohClass = yeasVar.class("oh")
     const ohStyle = yeasVar.style("oh")
     ```
+
+<br />
+
+---
+
+<br />
 
 # `WindVariants`
 
@@ -992,12 +1152,12 @@ WindVariants<TypeofWind>
 
 ### Generic Parameter: `TypeofWind`
 
--   type: `typeof` `wind$` and `createWind` instance
+-   type: generic `TypeofWind` is instance of `typeof wind$` and `createWind`
 -   usage: extract variant type
 
 ### Example
 
--   extract `wind$` instance's variant type
+-   extract instance of `wind$` variant type
 
     1. Make instance of `wind$`
 
@@ -1013,7 +1173,7 @@ WindVariants<TypeofWind>
         type ButtonVariants = "default" | "warning" | "success"
         ```
 
--   extract `createVariants` instance's variant type
+-   extract instance of `createVariants` variant type
 
     1. Make instance of `createVariants`
 
@@ -1032,13 +1192,14 @@ WindVariants<TypeofWind>
         ```ts
         type ButtonVariants = WindVariants<typeof button>
 
+        // inferred result
         type ButtonVariants = {
-            state: "default" | "warning" | "success"
-            size: "sm" | "md" | "lg"
+            state?: "default" | "warning" | "success" | undefined
+            size?: "sm" | "md" | "lg" | undefined
         }
         ```
 
-    3. Plug to prop types
+    3. Plug variants type
 
         ```tsx
         const Button = (props: React.PropsWithChildren<ButtonVariants>) => {
