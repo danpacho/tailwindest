@@ -9,27 +9,25 @@ import type {
 import type { TailwindestTypeSet } from "./types/tailwindest"
 
 /**
- * @description Add custom property type defined at `tailwind.config.js`
+ * @description Add custom property, defined at `tailwind.config.js`
  * @see {@link https://tailwindcss.com/docs/configuration tailwind configuration}
- *  Define custom style type
  * @example
- *
- * type Custom = Tailwindest<{
- *          // ✅ Add color, spacing, screens global type
- *          color: "my-color1" | "my-color2",
- *          spacing: "0.25" | "0.5" | "0.75",
- *          screens: {
- *              // ✅ only one string union
- *              conditionA: "@do-this",
- *              // ❌ more than one string union
- *              conditionB: "@dont-do-this" | "@dont-do-this-plz"
- *          }
- *      }
- *      {
- *          // ✅ Add "my-flex", "my-shadow1" & "my-shadow2"
- *          display: "my-flex",
- *          shadow: "my-shadow1" | "my-shadow2"
- *      }
+ * // Plug customized type to createWind generic
+ * type Custom = Tailwindest<
+ *    {
+ *        // Add color, spacing, screens global property
+ *        color: "my-color1" | "my-color2"
+ *        spacing: "0.25" | "0.5" | "0.75"
+ *        screens: {
+ *            // only one string union
+ *            conditionA: "@do-this"
+ *        }
+ *    },
+ *    {
+ *        // Add "emoji", "my-shadow1" & "my-shadow2"
+ *        listStyleType: "emoji"
+ *        shadow: "my-shadow1" | "my-shadow2"
+ *    }
  * >
  * @description Pick specific type
  * @example
@@ -38,19 +36,19 @@ import type { TailwindestTypeSet } from "./types/tailwindest"
  * type FontSize = Custom["fontSize"]
  */
 export type Tailwindest<
-    TailwindCustom extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
-    CustomExtends extends TailwindStylePlugOption = TailwindDefaultStylePlug
-> = TailwindCustom["screens"] extends Record<string, unknown>
+    TailwindGlobal extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
+    TailwindStyle extends TailwindStylePlugOption = TailwindDefaultStylePlug
+> = TailwindGlobal["screens"] extends Record<string, unknown>
     ? Partial<
           TailwindestTypeSet<
-              TailwindWithOption<TailwindCustom, CustomExtends>,
-              TailwindestNestKey<TailwindCustom["screens"]>,
-              TailwindCustom["screens"]
+              TailwindWithOption<TailwindGlobal, TailwindStyle>,
+              TailwindestNestKey<TailwindGlobal["screens"]>,
+              TailwindGlobal["screens"]
           >
       >
     : Partial<
           TailwindestTypeSet<
-              TailwindWithOption<TailwindCustom, CustomExtends>,
+              TailwindWithOption<TailwindGlobal, TailwindStyle>,
               TailwindestNestKey
           >
       >
