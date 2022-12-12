@@ -1,7 +1,7 @@
 {
     "name": "tailwindest",
     "version": "1.0.0",
-    "description": "Think diffrent, tailwind. Writing classnames like CSS in JS.",
+    "description": "Fully typed className for tailwindcss",
     "author": "danpacho",
     "license": "MIT",
     "private": false,
@@ -14,14 +14,15 @@
         "url": "https://github.com/danpacho/tailwindest/issues"
     },
     "keywords": [
-        "tailwind",
-        "css in js format",
         "near zero bundle size",
-        "just classnames"
+        "tailwind typescript",
+        "typed classnames",
+        "CSS in TS"
     ],
     "scripts": {
         "build": "pnpm clean && rollup -c && rimraf dist:watch",
         "build:watch": "rollup -cw",
+        "build:class": "node ./js/scripts/extract && prettier './packages/types/tailwind.nested/**.ts' --write",
         "clean": "rimraf {dist,dist:watch}",
         "bench": "node ./js/benchmark/bench.js",
         "prettier": "prettier '{packages,js}/**/*.{ts,js,md}' --check",
@@ -31,7 +32,6 @@
         "test": "jest",
         "test:dev": "jest --watch --no-coverage",
         "test:coverage:watch": "jest --watch",
-        "class": "node ./js/scripts/extract && prettier './packages/types/tailwind.nested/**.ts' --write",
         "pre-commit": "lint-staged",
         "prepare": "husky install"
     },
