@@ -22,7 +22,7 @@ const sizeVariants = wind$(
         sm: {},
         xs: {},
         "2xs": {},
-        default: "md",
+        defaultVariant: "md",
     }
 )
 
@@ -53,7 +53,7 @@ const colorVariants = wind$(
         red: {},
         white: {},
         yellow: {},
-        default: "white",
+        defaultVariant: "white",
     }
 )
 
@@ -85,7 +85,7 @@ describe(label.unit("WindVariants - wind$"), () => {
                 red: {},
                 white: {},
                 yellow: {},
-                default: "white",
+                defaultVariant: "white",
             }
         )
         expectType<
@@ -105,7 +105,7 @@ describe(label.unit("WindVariants - wind$"), () => {
                 sm: {},
                 xs: {},
                 "2xs": {},
-                default: "md",
+                defaultVariant: "md",
             }
         )
         expectType<
@@ -155,7 +155,7 @@ describe(label.unit("WindVariants - wind$"), () => {
     })
 })
 
-describe(label.unit("Windvariants - wind"), () => {
+describe(label.unit("WindVariants - wind"), () => {
     test(label.case("infer never"), () => {
         const baseWind = wind({})
         expectType<TypeEqual<WindVariants<typeof baseWind>, never>>(true)

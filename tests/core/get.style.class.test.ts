@@ -3,7 +3,7 @@ import { getStyleClass } from "../../packages/core/get.styleclass"
 import { label } from "../label"
 
 describe(label.unit("getStyleClass"), () => {
-    test(label.case("join string array into classname string"), () => {
+    test(label.case("join string array into className string"), () => {
         const stringArray = ["a", "b", "c", "d", "e"]
         const indent = " "
 

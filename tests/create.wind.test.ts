@@ -59,13 +59,13 @@ describe(label.unit("createWind - plugging custom type"), () => {
         expectType<TypeEqual<CustomPadding, ExpectedCustomPadding>>(true)
     })
 
-    test(label.case("global - custom scrrens"), () => {
-        type ExpectedScrrenCustom = "@my"
+    test(label.case("global - custom screens"), () => {
+        type ExpectedScreenCustom = "@my"
         expectType<TypeEqual<Keys<CustomTailwind>, Keys<Tailwindest>>>(false)
         expectType<
             TypeEqual<
                 Keys<CustomTailwind>,
-                ExpectedScrrenCustom | Keys<Tailwindest>
+                ExpectedScreenCustom | Keys<Tailwindest>
             >
         >(true)
     })
