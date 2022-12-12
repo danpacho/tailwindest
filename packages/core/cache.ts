@@ -1,23 +1,32 @@
-export interface Cache<CacheKey, CachedValue> {
-    get: (key: CacheKey) => undefined | CachedValue
-    set: (key: CacheKey, value: CachedValue) => void
-    has: (key: CacheKey) => boolean
+export interface Cache<Key, Value> {
+    set: (key: Key, value: Value) => void
+    has: (key: Key) => boolean
+    /**
+     * @param key store inquire key
+     * @param cacheFindFallback when cache is not found, caching it
+     * @returns cached value
+     */
+    get: (key: Key, cacheFindFallback: () => Value) => Value
 }
+
 /**
- * cache the computed result with `Map`
- * @returns `get`, get cached result at inquire key
- * @returns `set`, set cached value at inquire key
- * @returns `has`, has cached value at inquire key
+ * Simple cache with `Map` data structure
  */
-const cache = <CacheKey, CacheValue>(): Cache<CacheKey, CacheValue> => {
-    const store = new Map<CacheKey, CacheValue>()
+const cache = <Key, Value>(): Cache<Key, Value> => {
+    const store = new Map<Key, Value>()
 
     return {
-        get: (key: CacheKey) => store.get(key),
-        set: (key: CacheKey, value: CacheValue) => {
+        set: (key: Key, value: Value) => {
             store.set(key, value)
         },
-        has: (key: CacheKey) => store.has(key),
+        has: (key: Key) => store.has(key),
+        get: (key: Key, cacheFindFallback: () => Value) => {
+            if (store.has(key)) return store.get(key) as Value
+
+            const newCacheValue = cacheFindFallback()
+            store.set(key, newCacheValue)
+            return newCacheValue
+        },
     }
 }
 
