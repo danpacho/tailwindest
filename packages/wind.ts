@@ -1,16 +1,16 @@
-import { cache, deepMerge, getCachedValue, getTailwindClass } from "./core"
+import { cache, deepMerge, getTailwindClass } from "./core"
 
 type ToString<MightBeString> = Extract<MightBeString, string>
 export type VariantsStyles<Variant extends string, StyleType> = Record<
     Variant,
     StyleType
 > & {
-    default?: WindVariantsKey<Variant>
+    defaultVariant?: VariantsList<Variant>
 }
 
-type DefaultWindVariantOptionKey = "default"
-export type WindVariantsKey<Variants> = ToString<
-    Exclude<Variants, DefaultWindVariantOptionKey | undefined | null>
+type DefaultVariantOptionName = "defaultVariant"
+export type VariantsList<Variants> = ToString<
+    Exclude<Variants, DefaultVariantOptionName | undefined | null>
 >
 
 /** Base cache key for `style` and `class` */
@@ -49,9 +49,7 @@ function wind<
      * // ✅ Get baseStyle class string, set to "flex"
      * const flex = box.class()
      */
-    class: (
-        variant?: WindVariantsKey<keyof VariantsStylesType>
-    ) => ClassNameType
+    class: (variant?: VariantsList<keyof VariantsStylesType>) => ClassNameType
     /**
      * Input style extractor `function`, use it to compose styles
      * @example
@@ -64,12 +62,12 @@ function wind<
      *          container: { ...containerStyle },
      *          flex: { ...flexStyle },
      *          // ✅ Optionally set default variant
-     *          default: "flex",
+     *          defaultVariant: "flex",
      *      }
      * )
      * const container = boxStyle.style("container")
      */
-    style: (variant?: WindVariantsKey<keyof VariantsStylesType>) => StyleType
+    style: (variant?: VariantsList<keyof VariantsStylesType>) => StyleType
     /**
      * Compose multiple styles into one object
      * @example
@@ -84,11 +82,9 @@ function wind<
      */
     compose: (...styles: StyleType[]) => {
         class: (
-            variant?: WindVariantsKey<keyof VariantsStylesType>
+            variant?: VariantsList<keyof VariantsStylesType>
         ) => ClassNameType
-        style: (
-            variant?: WindVariantsKey<keyof VariantsStylesType>
-        ) => StyleType
+        style: (variant?: VariantsList<keyof VariantsStylesType>) => StyleType
     }
 }
 function wind<StyleType>(style: StyleType): {
@@ -109,7 +105,7 @@ function wind<StyleType>(style: StyleType): {
      * const button = wind()({ ...btnStyle })
      *
      * // ✅ Get button style object
-     * const butonStyle = button.style()
+     * const buttonStyle = button.style()
      */
     style: () => StyleType
     /**
@@ -138,7 +134,7 @@ function wind<StyleType>(style: StyleType): {
          * const button = wind()({ ...btnStyle })
          *
          * // ✅ Get button style object
-         * const butonStyle = button.style()
+         * const buttonStyle = button.style()
          */
         style: () => StyleType
     }
@@ -147,44 +143,30 @@ function wind<
     StyleType,
     VariantsStylesType extends VariantsStyles<string, StyleType>
 >(style: StyleType, variantsStyles?: VariantsStylesType) {
-    const classCacheStore = cache<WindCacheKey, ClassNameType>()
-    const styleCacheStore = cache<WindCacheKey, StyleType>()
+    const classStore = cache<WindCacheKey, ClassNameType>()
+    const styleStore = cache<WindCacheKey, StyleType>()
 
     return {
         class: (
             variant:
-                | WindVariantsKey<keyof VariantsStylesType>
-                | undefined = (variantsStyles?.default as WindVariantsKey<
+                | VariantsList<keyof VariantsStylesType>
+                | undefined = (variantsStyles?.defaultVariant as VariantsList<
                 keyof VariantsStylesType
             >) ?? undefined
         ) => {
-            const cachedBaseStyle = getCachedValue(
-                styleCacheStore,
-                BASE_KEY,
-                () => style
-            )
-            const cachedBaseClass = getCachedValue(
-                classCacheStore,
-                BASE_KEY,
-                () => getTailwindClass(cachedBaseStyle)
+            const cachedBaseStyle = styleStore.get(BASE_KEY, () => style)
+            const cachedBaseClass = classStore.get(BASE_KEY, () =>
+                getTailwindClass(cachedBaseStyle)
             )
 
             const isBase = variantsStyles === undefined || variant === undefined
             if (isBase) return cachedBaseClass
 
-            const cachedVariantStyle = getCachedValue(
-                styleCacheStore,
-                variant,
-                () =>
-                    deepMerge(
-                        cachedBaseStyle,
-                        variantsStyles[variant] as StyleType
-                    )
+            const cachedVariantStyle = styleStore.get(variant, () =>
+                deepMerge(cachedBaseStyle, variantsStyles[variant] as StyleType)
             )
-            const cachedVariantClass = getCachedValue(
-                classCacheStore,
-                variant,
-                () => getTailwindClass(cachedVariantStyle)
+            const cachedVariantClass = classStore.get(variant, () =>
+                getTailwindClass(cachedVariantStyle)
             )
 
             return cachedVariantClass
@@ -192,38 +174,24 @@ function wind<
 
         style: (
             variant:
-                | WindVariantsKey<keyof VariantsStylesType>
-                | undefined = (variantsStyles?.default as WindVariantsKey<
+                | VariantsList<keyof VariantsStylesType>
+                | undefined = (variantsStyles?.defaultVariant as VariantsList<
                 keyof VariantsStylesType
             >) ?? undefined
         ): StyleType => {
-            const cachedBaseStyle = getCachedValue(
-                styleCacheStore,
-                BASE_KEY,
-                () => style
-            )
+            const cachedBaseStyle = styleStore.get(BASE_KEY, () => style)
 
             const isBase = variantsStyles === undefined || variant === undefined
             if (isBase) return cachedBaseStyle
 
-            const cachedVariantStyle = getCachedValue(
-                styleCacheStore,
-                variant,
-                () =>
-                    deepMerge(
-                        cachedBaseStyle,
-                        variantsStyles[variant] as StyleType
-                    )
+            const cachedVariantStyle = styleStore.get(variant, () =>
+                deepMerge(cachedBaseStyle, variantsStyles[variant] as StyleType)
             )
             return cachedVariantStyle
         },
 
         compose: function (...styles: StyleType[]) {
-            const cachedBaseStyle = getCachedValue(
-                styleCacheStore,
-                BASE_KEY,
-                () => style
-            )
+            const cachedBaseStyle = styleStore.get(BASE_KEY, () => style)
 
             const composedStyle = styles.reduce<StyleType>(
                 (accStyle, currStyle) => deepMerge(accStyle, currStyle),
@@ -231,8 +199,8 @@ function wind<
             )
             const composedClass = getTailwindClass(composedStyle)
 
-            classCacheStore.set(BASE_KEY, composedClass)
-            styleCacheStore.set(BASE_KEY, composedStyle)
+            classStore.set(BASE_KEY, composedClass)
+            styleStore.set(BASE_KEY, composedStyle)
 
             return {
                 class: this.class,
