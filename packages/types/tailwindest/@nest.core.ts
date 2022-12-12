@@ -1,93 +1,80 @@
-export type TAILWINDEST_NEST_IDENTFIER = ":" | "@"
-/**
- * @example "::before" -> "before:"
- */
-export type RemoveIdentifierAddNest<
-    ClassKey extends string,
-    Remover extends string
-> = ClassKey extends `${Remover}${infer Rest}`
-    ? RemoveIdentifierAddNest<Rest, Remover>
-    : `${ClassKey}:`
+type IDENTIFIER = ":"
+type BREAK_CONDITION_IDENTIFIER = "@"
+export type TAILWINDEST_IDENTIFIER = IDENTIFIER | BREAK_CONDITION_IDENTIFIER
 
 /**
  * @example "::before" -> "before"
  */
 export type RemoveIdentifier<
-    ClassKey extends string,
-    Remover extends string
-> = ClassKey extends `${Remover}${infer Rest}`
-    ? RemoveIdentifier<Rest, Remover>
-    : ClassKey
+    ClassString extends string,
+    Identifier extends string = TAILWINDEST_IDENTIFIER
+> = ClassString extends `${Identifier}${infer RemovedClassString}`
+    ? RemoveIdentifier<RemovedClassString, Identifier>
+    : ClassString
 
 /**
- * @example
- * "hover", ":dark" -> "dark:hover"
+ * @example "hover", ":dark" -> "dark:hover"
  */
-type CombinateToNest<
-    StringLiteral,
-    Title extends string
-> = StringLiteral extends string
-    ? Title extends ""
-        ? StringLiteral
-        : `${RemoveIdentifierAddNest<
-              Title,
-              TAILWINDEST_NEST_IDENTFIER
-          >}${StringLiteral}`
-    : StringLiteral
+type CombineConditionAtTargetClass<
+    Class,
+    ConditionClass extends string
+> = Class extends string
+    ? ConditionClass extends ""
+        ? Class
+        : `${RemoveIdentifier<ConditionClass>}${IDENTIFIER}${Class}`
+    : Class
 
-type AddParentKeyAtChild<
-    ObjectType,
-    Title extends string,
-    TitleHeader extends string = ""
+type CombineKeyAtObjectProperty<
+    NestObject,
+    NestedClass extends string,
+    NestCondition extends string = ""
 > = {
-    [Key in keyof ObjectType]?: ObjectType[Key] extends string
-        ? CombinateToNest<ObjectType[Key], Title>
-        : Key extends string
-        ? AddParentKeyAtChild<
-              ObjectType[Key],
-              `${TitleHeader}:${RemoveIdentifier<
-                  Key,
-                  TAILWINDEST_NEST_IDENTFIER
-              >}`
+    [NestKey in keyof NestObject]?: NestObject[NestKey] extends string
+        ? CombineConditionAtTargetClass<NestObject[NestKey], NestedClass>
+        : NestKey extends string
+        ? CombineKeyAtObjectProperty<
+              NestObject[NestKey],
+              `${NestCondition}${IDENTIFIER}${RemoveIdentifier<NestKey>}`
           >
         : never
 }
 
 export type TailwindestGetNest<
-    Style,
-    TitleHeader extends string = ""
-> = AddParentKeyAtChild<Style, "", TitleHeader>
+    NestStyle,
+    NestCondition extends string = ""
+> = CombineKeyAtObjectProperty<NestStyle, "", NestCondition>
 
 export type TailwindestGetNestWithTitle<
-    Style,
-    Title extends string,
-    TitleHeader extends string = ""
-> = AddParentKeyAtChild<Style, Title, TitleHeader>
+    NestStyle,
+    NestedClass extends string,
+    NestCondition extends string = ""
+> = CombineKeyAtObjectProperty<NestStyle, NestedClass, NestCondition>
 
 /**
- * remove identifier at child style's key
+ * Remove identifier at child style's key
  */
-type AdjustKey<Style, Condition extends string = ""> = {
-    [Key in keyof Style]?: Style[Key] extends string
-        ? `${RemoveIdentifierAddNest<
-              Condition,
-              TAILWINDEST_NEST_IDENTFIER
-          >}${Style[Key]}`
+type CombineNestConditionAtNestStyleProperty<
+    NestStyle,
+    NestCondition extends string = ""
+> = {
+    [NestKey in keyof NestStyle]?: NestStyle[NestKey] extends string
+        ? `${RemoveIdentifier<NestCondition>}${IDENTIFIER}${NestStyle[NestKey]}`
         : never
 }
 
 /**
  * add nest style
  */
-export type NestStyle<
+export type GetNestStyle<
     Nest extends string,
-    Style,
-    Condition extends string = ""
+    NestStyle,
+    NestCondition extends string = ""
 > = {
-    [key in Exclude<Nest, Condition>]?: Style
-} & AdjustKey<Style, Condition>
+    [key in Exclude<Nest, NestCondition>]?: NestStyle
+} & CombineNestConditionAtNestStyleProperty<NestStyle, NestCondition>
 
+type UnusedNestProperty = "transition" | "border"
 export type RemoveUnusedNestProperty<Tailwindest> = Omit<
     Tailwindest,
-    "transition" | "border"
+    UnusedNestProperty
 >
