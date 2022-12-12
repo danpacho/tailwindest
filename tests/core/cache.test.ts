@@ -3,29 +3,99 @@ import { cache } from "../../packages/core"
 import type { NestedObject } from "../../packages/core/nested.object.type"
 import { label } from "../label"
 
-const store = cache<string, NestedObject>()
+describe(label.unit("cache: set | has"), () => {
+    const store = cache<string, NestedObject>()
 
-const nestedObject = {
-    a: "a",
-    b: "b",
-    c: {
-        d: "d",
-        e: "e",
-        f: {
-            g: "g",
-            h: "h",
+    const nestedObject = {
+        a: "a",
+        b: "b",
+        c: {
+            d: "d",
+            e: "e",
+            f: {
+                g: "g",
+                h: "h",
+            },
         },
-    },
-}
-const key = "nestedObject"
+    } as const
+    const key = "nestedObject" as const
 
-describe(label.unit("cache"), () => {
-    test(label.case("set -> save nested object"), () => {
+    test(label.case("set"), () => {
         store.set(key, nestedObject)
-        expect(store.get(key)).toEqual(nestedObject)
+        expect(store.has(key)).toBe(true)
     })
 
-    test(label.case("has -> check exsistance"), () => {
+    test(label.case("has"), () => {
         expect(store.has(key)).toBe(true)
+    })
+})
+
+describe(label.unit("cache: get"), () => {
+    type StoreKey = symbol | string | number
+    type StoreValue = string | NestedObject
+
+    const store = cache<StoreKey, StoreValue>()
+
+    const testStringKeys = {
+        string: "0",
+        symbol: Symbol(0),
+        number: 0,
+    }
+    const targetString = "string"
+
+    const testNestedObjectKeys = {
+        string: "1",
+        symbol: Symbol(1),
+        number: 1,
+    }
+    const targetNestedObject: NestedObject = {
+        a: "a",
+        b: {
+            c: {
+                d: {
+                    e: {
+                        f: {
+                            g: "g",
+                        },
+                    },
+                },
+            },
+        },
+    } as const
+
+    test(label.case("save string"), () => {
+        Object.values(testStringKeys).forEach((key) => {
+            expect(store.has(key)).toBe(false)
+            // save
+            expect(store.get(key, () => targetString)).toBe(targetString)
+        })
+    })
+
+    test(label.case("save stylesheet"), () => {
+        Object.values(testNestedObjectKeys).forEach((key) => {
+            expect(store.has(key)).toBe(false)
+            // save
+            expect(store.get(key, () => targetNestedObject)).toEqual(
+                targetNestedObject
+            )
+        })
+    })
+
+    test(label.case("inquire cached string"), () => {
+        Object.values(testStringKeys).forEach((key) => {
+            expect(store.has(key)).toBe(true)
+            // cache hit
+            expect(store.get(key, () => targetString)).toBe(targetString)
+        })
+    })
+
+    test(label.case("inquire cached stylesheet"), () => {
+        Object.values(testNestedObjectKeys).forEach((key) => {
+            expect(store.has(key)).toBe(true)
+            // cache hit
+            expect(store.get(key, () => targetNestedObject)).toEqual(
+                targetNestedObject
+            )
+        })
     })
 })
