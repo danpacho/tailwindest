@@ -1,7 +1,8 @@
 import { deepMerge, getTailwindClass } from "../core"
+import type { NestedObject } from "../core/nested.object.type"
 
 /**
- * @description Usefull for merging style props
+ * @description Useful for merging style props
  * @param baseStyle base `wind.style()`
  * @returns merged style class `string`
  * @example
@@ -29,7 +30,7 @@ const Text = (
 )}
  * ```
  */
-const mergeProps = <T>(baseStyle: T, styleProps: T) =>
+const mergeProps = <T extends NestedObject>(baseStyle: T, styleProps: T) =>
     getTailwindClass(deepMerge(baseStyle, styleProps))
 
 export { mergeProps }

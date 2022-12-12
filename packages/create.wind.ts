@@ -1,20 +1,21 @@
+import type { NestedObject } from "./core/nested.object.type"
 import { VariantsStyles, wind as windCore } from "./wind"
 
 /**
- * @description Create `wind` with custom `style` type
+ * @description Create `wind`, `wind$` with customized `Tailwindest`
  * @example
  * // ✅ Add "my-color1" | "my-color2"
- * type MyTailwindest = Tailwindest<{
+ * type Custom = Tailwindest<{
  *     color: "my-color1" | "my-color2",
  * }>
  *
- * // ✅ Adapt custom type in generic
- * // ✅ Rename it for non-duplicated imports
- * const { wind: style, wind$: style$ } = createWind<MyTailwindest>()
+ * // ✅ Plug custom type in generic
+ * const { wind: tw, wind$: tw$ } = createWind<Custom>()
  *
- * export { style, style$ }
+ * // 💡 Rename it for non-duplicated imports
+ * export { tw, tw$ }
  */
-const createWind = <StyleType>() => {
+const createWind = <StyleType extends NestedObject>() => {
     const wind$ = <Variant extends string>(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ...variantNames: Variant[]
