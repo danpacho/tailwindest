@@ -1,34 +1,35 @@
 import type {
-    NestStyle,
+    GetNestStyle,
     RemoveIdentifier,
-    TAILWINDEST_NEST_IDENTFIER,
     TailwindestGetNestWithTitle,
 } from "./@nest.core"
 
+type DASH_IDENTIFIER = "-"
+
 type TailwindestPickNestWithTitle<
-    Style,
-    Title extends string,
-    Condition extends string
+    NestStyle,
+    DashNestCondition extends string,
+    OneNestCondition extends string
 > = {
-    [ShouldbeOnlyOneKey in Condition]?: TailwindestGetNestWithTitle<
-        Style,
+    [ShouldBeOnlyOneKey in OneNestCondition]?: TailwindestGetNestWithTitle<
+        NestStyle,
         "",
-        `${Title}-${RemoveIdentifier<Condition, TAILWINDEST_NEST_IDENTFIER>}`
+        `${DashNestCondition}${DASH_IDENTIFIER}${RemoveIdentifier<OneNestCondition>}`
     >
 }
 
 type TailwindestNestWithTitle<
     Nest extends string,
     Tailwind,
-    Type extends "group" | "peer",
+    DashNestCondition extends "group" | "peer",
     Condition extends string
 > = TailwindestPickNestWithTitle<
-    NestStyle<
+    GetNestStyle<
         Nest,
         Tailwind,
-        `${Type}-${RemoveIdentifier<Condition, TAILWINDEST_NEST_IDENTFIER>}`
+        `${DashNestCondition}${DASH_IDENTIFIER}${RemoveIdentifier<Condition>}`
     >,
-    Type,
+    DashNestCondition,
     Condition
 >
 
@@ -148,7 +149,7 @@ type TailwindestGroupFocusWithin<
     Nest extends string,
     Tailwind
 > = TailwindestNestWithTitle<Nest, Tailwind, "group", ":focus-within">
-type TailwindestGroupFocustVisible<
+type TailwindestGroupFocusVisible<
     Nest extends string,
     Tailwind
 > = TailwindestNestWithTitle<Nest, Tailwind, "group", ":focus-visible">
@@ -182,7 +183,7 @@ interface TailwindestGroupPseudoClass<Nest extends string, Tailwind>
         TailwindestGroupFirstOfType<Nest, Tailwind>,
         TailwindestGroupFocusWithin<Nest, Tailwind>,
         TailwindestGroupIndeterminate<Nest, Tailwind>,
-        TailwindestGroupFocustVisible<Nest, Tailwind>,
+        TailwindestGroupFocusVisible<Nest, Tailwind>,
         TailwindestGroupPlaceholderShown<Nest, Tailwind> {}
 
 type TailwindestPeerBackdrop<
@@ -301,7 +302,7 @@ type TailwindestPeerFocusWithin<
     Nest extends string,
     Tailwind
 > = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":focus-within">
-type TailwindestPeerFocustVisible<
+type TailwindestPeerFocusVisible<
     Nest extends string,
     Tailwind
 > = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":focus-visible">
@@ -334,7 +335,7 @@ interface TailwindestPeerPseudoClass<Nest extends string, Tailwind>
         TailwindestPeerFirstOfType<Nest, Tailwind>,
         TailwindestPeerFocusWithin<Nest, Tailwind>,
         TailwindestPeerIndeterminate<Nest, Tailwind>,
-        TailwindestPeerFocustVisible<Nest, Tailwind>,
+        TailwindestPeerFocusVisible<Nest, Tailwind>,
         TailwindestPeerPlaceholderShown<Nest, Tailwind> {}
 
 type TailwindestGroup<Nest extends string, Tailwind> = {

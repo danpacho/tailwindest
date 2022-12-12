@@ -1,14 +1,20 @@
-import type { NestStyle, TailwindestGetNest } from "./@nest.core"
+import type { GetNestStyle, TailwindestGetNest } from "./@nest.core"
 
-type TailwindestPickNest<Style, Condition extends string> = {
-    [ShouldbeOnlyOneKey in Condition]?: TailwindestGetNest<Style, Condition>
+type TailwindestPickNest<NestStyle, OneNestCondition extends string> = {
+    [ShouldBeOnlyOneKey in OneNestCondition]?: TailwindestGetNest<
+        NestStyle,
+        OneNestCondition
+    >
 }
 
 export type TailwindestNest<
     Nest extends string,
     Tailwind,
-    Condition extends string
-> = TailwindestPickNest<NestStyle<Nest, Tailwind, Condition>, Condition>
+    OneNestCondition extends string
+> = TailwindestPickNest<
+    GetNestStyle<Nest, Tailwind, OneNestCondition>,
+    OneNestCondition
+>
 
 type TailwindestSm<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
@@ -52,7 +58,7 @@ type TailwindestContrastMore<Nest extends string, Tailwind> = TailwindestNest<
     Tailwind,
     "@contrast-more"
 >
-type TailwindestContrassLess<Nest extends string, Tailwind> = TailwindestNest<
+type TailwindestContrastLess<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
     "@contrast-less"
@@ -102,7 +108,7 @@ interface TailwindestMedia<Nest extends string, Tailwind>
         TailwindestLandscape<Nest, Tailwind>,
         TailwindestMotionSafe<Nest, Tailwind>,
         TailwindestContrastMore<Nest, Tailwind>,
-        TailwindestContrassLess<Nest, Tailwind>,
+        TailwindestContrastLess<Nest, Tailwind>,
         TailwindestMotionReduce<Nest, Tailwind> {}
 
 type TailwindestBefore<Nest extends string, Tailwind> = TailwindestNest<
