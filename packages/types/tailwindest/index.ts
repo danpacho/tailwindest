@@ -7,11 +7,11 @@ import type { TailwindestNest, TailwindestNestBasic } from "./@nest.basic"
 import type { RemoveUnusedNestProperty } from "./@nest.core"
 import type { TailwindestNestExtends } from "./@nest.extends"
 
-export interface TailwindestNestTypeSet<Nest extends string, Tailwind>
+interface TailwindestNestTypeSet<Nest extends string, Tailwind>
     extends TailwindestNestBasic<Nest, Tailwind>,
         TailwindestNestExtends<Nest, Tailwind> {}
 
-type TailwindestNestPlugExtends<
+type TailwindestNestPlugExtendedTypeSet<
     Nest extends string,
     Tailwind,
     T extends TailwindestNestPlugOption = TailwindestDefaultNestPlug
@@ -42,13 +42,23 @@ type TailwindestNestPlugExtends<
     TailwindestNest<Nest, Tailwind, Pluggable<T["conditionY"]>> &
     TailwindestNest<Nest, Tailwind, Pluggable<T["conditionZ"]>>
 
+type TailwindestNestType<
+    Nest extends string,
+    TailwindRemoveUnusedNestProperty,
+    TailwindNestCustom extends TailwindestNestPlugOption = TailwindestDefaultNestPlug
+> = TailwindestNestTypeSet<Nest, TailwindRemoveUnusedNestProperty> &
+    TailwindestNestPlugExtendedTypeSet<
+        Nest,
+        TailwindRemoveUnusedNestProperty,
+        TailwindNestCustom
+    >
+
 export type TailwindestTypeSet<
     Tailwind,
     Nest extends string,
     TailwindNestCustom extends TailwindestNestPlugOption = TailwindestDefaultNestPlug
 > = Tailwind &
-    TailwindestNestTypeSet<Nest, RemoveUnusedNestProperty<Tailwind>> &
-    TailwindestNestPlugExtends<
+    TailwindestNestType<
         Nest,
         RemoveUnusedNestProperty<Tailwind>,
         TailwindNestCustom
