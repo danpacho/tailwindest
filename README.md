@@ -2,22 +2,31 @@
 
 <div align="center">
 
-<img src="./assets/tailwindest.banner.png" width="525" alt="tailwindest banner" />
+<img src="./images/tailwindest.banner.png" width="550" alt="tailwindest banner" />
 
 </div>
 
+<br />
+
 # Design Goals
 
-> Make
+> **Note**
+>
 > **_Readable_** / **_Reusable_** / **_Flexible_**
-> className
+>
+> **`tailwind`** **className**
+
+<br />
 
 # Recommended for
 
-1. Strictly **typed** **`tailwind`**
-2. Love **css in js like syntax**
-3. Make **design system with** **`tailwind`**
-4. **Refactoring** lover
+1. Fully **typed** **`tailwind`**
+2. Build **design system with** **`tailwind`**
+3. **CSS in TS like syntax** lover
+4. **Typescript** lover
+5. **Refactoring** lover
+
+<br />
 
 # Worth it?
 
@@ -25,13 +34,13 @@
 
 > **Autocompleted** by **`typescript`**, **`tailwind`** is literally insane.
 
-## 💅 Similar to css in js
+## 💅 Similar to CSS in TS
 
-> Syntax is **very similar to css in js**, meaning **easy to use it.**
+> Syntax is **very similar to CSS in TS**, meaning **easy to start.**
 
 ## 🔮 Variants
 
-> **Variants based conditional styling**, Inspitomato by **`stitches`** & **`vanilla-extract`**
+> **Variants based conditional styling**, inspired by **`stitches`** & **`vanilla-extract`**
 >
 > Practical and Intuitive.
 
@@ -39,17 +48,22 @@
 
 > **Hover** the property, you will **get document** **`link`**
 >
-> <img src="./assets/docs.png" width="420" />
+> <img src="./images/docs.png" width="420" />
 
 ## 🍦 Atomic Size
 
-> Gzip, **`614B`** **_tiny_ library**.
+> Gzip, **`605B`** **_tiny_ library**.
 >
 > Don’t worry about bundle size.
 
-## 🔌 Custom value? Yeas.
+## 🔌 Custom value? Yeas
 
 > **Support extended custom values**, defined in **`tailwind.config.js`**
+
+## 🌈 Independency of platform
+
+> **Compatible with any library or framework**.
+> Even _Vanilla JavaScript_.
 
 ## 🔥 Combine Power of Inline & Tailwindest
 
@@ -59,8 +73,14 @@
 > **Complex / Conditional style**
 > = **`tailwindest`**
 
-# Start
+<br />
+
+# Boot up, in 5s
 
 ```bash
 pnpm i tailwindest
 ```
+
+<br />
+
+# Deep dive
