@@ -6,13 +6,13 @@ export type TailwindGlobalPluginKey = "color" | "opacity" | "sizing"
 
 /**
  * @description Nest conditions
- * @description sholud be only **one** string literal
+ * @description should be only **one** string literal
  * @example
  * type MyTailwindest = Tailwindest<{
  *      screens: {
  *          conditionA: "@my-condition",
  *          // ✅ only one string union
- *          conditionB: "@dont-do-this" | "@dont-do-this-plz"
+ *          conditionB: "@don't-do-this" | "@don't-do-this-plz"
  *          // ❌ more than one string union
  *      }
  * }>
