@@ -1,6 +1,4 @@
-type IDENTIFIER = ":"
-type BREAK_CONDITION_IDENTIFIER = "@"
-export type TAILWINDEST_IDENTIFIER = IDENTIFIER | BREAK_CONDITION_IDENTIFIER
+export type TAILWINDEST_IDENTIFIER = ":" | "@"
 
 /**
  * @example "::before" -> "before"
@@ -21,7 +19,7 @@ type CombineConditionAtTargetClass<
 > = Class extends string
     ? ConditionClass extends ""
         ? Class
-        : `${RemoveIdentifier<ConditionClass>}${IDENTIFIER}${Class}`
+        : `${RemoveIdentifier<ConditionClass>}:${Class}`
     : Class
 
 type CombineKeyAtObjectProperty<
@@ -34,7 +32,7 @@ type CombineKeyAtObjectProperty<
         : NestKey extends string
         ? CombineKeyAtObjectProperty<
               NestObject[NestKey],
-              `${NestCondition}${IDENTIFIER}${RemoveIdentifier<NestKey>}`
+              `${NestCondition}:${RemoveIdentifier<NestKey>}`
           >
         : never
 }
@@ -58,7 +56,7 @@ type CombineNestConditionAtNestStyleProperty<
     NestCondition extends string = ""
 > = {
     [NestKey in keyof NestStyle]?: NestStyle[NestKey] extends string
-        ? `${RemoveIdentifier<NestCondition>}${IDENTIFIER}${NestStyle[NestKey]}`
+        ? `${RemoveIdentifier<NestCondition>}:${NestStyle[NestKey]}`
         : never
 }
 
@@ -70,7 +68,13 @@ export type GetNestStyle<
     NestStyle,
     NestCondition extends string = ""
 > = {
-    [key in Exclude<Nest, NestCondition>]?: NestStyle
+    [Key in Exclude<Nest, NestCondition>]?: Key extends ""
+        ? NestStyle
+        : GetNestStyle<
+              Exclude<Nest, Key | NestCondition>,
+              NestStyle,
+              `${NestCondition}:${RemoveIdentifier<Key>}`
+          >
 } & CombineNestConditionAtNestStyleProperty<NestStyle, NestCondition>
 
 type UnusedNestProperty = "transition" | "border"
