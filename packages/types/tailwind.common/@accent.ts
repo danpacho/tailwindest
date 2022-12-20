@@ -1,6 +1,8 @@
 import { PlugBase, Pluggable } from "../plugin"
+import { TailwindArbitrary } from "./@arbitrary"
 
-type TailwindOpacity<Plug extends PlugBase = ""> =
+export type TailwindOpacity<Plug extends PlugBase = ""> =
+    | "0"
     | "5"
     | "10"
     | "15"
@@ -20,6 +22,7 @@ type TailwindOpacity<Plug extends PlugBase = ""> =
     | "85"
     | "90"
     | "95"
+    | TailwindArbitrary
     | Pluggable<Plug>
 
 export type TailwindColorAccent =
