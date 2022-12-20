@@ -15,9 +15,9 @@ import type { TailwindestTypeSet } from "./types/tailwindest"
  * // Plug customized type to createWind generic
  * type Custom = Tailwindest<
  *    {
- *        // Add color, spacing, screens global property
+ *        // Add color, sizing, screens global property
  *        color: "my-color1" | "my-color2"
- *        spacing: "0.25" | "0.5" | "0.75"
+ *        sizing: "0.25" | "0.5" | "0.75"
  *        screens: {
  *            // only one string union
  *            conditionA: "@do-this"
