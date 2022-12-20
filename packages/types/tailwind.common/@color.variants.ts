@@ -1,7 +1,7 @@
 import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "./@arbitrary"
 
-export type TailwindColorVariants =
+export type TailwindColorWithVariants =
     | "slate"
     | "gray"
     | "neutral"

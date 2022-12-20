@@ -2,8 +2,8 @@ import { PluginOption } from "../plugin"
 import { TailwindGlobalPluginKey } from "../tailwind.plugin.key"
 import { TailwindColorAccent, TailwindColorWithOpacity } from "./@accent"
 import {
-    TailwindColorVariants,
     TailwindColorWithNoVariants,
+    TailwindColorWithVariants,
 } from "./@color.variants"
 
 export type TailwindColorPluginOptionKey = Exclude<
@@ -12,12 +12,15 @@ export type TailwindColorPluginOptionKey = Exclude<
 >
 type TailwindColorPlugOption = PluginOption<TailwindColorPluginOptionKey>
 
+type TailwindDefaultColor =
+    `${TailwindColorWithVariants}-${TailwindColorAccent}`
+
 export type TailwindColor<
     PlugOption extends TailwindColorPlugOption = PluginOption<
         TailwindColorPluginOptionKey,
         ""
     >
 > =
+    | TailwindDefaultColor
     | TailwindColorWithNoVariants<PlugOption["color"]>
     | TailwindColorWithOpacity<PlugOption["opacity"]>
-    | `${TailwindColorVariants}-${TailwindColorAccent}`
