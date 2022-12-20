@@ -116,7 +116,6 @@ export type TailwindStylePluginKey =
     | "minHeight"
     | "minWidth"
     | "objectPosition"
-    | "opacity"
     | "order"
     | "padding"
     | "outlineColor"

@@ -1,8 +1,9 @@
-import type { TailwindAccessbility } from "./tailwind.accessibility"
+import type { TailwindAccessibility } from "./tailwind.accessibility"
 import type { TailwindBackgrounds } from "./tailwind.backgrounds"
 import type { TailwindBorders } from "./tailwind.borders"
+import type { TailwindOpacity } from "./tailwind.common/@accent"
 import type { TailwindColor } from "./tailwind.common/@color"
-import type { TailwindSpacingVariants } from "./tailwind.common/@spacing.varients"
+import type { TailwindSpacingVariants } from "./tailwind.common/@spacing.variants"
 import type { TailwindEffects } from "./tailwind.effects"
 import type { TailwindFilters } from "./tailwind.filters"
 import type {
@@ -29,14 +30,13 @@ import type { TailwindTransitionAnimation } from "./tailwind.transition.animatio
 export interface Tailwind<
     GlobalPlugOption extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
     StylePlugOption extends TailwindStylePlugOption = TailwindDefaultStylePlug
-> extends TailwindAccessbility,
+> extends TailwindAccessibility,
         TailwindGrid<StylePlugOption>,
         TailwindFilters<StylePlugOption>,
         TailwindTransitionAnimation<StylePlugOption>,
         TailwindSvg<TailwindColor<GlobalPlugOption>, StylePlugOption>,
         TailwindFont<TailwindColor<GlobalPlugOption>, StylePlugOption>,
         TailwindBorders<TailwindColor<GlobalPlugOption>, StylePlugOption>,
-        TailwindEffects<TailwindColor<GlobalPlugOption>, StylePlugOption>,
         TailwindBackgrounds<TailwindColor<GlobalPlugOption>, StylePlugOption>,
         TailwindFlex<
             TailwindSpacingVariants<GlobalPlugOption["color"]>,
@@ -66,5 +66,10 @@ export interface Tailwind<
         TailwindInteractivity<
             TailwindColor<GlobalPlugOption>,
             TailwindSpacingVariants<GlobalPlugOption["sizing"]>,
+            StylePlugOption
+        >,
+        TailwindEffects<
+            TailwindColor<GlobalPlugOption>,
+            TailwindOpacity<GlobalPlugOption["opacity"]>,
             StylePlugOption
         > {}

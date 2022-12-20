@@ -42,7 +42,7 @@ type TailwindestNestPlugExtendedTypeSet<
     TailwindestNest<Nest, Tailwind, Pluggable<T["conditionY"]>> &
     TailwindestNest<Nest, Tailwind, Pluggable<T["conditionZ"]>>
 
-type TailwindestNestType<
+type TailwindestNestPlugType<
     Nest extends string,
     TailwindRemoveUnusedNestProperty,
     TailwindNestCustom extends TailwindestNestPlugOption = TailwindestDefaultNestPlug
@@ -58,7 +58,7 @@ export type TailwindestTypeSet<
     Nest extends string,
     TailwindNestCustom extends TailwindestNestPlugOption = TailwindestDefaultNestPlug
 > = Tailwind &
-    TailwindestNestType<
+    TailwindestNestPlugType<
         Nest,
         RemoveUnusedNestProperty<Tailwind>,
         TailwindNestCustom
