@@ -1,8 +1,9 @@
 import path from "path"
+import { fileURLToPath } from "url"
+import terser from "@rollup/plugin-terser"
 import typescript from "@rollup/plugin-typescript"
 import dts from "rollup-plugin-dts"
 import esbuild from "rollup-plugin-esbuild"
-import { terser } from "rollup-plugin-terser"
 import { bundleSizePlugin } from "./js/plugin/bundleSizePlugin.js"
 
 /**@typedef {import('rollup').RollupOptions} RollupOptions */
@@ -28,12 +29,23 @@ function getEsbuildPlugin(target, env = "development") {
  * @returns {RollupOptions} ESM config
  */
 function getESMConfig({ input, output, env }) {
+    //FIXME: __filename is not defined error
+    // https://github.com/rollup/plugins/issues/1366
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    global["__filename"] = fileURLToPath(import.meta.url)
+
     return {
         input,
         output: [{ file: `${output}.js`, format: "esm" }],
         plugins:
             env === "production"
-                ? [getEsbuildPlugin("node14", env), terser()]
+                ? [
+                      getEsbuildPlugin("node14", env),
+                      terser({
+                          sourceMap: true,
+                      }),
+                  ]
                 : [getEsbuildPlugin("node14", env)],
     }
 }
@@ -95,7 +107,7 @@ const entryPoint = "index"
  * @param {*} args
  * @returns {RollupOptions[]} rollup build config
  */
-export default function () {
+export default function (args) {
     return [
         getTypeDefConfig({
             input: `packages/${entryPoint}.ts`,
