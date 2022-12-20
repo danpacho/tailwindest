@@ -1,17 +1,24 @@
 import type { VariantsList } from "./wind"
 
 /**
- * @description Get variants type set at `wind$` or `createVariants`
- * @returns Type `string union` or `object` or `never`
+ * @description Get variants type of `wind$`, `createVariants`
  * @example
- * // ✅ "success" | "fail"
+ * ```ts
+ * // ✅ < wind$ >
  * type Variants = WindVariants<typeof btnSuccessFail>
+ * type VariantsResult = "success" | "fail"
  *
- * // ✅ { bg: "red" | "blue", type: "success" | "fail" }
+ * // ✅ < createVariants >
  * type ComplexVariants = WindVariants<typeof complexBtn>
+ * type ComplexVariantsResult = {
+ *      size?: "sm" | "md" | "lg" | undefined
+ *      type?: "success" | "fail" | undefined
+ * }
  *
- * // ❌ never
+ * // ❌ < wind >
  * type NoVariants = WindVariants<typeof btnNoVariants>
+ * type NoVariantsResult = never
+ * ```
  */
 export type WindVariants<TypeofWind> = TypeofWind extends {
     style: (variants: infer Variants) => unknown
