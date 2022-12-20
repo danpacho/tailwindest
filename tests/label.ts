@@ -3,7 +3,7 @@
  */
 const label = {
     /**
-     * @param unitLabel lable of testing unit
+     * @param unitLabel label of testing unit
      * @returns unit label
      */
     unit: (unitLabel: string) => `[ 🆄 🅽 🅸 🆃 : ${unitLabel} ]`,
