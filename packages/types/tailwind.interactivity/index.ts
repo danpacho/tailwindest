@@ -12,7 +12,7 @@ import { TailwindScrollSnapAlignType } from "./@scroll.snap.align"
 import { TailwindScrollSnapStopType } from "./@scroll.snap.stop"
 import { TailwindScrollSnapTypeType } from "./@scroll.snap.type"
 import { TailwindTouchActionType } from "./@touch.action"
-import { TailwindUserSlectType } from "./@user.slect"
+import { TailwindUserSelectType } from "./@user.slect"
 import { TailwindWillChangeType } from "./@will.change"
 
 export interface TailwindInteractivity<
@@ -34,7 +34,7 @@ export interface TailwindInteractivity<
         scrollPadding: ""
     }
 > extends TailwindResizeType,
-        TailwindUserSlectType,
+        TailwindUserSelectType,
         TailwindAppearanceType,
         TailwindTouchActionType,
         TailwindPointerEventsType,

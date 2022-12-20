@@ -46,7 +46,7 @@ export type TailwindBorderColorType<BorderColor extends string> = {
 
 export type TailwindDivideColorType<BorderColor extends string> = {
     /**
-     *@description Utilities for controlling the border-color-x between elements.
+     *@description Utilities for controlling the border color between elements.
      *@see {@link https://tailwindcss.com/docs/divide-color divide color}
      */
     divideColor: PluginVariants<"divide", BorderColor>

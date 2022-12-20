@@ -37,5 +37,5 @@ export type TailwindSpacingVariants<Plug extends PlugBase = ""> =
     | "0.5"
     | "0"
     | "px"
-    | Pluggable<Plug>
     | TailwindArbitrary
+    | Pluggable<Plug>

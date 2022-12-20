@@ -1,3 +1,3 @@
 import { TailwindScreenReadersType } from "./@screen.readers"
 
-export type TailwindAccessbility = TailwindScreenReadersType
+export type TailwindAccessibility = TailwindScreenReadersType

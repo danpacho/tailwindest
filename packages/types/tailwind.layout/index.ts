@@ -1,5 +1,5 @@
 import { Pluggable } from "../plugin"
-import { TailwindAsepectRatioType } from "./@aspect.ratio"
+import { TailwindAspectRatioType } from "./@aspect.ratio"
 import { TailwindBoxDecorationBreakType } from "./@box.decoration.break"
 import { TailwindBoxSizingType } from "./@box.sizing"
 import { TailwindBreakType } from "./@break"
@@ -46,7 +46,7 @@ export interface TailwindLayout<
         TailwindOverscrollBehaviorType,
         TailwindZIndexType<LayoutPlug["zIndex"]>,
         TailwindColumnsType<LayoutPlug["columns"]>,
-        TailwindAsepectRatioType<LayoutPlug["aspectRatio"]>,
+        TailwindAspectRatioType<LayoutPlug["aspectRatio"]>,
         TailwindObjectPositionType<LayoutPlug["objectPosition"]>,
         TailwindPositionType,
         TailwindPositionValueType<

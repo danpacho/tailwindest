@@ -4,7 +4,7 @@ import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 type TailwindFlexShrink<Plug extends PlugBase = ""> =
     | "shrink"
     | "shrink-0"
-    | `shirink-${TailwindArbitrary | Pluggable<Plug>}`
+    | `shrink-${TailwindArbitrary | Pluggable<Plug>}`
 
 export type TailwindFlexShrinkType<Plug extends PlugBase = ""> = {
     /**
