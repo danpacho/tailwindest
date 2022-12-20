@@ -100,8 +100,13 @@ function getBundleTypeDefConfig({ bundleSourcePath, bundleResultPath }) {
     }
 }
 
-/**@type {"index"} */
-const entryPoint = "index"
+const PATH = {
+    entryPoint: "index",
+    entryDir: "packages",
+    outputDir: "dist",
+    outputDevDir: "dist/dev",
+    watchDir: "dist/watch",
+}
 
 /**
  * @param {*} args
@@ -110,37 +115,37 @@ const entryPoint = "index"
 export default function (args) {
     return [
         getTypeDefConfig({
-            input: `packages/${entryPoint}.ts`,
-            output: "dist",
+            input: `${PATH.entryDir}/${PATH.entryPoint}.ts`,
+            output: PATH.outputDir,
         }),
         getESMConfig({
-            input: `packages/${entryPoint}.ts`,
-            output: `dist/dev/${entryPoint}`,
+            input: `${PATH.entryDir}/${PATH.entryPoint}.ts`,
+            output: `${PATH.outputDevDir}/${PATH.entryPoint}`,
             env: "development",
         }),
         getESMConfig({
-            input: `packages/core/${entryPoint}.ts`,
-            output: `dist/dev/core/${entryPoint}`,
+            input: `${PATH.entryDir}/core/${PATH.entryPoint}.ts`,
+            output: `${PATH.outputDevDir}/core/${PATH.entryPoint}`,
             env: "development",
         }),
         getESMConfig({
-            input: `packages/utils/${entryPoint}.ts`,
-            output: `dist/dev/utils/${entryPoint}`,
+            input: `${PATH.entryDir}/utils/${PATH.entryPoint}.ts`,
+            output: `${PATH.outputDevDir}/utils/${PATH.entryPoint}`,
             env: "development",
         }),
         getESMConfig({
-            input: `packages/${entryPoint}.ts`,
-            output: `dist/${entryPoint}`,
+            input: `${PATH.entryDir}/${PATH.entryPoint}.ts`,
+            output: `${PATH.outputDir}/${PATH.entryPoint}`,
             env: "production",
         }),
         getBundleTypeDefConfig({
-            bundleSourcePath: `./dist/${entryPoint}.d.ts`,
-            bundleResultPath: "./dist/tailwindest.d.ts",
+            bundleSourcePath: `${PATH.outputDir}/${PATH.entryPoint}.d.ts`,
+            bundleResultPath: `${PATH.outputDir}/tailwindest.d.ts`,
         }),
         getBundleSizeConfig({
-            devBuildPath: `dist/dev/${entryPoint}.js`,
-            productionBuildPath: `dist/${entryPoint}.js`,
-            outputWatchPath: "dist:watch",
+            devBuildPath: `${PATH.outputDevDir}/${PATH.entryPoint}.js`,
+            productionBuildPath: `${PATH.outputDir}/${PATH.entryPoint}.js`,
+            outputWatchPath: PATH.watchDir,
         }),
     ]
 }

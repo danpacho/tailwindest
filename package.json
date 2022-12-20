@@ -20,10 +20,10 @@
         "CSS in TS"
     ],
     "scripts": {
-        "build": "pnpm clean && rollup -c && rimraf dist:watch",
+        "build": "pnpm clean && rollup -c && rimraf dist/watch",
         "build:watch": "rollup -cw",
         "build:class": "node ./js/scripts/extract && prettier './packages/types/tailwind.nested/**.ts' --write",
-        "clean": "rimraf {dist,dist:watch}",
+        "clean": "rimraf {dist,dist/watch}",
         "bench": "node ./js/benchmark/bench.js",
         "prettier": "prettier '{packages,js}/**/*.{ts,js,md}' --check",
         "prettier:fix": "prettier '{packages,js}/**/*.{ts,js,md}' --write",
