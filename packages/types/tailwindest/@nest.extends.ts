@@ -1,7 +1,7 @@
 import type {
     GetNestStyle,
     RemoveIdentifier,
-    TailwindestGetNestWithTitle,
+    TailwindestGetNest,
 } from "./@nest.core"
 
 type DASH_IDENTIFIER = "-"
@@ -11,9 +11,8 @@ type TailwindestPickNestWithTitle<
     DashNestCondition extends string,
     OneNestCondition extends string
 > = {
-    [ShouldBeOnlyOneKey in OneNestCondition]?: TailwindestGetNestWithTitle<
+    [ShouldBeOnlyOneKey in OneNestCondition]?: TailwindestGetNest<
         NestStyle,
-        "",
         `${DashNestCondition}${DASH_IDENTIFIER}${RemoveIdentifier<OneNestCondition>}`
     >
 }
