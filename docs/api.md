@@ -22,6 +22,8 @@
         -   [Example](#example-1)
         -   [Parameter: `style`](#parameter-style-1)
         -   [Example](#example-2)
+        -   [Parameter: `variantsStyles`](#parameter-variantsstyles)
+        -   [Example](#example-3)
     -   [3. Returns](#3-returns-1)
 -   [`createVariants`](#createvariants)
     -   [Briefly](#briefly-2)
@@ -30,7 +32,7 @@
         -   [Usage](#usage-2)
         -   [Parameter: `variantsStyle`](#parameter-variantsstyle)
         -   [Parameter: `variantsOption`](#parameter-variantsoption)
-        -   [Example](#example-3)
+        -   [Example](#example-4)
     -   [3. Returns](#3-returns-2)
 -   [`mergeProps`](#mergeprops)
     -   [Briefly](#briefly-3)
@@ -39,7 +41,7 @@
         -   [Usage](#usage-3)
         -   [Parameter: `baseStyle`](#parameter-basestyle)
         -   [Parameter: `styleProps`](#parameter-styleprops)
-        -   [Example](#example-4)
+        -   [Example](#example-5)
 -   [`Tailwindest`](#tailwindest)
     -   [Briefly](#briefly-4)
     -   [1. Type definition](#1-type-definition-4)
@@ -47,21 +49,21 @@
         -   [Usage](#usage-4)
         -   [Generic Parameter: `TailwindGlobal`](#generic-parameter-tailwindglobal)
         -   [Generic Parameter: `TailwindStyle`](#generic-parameter-tailwindstyle)
-        -   [Example](#example-5)
+        -   [Example](#example-6)
 -   [`createWind`](#createwind)
     -   [Briefly](#briefly-5)
     -   [1. Type definition](#1-type-definition-5)
     -   [2. Spec](#2-spec-5)
         -   [Usage](#usage-5)
         -   [Generic Parameter: `StyleType`](#generic-parameter-styletype)
-        -   [Example](#example-6)
+        -   [Example](#example-7)
 -   [`WindVariants`](#windvariants)
     -   [Briefly](#briefly-6)
     -   [1. Type definition](#1-type-definition-6)
     -   [2. Spec](#2-spec-6)
         -   [Usage](#usage-6)
         -   [Generic Parameter: `TypeofWind`](#generic-parameter-typeofwind)
-        -   [Example](#example-7)
+        -   [Example](#example-8)
 
 <br />
 
@@ -317,7 +319,7 @@ The first `stylesheet` factor, `style`, has two ways of using it.
 
     > **Note**
     >
-    > **If default variant is explicitly defined**
+    > **Use it, if default variant is explicitly defined**
 
     ```ts
     const button = wind$(
@@ -358,6 +360,36 @@ The first `stylesheet` factor, `style`, has two ways of using it.
     > // defaultButtonStyle1 === defaultButtonStyle2
     > // same
     > ```
+
+### Parameter: `variantsStyles`
+
+-   type: `VariantsStyles<Variant, Tailwindest>`
+-   usage: Define **variant** `stylesheet`
+
+### Example
+
+Define **variant** `stylesheet`
+
+```ts
+const button = wind$("warning", "success")(
+    {
+        // default button styles
+        backgroundColor: "bg-white",
+        // ...more default styles
+    },
+    {
+        // 🔥 variant name is fully autocompleted!
+        success: {
+            backgroundColor: "bg-green-100",
+            // ...more success variant styles
+        },
+        warning: {
+            backgroundColor: "bg-red-100",
+            // ...more warning variant styles
+        },
+    }
+)
+```
 
 ## 3. Returns
 
@@ -637,7 +669,11 @@ const text = wind({
 }).style()
 ```
 
-`text`는 `stylesheet` `object`입니다.
+> **Note**
+>
+> `text` is `stylesheet` `object`.
+>
+> It means that first argument of `mergeProps` should be `stylesheet` `object`.
 
 Now let's define a `Text` that can have **variable font size**.
 
@@ -860,7 +896,6 @@ type Tailwindest<
         minHeight?: Custom
         minWidth?: Custom
         objectPosition?: Custom
-        opacity?: Custom
         order?: Custom
         padding?: Custom
         outlineColor?: Custom
@@ -926,46 +961,6 @@ type MyCustom = Tailwindest<
 >
 ```
 
-> **Note**: `Tailwindest` type **supports only `2 depth` nesting**
->
-> ```ts
-> const onlyTwoDepth = wind({
->     "@dark": {
->         ":hover": {
->             /** all property is autocompleted */
->         },
->     },
->     "@md": {
->         "@dark": {
->             /** all property is autocompleted */
->         },
->     },
-> })
-> ```
->
-> But supports 3 depth for `@peer` and `@group`
->
-> ```ts
-> const threeDepthForPeerAndGroup = wind({
->     "@peer": {
->         ":hover": {
->             ":active": {
->                 /** all property is autocompleted */
->             },
->         },
->     },
->     "@group": {
->         ":hover": {
->             ":active": {
->                 /** all property is autocompleted */
->             },
->         },
->     },
-> })
-> ```
->
-> Technically if depth increase to 3, string literal type calculation performance will be decreased too far (TS server calculation performance low, meaning lower DX).
-
 Pick specific tailwind value
 
 -   basic type
@@ -1002,7 +997,7 @@ Pick specific tailwind value
 
 ## Briefly
 
-Use to **create `wind` and `wind$` functions** with custom values defined in `tailwind.config.js`.
+**Create `wind` and `wind$` functions** with custom values defined in `tailwind.config.js`.
 
 ## 1. Type definition
 
@@ -1125,7 +1120,7 @@ export { tw, tw$ }
 
 ## Briefly
 
-`wind$` 와 `createVariants`의 **variant type을 추출하고 싶은 경우**에 사용합니다.
+**Extract variants type** of instance of `wind$`, `createVariants`.
 
 ## 1. Type definition
 
