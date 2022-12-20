@@ -1,34 +1,34 @@
-/* eslint-disable @typescript-eslint/no-extra-semi */
 import type { NestedObject } from "./nested.object.type"
 
 /**
- * @param obj string key object
+ * @param nestedObject string key object
  * @returns Merge nested style object deeply
  */
-const deepMerge = <T>(...obj: T[]): T =>
-    obj.reduce<T>((merged, obj) => {
-        const objectEntries = Object.entries<unknown>(obj as NestedObject)
-        for (const [key, value] of objectEntries) {
-            if ((merged as NestedObject)[key] === undefined) {
-                ;(merged as NestedObject)[key] = value
+const deepMerge = <T>(...nestedObject: T[]): T =>
+    nestedObject.reduce<NestedObject>((mergedObject, currentObject) => {
+        for (const [currKey, currValue] of Object.entries(
+            currentObject as NestedObject
+        )) {
+            if (mergedObject[currKey] === undefined) {
+                mergedObject[currKey] = currValue
             } else {
-                if (typeof value === "string") {
-                    ;(merged as NestedObject)[key] = value
+                if (typeof currValue === "string") {
+                    mergedObject[currKey] = currValue
                 } else {
-                    if (value) {
-                        if (typeof (merged as NestedObject)[key] === "string") {
-                            deepMerge((merged as NestedObject)[key], value)
+                    if (currValue) {
+                        if (typeof mergedObject[currKey] === "string") {
+                            deepMerge(mergedObject[currKey], currValue)
                         } else {
-                            ;(merged as NestedObject)[key] = deepMerge(
-                                (merged as NestedObject)[key],
-                                value
+                            mergedObject[currKey] = deepMerge(
+                                mergedObject[currKey],
+                                currValue
                             )
                         }
                     }
                 }
             }
         }
-        return merged
-    }, {} as T)
+        return mergedObject
+    }, {}) as T
 
 export { deepMerge }
