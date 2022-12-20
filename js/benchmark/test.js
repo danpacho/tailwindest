@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
     createVariants as createVariants__DEV,
     wind$ as wind$__DEV,
@@ -9,9 +10,6 @@ import {
     wind as wind__PROD,
 } from "../../dist/index.js"
 
-/** @typedef {import('../../dist/index').Tailwindest} Tailwindest */
-
-/** @type {Tailwindest} */
 const base = {
     "::after": {
         "::placeholder": {
@@ -62,7 +60,6 @@ const base = {
     },
 }
 
-/** @type {Tailwindest} */
 const variant = {
     backgroundColor: "bg-red-600",
     borderColor: "border-red-400",
@@ -116,15 +113,14 @@ const test__wind__DEV = wind__DEV(base)
  * @production
  * @description `wind`, no variants mode
  */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-nocheck
+// @ts-ignore
 const test__wind__PROD = wind__PROD(base)
 
 /**
  * @production
- * @description centerize style, composed to the `wind$`
+ * @description centering style, composed to the `wind$`
  */
-const centerize = wind__PROD({
+const centering = wind__PROD({
     display: "flex",
     alignItems: "items-center",
     justifyContent: "justify-center",
@@ -134,16 +130,16 @@ const centerize = wind__PROD({
 /**
  * @development
  * @description `wind$` with `warn` | `pending` variants
- * @description compose with `base` & `centerize` styles
+ * @description compose with `base` & `centering` styles
  */
 const test__wind$__DEV = wind$__DEV("warn", "pending")(
     {
-        //! should be replaced by centerize start
+        //! should be replaced by centering start
         display: "hidden",
         alignItems: "items-baseline",
         justifyContent: "justify-between",
         margin: "m-1",
-        //! should be replaced by centerize end
+        //! should be replaced by centering end
 
         padding: "p-1.5",
 
@@ -181,12 +177,12 @@ const test__wind$__DEV = wind$__DEV("warn", "pending")(
             },
         },
     }
-).compose(base, centerize)
+).compose(base, centering)
 
 /**
  * @production
  * @description `wind$` with `warn` | `pending` variants
- * @description compose with `base` & `centerize` styles
+ * @description compose with `base` & `centering` styles
  */
 const test__wind$__PROD = wind$__PROD("warn", "pending")(
     {
@@ -233,7 +229,8 @@ const test__wind$__PROD = wind$__PROD("warn", "pending")(
             },
         },
     }
-).compose(base, centerize)
+    // @ts-ignore
+).compose(base, centering)
 
 const variants__PROD = createVariants__PROD({
     size: test__wind$__PROD,
