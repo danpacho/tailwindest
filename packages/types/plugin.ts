@@ -7,7 +7,7 @@ export type Literalize<Literal> = Literal extends string
 type RecordWithPartial<Key extends string, Value> = { [P in Key]?: Value }
 
 export type PlugBase = string | undefined
-export type Pluggable<Plug> = Literalize<Exclude<Plug, "" | undefined>>
+export type Pluggable<Plug> = Literalize<Exclude<Plug, "">>
 
 export type PluginOption<
     OptionKey extends string,
