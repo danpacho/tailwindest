@@ -16,6 +16,7 @@ node_modules/
 
 # Testing
 coverage
+ts-perf
 
 # Logs
 npm-debug.log*

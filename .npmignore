@@ -23,6 +23,9 @@ dist/wind.d.ts
 dist/wind.variants.d.ts
 dist/create.wind.d.ts
 
+# Test
+ts-perf
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
