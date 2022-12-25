@@ -140,7 +140,7 @@ export default function (args) {
         }),
         getBundleTypeDefConfig({
             bundleSourcePath: `${PATH.outputDir}/${PATH.entryPoint}.d.ts`,
-            bundleResultPath: `${PATH.outputDir}/tailwindest.d.ts`,
+            bundleResultPath: `${PATH.outputDir}/${PATH.entryPoint}.d.ts`,
         }),
         getBundleSizeConfig({
             devBuildPath: `${PATH.outputDevDir}/${PATH.entryPoint}.js`,

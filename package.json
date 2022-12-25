@@ -43,12 +43,12 @@
     ],
     "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "types": "./dist/tailwindest.d.ts",
+    "types": "./dist/index.d.ts",
     "exports": {
         ".": {
             "import": "./dist/index.js",
             "default": "./dist/index.js",
-            "types": "./dist/tailwindest.d.ts",
+            "types": "./dist/index.d.ts",
             "module": "./dist/index.js"
         }
     },
