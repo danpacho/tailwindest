@@ -32,8 +32,8 @@
         "test": "jest",
         "test:dev": "jest --watch --no-coverage",
         "test:coverage:watch": "jest --watch",
-        "test:ts-type": "tsc --noEmit",
-        "test:ts-performance": "tsc --noEmit --generateTrace ts-perf",
+        "test:ts-typecheck": "tsc --noEmit",
+        "test:ts-performance": "rimraf ts-perf && tsc --noEmit --generateTrace ts-perf",
         "pre-commit": "lint-staged",
         "prepare": "husky install"
     },
