@@ -14,16 +14,16 @@ function bundleSizePlugin() {
             if ("code" in bundledProd && "code" in bundledDev) {
                 const size = maxmin(bundledDev.code, bundledProd.code, true)
                 logger
-                    .divider()
-                    .header("Check Bundle Size ✅")
+                    .log("")
+                    .header("   Check Bundle Size   ")
                     .log("")
                     .bold(size)
-                    .divider()
+                    .log("")
             } else {
                 logger
-                    .divider()
+                    .log("")
                     .header(`Can't find ${dev} / ${prod} code ‼️`)
-                    .divider()
+                    .log("")
             }
         },
     }
