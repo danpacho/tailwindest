@@ -1,8 +1,6 @@
 name: Publish package on tagged commit
 on:
     push:
-        branches:
-            - master
         tags:
             - v*.*.*
 jobs:
