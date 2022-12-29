@@ -1,9 +1,14 @@
 <br />
 
+# 🏛️ Tailwindest Architectures
+
+![architecture](./../images/architecture.png)
+
 # 🛠️ API Reference
 
 **Api reference** of `tailwindest`
 
+-   [🏛️ Tailwindest Architectures](#️-tailwindest-architectures)
 -   [🛠️ API Reference](#️-api-reference)
 -   [`wind` - basic styling](#wind---basic-styling)
     -   [Briefly](#briefly)
