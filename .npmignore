@@ -11,7 +11,7 @@ lerna-debug.log*
 node_modules
 *.local
 
-# Build
+# Uesless build outputs
 dist:watch
 dist/dev/*
 dist/index.d.ts
@@ -23,6 +23,14 @@ dist/wind.d.ts
 dist/wind.variants.d.ts
 dist/create.wind.d.ts
 
+# Others
+website
+docs
+images
+coverage
+tests
+js
+
 # Test
 ts-perf
 
@@ -31,6 +39,8 @@ ts-perf
 !.vscode/extensions.json
 .idea
 .DS_Store
+.github
+.husky
 *.suo
 *.ntvs*
 *.njsproj
