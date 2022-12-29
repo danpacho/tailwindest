@@ -41,8 +41,23 @@ jobs:
             - name: Install package dependencies
               run: pnpm install
 
-            - name: Test & Build
-              run: pnpm ci
+            - name: Format checking
+              run: pnpm prettier && pnpm eslint
+
+            - name: Type checking
+              run: pnpm test:ts-typecheck
+
+            - name: Unit testing
+              run: pnpm test:ci
+
+            - name: Build testing
+              run: pnpm build
+
+            - uses: actions/upload-artifact@v3
+              name: Uploading build artifact
+              with:
+                  path: dist
+                  if-no-files-found: error
 
             - uses: JS-DevTools/npm-publish@v1
               name: Publish package to npm
