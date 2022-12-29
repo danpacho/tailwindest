@@ -1,0 +1,41 @@
+name-template: "v$RESOLVED_VERSION 🔮"
+tag-template: "v$RESOLVED_VERSION"
+categories:
+    - title: "New Features 🚀"
+      labels:
+          - "feature"
+          - "enhancement"
+    - title: "Bug Fixes 🐛"
+      labels:
+          - "fix"
+          - "bugfix"
+          - "bug"
+    - title: "Breaking 🤯"
+      labels:
+          - "breaking"
+    - title: "Maintenance 🍦"
+      labels:
+          - "maintenance"
+category-template: "### $TITLE"
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+change-title-escapes: '\<*_&'
+no-changes-template: "No changes"
+exclude-labels:
+    - "skip-changelog"
+version-resolver:
+    major:
+        labels:
+            - "breaking"
+    minor:
+        labels:
+            - "feature"
+            - "enhancement"
+    patch:
+        labels:
+            - "maintenance"
+            - "patch"
+    default: "patch"
+template: |
+    $CHANGES
+
+    **Full Changelog**: https://github.com/danpacho/tailwindest/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION

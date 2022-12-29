@@ -34,6 +34,7 @@
         "test:coverage:watch": "jest --watch",
         "test:ts-typecheck": "tsc --noEmit",
         "test:ts-performance": "rimraf ts-perf && tsc --noEmit --generateTrace ts-perf",
+        "test:ci": "jest --no-coverage",
         "pre-commit": "lint-staged",
         "prepare": "husky install"
     },
@@ -52,6 +53,12 @@
             "module": "./dist/index.js"
         }
     },
+    "size-limit": [
+        {
+            "path": "dist/index.js",
+            "limit": "700B"
+        }
+    ],
     "devDependencies": {
         "@jest/globals": "^29.3.1",
         "@rollup/plugin-terser": "^0.2.0",
