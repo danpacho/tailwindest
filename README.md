@@ -128,3 +128,5 @@ pnpm i tailwindest
 <br />
 
 # Deep dive
+
+[Read api 🚀](./docs/api.md)
