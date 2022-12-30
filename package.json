@@ -1,6 +1,6 @@
 {
     "name": "tailwindest",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Fully typed className for tailwindcss",
     "author": "danpacho",
     "license": "MIT",
