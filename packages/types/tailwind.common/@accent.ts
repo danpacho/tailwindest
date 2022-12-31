@@ -22,6 +22,7 @@ export type TailwindOpacity<Plug extends PlugBase = ""> =
     | "85"
     | "90"
     | "95"
+    | "100"
     | TailwindArbitrary
     | Pluggable<Plug>
 
