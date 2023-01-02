@@ -1,8 +1,8 @@
 name: Publish package on tagged commit
 on:
-    push:
-        tags:
-            - v*.*.*
+    release:
+        types: [published]
+
 jobs:
     npm-publish:
         runs-on: ubuntu-latest
