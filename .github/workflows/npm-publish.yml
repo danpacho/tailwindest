@@ -1,4 +1,5 @@
-name: Publish package on tagged commit
+name: Publish package on release
+
 on:
     release:
         types: [published]
