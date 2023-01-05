@@ -11,7 +11,7 @@ type TailwindContent<Plug extends PlugBase = ""> =
 
 export type TailwindContentType<Plug extends PlugBase = ""> = {
     /**
-     *@description Utilities for controlling word breaks in an element.
+     *@description Utilities for controlling the content of the before and after pseudo-elements.
      *@see {@link https://tailwindcss.com/docs/content content}
      */
     content: TailwindContent<Plug>
