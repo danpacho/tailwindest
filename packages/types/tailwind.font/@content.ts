@@ -1,10 +1,13 @@
 import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindContent<Plug extends PlugBase = ""> =
-    | "content-none"
+type TailwindContentVariants<Plug extends PlugBase = ""> =
+    | "none"
     | Pluggable<Plug>
     | TailwindArbitrary
+
+type TailwindContent<Plug extends PlugBase = ""> =
+    `content-${TailwindContentVariants<Plug>}`
 
 export type TailwindContentType<Plug extends PlugBase = ""> = {
     /**
