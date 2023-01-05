@@ -8,7 +8,6 @@ type TailwindZIndexVariants<Plug extends PlugBase = ""> =
     | "30"
     | "40"
     | "50"
-    | "auto"
     | Pluggable<Plug>
     | TailwindArbitrary
 
@@ -17,5 +16,7 @@ export type TailwindZIndexType<Plug extends PlugBase = ""> = {
      *@description Utilities for controlling the stack order of an element.
      *@see {@link https://tailwindcss.com/docs/z-index z index}
      */
-    zIndex: PluginVariantsWithDirection<"z", TailwindZIndexVariants<Plug>>
+    zIndex:
+        | "z-auto"
+        | PluginVariantsWithDirection<"z", TailwindZIndexVariants<Plug>>
 }
