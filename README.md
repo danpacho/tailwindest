@@ -6,10 +6,7 @@
 
 <br />
 
-> <br />
-> <a href="https://tailwindest.vercel.app"><strong>Start with documentation 🏄‍♂️</strong></a>
->
-> <br />
+<a href="https://tailwindest.vercel.app"><strong>Start with documentation 🏄‍♂️</strong></a>
 
 <br />
 
