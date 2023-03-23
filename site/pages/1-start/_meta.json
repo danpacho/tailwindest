@@ -1,0 +1,11 @@
+{
+    "setup": {
+        "title": "Setup"
+    },
+    "problem": {
+        "title": "Problems of tailwind"
+    },
+    "goals": {
+        "title": "Design goals"
+    }
+}
