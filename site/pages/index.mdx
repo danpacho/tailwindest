@@ -1,0 +1,67 @@
+---
+title: Tailwindest – Fully typed tailwind
+---
+
+import { MainHeader, MainFeatures } from "~components/pages"
+import { Underline } from "~components/common"
+import { Tabs, Tab, Callout } from "nextra-theme-docs"
+
+<MainHeader />
+
+<br />
+<br />
+
+## What can it do?
+
+**Make `tailwind`**
+
+1. <Underline>Type-safe</Underline>
+
+2. <Underline>Readable</Underline>
+
+3. <Underline>Reusable</Underline>
+
+<br />
+
+## Tailwind
+
+```ts /helloWorld/
+const helloWorld =
+    "flex items-center justify-center p-4 m-4 rounded-md sm:p-2 sm:m-2 sm:rounded-sm bg-[#fff] hover:bg-gray-50 dark:bg-neutral-900/70 dark:hover:bg-gray-800/70"
+```
+
+## Becomes readable
+
+```ts /helloWorld/ /wind/ /class/
+const helloWorld = wind({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+
+    padding: "p-4",
+    margin: "m-4",
+    borderRadius: "rounded-md",
+    "@sm": {
+        padding: "sm:p-2",
+        margin: "sm:m-2",
+        borderRadius: "sm:rounded-sm",
+    },
+
+    backgroundColor: "bg-[#fff]",
+    ":hover": {
+        backgroundColor: "hover:bg-gray-50",
+    },
+    "@dark": {
+        backgroundColor: "dark:bg-neutral-900/70",
+        ":hover": {
+            backgroundColor: "dark:hover:bg-gray-800/70",
+        },
+    },
+}).class()
+```
+
+<br />
+
+## Features
+
+<MainFeatures />
