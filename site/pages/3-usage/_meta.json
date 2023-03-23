@@ -1,0 +1,14 @@
+{
+    "vanilla-js": {
+        "title": "Vanilla Javascript"
+    },
+    "react": {
+        "title": "React"
+    },
+    "svelte": {
+        "title": "Svelte"
+    },
+    "vue": {
+        "title": "Vue"
+    }
+}
