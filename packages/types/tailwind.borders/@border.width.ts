@@ -9,7 +9,6 @@ type TailwindBorderWidth<Plug extends string> =
     | "0"
     | "2"
     | "4"
-    | "6"
     | "8"
     | TailwindArbitrary
     | Plug
