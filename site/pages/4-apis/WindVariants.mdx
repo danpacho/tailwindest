@@ -1,0 +1,87 @@
+# `WindVariants`
+
+## Briefly
+
+**Extract variants type** of instance of `wind$`, `createVariants`.
+
+## 1. Type definition
+
+```ts
+type WindVariants<TypeofWind> = TypeofWind extends {
+    style: (variants: infer Variants) => unknown
+    class: (variants: infer Variants) => unknown
+}
+    ? Variants extends string
+        ? VariantsList<Variants>
+        : never
+    : TypeofWind extends (VariantsOption: infer VariantsOption) => unknown
+    ? VariantsOption
+    : never
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+WindVariants<TypeofWind>
+```
+
+### Generic Parameter: `TypeofWind`
+
+-   type: generic `TypeofWind` is instance of `typeof wind$` and `createWind`
+-   usage: extract variant type
+
+### Example
+
+#### Extract instance of `wind$` variant type
+
+1. Make instance of `wind$`
+
+    ```ts
+    const button = wind$("default", "warning", "success")(/* ... */)
+    ```
+
+2. Extract variants type
+
+    ```ts
+    type ButtonVariants = WindVariants<typeof button>
+
+    type ButtonVariants = "default" | "warning" | "success"
+    ```
+
+#### Extract instance of `createVariants` variant type
+
+1. Make instance of `createVariants`
+
+    ```ts
+    const buttonState = wind$("default", "warning", "success")(/* ... */)
+    const buttonSize = wind$("sm", "md", "lg")(/* ... */)
+
+    const button = createVariants({
+        state: buttonState,
+        size: buttonSize,
+    })
+    ```
+
+2. Extract variants type
+
+    ```ts
+    type ButtonVariants = WindVariants<typeof button>
+
+    // inferred result
+    type ButtonVariants = {
+        state?: "default" | "warning" | "success" | undefined
+        size?: "sm" | "md" | "lg" | undefined
+    }
+    ```
+
+3. Plug variants type
+
+    ```tsx
+    const Button = (props: React.PropsWithChildren<ButtonVariants>) => {
+        const { children, ...btnOption } = props
+
+        return <button className={button(btnOption)}>{props.children}</button>
+    }
+    ```

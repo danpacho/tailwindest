@@ -1,0 +1,118 @@
+import { Callout } from "nextra-theme-docs"
+
+# `createWind`
+
+## Briefly
+
+**Create `wind` and `wind$` functions** with custom values defined in `tailwind.config.js`.
+
+## 1. Type definition
+
+```ts
+declare const createWind: <StyleType>() => {
+    wind$: <Variant extends string>(
+        ...variantNames: Variant[]
+    ) => (
+        style: StyleType,
+        variantsStyles: VariantsStyles<Variant, StyleType>
+    ) => {
+        class: (variant?: VariantsList<Variant>) => string
+        style: (variant?: VariantsList<Variant>) => StyleType
+        compose: (...styles: StyleType[]) => {
+            class: (variant?: VariantsList<Variant>) => string
+            style: (variant?: VariantsList<Variant>) => StyleType
+        }
+    }
+    wind: (style: StyleType) => {
+        class: () => string
+        style: () => StyleType
+        compose: (...styles: StyleType[]) => {
+            class: () => string
+            style: () => StyleType
+        }
+    }
+}
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+createWind<StyleType>()
+```
+
+### Generic Parameter: `StyleType`
+
+-   type: generic `StyleType extends NestedObject`
+-   usage: plug customized tailwind type in `wind` and `wind$`
+
+### Example
+
+1. Define **customized `Tailwindest`**
+
+    ```ts
+    type MyCustom = Tailwindest<{
+        color: "my-color-1" | "my-color-2" | "my-color-3"
+    }>
+    ```
+
+2. Plug type at the `createWind` generic `StyleType`
+
+    ```ts
+    const { wind, wind$ } = createWind<MyCustom>()
+    ```
+
+3. Export with different name
+
+    ```ts
+    const { wind: tw, wind$: tw$ } = createWind<MyCustom>()
+
+    export { tw, tw$ }
+    ```
+
+4. Import customized `wind`(`tw`) and `wind$`(`tw$`) and use it
+
+    <Callout type="info">
+        functionality of returned `tw` and `tw$` is same as `wind` and `wind$`.
+    </Callout>
+
+    - `tw`: same as `wind`
+
+    ```ts
+    import { tw } from "@style/tailwindest"
+
+    const yeas = tw({
+        color: "text-my-color-1",
+        backgroundColor: "bg-my-color-2",
+        borderColor: "border-my-color-3",
+    })
+
+    const yeasClass = yeas.class()
+    const yeasStyle = yeas.style()
+    ```
+
+    - `tw$`: same as `wind$`
+
+    ```ts
+    import { tw$ } from "@style/tailwindest"
+
+    const yeasVar = tw$("oh")(
+        {
+            color: "text-my-color-1",
+            backgroundColor: "bg-my-color-2",
+            borderColor: "border-my-color-3",
+        },
+        {
+            oh: {
+                color: "text-my-color-2",
+            },
+        }
+    )
+
+    const defaultClass = yeasVar.class()
+    const defaultStyle = yeasVar.style()
+
+    const ohClass = yeasVar.class("oh")
+    const ohStyle = yeasVar.style("oh")
+    ```

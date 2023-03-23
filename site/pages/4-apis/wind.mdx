@@ -1,0 +1,192 @@
+import { Callout } from "nextra-theme-docs"
+
+# `wind` - basic styling
+
+## Briefly
+
+Core style generator `function`, with **no variants**.
+
+## 1. Type Definition
+
+```ts
+declare const wind: (style: Tailwindest) => {
+    class: () => string
+    style: () => Tailwindest
+    compose: (...styles: Tailwindest[]) => {
+        class: () => string
+        style: () => Tailwindest
+    }
+}
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+wind(style)
+```
+
+### Parameter: `style`
+
+-   type: `Tailwindest`
+-   usage: Define tailwind style
+
+### Example
+
+```ts
+const center = wind({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+})
+```
+
+## 3. Returns
+
+### `class`
+
+#### Briefly
+
+**Returns `className` `string`**
+
+#### Usage
+
+```ts
+wind(style).class()
+```
+
+#### Example
+
+```ts
+const center = wind({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+})
+
+const centerClass = center.class()
+// flex items-center justify-center
+```
+
+### `style`
+
+#### Briefly
+
+**Returns input `stylesheet` `object`**
+
+#### Usage
+
+```ts
+wind(style).style()
+```
+
+#### Example
+
+```ts
+const base = wind({
+    display: "flex",
+    alignItems: "items-center",
+})
+
+const baseStyle = base.style()
+/*
+{
+    display: "flex",
+    alignItems: "items-center",
+}
+*/
+```
+
+### `compose`
+
+#### Briefly
+
+Compose **Array of `stylesheet` `object`** into **single `stylesheet`**
+
+#### Usage
+
+```ts
+wind(style).compose(...stylesheets)
+```
+
+<Callout type="info">
+    The order of `...stylesheets` is very important.
+    
+    If `stylesheet` is placed behind in `...stylesheets`, **it has higher priority
+    in styling**.
+```ts
+const paddingWillBe4 = wind({
+    padding: "p-0.5",
+}).compose(
+    {
+        // first compose target
+        padding: "p-1",
+    },
+    {
+        // second compose target
+        padding: "p-2",
+    },
+    {
+        // ✅ last compose target
+        padding: "p-4",
+    }
+)
+
+const result = paddingWillBe4.class()
+// p-4
+
+````
+
+</Callout>
+
+#### Parameter: `...stylesheets`
+
+-   type: `Array<Tailwindest>`
+-   usage: **compose** `...stylesheets` into **one `stylesheet`** **`object`**
+
+#### Example
+
+1. Make `wind` instances
+
+```ts
+const center = wind({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+})
+
+const border = wind({
+    borderWidth: "border",
+    borderColor: "border-gray-50",
+    borderRadius: "rounded-sm",
+})
+````
+
+2. Compose all `stylesheet`
+
+```ts
+const box = wind({
+    backgroundColor: "bg-white",
+}).compose(center.style(), border.style())
+```
+
+3. Get composed result
+
+```ts
+const boxClass = box.class()
+// "flex items-center justify-center border border-gray-50 rounded-sm bg-white"
+
+const boxStyle = box.style()
+/*
+{
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    borderWidth: "border",
+    borderColor: "border-gray-50",
+    borderRadius: "rounded-sm",
+    backgroundColor: "bg-white",
+}
+*/
+```

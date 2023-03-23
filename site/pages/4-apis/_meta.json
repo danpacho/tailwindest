@@ -1,0 +1,23 @@
+{
+    "wind": {
+        "title": "wind"
+    },
+    "wind$": {
+        "title": "wind$"
+    },
+    "createVariants": {
+        "title": "createVariants"
+    },
+    "WindVariants": {
+        "title": "WindVariants"
+    },
+    "Tailwindest": {
+        "title": "Tailwindest"
+    },
+    "createWind": {
+        "title": "createWind"
+    },
+    "mergeProps": {
+        "title": "mergeProps"
+    }
+}

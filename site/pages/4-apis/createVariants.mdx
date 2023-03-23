@@ -1,0 +1,129 @@
+import { Callout } from "nextra-theme-docs"
+
+# `createVariants`
+
+## Briefly
+
+**If you want to implement a complex variants styles, like `stitches`**.
+
+## 1. Type Definition
+
+```ts
+declare const createVariants: <T extends VariantsStyle>(
+    variantsStyle: T
+) => (variantsOption: VariantsKeys<T>) => string
+```
+
+## 2. Spec
+
+### Usage
+
+<Callout type="info">
+    Think variants as **splitting style variants into smaller variant units and
+    assembling them**.
+</Callout>
+
+```ts
+createVariants(variantsStyle)(variantsOption)
+```
+
+### Parameter: `variantsStyle`
+
+-   type: `Record<string, typeof wind$>`
+-   usage: **Define complex variants** style
+
+### Parameter: `variantsOption`
+
+-   type: `VariantsKeys<T>`
+-   usage: **Get** specific **variant combination object**
+
+### Example
+
+In the example below, we will create a button with **`size`** and **`color`** variants.
+
+1.  **`size`** variants
+
+    ```ts
+    const btnSize = wind$(
+        "sm",
+        "md",
+        "lg"
+    )(
+        {
+            borderWidth: "border",
+            borderRadius: "rounded",
+        },
+        {
+            lg: {
+                padding: "p-4",
+            },
+            md: {
+                padding: "p-2",
+            },
+            sm: {
+                padding: "p-1",
+            },
+            default: "md",
+        }
+    )
+    ```
+
+2.  **`color`** variants
+
+    ```ts
+    const btnColor = wind$("red", "blue")(
+        {
+            color: "text-black",
+            backgroundColor: "bg-white",
+            borderColor: "border-gray-100",
+        },
+        {
+            red: {
+                color: "text-white",
+                backgroundColor: "bg-red-400",
+                borderColor: "border-red-100",
+            },
+            blue: {
+                color: "text-white",
+                backgroundColor: "bg-blue-400",
+                borderColor: "border-blue-100",
+            },
+        }
+    )
+    ```
+
+3.  Create a style that synthesizes **`color`**, **`size`** variants
+
+    ```ts
+    const btn = createVariants({
+        size: btnSize,
+        color: btnColor,
+    })
+    ```
+
+4.  Use variants
+
+    ```ts
+    const btnSm = btn({
+        size: "sm",
+    })
+    // border rounded p-1 text-black bg-white border-gray-100
+
+    const btnMdBlue = btn({
+        size: "md",
+        color: "blue",
+    })
+    // border rounded p-2 text-white bg-blue-400 border-blue-100
+
+    const btnDefault = btn()
+    const btnMd = btn({
+        size: "md",
+    })
+
+    // btnMd === btnDefault, same!
+    const same = "border rounded p-2 text-black bg-white border-gray-100"
+    ```
+
+## 3. Returns
+
+combination of variant **className `string`**
