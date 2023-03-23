@@ -7,7 +7,15 @@
 <br />
 <br />
 
-<a href="https://tailwindest.vercel.app"><h2>Start with documentation 🏄‍♂️</h2></a>
+<h2>Start with documentation 🏄‍♂️</h2>
+
+<br />
+
+> <strong>
+> <a href="https://tailwindest.vercel.app">
+> Read docs 📘
+> </a>
+> </strong>
 
 <br />
 
