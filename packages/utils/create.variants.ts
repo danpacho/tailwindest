@@ -2,11 +2,8 @@ import { cache, deepMerge, getTailwindClass } from "../core"
 import type { NestedObject } from "../core/nested.object.type"
 import type { WindVariants } from "../wind.variants"
 
-type VariantsStyle = Record<
-    string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { style: (option?: any) => NestedObject }
->
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type VariantsStyle = Record<string, { style: (option?: any) => NestedObject }>
 
 type VariantsKeys<T extends VariantsStyle> = {
     [StyleKey in keyof T]?: WindVariants<T[StyleKey]>
