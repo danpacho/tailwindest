@@ -85,7 +85,7 @@ describe(label.unit("createWind - plugging custom type"), () => {
     })
 })
 
-describe(label.unit("createWind - class & stylesheet"), () => {
+describe(label.unit("createWind(core) - class & stylesheet"), () => {
     const { wind, wind$ } = createWind<CustomTailwind>()
 
     const box = wind({
@@ -176,5 +176,137 @@ describe(label.unit("createWind - class & stylesheet"), () => {
                 margin: "my:m-my-size-1",
             },
         })
+    })
+})
+
+describe(label.unit("createWind(utility) - mergeProps & toggle"), () => {
+    const { mergeProps, toggle } = createWind<CustomTailwind>()
+
+    test(label.case("plugged mergeProps - merge two stylesheet"), () => {
+        expect(
+            mergeProps(
+                {
+                    display: "flex",
+                    "@dark": {
+                        backgroundColor: "dark:bg-amber-100",
+                        ":hover": {
+                            backgroundColor: "dark:hover:bg-amber-800",
+                        },
+                    },
+                },
+                {
+                    display: "grid",
+                    "@dark": {
+                        backgroundColor: "dark:bg-red-100",
+                        ":hover": {
+                            backgroundColor: "dark:hover:bg-red-800",
+                        },
+                    },
+                    padding: "p-2",
+                }
+            )
+        ).toBe("grid dark:bg-red-100 dark:hover:bg-red-800 p-2")
+    })
+
+    test(label.case("plugged toggle, without base - truthy condition"), () => {
+        expect(
+            toggle(true, {
+                truthy: {
+                    color: "text-my-color-1",
+                },
+                falsy: {
+                    color: "text-my-color-9",
+                },
+            })
+        ).toBe("text-my-color-1")
+        expect(
+            toggle(!null, {
+                truthy: {
+                    color: "text-my-color-1",
+                },
+                falsy: {
+                    color: "text-my-color-9",
+                },
+            })
+        ).toBe("text-my-color-1")
+        expect(
+            toggle(!undefined, {
+                truthy: {
+                    color: "text-my-color-1",
+                },
+                falsy: {
+                    color: "text-my-color-9",
+                },
+            })
+        ).toBe("text-my-color-1")
+    })
+    test(label.case("plugged toggle, without base - falsy condition"), () => {
+        expect(
+            toggle(false, {
+                truthy: {
+                    color: "text-my-color-1",
+                },
+                falsy: {
+                    color: "text-my-color-9",
+                },
+            })
+        ).toBe("text-my-color-9")
+    })
+
+    test(label.case("plugged toggle, with base - truthy condition"), () => {
+        expect(
+            toggle(true, {
+                base: {
+                    backgroundColor: "bg-my-color-1",
+                },
+                truthy: {
+                    color: "text-my-color-1",
+                },
+                falsy: {
+                    color: "text-my-color-9",
+                },
+            })
+        ).toBe("bg-my-color-1 text-my-color-1")
+        expect(
+            toggle(!null, {
+                base: {
+                    backgroundColor: "bg-my-color-1",
+                },
+                truthy: {
+                    color: "text-my-color-1",
+                },
+                falsy: {
+                    color: "text-my-color-9",
+                },
+            })
+        ).toBe("bg-my-color-1 text-my-color-1")
+        expect(
+            toggle(!undefined, {
+                base: {
+                    backgroundColor: "bg-my-color-1",
+                },
+                truthy: {
+                    color: "text-my-color-1",
+                },
+                falsy: {
+                    color: "text-my-color-9",
+                },
+            })
+        ).toBe("bg-my-color-1 text-my-color-1")
+    })
+    test(label.case("plugged toggle, with base - falsy condition"), () => {
+        expect(
+            toggle(false, {
+                base: {
+                    backgroundColor: "bg-my-color-1",
+                },
+                truthy: {
+                    color: "text-my-color-1",
+                },
+                falsy: {
+                    color: "text-my-color-9",
+                },
+            })
+        ).toBe("bg-my-color-1 text-my-color-9")
     })
 })
