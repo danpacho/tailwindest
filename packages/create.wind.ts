@@ -1,4 +1,5 @@
 import type { NestedObject } from "./core/nested.object.type"
+import { mergeProps, toggle } from "./utils"
 import { VariantsStyles, wind as windCore } from "./wind"
 
 /**
@@ -10,10 +11,7 @@ import { VariantsStyles, wind as windCore } from "./wind"
  * }>
  *
  * // ✅ Plug custom type in generic
- * const { wind: tw, wind$: tw$ } = createWind<Custom>()
- *
- * // 💡 Rename it for non-duplicated imports
- * export { tw, tw$ }
+ * const { wind, wind$, mergeProps, toggle } = createWind<Custom>()
  */
 const createWind = <StyleType extends NestedObject>() => {
     const wind$ = <Variant extends string>(
@@ -22,9 +20,15 @@ const createWind = <StyleType extends NestedObject>() => {
     ): typeof windCore<StyleType, VariantsStyles<Variant, StyleType>> =>
         windCore
     const wind: typeof windCore<StyleType> = windCore
+
+    const mergePropsWithType: typeof mergeProps<StyleType> = mergeProps
+    const toggleWithType = toggle(wind)
+
     return {
         wind$,
         wind,
+        mergeProps: mergePropsWithType,
+        toggle: toggleWithType,
     }
 }
 
