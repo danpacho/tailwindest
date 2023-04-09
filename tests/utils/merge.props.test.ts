@@ -1,6 +1,8 @@
 import { describe, expect, test } from "@jest/globals"
-import { type Tailwindest, mergeProps } from "../../packages"
+import { type Tailwindest, createWind } from "../../packages"
 import { label } from "../label"
+
+const { mergeProps } = createWind<Tailwindest>()
 
 describe(label.unit("mergeProps"), () => {
     test(label.case("overwrites the styles defined later"), () => {
