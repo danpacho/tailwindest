@@ -1,6 +1,8 @@
 import { describe, expect, test } from "@jest/globals"
-import { createVariants, wind$ } from "../../packages"
+import { Tailwindest, createVariants, createWind } from "../../packages"
 import { label } from "../label"
+
+const { wind$ } = createWind<Tailwindest>()
 
 const boxSize = wind$("sm", "md")(
     {

@@ -1,7 +1,14 @@
 import { describe, test } from "@jest/globals"
 import { TypeEqual, TypeOf, expectType } from "ts-expect"
-import { type WindVariants, createVariants, wind, wind$ } from "../packages"
+import {
+    Tailwindest,
+    type WindVariants,
+    createVariants,
+    createWind,
+} from "../packages"
 import { label } from "./label"
+
+const { wind, wind$ } = createWind<Tailwindest>()
 
 const sizeVariantsList = ["2xs", "xs", "sm", "md", "lg", "xl", "2xl"] as const
 const sizeVariants = wind$(
