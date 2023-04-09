@@ -30,7 +30,9 @@ const Text = (
 )}
  * ```
  */
-const mergeProps = <T extends NestedObject>(baseStyle: T, styleProps: T) =>
-    getTailwindClass(deepMerge(baseStyle, styleProps))
+const mergeProps = <StyleType extends NestedObject>(
+    baseStyle: StyleType,
+    styleProps: StyleType
+) => getTailwindClass(deepMerge(baseStyle, styleProps))
 
 export { mergeProps }

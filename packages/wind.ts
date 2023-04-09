@@ -1,10 +1,11 @@
 import { cache, deepMerge, getTailwindClass } from "./core"
+import type { NestedObject } from "./core/nested.object.type"
 
 type ToString<MightBeString> = Extract<MightBeString, string>
-export type VariantsStyles<Variant extends string, StyleType> = Record<
-    Variant,
-    StyleType
-> & {
+export type VariantsStyles<
+    Variant extends string,
+    StyleType extends NestedObject
+> = Record<Variant, StyleType> & {
     defaultVariant?: VariantsList<Variant>
 }
 
@@ -23,7 +24,7 @@ type ClassNameType = string
  * @param variantsStyles optional variants style objects
  */
 function wind<
-    StyleType,
+    StyleType extends NestedObject,
     VariantsStylesType extends VariantsStyles<string, StyleType>
 >(
     style: StyleType,
@@ -87,7 +88,9 @@ function wind<
         style: (variant?: VariantsList<keyof VariantsStylesType>) => StyleType
     }
 }
-function wind<StyleType>(style: StyleType): {
+function wind<StyleType extends NestedObject>(
+    style: StyleType
+): {
     /**
      * Class extractor `function`
      * @example
@@ -140,7 +143,7 @@ function wind<StyleType>(style: StyleType): {
     }
 }
 function wind<
-    StyleType,
+    StyleType extends NestedObject,
     VariantsStylesType extends VariantsStyles<string, StyleType>
 >(style: StyleType, variantsStyles?: VariantsStylesType) {
     const classStore = cache<WindCacheKey, ClassNameType>()
