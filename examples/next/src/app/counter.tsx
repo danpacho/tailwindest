@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { wind, wind$ } from "tailwindest"
 import { ThemeButton } from "@/components"
+import { wind, wind$ } from "@/wind"
 
 const header = wind({
     fontSize: "text-3xl",
@@ -19,7 +19,7 @@ const button = wind$("plus", "minus")(
         alignItems: "items-center",
         justifyContent: "justify-center",
         padding: "p-2",
-        borderRadius: "rounded-md",
+        borderRadius: "rounded-lg",
         backgroundColor: "bg-white",
         "@dark": {
             backgroundColor: "dark:bg-neutral-900",
@@ -27,15 +27,14 @@ const button = wind$("plus", "minus")(
         borderWidth: "border",
         borderBottomWidth: "border-b-4",
         ":hover": {
-            borderBottomWidth: "hover:border-b-[3px]",
+            borderBottomWidth: "hover:border-b-[3.25px]",
         },
         ":active": {
             opacity: "active:opacity-50",
             transformScale: "active:scale-95",
             transformTranslateY: "active:translate-y-0.5",
-            borderBottomWidth: "active:border-b-[2.5px]",
+            borderBottomWidth: "active:border-b-[2px]",
         },
-
         transition: "transition",
         transitionDuration: "duration-75",
     },

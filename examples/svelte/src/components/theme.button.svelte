@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isDarkMode } from '../store/theme';
-	import { wind$ } from 'tailwindest';
+	import { wind$ } from '../wind';
 
 	const button = wind$('dark', 'light')(
 		{

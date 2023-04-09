@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { wind$ } from "tailwindest"
+import { wind$ } from "@/wind"
 
-const button = wind$("dark", "light")(
+const themeButton = wind$("dark", "light")(
     {
         position: "absolute",
         top: "top-4",
@@ -55,7 +55,7 @@ const ThemeButton = () => {
     return (
         <button
             type="button"
-            className={button.class(isDark ? "dark" : "light")}
+            className={themeButton.class(isDark ? "dark" : "light")}
             onClick={() => setIsDark((mode) => !mode)}
         >
             {isDark ? "dark" : "light"}

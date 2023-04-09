@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { wind, wind$ } from 'tailwindest';
-
 	import { onMount } from 'svelte';
 	import { isDarkMode } from '../store/theme';
+	import { wind, wind$ } from '../wind';
 
 	import ThemeButton from '../components/theme.button.svelte';
 

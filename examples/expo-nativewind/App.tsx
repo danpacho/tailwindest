@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { Text, TouchableOpacity, View } from "react-native"
-import { wind, wind$ } from "tailwindest"
+import { createWind, type Tailwindest } from "tailwindest"
+
+const { wind, wind$ } = createWind<Tailwindest>()
 
 const container = wind({
     flex: "flex-1",

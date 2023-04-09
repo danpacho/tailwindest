@@ -1,6 +1,7 @@
 <script>
-	import { wind } from 'tailwindest';
 	import '../app.css';
+	import { wind } from '../wind';
+
 	const layout = wind({
 		position: 'relative',
 

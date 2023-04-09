@@ -1,5 +1,5 @@
+import { wind } from "@/wind"
 import "./globals.css"
-import { wind } from "tailwindest"
 
 export const metadata = {
     title: "tailwindest + nextJs",

@@ -32,6 +32,6 @@
 		"vite": "^4.2.0"
 	},
 	"dependencies": {
-		"tailwindest": "^1.0.5"
+		"tailwindest": "^1.1.0"
 	}
 }
