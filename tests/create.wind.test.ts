@@ -258,6 +258,7 @@ describe(label.unit("createWind(utility) - mergeProps & toggle"), () => {
             toggle(true, {
                 base: {
                     backgroundColor: "bg-my-color-1",
+                    color: "text-red-100",
                 },
                 truthy: {
                     color: "text-my-color-1",
@@ -271,6 +272,7 @@ describe(label.unit("createWind(utility) - mergeProps & toggle"), () => {
             toggle(!null, {
                 base: {
                     backgroundColor: "bg-my-color-1",
+                    color: "text-red-100",
                 },
                 truthy: {
                     color: "text-my-color-1",
@@ -284,6 +286,7 @@ describe(label.unit("createWind(utility) - mergeProps & toggle"), () => {
             toggle(!undefined, {
                 base: {
                     backgroundColor: "bg-my-color-1",
+                    color: "text-red-100",
                 },
                 truthy: {
                     color: "text-my-color-1",
@@ -299,6 +302,7 @@ describe(label.unit("createWind(utility) - mergeProps & toggle"), () => {
             toggle(false, {
                 base: {
                     backgroundColor: "bg-my-color-1",
+                    color: "text-red-100",
                 },
                 truthy: {
                     color: "text-my-color-1",
