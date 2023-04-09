@@ -1,27 +1,71 @@
 import { Tab, Tabs, Callout } from "nextra-theme-docs"
 
-# Easy to boot up
+# Setup
 
-<Callout emoji="🚀" type="info">
-    Just **install package**. That's it!
-</Callout>
+## 1. Install package
 
-<Tabs items={['npm', 'yarn', 'pnpm']}>
+<Tabs items={["npm", "yarn", "pnpm"]}>
 
-  <Tab>
-    ```bash /tailwindest/ 
+    <Tab>
+    ```bash
     npm i tailwindest
     ```
-  </Tab>
-  <Tab>
-    ```bash /tailwindest/ 
+    </Tab>
+    <Tab>
+    ```bash
     yarn i tailwindest
     ```
-  </Tab>
-  <Tab>
-    ```bash /tailwindest/ 
+    </Tab>
+    <Tab>
+    ```bash
     pnpm i tailwindest
     ```
-  </Tab>
-  
+    </Tab>
+
 </Tabs>
+
+## 2. Define style functions
+
+<Callout type="warning">
+    You should plug `Tailwindest` type at `createWind`'s generic for typing.
+</Callout>
+
+```ts
+import { createWind, type Tailwindest } from "tailwindest"
+
+type MyTailwind = Tailwindest<{}, {}>
+type Tailwind = Required<MyTailwind>
+
+// Plug Tailwindest type
+const { wind, wind$, mergeProps, toggle } = createWind<MyTailwind>()
+```
+
+## 3. Export all tools
+
+<Callout type="info">
+    Export type `Tailwind`. This is full type definition of `tailwindcss`.
+</Callout>
+
+```ts
+export { wind, wind$, mergeProps, toggle, type Tailwind }
+```
+
+<br />
+
+## Summary
+
+**Copy and paste it** at `wind.ts` in your project.
+
+```ts filename="wind.ts"
+import { createWind, type Tailwindest } from "tailwindest"
+
+type MyTailwind = Tailwindest<{}, {}>
+/**
+ * Full type definition of `tailwindcss`
+ */
+type Tailwind = Required<MyTailwind>
+
+const { wind, wind$, mergeProps, toggle } = createWind<MyTailwind>()
+
+export { wind, wind$, mergeProps, toggle, type Tailwind }
+```
