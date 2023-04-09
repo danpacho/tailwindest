@@ -1,7 +1,7 @@
 <br />
 
 <div align="center">
-<img src="./images/tailwindest.banner.png" width="700px" alt="tailwindest banner" />
+<img src="./images/tailwindest.banner.png" width="750px" alt="tailwindest banner" />
 </div>
 
 <br />
@@ -22,8 +22,6 @@ import { createWind, type Tailwindest } from "tailwindest"
 
 const { wind, wind$ } = createWind<Tailwindest>()
 ```
-
-<br />
 
 ## 2. Make complex `tailwind` style
 
@@ -68,8 +66,6 @@ const themeBtn = wind$("dark", "light")(
 )
 ```
 
-<br />
-
 ## 3. Use it in components
 
 > `tailwindest` is just a function that generates classnames like `clsx`, meaning it's **platform independent** 🏖️.
@@ -95,7 +91,7 @@ const ThemeButton = () => {
 
 ## Svelte
 
-```tsx
+```svelte
 <script>
     /* themeBtn style is here */
 
