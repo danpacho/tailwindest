@@ -23,6 +23,8 @@ import { createWind, type Tailwindest } from "tailwindest"
 const { wind, wind$ } = createWind<Tailwindest>()
 ```
 
+<br />
+
 ## 2. Make complex `tailwind` style
 
 ```ts
@@ -66,6 +68,8 @@ const themeBtn = wind$("dark", "light")(
 )
 ```
 
+<br />
+
 ## 3. Use it in components
 
 > `tailwindest` is just a function that generates classnames like `clsx`, meaning it's **platform independent** 🏖️.
@@ -73,7 +77,7 @@ const themeBtn = wind$("dark", "light")(
 ### React
 
 ```tsx
-// themeBtn style is here
+/* themeBtn style is here */
 
 const ThemeButton = () => {
     const [isDark, setIsDark] = useState(true)
@@ -95,16 +99,16 @@ const ThemeButton = () => {
 <script>
     /* themeBtn style is here */
 
-    let isDarkMode = false;
+    let isDark = false;
 </script>
 
 <button
-    class={themeBtn.class(isDarkMode ? "dark" : "light")}
+    class={themeBtn.class(isDark ? "dark" : "light")}
     on:click={() => {
-        isDarkMode = !isDarkMode
+        isDark = !isDark
     }}
 >
-    {isDarkMode ? "light" : "dark"}
+    {isDark ? "light" : "dark"}
 </button>
 ```
 
@@ -115,9 +119,9 @@ const ThemeButton = () => {
 
 const btn = document.getElementById("themeBtn")
 
-let isDarkMode = false
+let isDark = false
 
-btn.classList.add(themeBtn.class(isDarkMode ? "dark" : "light"))
+btn.classList.add(themeBtn.class(isDark ? "dark" : "light"))
 ```
 
 <br />
