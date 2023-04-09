@@ -3,13 +3,13 @@ import { Underline } from "~components/common"
 
 # Design goals
 
-## <Underline>Fully-typed</Underline>
+## 1. <Underline>Fully-typed</Underline>
 
 To make <Underline>fully-typed</Underline> `tailwind`, first define all the base classname properties in `tailwind` docs.
 
 Then, using the power of `typescript`'s **`string literal` and `generic` magics🔮**.
 
-### Get All Tailwind Classname
+### ex) Get All Tailwind Classname
 
 The Final result shows fully typed product, but near zero bundle size.
 **Because it is just type definitions.**
@@ -20,11 +20,9 @@ type TailwindClass = Tailwindest[keyof Tailwindest]
 
 ![tailwindest type set](./../../public/images/tailwindest.type.png)
 
-### Access Infinite Nested Break Conditions
+### ex) Access Infinite Nested Break Conditions
 
-Type is not ends here
-
-**Infinitely** <Underline>fully-typed</Underline> **nested break conditions** is supported.
+`Typescript`'s recursive type computation allows you to write infinite Nested Break conditions.
 
 ```ts
 const infinite = wind({
