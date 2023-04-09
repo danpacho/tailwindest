@@ -117,15 +117,15 @@ const config: DocsThemeConfig = {
             </>
         )
     },
-    banner: {
-        key: "Document released!",
-        text: (
-            <p>
-                🎉 Documentation site is released. Support api docs only, right
-                now!
-            </p>
-        ),
-    },
+    // banner: {
+    //     key: "Document released!",
+    //     text: (
+    //         <p>
+    //             🎉 Documentation site is released. Support api docs only, right
+    //             now!
+    //         </p>
+    //     ),
+    // },
     editLink: {
         text: "Edit this page on GitHub →",
     },
@@ -157,7 +157,7 @@ const config: DocsThemeConfig = {
         forcedTheme: "dark",
     },
     primaryHue: {
-        dark: 25,
+        dark: 30,
         light: 30,
     },
 }

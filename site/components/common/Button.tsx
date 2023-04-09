@@ -1,13 +1,12 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { wind, wind$, WindVariants } from "tailwindest"
+import { WindVariants } from "tailwindest"
+import { wind$ } from "wind"
 
 const btn = wind$("outline", "fill")(
     {
         display: "flex",
         width: "w-fit",
-        paddingX: "px-2",
-        paddingY: "py-2",
 
         borderRadius: "rounded",
 
@@ -16,7 +15,9 @@ const btn = wind$("outline", "fill")(
             color: "dark:text-white",
         },
 
-        fontSize: "text-sm",
+        paddingX: "px-1.5",
+        paddingY: "py-1.5",
+        fontSize: "text-[0.8rem]",
         "@sm": {
             fontSize: "sm:text-base",
         },

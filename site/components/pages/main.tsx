@@ -1,4 +1,4 @@
-import { wind } from "tailwindest"
+import { wind } from "wind"
 import { Title, LinkButton, Underline, CopyButton } from "~components/common"
 import { Card, cardContainer } from "~components/common/Card"
 import {
@@ -7,6 +7,7 @@ import {
     DocumentCheckIcon,
     Square3Stack3DIcon,
     WrenchScrewdriverIcon,
+    CodeBracketIcon,
 } from "@heroicons/react/24/solid"
 import { useState } from "react"
 
@@ -26,8 +27,8 @@ const subtitle = wind({
 const MainHeader = () => {
     return (
         <>
-            <div className="w-full flex flex-col gap-14 items-center justify-center py-16">
-                <Title fontSize="text-5xl" lgFontSize="lg:text-6xl" />
+            <div className="w-full flex flex-col gap-14 md:gap-25 items-center justify-center py-16">
+                <Title fontSize="text-5xl" mdFontSize="md:text-[3.5rem]" />
                 <div className="flex flex-col items-center justify-center gap-1">
                     <p className={subtitle}>
                         Build <Underline>fully‒typed</Underline>{" "}
@@ -44,8 +45,8 @@ const MainHeader = () => {
                     copiedText={<p className="font-mono">type is ready</p>}
                     defaultText={
                         <div className="flex flex-row gap-1.5 items-center justify-center">
-                            <div className="text-amber-400 font-mono font-bold">
-                                $
+                            <div className="p-1 w-5 h-5 stroke md:stroke-2 stroke-amber-400 bg-transparent">
+                                <CodeBracketIcon />
                             </div>
                             <p className="font-mono">npm i tailwindest</p>
                         </div>
@@ -63,9 +64,18 @@ const code = wind({
     fontWeight: "font-semibold",
     fontSize: "text-sm",
     borderWidth: "border",
-    borderColor: "border-amber-400",
-    padding: "p-0.5",
-    borderRadius: "rounded",
+    borderColor: "border-amber-400/30",
+    backgroundColor: "bg-amber-900/10",
+    paddingX: "px-0.5",
+    paddingY: "py-0",
+    borderRadius: "rounded-sm",
+
+    "@md": {
+        padding: "md:p-0",
+        paddingX: "md:px-0.5",
+        paddingY: "md:py-[0.25px]",
+        borderRadius: "md:rounded",
+    },
 }).class()
 
 const Code = ({ children }: React.PropsWithChildren) => (
@@ -74,7 +84,7 @@ const Code = ({ children }: React.PropsWithChildren) => (
 
 const features = {
     fullyTyped: {
-        featureTitle: <Underline>Fully-typed</Underline>,
+        featureTitle: "Fully-typed",
         featureIcon: <CpuChipIcon />,
         title: <>Fully typed tailwind</>,
         description: (
@@ -87,7 +97,7 @@ const features = {
         ),
     },
     customizable: {
-        featureTitle: <Underline>Customizable</Underline>,
+        featureTitle: "Customizable",
         featureIcon: <WrenchScrewdriverIcon />,
         title: <>Support custom type</>,
         description: (
@@ -98,11 +108,7 @@ const features = {
         ),
     },
     variantsAPI: {
-        featureTitle: (
-            <>
-                <Underline>Variants</Underline> API
-            </>
-        ),
+        featureTitle: "Variants API",
         featureIcon: <CpuChipIcon />,
         title: <>Level up conditional styling</>,
         description: (
@@ -115,7 +121,7 @@ const features = {
     tiny: {
         featureTitle: (
             <>
-                Tiny, <Underline>603B</Underline>
+                Tiny, <Underline>638B</Underline>
             </>
         ),
         featureIcon: <Square3Stack3DIcon />,
@@ -123,12 +129,12 @@ const features = {
         description: (
             <>
                 Don't have to worry about heavy bundle size. It is just{" "}
-                <Code>603B</Code> tiny lib.
+                <Code>638B</Code> tiny lib.
             </>
         ),
     },
     performant: {
-        featureTitle: <Underline>Performant</Underline>,
+        featureTitle: "Performant",
         featureIcon: <BoltIcon />,
         title: <>Styles are cached</>,
         description: (
@@ -136,11 +142,7 @@ const features = {
         ),
     },
     docsLink: {
-        featureTitle: (
-            <>
-                Document <Underline>link</Underline>
-            </>
-        ),
+        featureTitle: "Document link",
         featureIcon: <DocumentCheckIcon />,
         title: <>Document embedded</>,
         description: (

@@ -1,4 +1,4 @@
-import { wind } from "tailwindest"
+import { wind } from "wind"
 
 export const cardContainer = wind({
     backgroundColor: "bg-amber-600/10",
@@ -47,8 +47,8 @@ const cardIcon = wind({
     padding: "p-1",
 
     backgroundImage: "bg-gradient-to-tl",
-    backgroundImageGradientStart: "from-amber-300/20",
-    backgroundImageGradientEnd: "to-amber-700",
+    backgroundImageGradientStart: "from-amber-700/50",
+    backgroundImageGradientEnd: "to-amber-700/30",
     border: "border-amber-400 border-solid",
     borderWidth: "border",
 

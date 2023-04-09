@@ -1,4 +1,4 @@
-import { wind } from "tailwindest"
+import { wind } from "wind"
 
 const underline = wind({
     fontFamily: "font-mono",
@@ -6,11 +6,14 @@ const underline = wind({
     paddingBottom: "pb-0.5",
 
     borderRadius: "rounded-none",
-    borderBottomWidth: "border-b-2",
+    borderBottomWidth: "border-b",
     borderBottomColor: "border-b-orange-400",
 
     letterSpacing: "tracking-tight",
 
+    "@md": {
+        borderBottomWidth: "md:border-b-2",
+    },
     "@dark": {
         color: "dark:text-white",
     },
