@@ -17,19 +17,21 @@ const btn = wind$("outline", "fill")(
 
         paddingX: "px-1.5",
         paddingY: "py-1.5",
-        fontSize: "text-[0.8rem]",
+        fontWeight: "font-medium",
+        fontSize: "text-sm",
+
         "@sm": {
             fontSize: "sm:text-base",
         },
         "@md": {
-            paddingX: "md:px-3",
-            paddingY: "md:py-2",
+            paddingX: "md:px-2.5",
+            paddingY: "md:py-1.5",
             fontSize: "md:text-lg",
         },
-        fontWeight: "font-semibold",
 
-        border: "border-transparent border-solid",
         borderWidth: "border",
+        borderColor: "border-transparent",
+
         ":hover": {
             opacity: "hover:opacity-75",
         },

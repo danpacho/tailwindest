@@ -44,25 +44,28 @@ const cardIcon = wind({
     height: "h-6",
     minWidth: "min-w-[1.5rem]",
     minHeight: "min-h-[1.5rem]",
+
     padding: "p-1",
 
-    backgroundImage: "bg-gradient-to-tl",
-    backgroundImageGradientStart: "from-amber-700/50",
-    backgroundImageGradientEnd: "to-amber-700/30",
-    border: "border-amber-400 border-solid",
-    borderWidth: "border",
+    backgroundImage: "bg-gradient-to-bl",
+    backgroundImageGradientStart: "from-amber-700/30",
+    backgroundImageGradientEnd: "to-amber-700/50",
 
+    borderColor: "border-amber-400",
+    borderWidth: "border",
     borderRadius: "rounded",
 
-    fill: "fill-neutral-500",
     "@md": {
-        padding: "md:p-1.5",
         width: "md:w-7",
         height: "md:h-7",
         minWidth: "md:min-w-[1.75rem]",
         minHeight: "md:min-h-[1.75rem]",
+
+        padding: "md:p-1.5",
     },
 }).class()
+
+console.log(card, "\n", cardIcon)
 
 const Card = ({
     children,
