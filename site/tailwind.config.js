@@ -6,7 +6,11 @@ module.exports = {
         "./theme.config.tsx",
     ],
     theme: {
-        extend: {},
+        extend: {
+            animation: {
+                appear: "appear 1.25s ease",
+            },
+        },
     },
     plugins: [],
     darkMode: "class",

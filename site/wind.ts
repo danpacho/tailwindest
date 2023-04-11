@@ -1,7 +1,14 @@
 import { Tailwindest, createWind } from "tailwindest"
 
-const { wind, mergeProps, toggle, wind$ } = createWind<Tailwindest>()
+type TailwindCustom = Tailwindest<
+    {},
+    {
+        animation: "appear"
+    }
+>
 
-type Tailwind = Required<Tailwindest>
+const { wind, mergeProps, toggle, wind$ } = createWind<TailwindCustom>()
+
+type Tailwind = Required<TailwindCustom>
 
 export { wind, wind$, mergeProps, toggle, type Tailwind }

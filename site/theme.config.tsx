@@ -147,7 +147,7 @@ const config: DocsThemeConfig = {
         text: (
             <div className="flex w-full flex-col items-center sm:items-start text-xs">
                 <p className=" text-amber-400 font-mono">MIT</p>
-                <p>©{new Date().getFullYear()} danpacho.</p>
+                <p>©{new Date().getFullYear()} danpacho</p>
             </div>
         ),
     },
@@ -157,7 +157,7 @@ const config: DocsThemeConfig = {
         forcedTheme: "dark",
     },
     primaryHue: {
-        dark: 30,
+        dark: 35,
         light: 30,
     },
 }

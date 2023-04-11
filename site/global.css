@@ -4,22 +4,24 @@
 
 body {
     background: linear-gradient(
-            to top,
-            rgba(5, 5, 5, 0.9) 0%,
-            rgba(0, 0, 0, 0.8) 100%
-        ),
-        radial-gradient(
-                at bottom center,
-                rgba(41, 41, 41, 0.75) 0%,
-                rgba(27, 16, 16, 0.75) 120%
-            )
-            #ff8635 !important;
-    background-blend-mode: multiply, multiply !important;
+        to left,
+        rgba(18, 18, 18, 0.9) 0%,
+        rgba(24, 24, 24, 0.75) 100%
+    ) !important;
 }
 
 pre {
-    background-color: #181110 !important;
-    border: 1px solid #4e3433;
+    background-color: rgba(24, 24, 24, 0.8) !important;
+    border: 1px solid #49202c;
+}
+
+@keyframes appear {
+    0% {
+        opacity: 0.25;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 .dark {
