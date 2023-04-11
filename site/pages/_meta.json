@@ -4,8 +4,9 @@
         "type": "page",
         "display": "hidden"
     },
-    "1-start": "Before you dive in",
-    "2-learn": "Learn with examples",
-    "3-usage": "Practical usage",
-    "4-apis": "API References"
+    "1_start": "Before dive in",
+    "2_setup": "Setup",
+    "3_learn": "Learn with examples",
+    "4_usage": "Practical usage",
+    "5_apis": "API References"
 }
