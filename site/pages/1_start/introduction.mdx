@@ -27,7 +27,7 @@ And the fact that `tailwindest` is a `className` string generator gives it the f
 2. **Framework-independent**
 3. **Zero build step**
 
-## Elegant conditional styling
+## Design philosophies for conditional styling
 
 ### Core concept
 
@@ -139,6 +139,25 @@ const btn = createVariants({
 })
 ```
 
+4. add style at component
+
+```tsx /className/
+interface BtnProps extends WindVariants<typeof btn> {
+    children: ReactNode
+}
+
+const Btn = ({ children, type = "default", size = "md" }) => (
+    <button
+        className={btn({
+            type,
+            size,
+        })}
+    >
+        {children}
+    </button>
+)
+```
+
 ## Pros and cons
 
 ### Pros
@@ -169,15 +188,15 @@ Now just combine the best of both worlds
     but if it's short and easy to read, write an inline `className`.
 </Callout>
 
-If you apply `tailwindest` at right point, you can design a much more robust product with `tailwind`!
+If you apply `tailwindest` in the right circumstances, you can build a much more robust product with `tailwind`.
 
 ## Real world adaptation
 
 1. Short: `inline-class`
-2. Complex & Reusable: `tailwindest`
+2. Complexity & Reuse: `tailwindest`
 
 <Callout type="info">
-    The code below is the Card component **in the Feature on the main page**.
+    The code below is the `Card` component **in the Feature on the main page**.
 </Callout>
 
 ### Original
@@ -189,8 +208,8 @@ export const Card = ({
     icon,
 }: {
     onClick: () => void
-    icon: React.ReactNode
-    children: React.ReactNode
+    icon: ReactNode
+    children: ReactNode
 }) => {
     return (
         <button
@@ -289,8 +308,8 @@ export const Card = ({
     icon,
 }: {
     onClick: () => void
-    icon: React.ReactNode
-    children: React.ReactNode
+    icon: ReactNode
+    children: ReactNode
 }) => {
     return (
         <button type="button" onClick={onClick} className={card}>
@@ -308,12 +327,13 @@ export const Card = ({
 
 ### Recommended
 
-1. Use `tailwind` to **create a design system**
-2. Want to **add type-safety to `tailwind`**
-3. Start projects where **maintainability is important**
-4. People who wants **great conditional styling DX**
+1. Use `tailwind` for creating a design system
+2. Want to add type-safety to `tailwind`
+3. Start projects where maintainability is important
+4. People who wants great conditional styling DX
 
 ### Not recommended
 
-1. Need to **make a product and ship it quickly**
-2. **Don't need type-safety**
+1. Need to make a product and ship it quickly
+2. Don't need type-safety
+3. Fine with `clsx`
