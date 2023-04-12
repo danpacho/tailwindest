@@ -62,13 +62,13 @@ import { createWind, type Tailwindest } from "tailwindest"
  * Custom type definition of `tailwindest`
  * @see {@link https://tailwindest.vercel.app/5_apis/Tailwindest api reference}
  */
-type MyTailwind = Tailwindest<{}, {}>
+type TailwindCustom = Tailwindest<{}, {}>
 /**
  * Full type definition of `tailwindcss`
  */
-type Tailwind = Required<MyTailwind>
+type Tailwind = Required<TailwindCustom>
 
-const { wind, wind$, mergeProps, toggle } = createWind<MyTailwind>()
+const { wind, wind$, mergeProps, toggle } = createWind<TailwindCustom>()
 
 export { wind, wind$, mergeProps, toggle, type Tailwind }
 ```
