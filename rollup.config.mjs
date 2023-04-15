@@ -1,6 +1,7 @@
+//@ts-check
+
 import path from "path"
 import { fileURLToPath } from "url"
-import terser from "@rollup/plugin-terser"
 import typescript from "@rollup/plugin-typescript"
 import dts from "rollup-plugin-dts"
 import esbuild from "rollup-plugin-esbuild"
@@ -38,15 +39,7 @@ function getESMConfig({ input, output, env }) {
     return {
         input,
         output: [{ file: `${output}.js`, format: "esm" }],
-        plugins:
-            env === "production"
-                ? [
-                      getEsbuildPlugin("node14", env),
-                      terser({
-                          sourceMap: true,
-                      }),
-                  ]
-                : [getEsbuildPlugin("node14", env)],
+        plugins: [getEsbuildPlugin("node14", env)],
     }
 }
 
@@ -103,8 +96,8 @@ function getBundleTypeDefConfig({ bundleSourcePath, bundleResultPath }) {
 const PATH = {
     entryPoint: "index",
     entryDir: "packages",
+    outputGzipDir: "dist/gzip",
     outputDir: "dist",
-    outputDevDir: "dist/dev",
     watchDir: "dist/watch",
 }
 
@@ -120,31 +113,21 @@ export default function (args) {
         }),
         getESMConfig({
             input: `${PATH.entryDir}/${PATH.entryPoint}.ts`,
-            output: `${PATH.outputDevDir}/${PATH.entryPoint}`,
-            env: "development",
-        }),
-        getESMConfig({
-            input: `${PATH.entryDir}/core/${PATH.entryPoint}.ts`,
-            output: `${PATH.outputDevDir}/core/${PATH.entryPoint}`,
-            env: "development",
-        }),
-        getESMConfig({
-            input: `${PATH.entryDir}/utils/${PATH.entryPoint}.ts`,
-            output: `${PATH.outputDevDir}/utils/${PATH.entryPoint}`,
-            env: "development",
+            output: `${PATH.outputGzipDir}/${PATH.entryPoint}`,
+            env: "production",
         }),
         getESMConfig({
             input: `${PATH.entryDir}/${PATH.entryPoint}.ts`,
             output: `${PATH.outputDir}/${PATH.entryPoint}`,
-            env: "production",
+            env: "development",
         }),
         getBundleTypeDefConfig({
             bundleSourcePath: `${PATH.outputDir}/${PATH.entryPoint}.d.ts`,
             bundleResultPath: `${PATH.outputDir}/${PATH.entryPoint}.d.ts`,
         }),
         getBundleSizeConfig({
-            devBuildPath: `${PATH.outputDevDir}/${PATH.entryPoint}.js`,
-            productionBuildPath: `${PATH.outputDir}/${PATH.entryPoint}.js`,
+            devBuildPath: `${PATH.outputDir}/${PATH.entryPoint}.js`,
+            productionBuildPath: `${PATH.outputGzipDir}/${PATH.entryPoint}.js`,
             outputWatchPath: PATH.watchDir,
         }),
     ]
