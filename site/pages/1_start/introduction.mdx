@@ -20,11 +20,11 @@ import { Underline } from "~components/common"
 
 ## Classname generator
 
-Unlike `twin` and other css in js frameworks, `tailwindest` is just **`className` string generator function** like `clsx`, but optimized only for `tailwindcss`.
-And the fact that `tailwindest` is a `className` string generator gives it the following advantages.
+Unlike other css in js frameworks, `tailwindest` is just **`className` generator function** like `clsx`, but optimized only for `tailwindcss`.
+And the fact that `tailwindest` is a `string` generator gives it the following advantages.
 
-1. **Tiny bundle size, `638B`**
-2. **Framework-independent**
+1. **Tiny bundle size, `637B`**
+2. **Independency of framework & environment**
 3. **Zero build step**
 
 ## Design philosophies for conditional styling
@@ -42,20 +42,16 @@ The simplest switch is a `toggle`, which can only express two states: on/off. Le
 You need to create a button that supports dark/light mode, i.e and **its style should change depending on the value of a boolean variable called `isDarkMode`**.
 It's like a light switch: pressing it (on = `true`) turns it on (light mode), pressing the other side (off = `false`) turns it off (dark mode).
 
-```tsx /toggle/ {5-9}
+```tsx {1-5}
+const themeBtn = toggle({
+    truthy: truthyStyle,
+    falsy: falsyStyle,
+    base: baseStyle /* Optional */,
+})
+
 const ThemeBtn = ({ children }) => {
     const [isDarkMode, setIsDarkMode] = useState(false)
-    return (
-        <button
-            className={toggle(isDarkMode, {
-                truthy: truthyStyle,
-                falsy: falsyStyle,
-                base: baseStyle /* Optional */,
-            })}
-        >
-            {children}
-        </button>
-    )
+    return <button className={themeBtn.class(isDarkMode)}>{children}</button>
 }
 ```
 
@@ -64,7 +60,7 @@ const ThemeBtn = ({ children }) => {
 But in the real world, we can't express everything with a toggle switch, so we need to create a switch that's a step more complex: a rotary switch. If you've ever used a microwave oven, it's easy to understand! From steps 1, 2 to 10, we can fine-tune the time and intensity we want with a ROTARY switch.
 So, for example, if we want to present a UI with 4 states: `"base"`, `"success"`, `"failure"` and `"pending"`, we can import the concept of a rotary switch: if it's `"success"`, we can associate a style for success, if it's `"failure"`, we can associate a style for failure, and so on.
 
-```tsx /wind$/ {1-12}
+```tsx {1-12}
 const btn = wind$(
     /* 🔮 Rotary conditions */
     "base",
@@ -92,13 +88,13 @@ const Btn = ({
 However, there may be times when we need a few more states. In other words, we may need to **create multiple rotary switches** to represent more complex states.
 This is where the `variants` comes in.
 
-`variants` are **combinations of rotary switches** - think of the **microwave at home**. You'll notice that it has a few rotary switches, such as a **timer** and an **intensity**.
+`variants` are **combinations of rotary switches** - think of the **microwave at home**. You'll notice that it has a few rotary switches, such as **time** and an **intensity**.
 
-![microwave](./microwave.png)
+<div className="w-full md:w-2/3 mt-4">![microwave](./microwave.png)</div>
 
 Similarly, with variants, you first create a category of switches for each of the criteria you need to adjust, and then add them to your Style functions.
 
-![microwave](./variants.png)
+<div className="w-full md:w-2/3 mt-4">![microwave](./variants.png)</div>
 
 1. `type` **rotary switch**
 
@@ -192,8 +188,8 @@ If you apply `tailwindest` in the right circumstances, you can build a much more
 
 ## Real world adaptation
 
-1. Short: `inline-class`
-2. Complexity & Reuse: `tailwindest`
+1. **Short `className`**: `inline-class`
+2. **Complex & Reusable `className`**: `tailwindest`
 
 <Callout type="info">
     The code below is the `Card` component **in the Feature on the main page**.
