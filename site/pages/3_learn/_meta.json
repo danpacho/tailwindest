@@ -1,20 +1,14 @@
 {
-    "basic-usage-style": {
-        "title": "Basic style"
+    "styling": {
+        "title": "Basic styling"
     },
-    "basic-usage-conditional": {
-        "title": "Conditional style"
+    "conditional-styling": {
+        "title": "Conditional styling"
     },
-    "advanced-usage-complex-variants": {
-        "title": "Complex variants style"
+    "customize": {
+        "title": "Customize"
     },
-    "advanced-usage-customize": {
-        "title": "Custom - type definition"
-    },
-    "advanced-usage-create": {
-        "title": "Custom - style functions"
-    },
-    "advanced-usage-merging-styles": {
-        "title": "Merging styles"
+    "utility": {
+        "title": "Utility"
     }
 }
