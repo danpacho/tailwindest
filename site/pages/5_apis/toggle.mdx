@@ -1,0 +1,145 @@
+import { Callout } from "nextra-theme-docs"
+
+# `mergeProps`
+
+## Briefly
+
+Core style generator `function` to handle toggle conditions.
+
+## 1. Type definition
+
+```ts
+declare const toggle: ({
+    falsy,
+    truthy,
+    base,
+}: {
+    truthy: Tailwindest
+    falsy: Tailwindest
+    base?: Tailwindest
+}) => {
+    class: (toggleCondition: boolean) => string
+    style: (toggleCondition: boolean) => Tailwindest
+}
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+toggle({
+    base: baseStyle,
+    truthy: truthyStyle,
+    falsy: falsyStyle,
+})
+```
+
+### Parameter: `base`
+
+-   type: `Tailwindest`
+-   usage: common style for `true` and `false` condition
+
+### Parameter: `truthy`
+
+-   type: `Tailwindest`
+-   usage: if condition is `true`, it will applied.
+
+### Parameter: `falsy`
+
+-   type: `Tailwindest`
+-   usage: if condition is `false`, it will applied.
+
+### Example
+
+Define styleSheet based on **specific one `boolean` condition**.
+
+```tsx
+const themeBtn = toggle({
+    base: {
+        display: "flex",
+        alignItems: "items-center",
+        justifyContent: "justify-center",
+        padding: "p-2",
+        "@lg": {
+            padding: "lg:p-3",
+        },
+        borderRadius: "rounded",
+        borderWidth: "border",
+    },
+    truthy: {
+        backgroundColor: "bg-white",
+        borderColor: "border-black",
+        color: "text-black",
+    },
+    falsy: {
+        backgroundColor: "bg-black",
+        borderColor: "border-white",
+        color: "text-white",
+    },
+})
+```
+
+## 3. Returns
+
+### `class`
+
+#### Briefly
+
+**Returns `className` `string`**
+
+#### Usage
+
+```ts
+toggle({
+    base: baseStyle,
+    truthy: truthyStyle,
+    falsy: falsyStyle,
+}).class(toggleBooleanCondition)
+```
+
+#### Example
+
+```ts /class/
+const truthy = themeBtn.class(true)
+
+const falsy = themeBtn.class(false)
+```
+
+`ThemeBtn` example.
+
+```tsx
+const ThemeBtn = () => {
+    const [isDarkMode, setIsDarkMode] = useState(false)
+
+    return (
+        <button onClick={onClick} className={themeBtn.class(isDarkMode)}>
+            {isDarkMode ? "light" : "dark"}
+        </button>
+    )
+}
+```
+
+### `style`
+
+#### Briefly
+
+**Returns input `styleSheet` `object`**
+
+#### Usage
+
+```ts /style/
+toggle({
+    base: baseStyle,
+    truthy: truthyStyle,
+    falsy: falsyStyle,
+}).style(toggleBooleanCondition)
+```
+
+#### Example
+
+```ts /style/
+const truthy = themeBtn.style(true)
+
+const falsy = themeBtn.style(false)
+```

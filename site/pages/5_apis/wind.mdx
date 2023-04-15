@@ -73,7 +73,7 @@ const centerClass = center.class()
 
 #### Briefly
 
-**Returns input `stylesheet` `object`**
+**Returns input `styleSheet` `object`**
 
 #### Usage
 
@@ -102,18 +102,18 @@ const baseStyle = base.style()
 
 #### Briefly
 
-Compose **Array of `stylesheet` `object`** into **single `stylesheet`**
+Compose **Array of `styleSheet` `object`** into **single `styleSheet`**
 
 #### Usage
 
 ```ts
-wind(style).compose(...stylesheets)
+wind(style).compose(...styleSheets)
 ```
 
 <Callout type="info">
-    The order of `...stylesheets` is very important.
+    The order of `...styleSheets` is very important.
     
-    If `stylesheet` is placed behind in `...stylesheets`, **it has higher priority
+    If `styleSheet` is placed behind in `...styleSheets`, **it has higher priority
     in styling**.
 ```ts
 const paddingWillBe4 = wind({
@@ -140,10 +140,10 @@ const result = paddingWillBe4.class()
 
 </Callout>
 
-#### Parameter: `...stylesheets`
+#### Parameter: `...styleSheets`
 
 -   type: `Array<Tailwindest>`
--   usage: **compose** `...stylesheets` into **one `stylesheet`** **`object`**
+-   usage: **compose** `...styleSheets` into **one `styleSheet`** **`object`**
 
 #### Example
 
@@ -163,7 +163,7 @@ const border = wind({
 })
 ````
 
-2. Compose all `stylesheet`
+2. Compose all `styleSheet`
 
 ```ts
 const box = wind({
