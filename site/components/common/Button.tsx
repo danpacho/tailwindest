@@ -1,13 +1,12 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { wind, wind$, WindVariants } from "tailwindest"
+import { WindVariants } from "tailwindest"
+import { wind$ } from "wind"
 
 const btn = wind$("outline", "fill")(
     {
         display: "flex",
         width: "w-fit",
-        paddingX: "px-2",
-        paddingY: "py-2",
 
         borderRadius: "rounded",
 
@@ -16,19 +15,23 @@ const btn = wind$("outline", "fill")(
             color: "dark:text-white",
         },
 
+        paddingX: "px-1.5",
+        paddingY: "py-1.5",
+        fontWeight: "font-medium",
         fontSize: "text-sm",
+
         "@sm": {
             fontSize: "sm:text-base",
         },
         "@md": {
-            paddingX: "md:px-3",
-            paddingY: "md:py-2",
+            paddingX: "md:px-2.5",
+            paddingY: "md:py-1.5",
             fontSize: "md:text-lg",
         },
-        fontWeight: "font-semibold",
 
-        border: "border-transparent border-solid",
         borderWidth: "border",
+        borderColor: "border-transparent",
+
         ":hover": {
             opacity: "hover:opacity-75",
         },

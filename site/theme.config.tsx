@@ -117,15 +117,15 @@ const config: DocsThemeConfig = {
             </>
         )
     },
-    banner: {
-        key: "Document released!",
-        text: (
-            <p>
-                🎉 Documentation site is released. Support api docs only, right
-                now!
-            </p>
-        ),
-    },
+    // banner: {
+    //     key: "Document released!",
+    //     text: (
+    //         <p>
+    //             🎉 Documentation site is released. Support api docs only, right
+    //             now!
+    //         </p>
+    //     ),
+    // },
     editLink: {
         text: "Edit this page on GitHub →",
     },
@@ -147,7 +147,7 @@ const config: DocsThemeConfig = {
         text: (
             <div className="flex w-full flex-col items-center sm:items-start text-xs">
                 <p className=" text-amber-400 font-mono">MIT</p>
-                <p>©{new Date().getFullYear()} danpacho.</p>
+                <p>©{new Date().getFullYear()} danpacho</p>
             </div>
         ),
     },
@@ -157,7 +157,7 @@ const config: DocsThemeConfig = {
         forcedTheme: "dark",
     },
     primaryHue: {
-        dark: 25,
+        dark: 35,
         light: 30,
     },
 }

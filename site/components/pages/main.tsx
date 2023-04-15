@@ -1,13 +1,15 @@
-import { wind } from "tailwindest"
+import { wind } from "wind"
 import { Title, LinkButton, Underline, CopyButton } from "~components/common"
 import { Card, cardContainer } from "~components/common/Card"
 import {
     BoltIcon,
-    CpuChipIcon,
-    DocumentCheckIcon,
-    Square3Stack3DIcon,
-    WrenchScrewdriverIcon,
+    DocumentIcon,
+    SparklesIcon,
+    SquaresPlusIcon,
+    SwatchIcon,
+    VariableIcon,
 } from "@heroicons/react/24/solid"
+
 import { useState } from "react"
 
 const subtitle = wind({
@@ -26,12 +28,12 @@ const subtitle = wind({
 const MainHeader = () => {
     return (
         <>
-            <div className="w-full flex flex-col gap-14 items-center justify-center py-16">
-                <Title fontSize="text-5xl" lgFontSize="lg:text-6xl" />
+            <div className="w-full flex flex-col gap-14 md:gap-25 items-center justify-center py-16">
+                <Title fontSize="text-5xl" mdFontSize="md:text-[3.5rem]" />
                 <div className="flex flex-col items-center justify-center gap-1">
                     <p className={subtitle}>
                         Build <Underline>fully‒typed</Underline>{" "}
-                        <Underline>tailwindcss</Underline> product
+                        <Underline>tailwind</Underline> product
                     </p>
                     <p className={subtitle}>
                         Using the power of <Underline>typescript</Underline>
@@ -39,17 +41,12 @@ const MainHeader = () => {
                 </div>
             </div>
             <div className="w-full flex flex-row items-center justify-center gap-4">
-                <LinkButton to="/1-start/setup">Getting Started</LinkButton>
+                <LinkButton to="/1_start/introduction">
+                    Getting Started
+                </LinkButton>
                 <CopyButton
                     copiedText={<p className="font-mono">type is ready</p>}
-                    defaultText={
-                        <div className="flex flex-row gap-1.5 items-center justify-center">
-                            <div className="text-amber-400 font-mono font-bold">
-                                $
-                            </div>
-                            <p className="font-mono">npm i tailwindest</p>
-                        </div>
-                    }
+                    defaultText={<p className="font-mono">npm i tailwindest</p>}
                     text="npm i tailwindest"
                     timeout={7000}
                 />
@@ -63,9 +60,18 @@ const code = wind({
     fontWeight: "font-semibold",
     fontSize: "text-sm",
     borderWidth: "border",
-    borderColor: "border-amber-400",
-    padding: "p-0.5",
-    borderRadius: "rounded",
+    borderColor: "border-amber-400/30",
+    backgroundColor: "bg-amber-900/10",
+    paddingX: "px-0.5",
+    paddingY: "py-0",
+    borderRadius: "rounded-sm",
+
+    "@md": {
+        padding: "md:p-0",
+        paddingX: "md:px-0.5",
+        paddingY: "md:py-[0.25px]",
+        borderRadius: "md:rounded",
+    },
 }).class()
 
 const Code = ({ children }: React.PropsWithChildren) => (
@@ -74,21 +80,19 @@ const Code = ({ children }: React.PropsWithChildren) => (
 
 const features = {
     fullyTyped: {
-        featureTitle: <Underline>Fully-typed</Underline>,
-        featureIcon: <CpuChipIcon />,
+        featureTitle: "Fully-typed",
+        featureIcon: <VariableIcon />,
         title: <>Fully typed tailwind</>,
         description: (
             <>
-                Type-safety and autocompletion magics,
-                <p>
-                    will give you the best <Code>tailwindcss</Code> DX.
-                </p>
+                Type-safety and autocompletion magics, will give you the best{" "}
+                <Code>tailwindcss</Code> DX.
             </>
         ),
     },
     customizable: {
-        featureTitle: <Underline>Customizable</Underline>,
-        featureIcon: <WrenchScrewdriverIcon />,
+        featureTitle: "Customizable",
+        featureIcon: <SwatchIcon />,
         title: <>Support custom type</>,
         description: (
             <>
@@ -98,12 +102,8 @@ const features = {
         ),
     },
     variantsAPI: {
-        featureTitle: (
-            <>
-                <Underline>Variants</Underline> API
-            </>
-        ),
-        featureIcon: <CpuChipIcon />,
+        featureTitle: "Variants API",
+        featureIcon: <SquaresPlusIcon />,
         title: <>Level up conditional styling</>,
         description: (
             <>
@@ -115,20 +115,20 @@ const features = {
     tiny: {
         featureTitle: (
             <>
-                Tiny, <Underline>603B</Underline>
+                Tiny, <Underline>638B</Underline>
             </>
         ),
-        featureIcon: <Square3Stack3DIcon />,
+        featureIcon: <SparklesIcon />,
         title: <>Tiny bundle size</>,
         description: (
             <>
                 Don't have to worry about heavy bundle size. It is just{" "}
-                <Code>603B</Code> tiny lib.
+                <Code>638B</Code> tiny lib.
             </>
         ),
     },
     performant: {
-        featureTitle: <Underline>Performant</Underline>,
+        featureTitle: "Performant",
         featureIcon: <BoltIcon />,
         title: <>Styles are cached</>,
         description: (
@@ -136,20 +136,13 @@ const features = {
         ),
     },
     docsLink: {
-        featureTitle: (
-            <>
-                Document <Underline>link</Underline>
-            </>
-        ),
-        featureIcon: <DocumentCheckIcon />,
+        featureTitle: "Document link",
+        featureIcon: <DocumentIcon />,
         title: <>Document embedded</>,
         description: (
             <>
-                Hover the property,{" "}
-                <p className="font-semibold">
-                    you will get the official <Code>tailwindcss</Code> document
-                    link
-                </p>
+                Hover the property, you will get the official{" "}
+                <Code>tailwindcss</Code> document link
             </>
         ),
     },
@@ -231,7 +224,7 @@ const MainFeatures = () => {
                                 {features[focusedFeature].title}
                             </Underline>
                         </div>
-                        <div className="text-sm md:text-base text-neutral-200 tracking">
+                        <div className="text-sm md:text-base text-neutral-200 tracking w-full">
                             {features[focusedFeature].description}
                         </div>
                     </>

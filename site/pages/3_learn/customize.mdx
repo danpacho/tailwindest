@@ -1,0 +1,267 @@
+import { Callout } from "nextra-theme-docs"
+
+# Customize
+
+## `Tailwindest`
+
+> tailwind docs, [`tailwind.config.js`](https://tailwindcss.com/docs/configuration)
+
+`Tailwindest` is a `tailwind` type definition to apply the customized values in `tailwind.config.js`.
+
+## Global style
+
+> api reference, [screens](../5_apis/Tailwindest#generic-parameter-tailwindglobal)
+
+Tailwind has three global custom properties.
+
+1. screens: Defines the break condition.
+2. color: Defines a new color palette.
+3. opacity: Defines a new color opacity.
+4. spacing: Defines a new spacing. (ex: margin, padding, ...)
+
+You can define customized global values via `Tailwindest`'s first generic type.
+
+```ts
+type TailwindCustom = Tailwindest<
+    {
+        screens: {
+            conditionA: "@my1"
+        }
+        color: "my1" | "my2"
+        opacity: "12.5" | "17.5"
+        sizing: "5" | "7.5"
+    },
+    {}
+>
+```
+
+### Screens
+
+> tailwind docs, [screens](https://tailwindcss.com/docs/screens)
+
+Define and access custom break conditions via three types of identifier.
+
+1. `:`: pseudo classes
+2. `::`: pseudo elements
+3. `@`: media and feature queries
+
+<Callout type="warning">
+    You **should use `:` and `@` to define custom break conditions**. ex) `::`,
+    `:`, `@`, `@:`, `@@`, ...
+</Callout>
+
+```js filename="tailwind.config.js" /screens/ /my1/ /my2/ /my3/
+module.exports = {
+    theme: {
+        extend: {
+            screens: {
+                my1: "600px",
+                my2: "1000px",
+                my3: "1400px",
+            },
+        },
+    },
+}
+```
+
+```ts filename="wind.ts" /screens/ /@my1/ /@my2/ /@my3/
+type TailwindCustom = Tailwindest<
+    {
+        screens: {
+            conditionA: "@my1"
+            conditionB: "@my2"
+            conditionC: "@my3"
+        }
+    },
+    {}
+>
+
+const customBreakCondition: TailwindCustom = {
+    "@my1": {
+        backgroundColor: "my1:bg-amber-300",
+    },
+    "@my2": {
+        backgroundColor: "my2:bg-amber-300",
+    },
+    "@my3": {
+        "@my2": {
+            backgroundColor: "my3:my2:bg-amber-300",
+            "@my1": {
+                backgroundColor: "my3:my2:my1:bg-amber-300",
+            },
+        },
+    },
+}
+```
+
+### Colors
+
+> tailwind docs, [colors](https://tailwindcss.com/docs/customizing-colors)
+
+```js filename="tailwind.config.js" /colors/ /my1/ /my2/ /my3/
+module.exports = {
+    theme: {
+        extend: {
+            colors: {
+                my1: "#371A1A",
+                my2: "#682F2F",
+                my3: "#AE5050",
+            },
+        },
+    },
+}
+```
+
+```ts filename="wind.ts" /screens/ /@my1/ /@my2/ /@my3/
+type TailwindCustom = Tailwindest<
+    {
+        color: "my1" | "my2" | "my3"
+    },
+    {}
+>
+
+const customColor: TailwindCustom = {
+    color: "text-my1",
+    backgroundColor: "bg-my2",
+    borderColor: "border-my3",
+    "@dark": {
+        borderColor: "dark:border-my1",
+    },
+}
+```
+
+## Opacity
+
+> tailwind docs, [opacity](https://tailwindcss.com/docs/opacity#customizing-your-theme)
+
+```js filename="tailwind.config.js" /opacity/ /11/ /12/ /13/
+module.exports = {
+    theme: {
+        extend: {
+            opacity: {
+                11: "0.11",
+                12: "0.12",
+                13: "0.13",
+            },
+        },
+    },
+}
+```
+
+```ts filename="wind.ts" /opacity/ /11/ /12/ /13/
+type TailwindCustom = Tailwindest<
+    {
+        opacity: "11" | "12" | "13"
+    },
+    {}
+>
+
+const customOpacity: TailwindCustom = {
+    color: "text-gray-900/11",
+    backgroundColor: "bg-gray-100/12",
+    "@dark": {
+        backgroundColor: "dark:bg-[#000]/13",
+    },
+}
+```
+
+### Spacing
+
+> tailwind docs, [spacing](https://tailwindcss.com/docs/customizing-spacing)
+
+```js filename="tailwind.config.js" /spacing/ /0.25/ /0.75/ /1.25/
+module.exports = {
+    theme: {
+        extend: {
+            spacing: {
+                0.25: "0.25rem",
+                0.75: "0.75rem",
+                1.25: "1.25rem",
+            },
+        },
+    },
+}
+```
+
+```ts filename="wind.ts" /spacing/ /0.25/ /0.75/ /1.25/
+type TailwindCustom = Tailwindest<
+    {
+        spacing: "0.25" | "0.75" | "1.25"
+    },
+    {}
+>
+
+const customSpacing: TailwindCustom = {
+    padding: "p-0.25",
+    marginX: "mx-0.75",
+    borderXWidth: "border-x-1.25",
+    "@md": {
+        height: "md:h-1.25",
+    },
+}
+```
+
+## Normal styles
+
+> tailwind docs, [supported custom value list](https://tailwindcss.com/docs/theme#configuration-reference)
+>
+> api reference, [screens](../5_apis/Tailwindest#generic-parameter-tailwindstyle)
+
+For example, if you wanted to add a new property type for `fontFamily`, you could do something like this.
+
+```js filename="tailwind.config.js" /fontFamily/ /display/ /body/
+module.exports = {
+    theme: {
+        extend: {
+            fontFamily: {
+                display: ["Oswald", ...],
+                body: ['"Open Sans"', ...],
+            },
+        },
+    },
+}
+```
+
+```ts filename="wind.ts" /fontFamily/ /display/ /body/
+type TailwindCustom = Tailwindest<
+    {},
+    {
+        fontFamily: "display" | "body"
+    }
+>
+
+const customFontfamily: TailwindCustom = {
+    fontFamily: "font-display",
+    "@md": {
+        fontFamily: "md:font-body",
+    },
+}
+```
+
+## `jsdoc` typing
+
+You can define your custom type definition in javascript via **`jsdoc`**.
+
+```js filename="wind.js"
+import { createWind } from "tailwindest"
+
+/** @typedef {import("tailwindest").Tailwindest<{color: "my-color" | "my-test-color", screens: {conditionA: "@my"}}, {}>} CustomTailwind */
+/** @typedef {ReturnType<typeof createWind<CustomTailwind>>} CreateWind */
+/** @typedef {Required<CustomTailwind>} Tailwind */
+
+/** @type {CreateWind} */
+const { wind, wind$, toggle, mergeProps } = createWind()
+
+export { wind, wind$, toggle, mergeProps }
+```
+
+Access custom type at javascript files.
+
+```js filename="box.js"
+const box = wind({
+    color: "text-my-color",
+    "@my": {
+        color: "my:text-my-test-color",
+    },
+})
+```

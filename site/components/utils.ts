@@ -1,4 +1,4 @@
-import { wind } from "tailwindest"
+import { wind } from "wind"
 
 const bg = wind({
     backgroundImage: "bg-gradient-to-b",

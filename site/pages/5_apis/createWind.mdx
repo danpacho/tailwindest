@@ -1,0 +1,152 @@
+import { Callout } from "nextra-theme-docs"
+
+# `createWind`
+
+## Briefly
+
+**Create `wind` and `wind$` functions** with custom values defined in `tailwind.config.js`.
+
+## 1. Type definition
+
+```ts
+declare const createWind: <StyleType extends NestedObject>() => {
+    wind: (style: StyleType) => {
+        class: () => string
+        style: () => StyleType
+        compose: (...styles: StyleType[]) => {
+            class: () => string
+            style: () => StyleType
+        }
+    }
+
+    wind$: <Variant extends string>(
+        ...variantNames: Variant[]
+    ) => (
+        style: StyleType,
+        variantsStyles: VariantsStyles<Variant, StyleType>
+    ) => {
+        class: (
+            variant?:
+                | Extract<
+                      Exclude<Variant, "defaultVariant" | null | undefined>,
+                      string
+                  >
+                | undefined
+        ) => string
+        style: (
+            variant?:
+                | Extract<
+                      Exclude<Variant, "defaultVariant" | null | undefined>,
+                      string
+                  >
+                | undefined
+        ) => StyleType
+        compose: (...styles: StyleType[]) => {
+            class: (
+                variant?:
+                    | Extract<
+                          Exclude<Variant, "defaultVariant" | null | undefined>,
+                          string
+                      >
+                    | undefined
+            ) => string
+            style: (
+                variant?:
+                    | Extract<
+                          Exclude<Variant, "defaultVariant" | null | undefined>,
+                          string
+                      >
+                    | undefined
+            ) => StyleType
+        }
+    }
+
+    mergeProps: (baseStyle: StyleType, styleProps: StyleType) => string
+
+    toggle: (
+        booleanCondition: boolean,
+        {
+            falsy,
+            truthy,
+            base,
+        }: {
+            truthy: StyleType
+            falsy: StyleType
+            base?: StyleType
+        }
+    ) => string
+}
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+createWind<StyleType>()
+```
+
+### Generic Parameter: `StyleType`
+
+-   type: generic `StyleType extends NestedObject`
+-   usage: plug tailwind types and create style tools.
+
+### Example
+
+1. Define **customized `Tailwindest`**
+
+    ```ts
+    type MyCustom = Tailwindest<{
+        color: "my-color-1" | "my-color-2" | "my-color-3"
+    }>
+    ```
+
+2. Plug type at the `createWind` generic `StyleType`
+
+    ```ts
+    const { wind, wind$, mergeProps, toggle } = createWind<MyCustom>()
+    ```
+
+3. Import `wind` and `wind$`
+
+    <Callout>Checkout [setup](../1-start/setup.mdx) page</Callout>
+
+    - `wind`
+
+    ```ts
+    import { wind } from "@style/tailwindest"
+
+    const yeas = wind({
+        color: "text-my-color-1",
+        backgroundColor: "bg-my-color-2",
+        borderColor: "border-my-color-3",
+    })
+
+    const yeasClass = yeas.class()
+    const yeasStyle = yeas.style()
+    ```
+
+    - `wind$`: same as `wind$`
+
+    ```ts
+    import { wind$ } from "@style/tailwindest"
+
+    const yeasVar = wind$("oh")(
+        {
+            color: "text-my-color-1",
+            backgroundColor: "bg-my-color-2",
+            borderColor: "border-my-color-3",
+        },
+        {
+            oh: {
+                color: "text-my-color-2",
+            },
+        }
+    )
+
+    const defaultClass = yeasVar.class()
+    const defaultStyle = yeasVar.style()
+
+    const ohClass = yeasVar.class("oh")
+    const ohStyle = yeasVar.style("oh")
+    ```

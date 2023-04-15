@@ -1,0 +1,98 @@
+import { Tab, Tabs, Callout, Steps } from "nextra-theme-docs"
+
+# Setup
+
+## Easy to boot up
+
+<Steps>
+### Install package
+
+<Tabs items={["npm", "yarn", "pnpm"]}>
+
+    <Tab>
+    ```bash
+    npm i tailwindest
+    ```
+    </Tab>
+    <Tab>
+    ```bash
+    yarn i tailwindest
+    ```
+    </Tab>
+    <Tab>
+    ```bash
+    pnpm i tailwindest
+    ```
+    </Tab>
+
+</Tabs>
+
+### Define style functions
+
+<Callout type="info">
+    Plug `Tailwindest` type at `createWind`'s generic to type the function
+    correctly.
+</Callout>
+
+```ts
+import { createWind, type Tailwindest } from "tailwindest"
+
+type MyTailwind = Tailwindest<{}, {}>
+type Tailwind = Required<MyTailwind>
+
+// Plug Tailwindest type
+const { wind, wind$, mergeProps, toggle } = createWind<MyTailwind>()
+```
+
+### Export all tools
+
+<Callout type="info">
+    Export type `Tailwind`. This is full type definition of `tailwindcss`.
+</Callout>
+
+```ts
+export { wind, wind$, mergeProps, toggle, type Tailwind }
+```
+
+</Steps>
+
+## Summary
+
+**Copy and paste it** at your project. Both javascript and typescript supported.
+
+### Typescript
+
+```ts filename="wind.ts" /createWind/
+import { createWind, type Tailwindest } from "tailwindest"
+
+/**
+ * Custom type definition of `tailwindest`
+ * @see {@link https://tailwindest.vercel.app/5_apis/Tailwindest api reference}
+ */
+type TailwindCustom = Tailwindest<{}, {}>
+/**
+ * Full type definition of `tailwindcss`
+ */
+type Tailwind = Required<TailwindCustom>
+
+const { wind, wind$, mergeProps, toggle } = createWind<TailwindCustom>()
+
+export { wind, wind$, mergeProps, toggle, type Tailwind }
+```
+
+### Javascript
+
+Add type with `jsdoc` without any setup.
+
+```js filename="wind.js" /createWind/
+import { createWind } from "tailwindest"
+
+/** @typedef {import("tailwindest").Tailwindest<{}, {}>} CustomTailwind */
+/** @typedef {ReturnType<typeof createWind<CustomTailwind>>} CreateWind */
+/** @typedef {Required<CustomTailwind>} Tailwind */
+
+/** @type {CreateWind} */
+const { wind, wind$, toggle, mergeProps } = createWind()
+
+export { wind, wind$, toggle, mergeProps }
+```

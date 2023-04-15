@@ -1,6 +1,6 @@
 {
-    "setup": {
-        "title": "Setup"
+    "introduction": {
+        "title": "Introduction"
     },
     "problem": {
         "title": "Problems of tailwind"

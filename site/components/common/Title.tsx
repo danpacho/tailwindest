@@ -1,4 +1,4 @@
-import { mergeProps, Tailwindest, wind } from "tailwindest"
+import { wind, mergeProps, type Tailwind } from "wind"
 
 const header = wind({
     fontWeight: "font-extrabold",
@@ -21,36 +21,37 @@ const gradientHeader = wind({
     },
 }).class()
 
-const btn = wind({
-    display: "flex",
-    flexDirection: "flex-row",
-    alignItems: "items-center",
-    justifyContent: "justify-center",
-    gap: "gap-2",
-
-    transition: "transition ease-in",
-    ":hover": {
-        opacity: "hover:opacity-90",
-    },
-    ":active": {
-        transformScale: "active:scale-95",
-    },
-}).style()
-
 const Title = ({
     children,
     fontSize = "text-xl",
-    lgFontSize = "lg:text-2xl",
+    mdFontSize = "md:text-2xl",
 }: React.PropsWithChildren<{
-    fontSize?: Tailwindest["fontSize"]
-    lgFontSize?: `lg:${Exclude<Tailwindest["fontSize"], undefined>}`
+    fontSize?: Tailwind["fontSize"]
+    mdFontSize?: `md:${Tailwind["fontSize"]}`
 }>) => {
-    const btnWithSize = mergeProps(btn, {
-        fontSize,
-        "@lg": {
-            fontSize: lgFontSize,
+    const btnWithSize = mergeProps(
+        {
+            display: "flex",
+            flexDirection: "flex-row",
+            alignItems: "items-center",
+            justifyContent: "justify-center",
+            gap: "gap-2",
+
+            transition: "transition ease-in",
+            ":hover": {
+                opacity: "hover:opacity-90",
+            },
+            ":active": {
+                transformScale: "active:scale-95",
+            },
         },
-    })
+        {
+            fontSize,
+            "@md": {
+                fontSize: mdFontSize,
+            },
+        }
+    )
 
     return (
         <button className={btnWithSize}>

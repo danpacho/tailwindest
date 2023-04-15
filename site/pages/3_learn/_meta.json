@@ -1,0 +1,14 @@
+{
+    "styling": {
+        "title": "Basic styling"
+    },
+    "conditional-styling": {
+        "title": "Conditional styling"
+    },
+    "customize": {
+        "title": "Customize"
+    },
+    "utility": {
+        "title": "Utility"
+    }
+}

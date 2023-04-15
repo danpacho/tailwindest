@@ -4,7 +4,7 @@ import { Callout } from "nextra-theme-docs"
 
 ## Briefly
 
-Core style generator `function`, **with variants**.
+Core style generator `function` to handle various conditions.
 
 ## 1. Type Definition
 
@@ -61,11 +61,11 @@ const button = wind$(...buttonVariants)(/* variant style */)
 ### Parameter: `style`
 
 -   type: `Tailwindest`
--   usage: Define **base** or **common** `stylesheet` of variants
+-   usage: Define **base** or **common** `styleSheet` of variants
 
 ### Example
 
-The first `stylesheet` factor, `style`, has two ways of using it.
+The first `styleSheet` factor, `style`, has two ways of using it.
 
 1. **Use as default _variant_ style**
 
@@ -138,11 +138,11 @@ const button = wind$(
 ### Parameter: `variantsStyles`
 
 -   type: `VariantsStyles<Variant, Tailwindest>`
--   usage: Define **variant** `stylesheet`
+-   usage: Define **variant** `styleSheet`
 
 ### Example
 
-Define **variant** `stylesheet`
+Define **variant** `styleSheet`
 
 ```ts {9-10, 13-14}
 const button = wind$("warning", "success")(
@@ -198,7 +198,7 @@ const successButtonClass = button.class("success")
 
 #### Briefly
 
-**Returns input `stylesheet` `object`**
+**Returns input `styleSheet` `object`**
 
 #### Usage
 
@@ -220,13 +220,13 @@ const successButtonStyle = button.style("success")
 
 #### Briefly
 
-**Compose `stylesheet` `object`**
+**Compose `styleSheet` `object`**
 
 <Callout type="info">
     Performs the **almost same** function as `compose` in `wind`, **except
-    variant's `stylesheet`**.
+    variant's `styleSheet`**.
 
-    **Remember that variant's `stylesheet` has top priority.**
+    **Remember that variant's `styleSheet` has top priority.**
 
     ```ts {7-10}
     const willBeFlex = wind$("shouldBeFlex")(
@@ -254,6 +254,6 @@ const successButtonStyle = button.style("success")
 
     `display` is derived from the value of `flex` of variable in `shouldBeFlex`
 
-    In other words, the variant's `stylesheet` will overwrite the argument of `compose` `...stylesheet`.
+    In other words, the variant's `styleSheet` will overwrite the argument of `compose` `...styleSheet`.
 
 </Callout>

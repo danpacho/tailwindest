@@ -4,7 +4,7 @@ import { Callout } from "nextra-theme-docs"
 
 ## Briefly
 
-**Use this if you want to merge `stylesheet`**.
+**Use this if you want to merge `styleSheet`**.
 
 <Callout>
     **`mergeProps` is useful, when making certain styles flexible with
@@ -14,9 +14,9 @@ import { Callout } from "nextra-theme-docs"
 ## 1. Type definition
 
 ```ts
-declare const mergeProps: <T extends NestedObject>(
-    baseStyle: T,
-    styleProps: T
+declare const mergeProps: (
+    baseStyle: StyleType,
+    styleProps: StyleType
 ) => string
 ```
 
@@ -30,36 +30,19 @@ mergeProps(baseStyle, styleProps)
 
 ### Parameter: `baseStyle`
 
--   type: generic `T extends NestedObject`
+-   type: `Tailwindest`
 -   usage: default style for merge targets
 
 ### Parameter: `styleProps`
 
--   type: type `T` inferred as first argument type
+-   type: `Tailwindest`
 -   usage: if the key of `styleProps` is equal to the key of `baseStyle`, the value of `styleProps` is overwritten
 
 ### Example
 
 Applying **fontSize** after receiving `size prop` from `Text`.
 
-First, let's define the basic text style.
-
-```tsx
-const text = wind({
-    color: "text-black",
-    fontSize: "text-base",
-    fontWeight: "font-medium",
-}).style()
-```
-
-<Callout type="info">
-    **first argument of `mergeProps` should be `stylesheet` `object`.**
-
-    Same as `wind().style()`
-
-</Callout>
-
-Now let's define a `Text` that can have **variable font size**.
+Define a `Text` component that can have **variable font size**.
 
 ```tsx
 interface TextProps {
@@ -69,9 +52,16 @@ interface TextProps {
 }
 const Text = ({ children, size = "text-base" }: TextProps) => (
     <p
-        className={mergeProps(text, {
-            fontSize: size,
-        })}
+        className={mergeProps(
+            {
+                color: "text-black",
+                fontSize: "text-base",
+                fontWeight: "font-medium",
+            },
+            {
+                fontSize: size,
+            }
+        )}
     >
         {children}
     </p>

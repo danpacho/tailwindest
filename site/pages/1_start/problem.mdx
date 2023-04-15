@@ -1,0 +1,48 @@
+import { Callout } from "nextra-theme-docs"
+import { Underline } from "~components/common"
+
+# Problems of tailwind
+
+## 1. Type Safety
+
+The first problem with `tailwind` is its lack of type safety.
+While the `tailwind` Intellisense plugin goes a long way in solving this problem, it still falls short when it comes to typechecking classnames during the runtime or build process.
+
+```tsx {2}
+const FelxIsNotCorrect = ({ children }) => (
+    <div className="flex felx-row">{children}</div>
+)
+```
+
+As demonstrated in the above example, the `tailwind` Intellisense plugin is unable to identify the mistake of using `felx` instead of `flex`. This is because **the classname could be anything**.
+
+## 2. Difficulty in Reusing Styles
+
+`tailwind` offers a method for reusing styles, as described in their official documentation, but it can be quite challenging.
+
+The recommended way to reuse styles is by separating them into components and using loops in frameworks or multi-cursor editing in editors. Additionally, you can extract reusable classes using @apply.
+
+```css /@apply/
+@layer components {
+    .btn-primary {
+        @apply py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;
+    }
+}
+```
+
+The example above demonstrates how you can reuse the btn-primary classname using `@apply`.
+However, it's important to note that **using `@apply` creates an additional layer of abstraction over `tailwind`'s abstraction**, which can make the code more complex and harder to maintain.
+
+## 3. Horizontal Classname Issues
+
+`tailwind` can become challenging to read if the number of classes exceeds a certain point, in my opinion `10`. Furthermore, if there are additional break conditions like dark or hover, it can make things even messier and harder to read.
+
+```tsx {2}
+const Box = ({ children } => (
+    <div className="flex items-center justify-center p-4 m-4 bg-white rounded-md md:p-6 md:m-6 hover:bg-neutral-50 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+        {children}
+    </div>
+))
+```
+
+This problem **can become a technical debt** when it comes to refactoring the code over time. Developers may need to read through all the classnames slowly, which can be a time-consuming and error-prone process.
