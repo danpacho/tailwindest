@@ -28,35 +28,35 @@ The `toggle` function is used to **change the style** by a **single `boolean` co
 ### Implementation - `toggle`
 
 ```tsx
-const themeBtn = toggle({
-    base: {
-        display: "flex",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-        padding: "p-2",
-        "@lg": {
-            padding: "lg:p-3",
-        },
-        borderRadius: "rounded",
-        borderWidth: "border",
-    },
-    truthy: {
-        backgroundColor: "bg-white",
-        borderColor: "border-black",
-        color: "text-black",
-    },
-    falsy: {
-        backgroundColor: "bg-black",
-        borderColor: "border-white",
-        color: "text-white",
-    },
-})
-
 const ThemeBtn = () => {
     const [isDarkMode, setIsDarkMode] = useState(false)
 
     return (
-        <button onClick={onClick} className={themeBtn.class(isDarkMode)}>
+        <button
+            className={toggle(isDarkMode, {
+                base: {
+                    display: "flex",
+                    alignItems: "items-center",
+                    justifyContent: "justify-center",
+                    padding: "p-2",
+                    "@lg": {
+                        padding: "lg:p-3",
+                    },
+                    borderRadius: "rounded",
+                    borderWidth: "border",
+                },
+                truthy: {
+                    backgroundColor: "bg-black",
+                    borderColor: "border-white",
+                    color: "text-white",
+                },
+                falsy: {
+                    backgroundColor: "bg-white",
+                    borderColor: "border-black",
+                    color: "text-black",
+                },
+            })}
+        >
             {isDarkMode ? "light" : "dark"}
         </button>
     )

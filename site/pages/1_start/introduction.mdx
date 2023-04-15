@@ -43,15 +43,19 @@ You need to create a button that supports dark/light mode, i.e and **its style s
 It's like a light switch: pressing it (on = `true`) turns it on (light mode), pressing the other side (off = `false`) turns it off (dark mode).
 
 ```tsx {1-5}
-const themeBtn = toggle({
-    truthy: truthyStyle,
-    falsy: falsyStyle,
-    base: baseStyle /* Optional */,
-})
-
 const ThemeBtn = ({ children }) => {
     const [isDarkMode, setIsDarkMode] = useState(false)
-    return <button className={themeBtn.class(isDarkMode)}>{children}</button>
+    return (
+        <button
+            className={toggle(isDarkMode, {
+                truthy: truthyStyle,
+                falsy: falsyStyle,
+                base: baseStyle /* Optional */,
+            })}
+        >
+            {children}
+        </button>
+    )
 }
 ```
 
