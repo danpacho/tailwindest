@@ -9,7 +9,7 @@ class Logger {
     static #instance = null
 
     #dividerString =
-        "\n                                                                                                     \n"
+        "\n-----------------------------------------------------------------------------------------------------\n"
     constructor() {
         if (Logger.#instance === null) {
             Logger.#instance = this
@@ -44,7 +44,7 @@ class Logger {
      * @log divider `----`
      */
     divider() {
-        this.log(`${chalk.bgWhite(this.#dividerString)}`)
+        this.log(`${chalk.whiteBright(this.#dividerString)}`)
         return this
     }
     /**

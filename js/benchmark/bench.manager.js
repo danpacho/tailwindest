@@ -57,7 +57,7 @@ class BenchManager {
     }
 
     /**
-     * itrate bench function
+     * iterate bench function
      * @param {Func} func
      * @param {number} [iteration = 100000]
      */
