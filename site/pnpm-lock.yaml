@@ -20,8 +20,8 @@ dependencies:
     specifier: ^18.2.0
     version: 18.2.0(react@18.2.0)
   tailwindest:
-    specifier: ^1.1.0
-    version: 1.1.0
+    specifier: ^1.1.1
+    version: 1.1.1
 
 devDependencies:
   '@types/node':
@@ -2937,8 +2937,8 @@ packages:
       - ts-node
     dev: true
 
-  /tailwindest@1.1.0:
-    resolution: {integrity: sha512-PgxX7JTNsLwH9e4KqaqFxTrOHTRzzA+L2H6RCpNtpnVECX7vqXyquPfTLZ0/x7YSLOHQMedTYgphBsw+yo7rDQ==}
+  /tailwindest@1.1.1:
+    resolution: {integrity: sha512-pLqeZKya6YwWAcSpAm2TVyQcVqHIyQmhkpBx1zhexIwaAN7cmjyyhHZnHbs/L1h8gIQUX9k5p8L7rmIIJZSnGw==}
     dev: false
 
   /text-table@0.2.0:
