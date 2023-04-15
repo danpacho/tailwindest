@@ -65,8 +65,6 @@ const cardIcon = wind({
     },
 }).class()
 
-console.log(card, "\n", cardIcon)
-
 const Card = ({
     children,
     icon,

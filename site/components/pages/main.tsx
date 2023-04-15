@@ -3,15 +3,11 @@ import { Title, LinkButton, Underline, CopyButton } from "~components/common"
 import { Card, cardContainer } from "~components/common/Card"
 import {
     BoltIcon,
-    CpuChipIcon,
-    DocumentCheckIcon,
     DocumentIcon,
     SparklesIcon,
-    Square3Stack3DIcon,
     SquaresPlusIcon,
     SwatchIcon,
     VariableIcon,
-    WrenchScrewdriverIcon,
 } from "@heroicons/react/24/solid"
 
 import { useState } from "react"
