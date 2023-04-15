@@ -1,5 +1,3 @@
-import { type Tailwind, wind, mergeProps } from "wind"
-
 const exampleEntryPoint = {
     ["expo-nativewind"]: "App.tsx",
     next: "src/app/counter.tsx",
@@ -24,28 +22,6 @@ const StackBlitz = ({
                 src={`https://stackblitz.com/${examplePath}/${example}?embed=1&file=${exampleEntryPoint[example]}`}
                 className="w-full h-screen rounded-b-lg border-2 border-t-0 border-teal-400/50"
             />
-        </div>
-    )
-}
-
-const box = wind({
-    display: "flex",
-    alignItems: "items-center",
-    borderWidth: "border",
-    borderColor: "border-blue-300",
-    padding: "p-2",
-    borderRadius: "rounded",
-    // more box styles here...
-})
-
-interface BoxProps {
-    children: React.ReactNode
-    borderColor?: Tailwind["borderColor"]
-}
-export const Box = ({ children, borderColor }: BoxProps) => {
-    return (
-        <div className={mergeProps(box.style(), { borderColor })}>
-            {children}
         </div>
     )
 }
