@@ -5,8 +5,18 @@ import type {
     TailwindStylePluginKey,
 } from "./tailwind.plugin.key"
 
-export type TailwindStylePlugOption = PluginOption<TailwindStylePluginKey>
-export type TailwindDefaultStylePlug = PluginOption<TailwindStylePluginKey, "">
+export interface TailwindStylePlugOption
+    extends PluginOption<TailwindStylePluginKey> {
+    aria?: TailwindestNestPlugOption
+}
+
+type DEFAULT_VALUE = ""
+export type TailwindDefaultStylePlug = PluginOption<
+    TailwindStylePluginKey,
+    DEFAULT_VALUE
+> & {
+    aria?: TailwindestDefaultNestPlug
+}
 
 export type TailwindestNestPlugOption = PluginOption<TailwindNestPluginKey>
 export type TailwindestDefaultNestPlug = PluginOption<TailwindNestPluginKey, "">
@@ -19,7 +29,7 @@ export type TailwindGlobalPlugOption =
 
 export type TailwindDefaultGlobalPlugOption = PluginOption<
     TailwindGlobalPlugOptionKey,
-    ""
+    DEFAULT_VALUE
 > & {
     screens?: TailwindestDefaultNestPlug
 }

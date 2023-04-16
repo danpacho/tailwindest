@@ -50,7 +50,12 @@ export type TailwindNestPluginKey =
  * @see {@link https://tailwindcss.com/docs/theme#configuration-reference configuration reference}
  */
 export type TailwindStylePluginKey =
-    | "columns"
+    /**
+     * @description `aria` should be customized,
+     * @see {@link ../}
+     */
+    // | "aria"
+    | "accentColor"
     | "animation"
     | "aspectRatio"
     | "backdropBlur"
@@ -74,8 +79,8 @@ export type TailwindStylePluginKey =
     | "borderWidth"
     | "boxShadow"
     | "boxShadowColor"
+    | "columns"
     | "caretColor"
-    | "accentColor"
     | "contrast"
     | "content"
     | "cursor"
