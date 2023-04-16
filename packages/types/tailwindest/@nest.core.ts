@@ -79,9 +79,9 @@ export type GetNestStyle<
           >
 } & CombineNestConditionAtNestStyleProperty<NestStyle, NestCondition>
 
-type UnusedNestProperty = "transition" | "border"
+type UnusedNestProperty = "transition"
 /**
- * Remove what should not be used from the second depth or higher
+ * Remove condition, what should not be used from the second depth or higher
  */
 export type RemoveUnusedNestProperty<Tailwind> = Omit<
     Tailwind,

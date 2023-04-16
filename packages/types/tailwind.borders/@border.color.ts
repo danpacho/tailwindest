@@ -2,12 +2,6 @@ import { PluginVariants } from "../plugin"
 
 export type TailwindBorderColorType<BorderColor extends string> = {
     /**
-     *@description border shorthand syntax
-     *@description `<border-color>` `border-solid`
-     *@see {@link https://tailwindcss.com/docs/border-width border}
-     */
-    border: `${PluginVariants<"border", BorderColor>} border-solid`
-    /**
      *@description Utilities for controlling the color of an element's borders.
      *@see {@link https://tailwindcss.com/docs/border-color border-color}
      */
