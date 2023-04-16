@@ -3,7 +3,7 @@ import { PluginVariants } from "../plugin"
 export type TailwindBorderColorType<BorderColor extends string> = {
     /**
      *@description Utilities for controlling the color of an element's borders.
-     *@see {@link https://tailwindcss.com/docs/border-color border-color}
+     *@see {@link https://tailwindcss.com/docs/border-color border color}
      */
     borderColor: PluginVariants<"border", BorderColor>
     /**
@@ -38,10 +38,10 @@ export type TailwindBorderColorType<BorderColor extends string> = {
     borderRightColor: PluginVariants<"border-r", BorderColor>
 }
 
-export type TailwindDivideColorType<BorderColor extends string> = {
+export type TailwindDivideColorType<DivideColor extends string> = {
     /**
      *@description Utilities for controlling the border color between elements.
      *@see {@link https://tailwindcss.com/docs/divide-color divide color}
      */
-    divideColor: PluginVariants<"divide", BorderColor>
+    divideColor: PluginVariants<"divide", DivideColor>
 }
