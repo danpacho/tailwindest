@@ -151,21 +151,22 @@ type TailwindestFirstLetter<Nest extends string, Tailwind> = TailwindestNest<
     Tailwind,
     "::first-letter"
 >
+type TailwindestBackdrop<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "::backdrop"
+>
 interface TailwindestPseudoElements<Nest extends string, Tailwind>
     extends TailwindestBefore<Nest, Tailwind>,
         TailwindestFile<Nest, Tailwind>,
         TailwindestAfter<Nest, Tailwind>,
         TailwindestMarker<Nest, Tailwind>,
+        TailwindestBackdrop<Nest, Tailwind>,
         TailwindestSelection<Nest, Tailwind>,
         TailwindestFirstLine<Nest, Tailwind>,
         TailwindestFirstLetter<Nest, Tailwind>,
         TailwindestPlaceholder<Nest, Tailwind> {}
 
-type TailwindestBackdrop<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
-    Tailwind,
-    ":backdrop"
->
 type TailwindestHover<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
@@ -330,7 +331,6 @@ interface TailwindestPseudoClass<Nest extends string, Tailwind>
         TailwindestDefault<Nest, Tailwind>,
         TailwindestRequired<Nest, Tailwind>,
         TailwindestAutofill<Nest, Tailwind>,
-        TailwindestBackdrop<Nest, Tailwind>,
         TailwindestReadonly<Nest, Tailwind>,
         TailwindestDisabled<Nest, Tailwind>,
         TailwindestOutOfRange<Nest, Tailwind>,
