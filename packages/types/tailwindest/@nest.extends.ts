@@ -96,6 +96,10 @@ type TailwindestGroupRequired<
     Nest extends string,
     Tailwind
 > = TailwindestNestWithTitle<Nest, Tailwind, "group", ":required">
+type TailwindestGroupOptional<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":optional">
 type TailwindestGroupValid<
     Nest extends string,
     Tailwind
@@ -174,6 +178,7 @@ interface TailwindestGroupPseudoClass<Nest extends string, Tailwind>
         TailwindestGroupAutofill<Nest, Tailwind>,
         TailwindestGroupBackdrop<Nest, Tailwind>,
         TailwindestGroupRequired<Nest, Tailwind>,
+        TailwindestGroupOptional<Nest, Tailwind>,
         TailwindestGroupDisabled<Nest, Tailwind>,
         TailwindestGroupReadonly<Nest, Tailwind>,
         TailwindestGroupOutOfRange<Nest, Tailwind>,
@@ -249,6 +254,10 @@ type TailwindestPeerRequired<
     Nest extends string,
     Tailwind
 > = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":required">
+type TailwindestPeerOptional<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":optional">
 type TailwindestPeerValid<
     Nest extends string,
     Tailwind
@@ -305,6 +314,7 @@ type TailwindestPeerFocusVisible<
     Nest extends string,
     Tailwind
 > = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":focus-visible">
+
 interface TailwindestPeerPseudoClass<Nest extends string, Tailwind>
     extends TailwindestPeerOdd<Nest, Tailwind>,
         TailwindestPeerLast<Nest, Tailwind>,
@@ -327,6 +337,7 @@ interface TailwindestPeerPseudoClass<Nest extends string, Tailwind>
         TailwindestPeerBackdrop<Nest, Tailwind>,
         TailwindestPeerAutofill<Nest, Tailwind>,
         TailwindestPeerReadonly<Nest, Tailwind>,
+        TailwindestPeerOptional<Nest, Tailwind>,
         TailwindestPeerRequired<Nest, Tailwind>,
         TailwindestPeerOutOfRange<Nest, Tailwind>,
         TailwindestPeerLastOfType<Nest, Tailwind>,
