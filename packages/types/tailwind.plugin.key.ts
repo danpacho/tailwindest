@@ -89,6 +89,7 @@ export type TailwindStylePluginKey =
     | "fill"
     | "grayscale"
     | "hueRotate"
+    | "hyphens"
     | "invert"
     | "flex"
     | "flexBasis"

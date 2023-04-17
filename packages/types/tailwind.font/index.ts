@@ -5,6 +5,7 @@ import { TailwindFontSmoothingType } from "./@font.smoothing"
 import { TailwindFontStyleType } from "./@font.style"
 import { TailwindFontVariantNumericType } from "./@font.variant.numeric"
 import { TailwindFontWeightType } from "./@font.weight"
+import { TailwindHyphensType } from "./@hypens"
 import { TailwindLetterSpacingType } from "./@letter.spacing"
 import { TailwindLineClampType } from "./@line.clamp"
 import { TailwindLineHeightType } from "./@line.height"
@@ -39,6 +40,7 @@ export interface TailwindFont<
         lineClamp?: string
         listStyleType?: string
         listStyleImage?: string
+        hyphens?: string
     } = {
         content: ""
         fontFamily: ""
@@ -54,6 +56,7 @@ export interface TailwindFont<
         lineClamp: ""
         listStyleType: ""
         listStyleImage: ""
+        hyphens: ""
     }
 > extends TailwindTextAlignType,
         TailwindTextOverflowType,
@@ -82,4 +85,5 @@ export interface TailwindFont<
         TailwindLetterSpacingType<FontPlug["letterSpacing"]>,
         TailwindLineHeightType<FontPlug["lineHeight"]>,
         TailwindLineClampType<FontPlug["lineClamp"]>,
+        TailwindHyphensType<FontPlug["hyphens"]>,
         TailwindListStylePositionType {}
