@@ -1,7 +1,7 @@
 import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
 
-type TailwindLineHeightVariants<Plug extends PlugBase = ""> =
+export type TailwindLineHeightVariants<Plug extends PlugBase = ""> =
     | "3"
     | "4"
     | "5"

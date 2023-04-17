@@ -1,5 +1,6 @@
 import { PlugBase, Pluggable } from "../plugin"
 import { TailwindArbitrary } from "../tailwind.common/@arbitrary"
+import { TailwindLineHeightVariants } from "./@line.height"
 
 type TailwindFontSizeVariants<Plug extends PlugBase = ""> =
     | "xs"
@@ -18,13 +19,20 @@ type TailwindFontSizeVariants<Plug extends PlugBase = ""> =
     | Pluggable<Plug>
     | TailwindArbitrary
 
-type TailwindFontSize<Plug extends PlugBase = ""> =
-    `text-${TailwindFontSizeVariants<Plug>}`
-export type TailwindFontSizeType<Plug extends PlugBase = ""> = {
+type TailwindFontSize<
+    FontSizePlug extends PlugBase = "",
+    LineHeightPlug extends PlugBase = ""
+> =
+    | `text-${TailwindFontSizeVariants<FontSizePlug>}`
+    | `text-${TailwindFontSizeVariants<FontSizePlug>}/${TailwindLineHeightVariants<LineHeightPlug>}`
+export type TailwindFontSizeType<
+    FontSizePlug extends PlugBase = "",
+    LineHeightPlug extends PlugBase = ""
+> = {
     /**
      *@description Utilities for controlling the font size of an element.
-     *@unit Base Size = `1rem` / `text-base`
+     *@unit Base size(`text-base`) = `1rem`
      *@see {@link https://tailwindcss.com/docs/font-size font size}
      */
-    fontSize: TailwindFontSize<Plug>
+    fontSize: TailwindFontSize<FontSizePlug, LineHeightPlug>
 }

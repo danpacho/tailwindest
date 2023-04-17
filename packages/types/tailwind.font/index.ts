@@ -67,11 +67,11 @@ export interface TailwindFont<
         TailwindFontSmoothingType,
         TailwindFontVariantNumericType,
         TailwindContentType<FontPlug["content"]>,
-        TailwindFontSizeType<FontPlug["fontSize"]>,
         TailwindFontWeightType<FontPlug["fontSize"]>,
         TailwindFontFamilyType<FontPlug["fontFamily"]>,
         TailwindTextColorType<TailwindColor, FontPlug["textColor"]>,
         TailwindTextIndentType<TailwindColor, FontPlug["textIndent"]>,
+        TailwindFontSizeType<FontPlug["fontSize"], FontPlug["lineHeight"]>,
         TailwindTextDecorationColorType<
             TailwindColor,
             FontPlug["textDecorationColor"]
