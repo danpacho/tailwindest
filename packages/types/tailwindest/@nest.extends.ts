@@ -20,7 +20,7 @@ type TailwindestPickNestWithTitle<
 type TailwindestNestWithTitle<
     Nest extends string,
     Tailwind,
-    DashNestCondition extends "group" | "peer",
+    DashNestCondition extends "group" | "peer" | "aria",
     Condition extends string
 > = TailwindestPickNestWithTitle<
     GetNestStyle<
@@ -96,6 +96,10 @@ type TailwindestGroupRequired<
     Nest extends string,
     Tailwind
 > = TailwindestNestWithTitle<Nest, Tailwind, "group", ":required">
+type TailwindestGroupOptional<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":optional">
 type TailwindestGroupValid<
     Nest extends string,
     Tailwind
@@ -174,6 +178,7 @@ interface TailwindestGroupPseudoClass<Nest extends string, Tailwind>
         TailwindestGroupAutofill<Nest, Tailwind>,
         TailwindestGroupBackdrop<Nest, Tailwind>,
         TailwindestGroupRequired<Nest, Tailwind>,
+        TailwindestGroupOptional<Nest, Tailwind>,
         TailwindestGroupDisabled<Nest, Tailwind>,
         TailwindestGroupReadonly<Nest, Tailwind>,
         TailwindestGroupOutOfRange<Nest, Tailwind>,
@@ -249,6 +254,10 @@ type TailwindestPeerRequired<
     Nest extends string,
     Tailwind
 > = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":required">
+type TailwindestPeerOptional<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":optional">
 type TailwindestPeerValid<
     Nest extends string,
     Tailwind
@@ -305,6 +314,7 @@ type TailwindestPeerFocusVisible<
     Nest extends string,
     Tailwind
 > = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":focus-visible">
+
 interface TailwindestPeerPseudoClass<Nest extends string, Tailwind>
     extends TailwindestPeerOdd<Nest, Tailwind>,
         TailwindestPeerLast<Nest, Tailwind>,
@@ -327,6 +337,7 @@ interface TailwindestPeerPseudoClass<Nest extends string, Tailwind>
         TailwindestPeerBackdrop<Nest, Tailwind>,
         TailwindestPeerAutofill<Nest, Tailwind>,
         TailwindestPeerReadonly<Nest, Tailwind>,
+        TailwindestPeerOptional<Nest, Tailwind>,
         TailwindestPeerRequired<Nest, Tailwind>,
         TailwindestPeerOutOfRange<Nest, Tailwind>,
         TailwindestPeerLastOfType<Nest, Tailwind>,
@@ -337,7 +348,68 @@ interface TailwindestPeerPseudoClass<Nest extends string, Tailwind>
         TailwindestPeerFocusVisible<Nest, Tailwind>,
         TailwindestPeerPlaceholderShown<Nest, Tailwind> {}
 
-type TailwindestGroup<Nest extends string, Tailwind> = {
+type TailwindestAriaChecked<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":checked">
+type TailwindestAriaDisabled<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":disabled">
+type TailwindestAriaExpanded<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":expanded">
+type TailwindestAriaHidden<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":hidden">
+type TailwindestAriaPressed<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":pressed">
+type TailwindestAriaReadonly<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":readonly">
+type TailwindestAriaRequired<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":required">
+type TailwindestAriaSelected<
+    Nest extends string,
+    Tailwind
+> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":selected">
+
+interface TailwindestAriaClass<Nest extends string, Tailwind>
+    extends TailwindestAriaChecked<Nest, Tailwind>,
+        TailwindestAriaDisabled<Nest, Tailwind>,
+        TailwindestAriaExpanded<Nest, Tailwind>,
+        TailwindestAriaHidden<Nest, Tailwind>,
+        TailwindestAriaPressed<Nest, Tailwind>,
+        TailwindestAriaReadonly<Nest, Tailwind>,
+        TailwindestAriaRequired<Nest, Tailwind>,
+        TailwindestAriaSelected<Nest, Tailwind> {}
+
+export interface TailwindestAria<
+    Nest extends string,
+    Tailwind,
+    TailwindestAriaCustom
+> {
+    /**
+     *@description Conditional styling based on `aria-*`
+     *@description `aria-{attributes}`
+     *@see {@link https://tailwindcss.com/docs/hover-focus-and-other-states#aria-states aria states}
+     */
+    "@aria"?: TailwindestAriaClass<Nest, Tailwind> & TailwindestAriaCustom
+}
+export type TailwindestAriaCustom<
+    Nest extends string,
+    Tailwind,
+    CustomAria extends string
+> = TailwindestNestWithTitle<Nest, Tailwind, "aria", CustomAria>
+
+interface TailwindestGroup<Nest extends string, Tailwind> {
     /**
      *@description Styling based on parent state
      *@description `group-{pseudo-class}`
@@ -346,7 +418,7 @@ type TailwindestGroup<Nest extends string, Tailwind> = {
     "@group"?: TailwindestGroupPseudoClass<Nest, Tailwind>
 }
 
-type TailwindestPeer<Nest extends string, Tailwind> = {
+interface TailwindestPeer<Nest extends string, Tailwind> {
     /**
      *@description Styling based on sibling state
      *@description `peer-{pseudo-class}`

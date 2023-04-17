@@ -8,6 +8,8 @@ import type {
 } from "./types/tailwind.plugin.option"
 import type { TailwindestTypeSet } from "./types/tailwindest"
 
+type PlugOptionType = Record<string, unknown>
+
 /**
  * @description Add custom property, defined at `tailwind.config.js`
  * @see {@link https://tailwindcss.com/docs/configuration tailwind configuration}
@@ -38,14 +40,23 @@ import type { TailwindestTypeSet } from "./types/tailwindest"
 export type Tailwindest<
     TailwindGlobal extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
     TailwindStyle extends TailwindStylePlugOption = TailwindDefaultStylePlug
-> = TailwindGlobal["screens"] extends Record<string, unknown>
-    ? Partial<
-          TailwindestTypeSet<
-              TailwindWithOption<TailwindGlobal, TailwindStyle>,
-              TailwindestNestKey<TailwindGlobal["screens"]>,
-              TailwindGlobal["screens"]
+> = TailwindGlobal["screens"] extends PlugOptionType
+    ? TailwindStyle["aria"] extends PlugOptionType
+        ? Partial<
+              TailwindestTypeSet<
+                  TailwindWithOption<TailwindGlobal, TailwindStyle>,
+                  TailwindestNestKey<TailwindGlobal["screens"]>,
+                  TailwindGlobal["screens"],
+                  TailwindStyle["aria"]
+              >
           >
-      >
+        : Partial<
+              TailwindestTypeSet<
+                  TailwindWithOption<TailwindGlobal, TailwindStyle>,
+                  TailwindestNestKey<TailwindGlobal["screens"]>,
+                  TailwindGlobal["screens"]
+              >
+          >
     : Partial<
           TailwindestTypeSet<
               TailwindWithOption<TailwindGlobal, TailwindStyle>,

@@ -1,12 +1,12 @@
 import { Pluggable } from "../plugin"
-import { TailwindBackgroundColorType } from "./@backgroud.color"
 import { TailwindBackgroundAttachmentType } from "./@background.attachment"
 import { TailwindBackgroundClipType } from "./@background.clip"
-import { TailwindBackgroundImageType } from "./@background.image"
+import { TailwindBackgroundColorType } from "./@background.color"
 import { TailwindBackgroundOriginType } from "./@background.origin"
 import { TailwindBackgroundPositionType } from "./@background.position"
 import { TailwindBackgroundRepeatType } from "./@background.repeat"
 import { TailwindBackgroundSizeType } from "./@background.size"
+import { TailwindBackgroundImageType } from "./@gradient"
 import { TailwindGradientColorStopsType } from "./@gradient.color.stops"
 
 export interface TailwindBackgrounds<

@@ -21,32 +21,62 @@ type TailwindestSm<Nest extends string, Tailwind> = TailwindestNest<
     Tailwind,
     "@sm"
 >
+type TailwindestMaxSm<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "@max-sm"
+>
 type TailwindestMd<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
     "@md"
+>
+type TailwindestMaxMd<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "@max-md"
 >
 type TailwindestLg<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
     "@lg"
 >
+type TailwindestMaxLg<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "@max-lg"
+>
 type TailwindestXl<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
     "@xl"
+>
+type TailwindestMaxXl<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "@max-xl"
 >
 type Tailwindest2Xl<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
     "@2xl"
 >
+type TailwindestMax2Xl<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "@max-2xl"
+>
 interface TailwindestSizeCondition<Nest extends string, Tailwind>
     extends TailwindestSm<Nest, Tailwind>,
         TailwindestMd<Nest, Tailwind>,
         TailwindestLg<Nest, Tailwind>,
         TailwindestXl<Nest, Tailwind>,
-        Tailwindest2Xl<Nest, Tailwind> {}
+        Tailwindest2Xl<Nest, Tailwind>,
+        TailwindestMaxSm<Nest, Tailwind>,
+        TailwindestMaxMd<Nest, Tailwind>,
+        TailwindestMaxLg<Nest, Tailwind>,
+        TailwindestMaxXl<Nest, Tailwind>,
+        TailwindestMax2Xl<Nest, Tailwind> {}
 
 type TailwindestDark<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
@@ -151,21 +181,22 @@ type TailwindestFirstLetter<Nest extends string, Tailwind> = TailwindestNest<
     Tailwind,
     "::first-letter"
 >
+type TailwindestBackdrop<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "::backdrop"
+>
 interface TailwindestPseudoElements<Nest extends string, Tailwind>
     extends TailwindestBefore<Nest, Tailwind>,
         TailwindestFile<Nest, Tailwind>,
         TailwindestAfter<Nest, Tailwind>,
         TailwindestMarker<Nest, Tailwind>,
+        TailwindestBackdrop<Nest, Tailwind>,
         TailwindestSelection<Nest, Tailwind>,
         TailwindestFirstLine<Nest, Tailwind>,
         TailwindestFirstLetter<Nest, Tailwind>,
         TailwindestPlaceholder<Nest, Tailwind> {}
 
-type TailwindestBackdrop<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
-    Tailwind,
-    ":backdrop"
->
 type TailwindestHover<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
@@ -330,7 +361,6 @@ interface TailwindestPseudoClass<Nest extends string, Tailwind>
         TailwindestDefault<Nest, Tailwind>,
         TailwindestRequired<Nest, Tailwind>,
         TailwindestAutofill<Nest, Tailwind>,
-        TailwindestBackdrop<Nest, Tailwind>,
         TailwindestReadonly<Nest, Tailwind>,
         TailwindestDisabled<Nest, Tailwind>,
         TailwindestOutOfRange<Nest, Tailwind>,

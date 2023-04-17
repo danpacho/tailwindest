@@ -55,7 +55,30 @@ const MEDIA_CONDITIONS = [
     "@ltr",
 ]
 
-const BREAK_CONDITIONS = ["@sm", "@md", "@lg", "@xl", "@2xl"]
+const BREAK_CONDITIONS = [
+    "@sm",
+    "@md",
+    "@lg",
+    "@xl",
+    "@2xl",
+    "@max-sm",
+    "@max-md",
+    "@max-lg",
+    "@max-xl",
+    "@max-2xl",
+]
+
+const ARIA_CONDITIONS = [
+    "@aria-checked",
+    "@aria-disabled",
+    "@aria-expanded",
+    "@aria-hidden",
+    "@aria-pressed",
+    "@aria-readonly",
+    "@aria-required",
+    "@aria-selected",
+]
+
 const THEME_CONDITION = ["@dark"]
 
 const BasicNestKeys = [
@@ -63,6 +86,7 @@ const BasicNestKeys = [
     ...PSEUDO_ELEMENTS,
     ...MEDIA_CONDITIONS,
     ...BREAK_CONDITIONS,
+    ...ARIA_CONDITIONS,
     ...THEME_CONDITION,
 ]
 

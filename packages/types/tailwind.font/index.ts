@@ -5,8 +5,11 @@ import { TailwindFontSmoothingType } from "./@font.smoothing"
 import { TailwindFontStyleType } from "./@font.style"
 import { TailwindFontVariantNumericType } from "./@font.variant.numeric"
 import { TailwindFontWeightType } from "./@font.weight"
+import { TailwindHyphensType } from "./@hypens"
 import { TailwindLetterSpacingType } from "./@letter.spacing"
+import { TailwindLineClampType } from "./@line.clamp"
 import { TailwindLineHeightType } from "./@line.height"
+import { TailwindListStyleImageType } from "./@list.style.image"
 import { TailwindListStylePositionType } from "./@list.style.position"
 import { TailwindListStyleTypeType } from "./@list.style.type"
 import { TailwindTextAlignType } from "./@text.align"
@@ -34,7 +37,10 @@ export interface TailwindFont<
         textUnderlineOffset?: string
         letterSpacing?: string
         lineHeight?: string
+        lineClamp?: string
         listStyleType?: string
+        listStyleImage?: string
+        hyphens?: string
     } = {
         content: ""
         fontFamily: ""
@@ -47,7 +53,10 @@ export interface TailwindFont<
         textUnderlineOffset: ""
         letterSpacing: ""
         lineHeight: ""
+        lineClamp: ""
         listStyleType: ""
+        listStyleImage: ""
+        hyphens: ""
     }
 > extends TailwindTextAlignType,
         TailwindTextOverflowType,
@@ -58,11 +67,11 @@ export interface TailwindFont<
         TailwindFontSmoothingType,
         TailwindFontVariantNumericType,
         TailwindContentType<FontPlug["content"]>,
-        TailwindFontSizeType<FontPlug["fontSize"]>,
         TailwindFontWeightType<FontPlug["fontSize"]>,
         TailwindFontFamilyType<FontPlug["fontFamily"]>,
         TailwindTextColorType<TailwindColor, FontPlug["textColor"]>,
         TailwindTextIndentType<TailwindColor, FontPlug["textIndent"]>,
+        TailwindFontSizeType<FontPlug["fontSize"], FontPlug["lineHeight"]>,
         TailwindTextDecorationColorType<
             TailwindColor,
             FontPlug["textDecorationColor"]
@@ -71,7 +80,10 @@ export interface TailwindFont<
             FontPlug["textDecorationThickness"]
         >,
         TailwindTextUnderlineOffsetType<FontPlug["textUnderlineOffset"]>,
-        TailwindLetterSpacingType<FontPlug["letterSpacing"]>,
+        TailwindListStyleImageType<FontPlug["listStyleImage"]>,
         TailwindListStyleTypeType<FontPlug["listStyleType"]>,
+        TailwindLetterSpacingType<FontPlug["letterSpacing"]>,
         TailwindLineHeightType<FontPlug["lineHeight"]>,
+        TailwindLineClampType<FontPlug["lineClamp"]>,
+        TailwindHyphensType<FontPlug["hyphens"]>,
         TailwindListStylePositionType {}
