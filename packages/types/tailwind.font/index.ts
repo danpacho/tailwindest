@@ -8,6 +8,7 @@ import { TailwindFontWeightType } from "./@font.weight"
 import { TailwindLetterSpacingType } from "./@letter.spacing"
 import { TailwindLineClampType } from "./@line.clamp"
 import { TailwindLineHeightType } from "./@line.height"
+import { TailwindListStyleImageType } from "./@list.style.image"
 import { TailwindListStylePositionType } from "./@list.style.position"
 import { TailwindListStyleTypeType } from "./@list.style.type"
 import { TailwindTextAlignType } from "./@text.align"
@@ -37,6 +38,7 @@ export interface TailwindFont<
         lineHeight?: string
         lineClamp?: string
         listStyleType?: string
+        listStyleImage?: string
     } = {
         content: ""
         fontFamily: ""
@@ -51,6 +53,7 @@ export interface TailwindFont<
         lineHeight: ""
         lineClamp: ""
         listStyleType: ""
+        listStyleImage: ""
     }
 > extends TailwindTextAlignType,
         TailwindTextOverflowType,
@@ -74,8 +77,9 @@ export interface TailwindFont<
             FontPlug["textDecorationThickness"]
         >,
         TailwindTextUnderlineOffsetType<FontPlug["textUnderlineOffset"]>,
-        TailwindLetterSpacingType<FontPlug["letterSpacing"]>,
+        TailwindListStyleImageType<FontPlug["listStyleImage"]>,
         TailwindListStyleTypeType<FontPlug["listStyleType"]>,
+        TailwindLetterSpacingType<FontPlug["letterSpacing"]>,
         TailwindLineHeightType<FontPlug["lineHeight"]>,
         TailwindLineClampType<FontPlug["lineClamp"]>,
         TailwindListStylePositionType {}

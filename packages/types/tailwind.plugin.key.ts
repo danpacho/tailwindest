@@ -115,6 +115,7 @@ export type TailwindStylePluginKey =
     | "lineHeight"
     | "lineClamp"
     | "listStyleType"
+    | "listStyleImage"
     | "margin"
     | "maxHeight"
     | "maxWidth"
