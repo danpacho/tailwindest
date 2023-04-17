@@ -1,0 +1,37 @@
+{
+    "Tailwind type definition": {
+        "scope": "typescript",
+        "prefix": "twt",
+        "body": [
+            "import { PlugBase, Pluggable } from '../plugin'",
+            "import { TailwindArbitrary } from '../tailwind.common/@arbitrary'",
+            "",
+            "type Tailwind$1Variants<Plug extends PlugBase = ''> = '' | '' | '' | '' | '' | '' | Pluggable<Plug> | TailwindArbitrary",
+            "type Tailwind$1<Plug extends PlugBase = ''> = `$2-${Tailwind$1Variants<Plug>}`",
+            "export type Tailwind$1Type<Plug extends PlugBase = ''> = {",
+            "    /**",
+            "    *@description $5",
+            "    *@see {@link https://tailwindcss.com/docs/$3 $3}",
+            "    */",
+            "    $4: Tailwind$1<Plug>",
+            "}"
+        ],
+        "description": "easy type def with twt command"
+    },
+    "Tailwind conditional nest type": {
+        "scope": "typescript",
+        "prefix": "nest",
+        "body": ["type Tailwindest$1 = TailwindestNest<'$2'>"],
+        "description": "easy nest type def with nest command"
+    },
+    "Tailwindest plug": {
+        "scope": "typescript",
+        "prefix": "pl",
+        "body": ["<Plug extends PlugBase = ''>"]
+    },
+    "Tailwindest pluggable": {
+        "scope": "typescript",
+        "prefix": "plug",
+        "body": ["$1Plug extends {", "$2?: string", "} = {", "   $2: ''", "}"]
+    }
+}
