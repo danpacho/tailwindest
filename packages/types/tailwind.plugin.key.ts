@@ -52,7 +52,6 @@ export type TailwindNestPluginKey =
 export type TailwindStylePluginKey =
     /**
      * @description `aria` should be customized,
-     * @see {@link ../}
      */
     // | "aria"
     | "accentColor"
@@ -114,6 +113,7 @@ export type TailwindStylePluginKey =
     | "inset"
     | "letterSpacing"
     | "lineHeight"
+    | "lineClamp"
     | "listStyleType"
     | "margin"
     | "maxHeight"
