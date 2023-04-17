@@ -5,7 +5,6 @@
 </div>
 
 <br />
-<br />
 
 # Start with documentation
 
@@ -20,7 +19,7 @@
 ```ts
 import { createWind, type Tailwindest } from "tailwindest"
 
-const { wind, wind$ } = createWind<Tailwindest>()
+const { wind, toggle, wind$, mergeProps } = createWind<Tailwindest>()
 ```
 
 <br />
@@ -87,7 +86,7 @@ const ThemeButton = () => {
             className={themeBtn.class(isDark ? "dark" : "light")}
             onClick={() => setIsDark((mode) => !mode)}
         >
-            {isDark ? "dark" : "light"}
+            {isDark ? "light" : "dark"}
         </button>
     )
 }
@@ -129,7 +128,7 @@ btn.classList.add(themeBtn.class(isDark ? "dark" : "light"))
 # Features
 
 1. Fully-typed `tailwind`
-2. Support custom type
+2. Support custom type, defined in `tailwind.config.js`
 3. Level up conditional styling with variants API
 4. Tiny bundle size, `638B`
 5. Performant
