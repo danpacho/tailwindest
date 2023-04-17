@@ -102,7 +102,7 @@ type TailwindestAriaPlugType<
     >
 >
 
-type TailwindestCustomizedTypeSet<
+type TailwindestCustomNestTypeSet<
     Nest extends string,
     Tailwind,
     TailwindNestCustom extends TailwindestNestPlugOption = TailwindestDefaultNestPlug,
@@ -116,7 +116,7 @@ export type TailwindestTypeSet<
     TailwindNestCustom extends TailwindestNestPlugOption = TailwindestDefaultNestPlug,
     TailwindAriaCustom extends TailwindestNestPlugOption = TailwindestDefaultNestPlug
 > = Tailwind &
-    TailwindestCustomizedTypeSet<
+    TailwindestCustomNestTypeSet<
         Nest,
         RemoveUnusedNestProperty<Tailwind>,
         TailwindNestCustom,
