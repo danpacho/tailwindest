@@ -37,6 +37,7 @@ export type TailwindColorAccent =
     | "700"
     | "800"
     | "900"
+    | "950"
 
 export type TailwindColorWithOpacity<Plug extends PlugBase = ""> =
     `${string}/${TailwindOpacity<Plug>}`
