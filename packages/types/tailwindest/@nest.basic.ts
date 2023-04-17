@@ -21,32 +21,62 @@ type TailwindestSm<Nest extends string, Tailwind> = TailwindestNest<
     Tailwind,
     "@sm"
 >
+type TailwindestMaxSm<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "@max-sm"
+>
 type TailwindestMd<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
     "@md"
+>
+type TailwindestMaxMd<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "@max-md"
 >
 type TailwindestLg<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
     "@lg"
 >
+type TailwindestMaxLg<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "@max-lg"
+>
 type TailwindestXl<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
     "@xl"
+>
+type TailwindestMaxXl<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "@max-xl"
 >
 type Tailwindest2Xl<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
     Tailwind,
     "@2xl"
 >
+type TailwindestMax2Xl<Nest extends string, Tailwind> = TailwindestNest<
+    Nest,
+    Tailwind,
+    "@max-2xl"
+>
 interface TailwindestSizeCondition<Nest extends string, Tailwind>
     extends TailwindestSm<Nest, Tailwind>,
         TailwindestMd<Nest, Tailwind>,
         TailwindestLg<Nest, Tailwind>,
         TailwindestXl<Nest, Tailwind>,
-        Tailwindest2Xl<Nest, Tailwind> {}
+        Tailwindest2Xl<Nest, Tailwind>,
+        TailwindestMaxSm<Nest, Tailwind>,
+        TailwindestMaxMd<Nest, Tailwind>,
+        TailwindestMaxLg<Nest, Tailwind>,
+        TailwindestMaxXl<Nest, Tailwind>,
+        TailwindestMax2Xl<Nest, Tailwind> {}
 
 type TailwindestDark<Nest extends string, Tailwind> = TailwindestNest<
     Nest,
