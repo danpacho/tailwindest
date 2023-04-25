@@ -1,6 +1,6 @@
 import { describe, expect, test } from "@jest/globals"
 import { cache } from "../../packages/core"
-import type { NestedObject } from "../../packages/core/nested.object.type"
+import type { NestedObject } from "../../packages/utils"
 import { label } from "../label"
 
 describe(label.unit("cache: set | has"), () => {

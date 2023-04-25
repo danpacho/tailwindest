@@ -1,7 +1,7 @@
 import { describe, test } from "@jest/globals"
-import { TypeEqual, expectType } from "ts-expect"
-import { Tailwindest } from "../../packages"
-import { NestedObject } from "../../packages/core/nested.object.type"
+import { type TypeEqual, expectType } from "ts-expect"
+import type { Tailwindest } from "../../packages"
+import type { NestedObject } from "../../packages/utils"
 import { label } from "../label"
 
 describe(label.unit("Type NestedObject"), () => {

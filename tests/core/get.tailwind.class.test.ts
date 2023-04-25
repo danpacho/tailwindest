@@ -138,4 +138,7 @@ describe(label.unit("getTailwindClass"), () => {
         })
         expect(impossibleNestedObjectClassName).toBe("IamIronMan")
     })
+    test(label.case("empty object, {}"), () => {
+        expect(getTailwindClass({})).toBe("")
+    })
 })
