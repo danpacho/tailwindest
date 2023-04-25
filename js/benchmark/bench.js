@@ -1,52 +1,72 @@
 import { benchManager } from "./bench.manager.js"
-import { mergeProps, test__wind, test__wind$, variants } from "./test.js"
+import {
+    test__rotary,
+    test__style,
+    test__toggle,
+    test__variants,
+    tw,
+} from "./test.js"
+
+const ITER_COUNT = 10000000
+/**@type {Array<Required<import("../../dist/index.js").GetVariants<typeof test__variants>>["bg"]>} */
+const VARIANT_BG_OPTIONS = ["red", "blue", "green"]
+/**@type {Array<Required<import("../../dist/index.js").GetVariants<typeof test__variants>>["size"]>} */
+const VARIANT_SIZE_OPTIONS = ["pending", "warn"]
 
 benchManager
     .start()
 
-    .bench("wind class", () => test__wind.class(), 10000000)
+    .bench("style class", () => test__style.class(), ITER_COUNT)
+    .bench("style style", () => test__style.style(), ITER_COUNT)
 
-    .bench("wind style", () => test__wind.style(), 10000000)
+    .bench("toggle style [true]", () => test__toggle.style(true), ITER_COUNT)
+    .bench("toggle class [true]", () => test__toggle.class(true), ITER_COUNT)
+    .bench("toggle style [false]", () => test__toggle.style(false), ITER_COUNT)
+    .bench("toggle class [false]", () => test__toggle.class(false), ITER_COUNT)
 
-    .bench("wind$ class compose", () => test__wind$.class(), 10000000)
-
-    .bench("wind$ style compose", () => test__wind$.style(), 10000000)
-
+    .bench("rotary style [warn]", () => test__rotary.style("warn"), ITER_COUNT)
+    .bench("rotary class [warn]", () => test__rotary.class("warn"), ITER_COUNT)
     .bench(
-        "wind$ style [warn] compose",
-        () => test__wind$.style("warn"),
-        10000000
+        "rotary style [pending]",
+        () => test__rotary.style("pending"),
+        ITER_COUNT
     )
     .bench(
-        "wind$ class [warn] compose",
-        () => test__wind$.class("warn"),
-        10000000
+        "rotary class [pending]",
+        () => test__rotary.class("pending"),
+        ITER_COUNT
     )
 
     .bench(
         "variants",
-        () =>
-            variants({
-                bg: "pending",
-                size: "warn",
+        (i) =>
+            test__variants({
+                bg:
+                    typeof i === "number"
+                        ? VARIANT_BG_OPTIONS[i % 3]
+                        : VARIANT_BG_OPTIONS[0],
+                size:
+                    typeof i === "number"
+                        ? VARIANT_SIZE_OPTIONS[i % 2]
+                        : VARIANT_SIZE_OPTIONS[0],
             }),
-        10000000
+        ITER_COUNT
     )
 
     .bench("merge props", () =>
-        mergeProps(test__wind$.style(), {
+        tw.mergeProps(test__rotary.style("pending"), {
             display: "grid",
         })
     )
 
-    .bench("⛔️ live compose wind$ [warn] & [pending] into wind", () =>
-        test__wind
-            .compose(test__wind$.style("warn"), test__wind$.style("pending"))
+    .bench("⛔️ live compose rotary [warn] & [pending] into wind", () =>
+        test__style
+            .compose(test__rotary.style("warn"), test__rotary.style("pending"))
             .class()
     )
-    .bench("⛔️ live compose wind$ [pending] & [warn] into wind", () =>
-        test__wind
-            .compose(test__wind$.style("pending"), test__wind$.style("warn"))
+    .bench("⛔️ live compose rotary [pending] & [warn] into wind", () =>
+        test__style
+            .compose(test__rotary.style("pending"), test__rotary.style("warn"))
             .class()
     )
 

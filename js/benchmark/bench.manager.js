@@ -19,7 +19,7 @@ class BenchManager {
      * start bench
      */
     start() {
-        logger.clear().divider().header("Boot Iteration Bench 🚀").divider()
+        logger.clear().divider().header("Boot iteration bench 🚀").divider()
         return this
     }
     /**
@@ -29,9 +29,8 @@ class BenchManager {
      * @param {number} [iteration = 100000] optional, number of iteration, default `100,000`
      * @param {boolean=} displayData optional, activated by default
      */
-    bench(label, func, iteration = 100000, displayData = true) {
-        logger.header("Bench Started!").log("\n")
-
+    bench(label, func, iteration = 100000, displayData = false) {
+        logger.header(`Bench start`)
         const { iterTime } = this.#iterate(func, iteration)
         const benchResult = {
             label,
@@ -49,10 +48,7 @@ class BenchManager {
                     data,
                 })
                 .divider()
-        } else {
-            logger.divider()
         }
-
         return this
     }
 
@@ -64,7 +60,7 @@ class BenchManager {
     #iterate(func, iteration = 10000) {
         const start = performance.now()
         for (let i = 0; i < iteration; i++) {
-            func()
+            func(i)
         }
         const end = performance.now()
         const iterTime = end - start
@@ -87,10 +83,11 @@ class BenchManager {
         const currentCpuInfo = cpus()
         const { model } = currentCpuInfo[0]
         logger
-            .header("Bench Total Results!")
+            .divider()
+            .header("Bench total result")
             .log("")
-            .bold(` 📦 OS: ${type()}, @${release()} `)
-            .bold(` 📦 MACHINE: ${model} `)
+            .bold(`📦 OS: ${type()}, @${release()}`)
+            .bold(`📦 MACHINE: ${model}`)
             .log("")
 
         if (this.#benchResult.length === 0) {

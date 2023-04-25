@@ -9,7 +9,7 @@ class Logger {
     static #instance = null
 
     #dividerString =
-        "\n-----------------------------------------------------------------------------------------------------\n"
+        "\n————————————————————————————————————————————————————————————————————————————————————\n"
     constructor() {
         if (Logger.#instance === null) {
             Logger.#instance = this
@@ -54,9 +54,9 @@ class Logger {
      */
     header(message, type = "success") {
         if (type === "success") {
-            this.log(`${chalk.bgGreenBright.black.bold(` ${message} `)}`)
+            this.log(chalk.greenBright.black.bold(message))
         } else {
-            this.log(`${chalk.bgRedBright.black.bold(` ${message} `)}`)
+            this.log(chalk.redBright.black.bold(message))
         }
         return this
     }
@@ -77,11 +77,11 @@ class Logger {
     iterTime({ label, iteration, iterTime }) {
         this.log(
             `${chalk.white(
-                `[ Result: ${chalk.bold.underline(label)} / ${chalk.bold.green(
-                    ` ✅ ${iteration.toLocaleString()} iteration `
-                )}]`
-            )} : ${chalk.bgYellowBright.bold.underline.black(
-                ` ${iterTime.toLocaleString()} ms `
+                `Bench - ${chalk.bold(label)} ${chalk.bold.green(
+                    `${chalk.underline(iteration.toLocaleString())} iteration`
+                )}`
+            )}: ${chalk.bgYellowBright.bold.black(
+                ` ${iterTime.toLocaleString()}ms `
             )}`
         )
         return this
