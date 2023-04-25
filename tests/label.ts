@@ -11,7 +11,7 @@ const label = {
      * @param caseLabel label of testing unit case
      * @returns unit's case label
      */
-    case: (caseLabel: string) => `[ 🅲 🅰 🆂 🅴 : ${caseLabel} ]`,
+    case: (caseLabel: string) => `[ C A S E : ${caseLabel} ]`,
 } as const
 
 export { label }
