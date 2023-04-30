@@ -36,7 +36,7 @@ type ExpectedColorVariants =
     | "black"
     | "white"
 
-describe(label.unit("WindVariants - wind$"), () => {
+describe(label.unit("GetVariants - rotary"), () => {
     test(label.case("infer variants type"), () => {
         expectType<
             TypeEqual<GetVariants<typeof sizeRotary>, ExpectedSizeVariants>
@@ -81,7 +81,7 @@ describe(label.unit("WindVariants - wind$"), () => {
     })
 })
 
-describe(label.unit("WindVariants - wind"), () => {
+describe(label.unit("GetVariants - style"), () => {
     test(label.case("infer never"), () => {
         const baseWind = tw.style({})
         expectType<TypeEqual<GetVariants<typeof baseWind>, never>>(true)
@@ -96,7 +96,7 @@ describe(label.unit("WindVariants - wind"), () => {
     })
 })
 
-describe(label.unit("WindVariants - variants"), () => {
+describe(label.unit("GetVariants - variants"), () => {
     const totVariants = tw.variants({
         base: {},
         variants: {
@@ -125,6 +125,25 @@ describe(label.unit("WindVariants - variants"), () => {
     })
 
     test("infer variants type", () => {
+        expectType<
+            TypeEqual<
+                GetVariants<typeof totVariants>,
+                {
+                    size?: "sm" | "md" | "lg" | "xl" | "2xl" | "xs" | "2xs"
+                    color?:
+                        | "red"
+                        | "yellow"
+                        | "green"
+                        | "blue"
+                        | "purple"
+                        | "black"
+                        | "white"
+                }
+            >
+        >(true)
+    })
+
+    test("infer variants type - by rotary", () => {
         expectType<
             TypeEqual<
                 GetVariants<typeof totVariants>,
