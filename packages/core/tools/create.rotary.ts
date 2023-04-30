@@ -1,11 +1,14 @@
 import { BASE_KEY } from "../../constants"
-import type { CacheKey, ClassName, NestedObject, ToString } from "../../utils"
+import type {
+    CacheKey,
+    NestedObject,
+    StyleGeneratorCache,
+    ToString,
+} from "../../utils"
 import { cache } from "../cache"
 import { deepMerge } from "../deep.merge"
 import { getTailwindClass } from "../get.tailwind.class"
 import type { StyleGeneratorRotary } from "./tool.interface"
-
-type RotaryCache<StyleType extends NestedObject> = [StyleType, ClassName]
 
 const createRotary =
     <StyleType extends NestedObject>() =>
@@ -22,26 +25,21 @@ const createRotary =
         StyleType,
         ToString<Exclude<keyof VariantsStylesType, "base">>
     > => {
-        const rotaryCache = cache<CacheKey, RotaryCache<StyleType>>()
-        base && rotaryCache.set(BASE_KEY, [base, ""])
+        const rotaryCache = cache<CacheKey, StyleGeneratorCache<StyleType>>()
         let isBaseUpdated = false
 
         const getCachedBaseStyle = (): StyleType =>
-            rotaryCache.get(BASE_KEY, () => [
-                base ?? ({} as StyleType),
-                getTailwindClass(base),
-            ])[0]
+            rotaryCache.get(BASE_KEY, () => [base ?? ({} as StyleType), ""])[0]
 
         const getCachedValues = (
             variant: ToString<Exclude<keyof VariantsStylesType, "base">>
-        ): RotaryCache<StyleType> => {
-            const cachedBaseStyle = getCachedBaseStyle()
+        ): StyleGeneratorCache<StyleType> => {
             if (isBaseUpdated) {
                 const updatedVariantStyle = deepMerge<StyleType>(
-                    cachedBaseStyle,
+                    getCachedBaseStyle(),
                     styles[variant]
                 )
-                const updated: RotaryCache<StyleType> = [
+                const updated: StyleGeneratorCache<StyleType> = [
                     updatedVariantStyle,
                     getTailwindClass(updatedVariantStyle),
                 ]
@@ -51,7 +49,7 @@ const createRotary =
             }
             const cachedVariantStyle = rotaryCache.get(variant, () => {
                 const variantStyle = deepMerge<StyleType>(
-                    cachedBaseStyle,
+                    getCachedBaseStyle(),
                     styles[variant]
                 )
                 return [variantStyle, getTailwindClass(variantStyle)]
