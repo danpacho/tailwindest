@@ -42,7 +42,5 @@ export type GetVariants<TypeofVariants> = TypeofVariants extends {
 }
     ? Variants extends string
         ? Variants
-        : never
-    : TypeofVariants extends (VariantsOption: infer VariantOptions) => unknown
-    ? Partial<VariantOptions>
+        : Partial<Variants>
     : never
