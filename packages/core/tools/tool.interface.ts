@@ -4,11 +4,13 @@ export interface StyleGeneratorStyle<StyleType extends NestedObject> {
     /**
      * @description Get className `string`
      */
-    class: () => string
+    class: string
+
     /**
      * @description Get styleSheet `object`
      */
-    style: () => StyleType
+    style: StyleType
+
     /**
      * @description Compose styleSheets into `base` styleSheet
      * @param styles Compose target styleSheets
@@ -17,15 +19,12 @@ export interface StyleGeneratorStyle<StyleType extends NestedObject> {
         /**
          * @description Get className `string`
          */
-        class: () => string
+        class: string
+
         /**
          * @description Get styleSheet `object`
          */
-        style: () => StyleType
-        /**
-         * @description Compose styleSheets into `base` styleSheet
-         * @param styles Compose target styleSheets
-         */
+        style: StyleType
     }
 }
 export interface StyleGeneratorToggle<StyleType extends NestedObject> {
@@ -34,11 +33,13 @@ export interface StyleGeneratorToggle<StyleType extends NestedObject> {
      * @description Get toggled className `string`
      */
     class: (toggleCondition: boolean) => string
+
     /**
      * @param toggleCondition Toggling condition, `true` | `false`
      * @description Get toggled styleSheet `object`
      */
     style: (toggleCondition: boolean) => StyleType
+
     /**
      * @description Compose styleSheets into `base` styleSheet
      * @param styles Compose target styleSheets
@@ -49,31 +50,65 @@ export interface StyleGeneratorToggle<StyleType extends NestedObject> {
          * @description Get toggled className `string`
          */
         class: (toggleCondition: boolean) => string
+
         /**
          * @param toggleCondition Toggling condition, `true` | `false`
          * @description Get toggled styleSheet `object`
          */
         style: (toggleCondition: boolean) => StyleType
-        /**
-         * @description Compose styleSheets into `base` styleSheet
-         * @param styles Compose target styleSheets
-         */
     }
 }
 export interface StyleGeneratorRotary<
     StyleType extends NestedObject,
-    Variant extends string
+    RotaryVariant extends string
+> {
+    /**
+     * @description Get rotary variant className `string`
+     * @param variant Name of rotary variant `string`
+     */
+    class: (variant: RotaryVariant) => string
+
+    /**
+     * @description Get rotary variant styleSheet `object`
+     * @param variant Name of rotary variant `string`
+     */
+    style: (variant: RotaryVariant) => StyleType
+
+    /**
+     * @description Compose styleSheets into `base` styleSheet
+     * @param styles Compose target styleSheets
+     */
+    compose: (...styles: StyleType[]) => {
+        /**
+         * @description Get rotary variant className `string`
+         * @param variant Name of rotary variant `string`
+         */
+        class: (variant: RotaryVariant) => string
+
+        /**
+         * @description Get rotary variant styleSheet `object`
+         * @param variant Name of rotary variant `string`
+         */
+        style: (variant: RotaryVariant) => StyleType
+    }
+}
+
+export interface StyleGeneratorVariants<
+    StyleType extends NestedObject,
+    VariantOption
 > {
     /**
      * @description Get variant className `string`
      * @param variant Name of variant `string`
      */
-    class: (variant: Variant) => string
+    class: (variantOption: VariantOption) => string
+
     /**
      * @description Get variant styleSheet `object`
      * @param variant Name of variant `string`
      */
-    style: (variant: Variant) => StyleType
+    style: (variantOption: VariantOption) => StyleType
+
     /**
      * @description Compose styleSheets into `base` styleSheet
      * @param styles Compose target styleSheets
@@ -83,15 +118,12 @@ export interface StyleGeneratorRotary<
          * @description Get variant className `string`
          * @param variant Name of variant `string`
          */
-        class: (variant: Variant) => string
+        class: (variantOption: VariantOption) => string
+
         /**
          * @description Get variant styleSheet `object`
          * @param variant Name of variant `string`
          */
-        style: (variant: Variant) => StyleType
-        /**
-         * @description Compose styleSheets into `base` styleSheet
-         * @param styles Compose target styleSheets
-         */
+        style: (variantOption: VariantOption) => StyleType
     }
 }
