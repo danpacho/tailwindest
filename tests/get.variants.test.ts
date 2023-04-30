@@ -86,7 +86,7 @@ describe(label.unit("WindVariants - wind"), () => {
         const baseWind = tw.style({})
         expectType<TypeEqual<GetVariants<typeof baseWind>, never>>(true)
 
-        const baseWindStyle = baseWind.style()
+        const baseWindStyle = baseWind.style
         expectType<TypeEqual<GetVariants<typeof baseWindStyle>, never>>(true)
 
         const baseWindComposedStyle = baseWind.compose({})
@@ -98,25 +98,29 @@ describe(label.unit("WindVariants - wind"), () => {
 
 describe(label.unit("WindVariants - variants"), () => {
     const totVariants = tw.variants({
-        color: {
-            black: {},
-            blue: {},
-            green: {},
-            purple: {},
-            red: {},
-            white: {},
-            yellow: {},
-            base: {},
-        },
-        size: {
-            "2xl": {},
-            xl: {},
-            lg: {},
-            md: {},
-            sm: {},
-            xs: {},
-            "2xs": {},
-            base: {},
+        base: {},
+        variants: {
+            color: {
+                black: {},
+                blue: {},
+                green: {},
+                purple: {},
+                red: {
+                    display: "flex",
+                    alignItems: "items-center",
+                },
+                white: {},
+                yellow: {},
+            },
+            size: {
+                "2xl": {},
+                xl: {},
+                lg: {},
+                md: {},
+                sm: {},
+                xs: {},
+                "2xs": {},
+            },
         },
     })
 
