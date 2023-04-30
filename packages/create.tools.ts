@@ -47,7 +47,7 @@ const createTools = <StyleType extends NestedObject>() => {
          *
          * // Use it in component
          * const Box = ({ children }) => {
-         *      return <div className={box.class()}>{children}</div>
+         *      return <div className={box.class}>{children}</div>
          * }
          * ```
          */
@@ -61,7 +61,7 @@ const createTools = <StyleType extends NestedObject>() => {
          * const themeBtn = tw.toggle({
          *      truthy: {}, // 🌝 light mode
          *      falsy: {}, // 🌚 dark mode
-         *      base: {}, // common styleSheet of truthy and falsy
+         *      base: {}, // [optional] base style
          * })
          *
          * // Use it in component
@@ -90,6 +90,7 @@ const createTools = <StyleType extends NestedObject>() => {
          *      default: {},
          *      success: {},
          *      warning: {},
+         *      base: {}, // [optional] base style
          * })
          *
          * // Get rotary type with GetVariants
@@ -122,16 +123,19 @@ const createTools = <StyleType extends NestedObject>() => {
          * ```tsx
          * // Define variants style
          * const btn = tw.variants({
-         *      type: {
-         *          default: {},
-         *          success: {},
-         *          warning: {},
+         *      variants: {
+         *          type: {
+         *              default: {},
+         *              success: {},
+         *              warning: {},
+         *          },
+         *          size: {
+         *              sm: {},
+         *              md: {},
+         *              lg: {},
+         *          },
          *      },
-         *      size: {
-         *          sm: {},
-         *          md: {},
-         *          lg: {},
-         *      },
+         *      base: {}, // [optional] base style
          * })
          *
          * // Get variants type with GetVariants
@@ -148,7 +152,7 @@ const createTools = <StyleType extends NestedObject>() => {
          *      onClick,
          * }: BtnProps) => (
          *      <button
-         *          className={btn({ size, type })}
+         *          className={btn.class({ size, type })}
          *          onClick={onClick}
          *      >
          *          {children}
