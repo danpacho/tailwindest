@@ -1,29 +1,37 @@
-import { BASE_KEY } from "../../constants"
-import type { CacheKey, ClassName, NestedObject } from "../../utils"
-import { cache } from "../cache"
+import type { ClassName, NestedObject } from "../../utils"
 import { deepMerge } from "../deep.merge"
 import { getTailwindClass } from "../get.tailwind.class"
 import type { StyleGeneratorStyle } from "./tool.interface"
 
+class StyleSheet<StyleType extends NestedObject>
+    implements StyleGeneratorStyle<StyleType>
+{
+    private s: StyleType
+    private c: ClassName
+
+    constructor(style: StyleType) {
+        this.s = style
+        this.c = getTailwindClass(style)
+    }
+
+    get class() {
+        return this.c
+    }
+
+    get style() {
+        return this.s
+    }
+
+    compose(...styles: StyleType[]) {
+        this.s = deepMerge(this.s, ...styles)
+        this.c = getTailwindClass(this.s)
+        return this
+    }
+}
+
 const createStyle =
     <StyleType extends NestedObject>() =>
-    (style: StyleType): StyleGeneratorStyle<StyleType> => {
-        const styleCache = cache<CacheKey, StyleType>()
-        const classCache = cache<CacheKey, ClassName>()
-        const getCachedStyle = () => styleCache.get(BASE_KEY, () => style)
-        return {
-            style: getCachedStyle,
-            class: () =>
-                classCache.get(BASE_KEY, () =>
-                    getTailwindClass(getCachedStyle())
-                ),
-            compose: function (...styles) {
-                const composedStyle = deepMerge(getCachedStyle(), ...styles)
-                styleCache.set(BASE_KEY, composedStyle)
-                classCache.set(BASE_KEY, getTailwindClass(composedStyle))
-                return this
-            },
-        }
-    }
+    (style: StyleType): StyleGeneratorStyle<StyleType> =>
+        new StyleSheet<StyleType>(style)
 
 export { createStyle }
