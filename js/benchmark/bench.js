@@ -16,8 +16,8 @@ const VARIANT_SIZE_OPTIONS = ["pending", "warn"]
 benchManager
     .start()
 
-    .bench("style class", () => test__style.class(), ITER_COUNT)
-    .bench("style style", () => test__style.style(), ITER_COUNT)
+    .bench("style class", () => test__style.class, ITER_COUNT)
+    .bench("style style", () => test__style.style, ITER_COUNT)
 
     .bench("toggle style [true]", () => test__toggle.style(true), ITER_COUNT)
     .bench("toggle class [true]", () => test__toggle.class(true), ITER_COUNT)
@@ -40,16 +40,15 @@ benchManager
     .bench(
         "variants",
         (i) =>
-            test__variants({
-                bg:
-                    typeof i === "number"
-                        ? VARIANT_BG_OPTIONS[i % 3]
-                        : VARIANT_BG_OPTIONS[0],
-                size:
-                    typeof i === "number"
-                        ? VARIANT_SIZE_OPTIONS[i % 2]
-                        : VARIANT_SIZE_OPTIONS[0],
-            }),
+            typeof i === "number"
+                ? test__variants.class({
+                      bg: VARIANT_BG_OPTIONS[i % 3],
+                      size: VARIANT_SIZE_OPTIONS[i % 2],
+                  })
+                : test__variants.class({
+                      bg: "blue",
+                      size: "pending",
+                  }),
         ITER_COUNT
     )
 
@@ -59,15 +58,21 @@ benchManager
         })
     )
 
-    .bench("⛔️ live compose rotary [warn] & [pending] into wind", () =>
-        test__style
-            .compose(test__rotary.style("warn"), test__rotary.style("pending"))
-            .class()
+    .bench(
+        "⛔️ live compose rotary [warn] & [pending] into wind",
+        () =>
+            test__style.compose(
+                test__rotary.style("warn"),
+                test__rotary.style("pending")
+            ).class
     )
-    .bench("⛔️ live compose rotary [pending] & [warn] into wind", () =>
-        test__style
-            .compose(test__rotary.style("pending"), test__rotary.style("warn"))
-            .class()
+    .bench(
+        "⛔️ live compose rotary [pending] & [warn] into wind",
+        () =>
+            test__style.compose(
+                test__rotary.style("pending"),
+                test__rotary.style("warn")
+            ).class
     )
 
     .getTotalBenchResult()

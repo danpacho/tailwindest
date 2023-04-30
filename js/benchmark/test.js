@@ -66,14 +66,12 @@ const test__style = tw.style(base)
 /**
  * @description centering style, composed to the `wind$`
  */
-const centering = tw
-    .style({
-        display: "flex",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-        margin: "m-auto",
-    })
-    .style()
+const centering = tw.style({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    margin: "m-auto",
+}).style
 
 /**
  * @description `wind$` with `warn` | `pending` variants
@@ -82,12 +80,10 @@ const centering = tw
 const test__rotary = tw
     .rotary({
         base: {
-            // should be removed
             display: "hidden",
             alignItems: "items-baseline",
             justifyContent: "justify-between",
             margin: "m-1",
-            // should be removed
 
             padding: "p-1.5",
 
@@ -165,76 +161,76 @@ const test__toggle = tw.toggle({
 })
 
 const test__variants = tw.variants({
-    size: {
-        base: {
-            // should be removed
-            display: "hidden",
-            alignItems: "items-baseline",
-            justifyContent: "justify-between",
-            margin: "m-1",
-            // should be removed
+    base: {
+        display: "hidden",
+        alignItems: "items-baseline",
+        justifyContent: "justify-between",
+        margin: "m-1",
 
-            padding: "p-1.5",
+        padding: "p-1.5",
 
-            fontWeight: "font-bold",
-            color: "text-black",
-            backgroundColor: "bg-gray-50",
-            ":hover": {
-                color: "hover:text-gray-100",
-                backgroundColor: "hover:bg-gray-800",
-            },
-        },
-        pending: {
-            backgroundColor: "bg-yellow-400",
-            ":hover": {
-                backgroundColor: "hover:bg-yellow-800",
-            },
-            "@dark": {
-                backgroundColor: "dark:bg-yellow-300",
-                ":hover": {
-                    backgroundColor: "dark:hover:bg-yellow-500",
-                },
-            },
-        },
-        warn: {
-            backgroundColor: "bg-red-400",
-            ":hover": {
-                backgroundColor: "hover:bg-red-800",
-            },
-            "@dark": {
-                backgroundColor: "dark:bg-red-300",
-                ":hover": {
-                    backgroundColor: "dark:hover:bg-red-500",
-                },
-            },
+        fontWeight: "font-bold",
+        color: "text-black",
+        backgroundColor: "bg-gray-50",
+        ":hover": {
+            color: "hover:text-gray-100",
+            backgroundColor: "hover:bg-gray-800",
         },
     },
-    bg: {
-        red: {
-            fontWeight: "font-bold",
-            color: "text-white",
-            backgroundColor: "bg-red-500",
-            ":hover": {
-                color: "hover:text-gray-100",
-                backgroundColor: "hover:bg-red-800",
+    variants: {
+        size: {
+            pending: {
+                backgroundColor: "bg-yellow-400",
+                ":hover": {
+                    backgroundColor: "hover:bg-yellow-800",
+                },
+                "@dark": {
+                    backgroundColor: "dark:bg-yellow-300",
+                    ":hover": {
+                        backgroundColor: "dark:hover:bg-yellow-500",
+                    },
+                },
+            },
+            warn: {
+                backgroundColor: "bg-red-400",
+                ":hover": {
+                    backgroundColor: "hover:bg-red-800",
+                },
+                "@dark": {
+                    backgroundColor: "dark:bg-red-300",
+                    ":hover": {
+                        backgroundColor: "dark:hover:bg-red-500",
+                    },
+                },
             },
         },
-        blue: {
-            fontWeight: "font-bold",
-            color: "text-white",
-            backgroundColor: "bg-blue-500",
-            ":hover": {
-                color: "hover:text-gray-100",
-                backgroundColor: "hover:bg-blue-800",
+        bg: {
+            red: {
+                fontWeight: "font-bold",
+                color: "text-white",
+                backgroundColor: "bg-red-500",
+                ":hover": {
+                    color: "hover:text-gray-100",
+                    backgroundColor: "hover:bg-red-800",
+                },
             },
-        },
-        green: {
-            fontWeight: "font-bold",
-            color: "text-white",
-            backgroundColor: "bg-green-500",
-            ":hover": {
-                color: "hover:text-gray-100",
-                backgroundColor: "hover:bg-green-800",
+            blue: {
+                fontWeight: "font-bold",
+                color: "text-white",
+                backgroundColor: "bg-blue-500",
+                ":hover": {
+                    color: "hover:text-gray-100",
+                    backgroundColor: "hover:bg-blue-800",
+                },
+            },
+            green: {
+                fontWeight: "font-bold",
+                color: "text-white",
+                backgroundColor: "bg-green-500",
+                ":hover": {
+                    color: "hover:text-gray-100",
+                    backgroundColor: "hover:bg-green-800",
+                },
             },
         },
     },
