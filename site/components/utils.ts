@@ -1,18 +1,17 @@
-import { wind } from "wind"
+import { tw } from "wind"
 
-const bg = wind({
-    backgroundImage: "bg-gradient-to-b",
-    backgroundImageGradientStart: "from-[#D0E33E]",
-    backgroundImageGradientEnd: "to-[#FF3C3C]",
+const bg = tw.style({
+    gradient: "bg-gradient-to-b",
+    gradientStart: "from-[#D0E33E]",
+    gradientEnd: "to-[#FF3C3C]",
     "@dark": {
-        backgroundImageGradientStart: "dark:from-[#e9ff4d]",
-        backgroundImageGradientEnd: "dark:to-[#ff0707]",
+        gradientStart: "dark:from-[#e9ff4d]",
+        gradientEnd: "dark:to-[#ff0707]",
     },
 })
 
-const tw = {
-    bgClass: bg.class(),
-    bgStyle: bg.style(),
+const util = {
+    bg,
 } as const
 
-export { tw }
+export { util as tw }

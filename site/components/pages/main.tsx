@@ -1,4 +1,4 @@
-import { wind } from "wind"
+import { tw } from "wind"
 import { Title, LinkButton, Underline, CopyButton } from "~components/common"
 import { Card, cardContainer } from "~components/common/Card"
 import {
@@ -12,7 +12,7 @@ import {
 
 import { useState } from "react"
 
-const subtitle = wind({
+const subtitle = tw.style({
     color: "text-neutral-400",
     fontWeight: "font-medium",
     fontSize: "text-base",
@@ -23,7 +23,7 @@ const subtitle = wind({
     "@lg": {
         fontSize: "lg:text-xl",
     },
-}).class()
+})
 
 const MainHeader = () => {
     return (
@@ -31,11 +31,11 @@ const MainHeader = () => {
             <div className="w-full flex flex-col gap-14 md:gap-25 items-center justify-center py-16">
                 <Title fontSize="text-5xl" mdFontSize="md:text-[3.5rem]" />
                 <div className="flex flex-col items-center justify-center gap-1">
-                    <p className={subtitle}>
+                    <p className={subtitle.class}>
                         Build <Underline>fully‒typed</Underline>{" "}
                         <Underline>tailwind</Underline> product
                     </p>
-                    <p className={subtitle}>
+                    <p className={subtitle.class}>
                         Using the power of <Underline>typescript</Underline>
                     </p>
                 </div>
@@ -55,7 +55,7 @@ const MainHeader = () => {
     )
 }
 
-const code = wind({
+const code = tw.style({
     color: "text-neutral-300",
     fontWeight: "font-semibold",
     fontSize: "text-sm",
@@ -72,10 +72,10 @@ const code = wind({
         paddingY: "md:py-[0.25px]",
         borderRadius: "md:rounded",
     },
-}).class()
+})
 
 const Code = ({ children }: React.PropsWithChildren) => (
-    <code className={code}>{children}</code>
+    <code className={code.class}>{children}</code>
 )
 
 const features = {
@@ -158,27 +158,27 @@ const features = {
     >
 >
 
-const moreInfo = wind({
-    display: "flex",
-    flexDirection: "flex-col",
-    alignItems: "items-start",
-    justifyContent: "justify-center",
-    gap: "gap-4",
+const moreInfo = tw
+    .style({
+        display: "flex",
+        flexDirection: "flex-col",
+        alignItems: "items-start",
+        justifyContent: "justify-center",
+        gap: "gap-4",
 
-    width: "w-full",
-    padding: "p-2",
+        width: "w-full",
+        padding: "p-2",
 
-    transition: "transition",
-    transitionDuration: "duration-300",
+        transition: "transition",
+        transitionDuration: "duration-300",
 
-    borderLeftWidth: "border-l-8",
-    borderTopLeftRadius: "rounded-tl-sm",
-    borderBottomLeftRadius: "rounded-bl-sm",
+        borderLeftWidth: "border-l-8",
+        borderTopLeftRadius: "rounded-tl-sm",
+        borderBottomLeftRadius: "rounded-bl-sm",
 
-    transformGPU: "transform-gpu",
-})
-    .compose(cardContainer.style())
-    .class()
+        transformGPU: "transform-gpu",
+    })
+    .compose(cardContainer.style)
 
 const MainFeatures = () => {
     const [focusedFeature, setFocusedFeature] = useState<
@@ -211,7 +211,7 @@ const MainFeatures = () => {
                 })}
             </div>
             <div
-                className={`${moreInfo} ${
+                className={`${moreInfo.class} ${
                     isMoreInfoOpened
                         ? "opacity-100 translate-y-0"
                         : "opacity-0 translate-y-2"

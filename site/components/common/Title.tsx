@@ -1,25 +1,26 @@
-import { wind, mergeProps, type Tailwind } from "wind"
+import { tw, Tailwind } from "wind"
 
-const header = wind({
+const header = tw.style({
     fontWeight: "font-extrabold",
     color: "text-black",
     "@dark": {
         color: "dark:text-neutral-100",
     },
-}).class()
+})
 
-const gradientHeader = wind({
+const gradientHeader = tw.style({
     color: "text-transparent",
     fontWeight: "font-extrabold",
     backgroundClip: "bg-clip-text",
-    backgroundImage: "bg-gradient-to-b",
-    backgroundImageGradientStart: "from-[#D0E33E]",
-    backgroundImageGradientEnd: "to-[#FF3C3C]",
+
+    gradient: "bg-gradient-to-b",
+    gradientStart: "from-[#D0E33E]",
+    gradientEnd: "to-[#FF3C3C]",
     "@dark": {
-        backgroundImageGradientStart: "dark:from-[#e9ff4d]",
-        backgroundImageGradientEnd: "dark:to-[#ff0707]",
+        gradientStart: "dark:from-[#e9ff4d]",
+        gradientEnd: "dark:to-[#ff0707]",
     },
-}).class()
+})
 
 const Title = ({
     children,
@@ -29,7 +30,7 @@ const Title = ({
     fontSize?: Tailwind["fontSize"]
     mdFontSize?: `md:${Tailwind["fontSize"]}`
 }>) => {
-    const btnWithSize = mergeProps(
+    const titleBtn = tw.mergeProps(
         {
             display: "flex",
             flexDirection: "flex-row",
@@ -54,10 +55,12 @@ const Title = ({
     )
 
     return (
-        <button className={btnWithSize}>
+        <button className={titleBtn}>
             <div className="flex flex-row gap-0 items-center justify-center">
-                <h1 className={header}>Tailwind</h1>
-                <h1 className={`${gradientHeader} gradient italic`}>est</h1>
+                <h1 className={header.class}>Tailwind</h1>
+                <h1 className={`${gradientHeader.class} gradient italic`}>
+                    est
+                </h1>
                 {children}
             </div>
         </button>

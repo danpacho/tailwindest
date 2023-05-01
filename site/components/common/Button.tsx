@@ -1,10 +1,10 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { WindVariants } from "tailwindest"
-import { wind$ } from "wind"
+import { GetVariants } from "tailwindest"
+import { tw } from "wind"
 
-const btn = wind$("outline", "fill")(
-    {
+const btn = tw.rotary({
+    base: {
         display: "flex",
         width: "w-fit",
 
@@ -39,25 +39,22 @@ const btn = wind$("outline", "fill")(
             transformTranslateY: "active:translate-y-0.5",
         },
     },
-    {
-        fill: {
-            backgroundColor: "bg-neutral-100",
-            "@dark": {
-                backgroundColor: "dark:bg-neutral-700",
-            },
+    fill: {
+        backgroundColor: "bg-neutral-100",
+        "@dark": {
+            backgroundColor: "dark:bg-neutral-700",
         },
-        outline: {
-            backgroundColor: "bg-transparent",
-            borderColor: "border-neutral-100",
-            "@dark": {
-                borderColor: "dark:border-neutral-700",
-            },
+    },
+    outline: {
+        backgroundColor: "bg-transparent",
+        borderColor: "border-neutral-100",
+        "@dark": {
+            borderColor: "dark:border-neutral-700",
         },
-        defaultVariant: "fill",
-    }
-)
+    },
+})
 
-type BtnType = WindVariants<typeof btn>
+type BtnType = GetVariants<typeof btn>
 
 const LinkButton = ({
     children,

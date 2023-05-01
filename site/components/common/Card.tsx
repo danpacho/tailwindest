@@ -1,6 +1,6 @@
-import { wind } from "wind"
+import { tw } from "wind"
 
-export const cardContainer = wind({
+export const cardContainer = tw.style({
     backgroundColor: "bg-amber-600/10",
 
     borderRadius: "rounded",
@@ -8,38 +8,38 @@ export const cardContainer = wind({
     borderWidth: "border",
 })
 
-const card = wind({
-    display: "flex",
-    flexDirection: "flex-col",
-    alignItems: "items-start",
-    justifyContent: "justify-between",
-    gap: "gap-2",
+const card = tw
+    .style({
+        display: "flex",
+        flexDirection: "flex-col",
+        alignItems: "items-start",
+        justifyContent: "justify-between",
+        gap: "gap-2",
 
-    padding: "p-2",
+        padding: "p-2",
 
-    ":hover": {
-        transformTranslateY: "hover:translate-y-[1.5px]",
-        borderColor: "hover:border-transparent",
-        opacity: "hover:opacity-100",
-    },
-    ":active": {
-        borderColor: "active:border-amber-400/10",
-        opacity: "active:opacity-75",
-    },
-    transition: "transition-all ease-in",
-    transitionDuration: "duration-75",
-    userSelect: "select-none",
+        ":hover": {
+            transformTranslateY: "hover:translate-y-[1.5px]",
+            borderColor: "hover:border-transparent",
+            opacity: "hover:opacity-100",
+        },
+        ":active": {
+            borderColor: "active:border-amber-400/10",
+            opacity: "active:opacity-75",
+        },
+        transition: "transition-all ease-in",
+        transitionDuration: "duration-75",
+        userSelect: "select-none",
 
-    "@sm": {
-        flexDirection: "sm:flex-row",
-        alignItems: "sm:items-center",
-        padding: "sm:p-2.5",
-    },
-})
-    .compose(cardContainer.style())
-    .class()
+        "@sm": {
+            flexDirection: "sm:flex-row",
+            alignItems: "sm:items-center",
+            padding: "sm:p-2.5",
+        },
+    })
+    .compose(cardContainer.style)
 
-const cardIcon = wind({
+const cardIcon = tw.style({
     width: "w-6",
     height: "h-6",
     minWidth: "min-w-[1.5rem]",
@@ -47,9 +47,9 @@ const cardIcon = wind({
 
     padding: "p-1",
 
-    backgroundImage: "bg-gradient-to-bl",
-    backgroundImageGradientStart: "from-amber-700/30",
-    backgroundImageGradientEnd: "to-amber-700/50",
+    gradient: "bg-gradient-to-bl",
+    gradientStart: "from-amber-700/30",
+    gradientEnd: "to-amber-700/50",
 
     borderColor: "border-amber-400",
     borderWidth: "border",
@@ -63,7 +63,7 @@ const cardIcon = wind({
 
         padding: "md:p-1.5",
     },
-}).class()
+})
 
 const Card = ({
     children,
@@ -78,11 +78,11 @@ const Card = ({
 }) => {
     return (
         <button
-            className={`${card} ${className}`}
+            className={`${card.class} ${className}`}
             type="button"
             onClick={onClick}
         >
-            <div className={cardIcon}>{icon}</div>
+            <div className={cardIcon.class}>{icon}</div>
             <div className="font-bold text-sm md:text-base md:font-semibold text-start">
                 {children}
             </div>

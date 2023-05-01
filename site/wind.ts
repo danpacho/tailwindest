@@ -1,4 +1,4 @@
-import { Tailwindest, createWind } from "tailwindest"
+import { Tailwindest, createTools } from "tailwindest"
 
 type TailwindCustom = Tailwindest<
     {},
@@ -7,8 +7,8 @@ type TailwindCustom = Tailwindest<
     }
 >
 
-const { wind, mergeProps, toggle, wind$ } = createWind<TailwindCustom>()
+const tw = createTools<TailwindCustom>()
 
 type Tailwind = Required<TailwindCustom>
 
-export { wind, wind$, mergeProps, toggle, type Tailwind }
+export { tw, type Tailwind }
