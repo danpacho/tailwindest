@@ -2,7 +2,7 @@
  * @description Get variants type of `rotary` and `variants`
  * @example
  * ```ts
- * // ✅ rotary
+ * // 🛠️ rotary
  * const rotaryBtn = tw.rotary({
  *      success: {},
  *      fail: {},
@@ -10,16 +10,18 @@
  * type InferredRotary = GetVariants<typeof rotaryBtn>
  * type InferredRotary = "success" | "fail"
  *
- * // ✅ variants
+ * // 🛠️ variants
  * const complexBtn = tw.variants({
- *      size: {
- *          sm: {},
- *          md: {},
- *          lg: {},
- *      },
- *      fail: {
- *          success: {},
- *          fail: {},
+ *      variants: {
+ *          size: {
+ *              sm: {},
+ *              md: {},
+ *              lg: {},
+ *          },
+ *          fail: {
+ *              success: {},
+ *              fail: {},
+ *          }
  *      }
  * })
  * type InferredVariants = GetVariants<typeof complexBtn>
