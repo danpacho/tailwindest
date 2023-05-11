@@ -99,13 +99,13 @@ export interface StyleGeneratorVariants<
 > {
     /**
      * @description Get variant className `string`
-     * @param variant Name of variant `string`
+     * @param variant Variant option `object`
      */
     class: (variantOption: VariantOption) => string
 
     /**
      * @description Get variant styleSheet `object`
-     * @param variant Name of variant `string`
+     * @param variant Variant option `object`
      */
     style: (variantOption: VariantOption) => StyleType
 
@@ -116,13 +116,13 @@ export interface StyleGeneratorVariants<
     compose: (...styles: StyleType[]) => {
         /**
          * @description Get variant className `string`
-         * @param variant Name of variant `string`
+         * @param variant Variant option `object`
          */
         class: (variantOption: VariantOption) => string
 
         /**
          * @description Get variant styleSheet `object`
-         * @param variant Name of variant `string`
+         * @param variant Variant option `object`
          */
         style: (variantOption: VariantOption) => StyleType
     }
