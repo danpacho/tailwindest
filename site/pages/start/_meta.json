@@ -2,10 +2,13 @@
     "introduction": {
         "title": "Introduction"
     },
-    "problem": {
-        "title": "Problems of tailwind"
+    "drawbacks": {
+        "title": "Drawbacks of tailwind"
     },
     "goals": {
         "title": "Design goals"
+    },
+    "overview": {
+        "title": "Overview"
     }
 }

@@ -10,14 +10,14 @@ import { Callout } from "nextra-theme-docs"
 
 ## Global style
 
-> api reference, [screens](../5_apis/Tailwindest#generic-parameter-tailwindglobal)
+> api reference, [screens](../apis/Tailwindest#generic-parameter-tailwindglobal)
 
 Tailwind has three global custom properties.
 
-1. screens: Defines the break condition.
-2. color: Defines a new color palette.
-3. opacity: Defines a new color opacity.
-4. spacing: Defines a new spacing. (ex: margin, padding, ...)
+1. `screens`: Defines the break condition.
+2. `color`: Defines a new color palette.
+3. `opacity`: Defines a new color opacity.
+4. `spacing`: Defines a new spacing. (ex: margin, padding, ...)
 
 You can define customized global values via `Tailwindest`'s first generic type.
 
@@ -205,7 +205,7 @@ const customSpacing: TailwindCustom = {
 
 > tailwind docs, [supported custom value list](https://tailwindcss.com/docs/theme#configuration-reference)
 >
-> api reference, [screens](../5_apis/Tailwindest#generic-parameter-tailwindstyle)
+> api reference, [screens](../apis/Tailwindest#generic-parameter-tailwindstyle)
 
 For example, if you wanted to add a new property type for `fontFamily`, you could do something like this.
 
@@ -250,15 +250,13 @@ import { createWind } from "tailwindest"
 /** @typedef {Required<CustomTailwind>} Tailwind */
 
 /** @type {CreateWind} */
-const { wind, wind$, toggle, mergeProps } = createWind()
-
-export { wind, wind$, toggle, mergeProps }
+export const tw = createWind()
 ```
 
 Access custom type at javascript files.
 
 ```js filename="box.js"
-const box = wind({
+const box = tw.style({
     color: "text-my-color",
     "@my": {
         color: "my:text-my-test-color",

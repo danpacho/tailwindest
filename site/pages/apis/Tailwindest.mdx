@@ -13,14 +13,23 @@ import { Callout } from "nextra-theme-docs"
 type Tailwindest<
     TailwindGlobal extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
     TailwindStyle extends TailwindStylePlugOption = TailwindDefaultStylePlug
-> = TailwindGlobal["screens"] extends Record<string, unknown>
-    ? Partial<
-          TailwindestTypeSet<
-              TailwindWithOption<TailwindGlobal, TailwindStyle>,
-              TailwindestNestKey<TailwindGlobal["screens"]>,
-              TailwindGlobal["screens"]
+> = TailwindGlobal["screens"] extends PlugOptionType
+    ? TailwindStyle["aria"] extends PlugOptionType
+        ? Partial<
+              TailwindestTypeSet<
+                  TailwindWithOption<TailwindGlobal, TailwindStyle>,
+                  TailwindestNestKey<TailwindGlobal["screens"]>,
+                  TailwindGlobal["screens"],
+                  TailwindStyle["aria"]
+              >
           >
-      >
+        : Partial<
+              TailwindestTypeSet<
+                  TailwindWithOption<TailwindGlobal, TailwindStyle>,
+                  TailwindestNestKey<TailwindGlobal["screens"]>,
+                  TailwindGlobal["screens"]
+              >
+          >
     : Partial<
           TailwindestTypeSet<
               TailwindWithOption<TailwindGlobal, TailwindStyle>,
@@ -134,116 +143,6 @@ type TailwindGlobal = {
 
 ### Generic Parameter: `TailwindStyle`
 
-#### type
-
-**All property is `[ optional ]`**
-
-<Callout type="info">type **`Custom`** = `string literal union`</Callout>
-
-```ts
-type TailwindStyle = {
-    columns?: Custom
-    animation?: Custom
-    aspectRatio?: Custom
-    backdropBlur?: Custom
-    backdropBrightness?: Custom
-    backdropContrast?: Custom
-    backdropGrayscale?: Custom
-    backdropHueRotate?: Custom
-    backdropInvert?: Custom
-    backdropOpacity?: Custom
-    backdropSaturate?: Custom
-    backdropSepia?: Custom
-    backgroundColor?: Custom
-    backgroundImage?: Custom
-    backgroundPosition?: Custom
-    backgroundSize?: Custom
-    blur?: Custom
-    brightness?: Custom
-    borderColor?: Custom
-    borderRadius?: Custom
-    borderSpacing?: Custom
-    borderWidth?: Custom
-    boxShadow?: Custom
-    boxShadowColor?: Custom
-    caretColor?: Custom
-    accentColor?: Custom
-    contrast?: Custom
-    content?: Custom
-    cursor?: Custom
-    divideColor?: Custom
-    divideWidth?: Custom
-    dropShadow?: Custom
-    fill?: Custom
-    grayscale?: Custom
-    hueRotate?: Custom
-    invert?: Custom
-    flex?: Custom
-    flexBasis?: Custom
-    flexGrow?: Custom
-    flexShrink?: Custom
-    fontFamily?: Custom
-    fontSize?: Custom
-    fontWeight?: Custom
-    gap?: Custom
-    gradientColorStops?: Custom
-    gridAutoColumns?: Custom
-    gridAutoRows?: Custom
-    gridColumn?: Custom
-    gridColumnEnd?: Custom
-    gridColumnStart?: Custom
-    gridRow?: Custom
-    gridRowStart?: Custom
-    gridRowEnd?: Custom
-    gridTemplateColumns?: Custom
-    gridTemplateRows?: Custom
-    height?: Custom
-    inset?: Custom
-    letterSpacing?: Custom
-    lineHeight?: Custom
-    listStyleType?: Custom
-    margin?: Custom
-    maxHeight?: Custom
-    maxWidth?: Custom
-    minHeight?: Custom
-    minWidth?: Custom
-    objectPosition?: Custom
-    order?: Custom
-    padding?: Custom
-    outlineColor?: Custom
-    outlineOffset?: Custom
-    outlineWidth?: Custom
-    ringColor?: Custom
-    ringOffsetColor?: Custom
-    ringOffsetWidth?: Custom
-    ringWidth?: Custom
-    rotate?: Custom
-    saturate?: Custom
-    scale?: Custom
-    scrollMargin?: Custom
-    scrollPadding?: Custom
-    sepia?: Custom
-    skew?: Custom
-    space?: Custom
-    stroke?: Custom
-    strokeWidth?: Custom
-    textColor?: Custom
-    textDecorationColor?: Custom
-    textDecorationThickness?: Custom
-    textUnderlineOffset?: Custom
-    textIndent?: Custom
-    transformOrigin?: Custom
-    transitionDelay?: Custom
-    transitionDuration?: Custom
-    transitionProperty?: Custom
-    transitionTimingFunction?: Custom
-    translate?: Custom
-    width?: Custom
-    willChange?: Custom
-    zIndex?: Custom
-}
-```
-
 #### Usage
 
 Add specific property
@@ -270,32 +169,46 @@ type MyCustom = Tailwindest<
     {
         accentColor: "my-accent-1" | "my-accent-2"
         borderRadius: "my-rad-1" | "my-rad-2"
+        aria: {
+            conditionA: "my-aria"
+        }
     }
 >
 ```
 
 #### Pick specific tailwind value
 
--   **basic type**
+<Callout type="info">
+    If you want to extract type of `tailwindcss`, wrap up `Tailwindest` type
+    with `Required` and export it.
 
     ```ts
-    type BgColor = Tailwindest["backgroundColor"]
+    export type Tailwind = Required<Tailwindest>
+    export type CustomizedTailwind = Required<Tailwindest<{}, {}>>
     ```
+
+</Callout>
+
+-   **basic type**
+
+```ts
+type BgColor = Tailwind["backgroundColor"]
+```
 
 -   **custom type**
 
-    ```ts
-    type BgColor = MyCustom["backgroundColor"]
-    ```
+```ts
+type BgColor = CustomizedTailwind["backgroundColor"]
+```
 
 -   **use picked type for typing of props**
 
-    ```tsx
-    interface BoxProps {
-        //...
-        bg: MyCustom["backgroundColor"]
-        //...
-    }
+```tsx
+interface BoxProps {
+    //...
+    bg?: CustomizedTailwind["backgroundColor"]
+    //...
+}
 
-    const Box = (props: BoxProps) => <div bg={props.bg}>{...}</div>
-    ```
+const Box = (props: BoxProps) => <div bg={props.bg}>{...}</div>
+```

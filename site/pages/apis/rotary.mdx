@@ -1,0 +1,129 @@
+import { Callout } from "nextra-theme-docs"
+
+# `rotary`
+
+## Briefly
+
+Core style generator `function` to handle various conditions.
+
+## 1. Type Definition
+
+```ts
+interface StyleGeneratorRotary<
+    StyleType extends NestedObject,
+    RotaryVariant extends string
+> {
+    class: (variant: RotaryVariant) => string
+    style: (variant: RotaryVariant) => StyleType
+
+    compose: (...styles: StyleType[]) => {
+        class: (variant: RotaryVariant) => string
+        style: (variant: RotaryVariant) => StyleType
+    }
+}
+
+declare const createTools: <StyleType extends NestedObject>() => {
+    rotary: <
+        VariantsStylesType extends {
+            [key in keyof VariantsStylesType]: StyleType
+        }
+    >({
+        base,
+        ...styles
+    }: { [key_1 in keyof VariantsStylesType]: StyleType } & {
+        base?: StyleType
+    }) => StyleGeneratorRotary<
+        StyleType,
+        Extract<Exclude<keyof VariantsStylesType, "base">, string>
+    >
+}
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+tw.rotary({
+    base: baseStyle,
+    ...rotaryStyles,
+})
+```
+
+### Parameter: `...rotaryStyles`
+
+-   type: `Record<string, Tailwindest>`
+-   usage: Define rotary `styleSheet` of variants
+
+### Example
+
+Define **rotary** `styleSheet`
+
+```ts /success/ /warning/ /rotary/
+const button = tw.rotary({
+    base: {
+        // base button style
+        backgroundColor: "bg-white",
+    },
+    success: {
+        // success button style
+        backgroundColor: "bg-green-100",
+    },
+    warning: {
+        // warning button style
+        backgroundColor: "bg-red-100",
+    },
+})
+```
+
+## 3. Returns
+
+### `class`
+
+#### Briefly
+
+**Returns `className` `string`**
+
+#### Usage
+
+```ts
+tw.rotary(...).class(rotaryVariant)
+```
+
+<Callout type="info">
+    **`rotaryVariant` will be typed as given rotary variant**
+</Callout>
+
+#### Example
+
+```ts /class/ /"warning"/ /"success"/
+const warningButton = button.class("warning")
+const successButton = button.class("success")
+```
+
+### `style`
+
+#### Briefly
+
+**Returns input `styleSheet` `object`**
+
+#### Usage
+
+```ts /style/
+tw.rotary(...).style(rotaryVariant)
+```
+
+#### Example
+
+```ts /style/ /"warning"/ /"success"/
+const warningButton = button.style("warning")
+const successButton = button.style("success")
+```
+
+### `compose`
+
+#### Briefly
+
+Compose all styles into **`base`** `styleSheet`.
+
+**The functionality of compose is same as [style's compose](./style#compose).**

@@ -1,9 +1,9 @@
 import { Callout } from "nextra-theme-docs"
 import { Underline } from "~components/common"
 
-# Problems of tailwind
+# Drawbacks of tailwind
 
-## 1. Type Safety
+## 1. Missing types
 
 The first problem with `tailwind` is its lack of type safety.
 While the `tailwind` Intellisense plugin goes a long way in solving this problem, it still falls short when it comes to typechecking classnames during the runtime or build process.
@@ -16,7 +16,7 @@ const FelxIsNotCorrect = ({ children }) => (
 
 As demonstrated in the above example, the `tailwind` Intellisense plugin is unable to identify the mistake of using `felx` instead of `flex`. This is because **the classname could be anything**.
 
-## 2. Difficulty in Reusing Styles
+## 2. Difficulty in reusing styles
 
 `tailwind` offers a method for reusing styles, as described in their official documentation, but it can be quite challenging.
 
@@ -33,9 +33,10 @@ The recommended way to reuse styles is by separating them into components and us
 The example above demonstrates how you can reuse the btn-primary classname using `@apply`.
 However, it's important to note that **using `@apply` creates an additional layer of abstraction over `tailwind`'s abstraction**, which can make the code more complex and harder to maintain.
 
-## 3. Horizontal Classname Issues
+## 3. Classname readability issues
 
-`tailwind` can become challenging to read if the number of classes exceeds a certain point, in my opinion `10`. Furthermore, if there are additional break conditions like dark or hover, it can make things even messier and harder to read.
+`tailwind` can become challenging to read if the number of classes exceeds a certain point.
+Furthermore, if there are additional break conditions like dark or hover, it can make things even messier and harder to read.
 
 ```tsx {2}
 const Box = ({ children } => (
@@ -45,4 +46,6 @@ const Box = ({ children } => (
 ))
 ```
 
-This problem **can become a technical debt** when it comes to refactoring the code over time. Developers may need to read through all the classnames slowly, which can be a time-consuming and error-prone process.
+This problem **can become a technical debt** when it comes to refactoring the code over time.
+Developers may need to read through all the classnames slowly,
+which can be a time-consuming and error-prone process.

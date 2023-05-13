@@ -14,10 +14,9 @@ import { Callout } from "nextra-theme-docs"
 ## 1. Type definition
 
 ```ts
-declare const mergeProps: (
-    baseStyle: StyleType,
-    styleProps: StyleType
-) => string
+declare const createTools: <StyleType extends NestedObject>() => {
+    mergeProps: (baseStyle: StyleType, styleProps: StyleType) => string
+}
 ```
 
 ## 2. Spec
@@ -25,7 +24,7 @@ declare const mergeProps: (
 ### Usage
 
 ```ts
-mergeProps(baseStyle, styleProps)
+tw.mergeProps(baseStyle, styleProps)
 ```
 
 ### Parameter: `baseStyle`
@@ -45,6 +44,14 @@ Applying **fontSize** after receiving `size prop` from `Text`.
 Define a `Text` component that can have **variable font size**.
 
 ```tsx
+import { tw } from "~/tw"
+
+const text = tw.style({
+    color: "text-black",
+    fontSize: "text-base",
+    fontWeight: "font-medium",
+})
+
 interface TextProps {
     children: React.ReactNode
     // type Tailwindest is typeset of tailwindcss classnames
@@ -52,16 +59,9 @@ interface TextProps {
 }
 const Text = ({ children, size = "text-base" }: TextProps) => (
     <p
-        className={mergeProps(
-            {
-                color: "text-black",
-                fontSize: "text-base",
-                fontWeight: "font-medium",
-            },
-            {
-                fontSize: size,
-            }
-        )}
+        className={tw.mergeProps(text.style, {
+            fontSize: size,
+        })}
     >
         {children}
     </p>

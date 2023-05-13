@@ -2,23 +2,23 @@ import { Callout } from "nextra-theme-docs"
 
 # Basic styling
 
-Define `tailwind` style using [`wind`](../5_apis/wind) function
+Define tailwind style using [`style`](../apis/style) function
 
 ## Define styles
 
-If style `className` is too long horizontally, then refactor it with `wind`
+Define reusable, readable and maintainable tailwind style.
 
-### from
+### Before
 
 ```ts
 const card =
     "flex flex-col items-start justify-between gap-2 p-2 hover:translate-y-[1.5px] hover:border-transparent hover:opacity-100 active:border-amber-400/10 active:opacity-75 transition-all ease-in duration-75 select-none sm:flex-row sm:items-center sm:p-2.5 bg-amber-600/10 rounded border-amber-400/20 border"
 ```
 
-### to
+### After
 
 ```ts
-const card = wind({
+const card = tw.style({
     display: "flex",
     flexDirection: "flex-col",
     alignItems: "items-start",
@@ -51,7 +51,7 @@ const card = wind({
         alignItems: "sm:items-center",
         padding: "sm:p-2.5",
     },
-}).class()
+})
 ```
 
 ## Group break conditions
@@ -63,7 +63,7 @@ Access break conditions via three types of identifier.
 3. `@`: [media and feature queries](https://tailwindcss.com/docs/hover-focus-and-other-states#media-and-feature-queries)
 
 <Callout>
-    Define [custom break conditions](../5_apis/Tailwindest#usage-1)
+    Define [custom break conditions](../apis/Tailwindest#usage-1)
 
     ```ts
     type TailwindCustom = Tailwindest<{
@@ -91,10 +91,10 @@ Access break conditions via three types of identifier.
 
 </Callout>
 
-Group your break conditions.
+Group break conditions with `:`, `::`, `@` modifiers.
 
 ```tsx
-const nest = wind({
+const nest = tw.style({
     "@dark": {
         color: "dark:text-gray-100",
         borderColor: "dark:border-gray-800",
@@ -115,7 +115,7 @@ const nest = wind({
 Extract and define common styles in your components to maximize reusability.
 
 ```ts
-const layout = wind({
+const layout = tw.style({
     width: "w-full",
     minHeight: "min-h-screen",
     height: "h-max",
@@ -133,7 +133,7 @@ const layout = wind({
     },
 })
 
-const border = wind({
+const border = tw.style({
     borderWidth: "border",
     "@dark": {
         borderColor: "dark:border-gray-500",
@@ -160,13 +160,13 @@ export { util }
 
 ## Compose styles
 
-`wind` returns three functions.
+`tw.style` returns three functions.
 
 1. **`class`**: returns className `string`
 2. **`style`**: returns styleSheet `object` = input argument
 3. **`compose`**: compose styleSheets into main styleSheet
 
-The `compose` function allows you to **overwrite styles** without the need for a `className` merge package like `tailwind-merge`.
+The `compose` function allows you to **overwrite styles** without the need for a `className` merging library like `tailwind-merge`.
 
 ### Usage - merge styleSheets
 
@@ -174,20 +174,22 @@ The `compose` function allows you to **overwrite styles** without the need for a
     The furthest back styleSheet has the highest priority.
 </Callout>
 
-```ts
-const basic = wind({
-    display: "flex",
-    flexDirection: "flex-col",
-    alignItems: "items-start",
-    justifyContent: "justify-between",
-}).compose(
-    {
-        alignItems: "items-end",
-    },
-    {
-        alignItems: "items-stretch",
-    }
-)
+```ts /style/ /compose/ /items-stretch/
+const basic = tw
+    .style({
+        display: "flex",
+        flexDirection: "flex-col",
+        alignItems: "items-start",
+        justifyContent: "justify-between",
+    })
+    .compose(
+        {
+            alignItems: "items-end",
+        },
+        {
+            alignItems: "items-stretch",
+        }
+    )
 
 // ✨ flex flex-col items-stretch justify-between
 ```
@@ -197,7 +199,7 @@ const basic = wind({
 Define utility style
 
 ```ts /container/
-const container = wind({
+const container = tw.style({
     borderColor: "border-black",
     backgroundColor: "bg-white",
     "@dark": {
@@ -217,17 +219,17 @@ const container = wind({
 
 Compose utility styles where you need.
 
-```tsx /compose/ /container/ /style()/
+```tsx /compose/ /container.style/
 import { container } from "@/utils"
 
-const box = wind({
-    display: "flex",
-    alignItems: "items-center",
-    justifyContent: "justify-center",
-})
-    .compose(container.style())
-    .class()
+const box = tw
+    .style({
+        display: "flex",
+        alignItems: "items-center",
+        justifyContent: "justify-center",
+    })
+    .compose(container.style)
 
 // ✨ flex items-center justify-center border-black bg-white dark:border-neutral-50 dark:bg-neutral-900 rounded hover:opacity-90 active:opacity-75
-const Box = ({ children }) => <div className={box}>{children}</div>
+const Box = ({ children }) => <div className={box.class}>{children}</div>
 ```
