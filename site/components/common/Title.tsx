@@ -1,4 +1,4 @@
-import { tw, Tailwind } from "wind"
+import { tw, TailwindCustom } from "wind"
 
 const header = tw.style({
     fontWeight: "font-extrabold",
@@ -22,45 +22,39 @@ const gradientHeader = tw.style({
     },
 })
 
+const titleBtn = tw.style({
+    display: "flex",
+    flexDirection: "flex-row",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    gap: "gap-2",
+
+    fontSize: "text-xl",
+
+    transition: "transition ease-in",
+    ":hover": {
+        opacity: "hover:opacity-90",
+    },
+    ":active": {
+        transformScale: "active:scale-95",
+    },
+})
+
 const Title = ({
     children,
-    fontSize = "text-xl",
-    mdFontSize = "md:text-2xl",
+    tw: twS,
 }: React.PropsWithChildren<{
-    fontSize?: Tailwind["fontSize"]
-    mdFontSize?: `md:${Tailwind["fontSize"]}`
+    tw?: TailwindCustom
 }>) => {
-    const titleBtn = tw.mergeProps(
-        {
-            display: "flex",
-            flexDirection: "flex-row",
-            alignItems: "items-center",
-            justifyContent: "justify-center",
-            gap: "gap-2",
-
-            transition: "transition ease-in",
-            ":hover": {
-                opacity: "hover:opacity-90",
-            },
-            ":active": {
-                transformScale: "active:scale-95",
-            },
-        },
-        {
-            fontSize,
-            "@md": {
-                fontSize: mdFontSize,
-            },
-        }
-    )
-
     return (
-        <button className={titleBtn}>
+        <button
+            className={
+                twS ? tw.mergeProps(titleBtn.style, twS) : titleBtn.class
+            }
+        >
             <div className="flex flex-row gap-0 items-center justify-center">
                 <h1 className={header.class}>Tailwind</h1>
-                <h1 className={`${gradientHeader.class} gradient italic`}>
-                    est
-                </h1>
+                <h1 className={`${gradientHeader.class} gradient`}>est</h1>
                 {children}
             </div>
         </button>

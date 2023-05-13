@@ -11,11 +11,11 @@ const underline = tw.style({
 
     letterSpacing: "tracking-tight",
 
-    "@md": {
-        borderBottomWidth: "md:border-b-2",
-    },
     "@dark": {
         color: "dark:text-white",
+    },
+    "@md": {
+        paddingBottom: "md:pb-[0.2rem]",
     },
 })
 

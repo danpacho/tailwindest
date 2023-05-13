@@ -1,19 +1,10 @@
 import { tw } from "wind"
-import { Title, LinkButton, Underline, CopyButton } from "~components/common"
-import { Card, cardContainer } from "~components/common/Card"
-import {
-    BoltIcon,
-    DocumentIcon,
-    SparklesIcon,
-    SquaresPlusIcon,
-    SwatchIcon,
-    VariableIcon,
-} from "@heroicons/react/24/solid"
-
-import { useState } from "react"
+import { LinkButton, CopyButton, Card } from "~components/common"
+import { util } from "~components/utils"
 
 const subtitle = tw.style({
-    color: "text-neutral-400",
+    marginTop: "mt-14",
+    color: "text-gray-200",
     fontWeight: "font-medium",
     fontSize: "text-base",
     letterSpacing: "tracking-wide",
@@ -25,24 +16,42 @@ const subtitle = tw.style({
     },
 })
 
+const titleText = tw.style({
+    fontSize: "text-5xl",
+    "@md": {
+        fontSize: "md:text-6xl",
+    },
+    fontWeight: "font-bold",
+})
+
+const gradientText = tw
+    .style({
+        color: "text-transparent",
+        fontWeight: "font-bold",
+        backgroundClip: "bg-clip-text",
+    })
+    .compose(titleText.style, util.goldGradient.style)
+
 const MainHeader = () => {
     return (
         <>
-            <div className="w-full flex flex-col gap-14 md:gap-25 items-center justify-center py-16">
-                <Title fontSize="text-5xl" mdFontSize="md:text-[3.5rem]" />
-                <div className="flex flex-col items-center justify-center gap-1">
-                    <p className={subtitle.class}>
-                        Build <Underline>fully‒typed</Underline>{" "}
-                        <Underline>tailwind</Underline> product
-                    </p>
-                    <p className={subtitle.class}>
-                        Using the power of <Underline>typescript</Underline>
-                    </p>
+            <div className="w-full flex flex-col gap-14 md:gap-25 items-center justify-center pt-16 pb-4">
+                <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="flex flex-col items-start md:items-center justify-center gap-1 md:gap-2 mb-12">
+                        <div className="flex gap-1.5 flex-wrap w-fit items-center">
+                            <h1 className={titleText.class}>Build</h1>
+                            <h1 className={gradientText.class}>Typesafe</h1>
+                        </div>
+                        <h1 className={titleText.class}>Tailwindcss Product</h1>
+                        <h1 className={subtitle.class}>
+                            Using the power of typescript
+                        </h1>
+                    </div>
                 </div>
             </div>
-            <div className="w-full flex flex-row items-center justify-center gap-4">
-                <LinkButton to="/1_start/introduction">
-                    Getting Started
+            <div className="w-full flex flex-row items-center justify-center gap-2 md:gap-3">
+                <LinkButton to="/start/introduction" type="fill">
+                    Documentation
                 </LinkButton>
                 <CopyButton
                     copiedText={<p className="font-mono">type is ready</p>}
@@ -55,181 +64,52 @@ const MainHeader = () => {
     )
 }
 
-const code = tw.style({
-    color: "text-neutral-300",
-    fontWeight: "font-semibold",
-    fontSize: "text-sm",
-    borderWidth: "border",
-    borderColor: "border-amber-400/30",
-    backgroundColor: "bg-amber-900/10",
-    paddingX: "px-0.5",
-    paddingY: "py-0",
-    borderRadius: "rounded-sm",
+const featureGrid = tw.style({
+    position: "relative",
+    display: "grid",
+    gridTemplateColumns: "grid-cols-1",
+    gapX: "gap-x-3",
+    gapY: "gap-y-6",
 
     "@md": {
-        padding: "md:p-0",
-        paddingX: "md:px-0.5",
-        paddingY: "md:py-[0.25px]",
-        borderRadius: "md:rounded",
+        gridTemplateColumns: "md:grid-cols-2",
+        gapX: "md:gap-x-4",
+        gapY: "md:gap-y-3",
     },
+
+    width: "w-full",
+    marginY: "my-6",
 })
 
-const Code = ({ children }: React.PropsWithChildren) => (
-    <code className={code.class}>{children}</code>
-)
-
-const features = {
-    fullyTyped: {
-        featureTitle: "Fully-typed",
-        featureIcon: <VariableIcon />,
-        title: <>Fully typed tailwind</>,
-        description: (
-            <>
-                Type-safety and autocompletion magics, will give you the best{" "}
-                <Code>tailwindcss</Code> DX.
-            </>
-        ),
-    },
-    customizable: {
-        featureTitle: "Customizable",
-        featureIcon: <SwatchIcon />,
-        title: <>Support custom type</>,
-        description: (
-            <>
-                Define custom type definition, defined in{" "}
-                <Code>tailwind.config.js</Code>
-            </>
-        ),
-    },
-    variantsAPI: {
-        featureTitle: "Variants API",
-        featureIcon: <SquaresPlusIcon />,
-        title: <>Level up conditional styling</>,
-        description: (
-            <>
-                Variants based conditional styling, alike <Code>stitches</Code>{" "}
-                & <Code>vanilla-extract</Code>.
-            </>
-        ),
-    },
-    tiny: {
-        featureTitle: (
-            <>
-                Tiny, <Underline>638B</Underline>
-            </>
-        ),
-        featureIcon: <SparklesIcon />,
-        title: <>Tiny bundle size</>,
-        description: (
-            <>
-                Don't have to worry about heavy bundle size. It is just{" "}
-                <Code>638B</Code> tiny lib.
-            </>
-        ),
-    },
-    performant: {
-        featureTitle: "Performant",
-        featureIcon: <BoltIcon />,
-        title: <>Styles are cached</>,
-        description: (
-            <>All operation is optimized and styles are cached by default.</>
-        ),
-    },
-    docsLink: {
-        featureTitle: "Document link",
-        featureIcon: <DocumentIcon />,
-        title: <>Document embedded</>,
-        description: (
-            <>
-                Hover the property, you will get the official{" "}
-                <Code>tailwindcss</Code> document link
-            </>
-        ),
-    },
-} satisfies Readonly<
-    Record<
+const MainFeatures = ({
+    features,
+}: {
+    features: Record<
         string,
         {
-            featureTitle: React.ReactNode
-            featureIcon: React.ReactNode
+            href: string
+            icon: React.ReactNode
             title: React.ReactNode
             description: React.ReactNode
         }
     >
->
-
-const moreInfo = tw
-    .style({
-        display: "flex",
-        flexDirection: "flex-col",
-        alignItems: "items-start",
-        justifyContent: "justify-center",
-        gap: "gap-4",
-
-        width: "w-full",
-        padding: "p-2",
-
-        transition: "transition",
-        transitionDuration: "duration-300",
-
-        borderLeftWidth: "border-l-8",
-        borderTopLeftRadius: "rounded-tl-sm",
-        borderBottomLeftRadius: "rounded-bl-sm",
-
-        transformGPU: "transform-gpu",
-    })
-    .compose(cardContainer.style)
-
-const MainFeatures = () => {
-    const [focusedFeature, setFocusedFeature] = useState<
-        keyof typeof features | null
-    >(null)
-
-    const isMoreInfoOpened = focusedFeature !== null
+}) => {
     return (
-        <div className="w-full flex flex-col items-center justify-center gap-2">
-            <div className="w-full py-2 md:py-6 grid grid-cols-2 md:grid-cols-3 gap-x-2 gap-y-4 md:gap-y-6">
-                {Object.entries(features).map((value) => {
-                    const [featureKey, component] = value
-                    const { featureIcon, featureTitle } = component
-                    const activated =
-                        focusedFeature == featureKey || focusedFeature == null
-                    return (
-                        <Card
-                            icon={featureIcon}
-                            key={featureKey}
-                            onClick={() =>
-                                setFocusedFeature(
-                                    featureKey as keyof typeof features
-                                )
-                            }
-                            className={activated ? "opacity-100" : "opacity-20"}
-                        >
-                            {featureTitle}
-                        </Card>
-                    )
-                })}
-            </div>
-            <div
-                className={`${moreInfo.class} ${
-                    isMoreInfoOpened
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-2"
-                }`}
-            >
-                {focusedFeature !== null && (
-                    <>
-                        <div className="text-base md:text-lg font-bold">
-                            <Underline>
-                                {features[focusedFeature].title}
-                            </Underline>
-                        </div>
-                        <div className="text-sm md:text-base text-neutral-200 tracking w-full">
-                            {features[focusedFeature].description}
-                        </div>
-                    </>
-                )}
-            </div>
+        <div className={featureGrid.class}>
+            {Object.entries(features).map((value) => {
+                const [featureKey, component] = value
+                const { icon, title, description, href } = component
+
+                return (
+                    <Card
+                        key={featureKey}
+                        href={href}
+                        icon={icon}
+                        title={title}
+                        description={description}
+                    />
+                )
+            })}
         </div>
     )
 }

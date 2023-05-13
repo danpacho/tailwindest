@@ -1,5 +1,10 @@
 import "../global.css"
+import { PointerLeaveProvider } from "~components/common"
 
 export default function App({ Component, pageProps }) {
-    return <Component {...pageProps} />
+    return (
+        <PointerLeaveProvider>
+            <Component {...pageProps} />
+        </PointerLeaveProvider>
+    )
 }

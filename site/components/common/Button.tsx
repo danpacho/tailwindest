@@ -2,31 +2,26 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { GetVariants } from "tailwindest"
 import { tw } from "wind"
+import { util } from "~components/utils"
 
 const btn = tw.rotary({
     base: {
         display: "flex",
         width: "w-fit",
 
-        borderRadius: "rounded",
+        borderRadius: "rounded-sm",
 
-        color: "text-black",
-        "@dark": {
-            color: "dark:text-white",
-        },
+        paddingX: "px-1",
+        paddingY: "py-1",
+        fontWeight: "font-normal",
 
-        paddingX: "px-1.5",
-        paddingY: "py-1.5",
-        fontWeight: "font-medium",
-        fontSize: "text-sm",
-
+        letterSpacing: "tracking-normal",
         "@sm": {
             fontSize: "sm:text-base",
         },
         "@md": {
-            paddingX: "md:px-2.5",
-            paddingY: "md:py-1.5",
-            fontSize: "md:text-lg",
+            paddingX: "md:px-2",
+            paddingY: "md:py-1",
         },
 
         borderWidth: "border",
@@ -40,16 +35,19 @@ const btn = tw.rotary({
         },
     },
     fill: {
-        backgroundColor: "bg-neutral-100",
+        ...util.goldGradient.style,
+        borderColor: "border-amber-300",
+        borderWidth: "border-[0.5px]",
         "@dark": {
-            backgroundColor: "dark:bg-neutral-700",
+            color: "dark:text-black",
         },
     },
     outline: {
         backgroundColor: "bg-transparent",
-        borderColor: "border-neutral-100",
+
         "@dark": {
-            borderColor: "dark:border-neutral-700",
+            borderColor: "dark:border-amber-100/20",
+            color: "dark:text-amber-100/80",
         },
     },
 })
