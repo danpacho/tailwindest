@@ -1,0 +1,83 @@
+import { Callout } from "nextra-theme-docs"
+
+# `mergeProps`
+
+## Briefly
+
+**Use this if you want to merge `styleSheet`**.
+
+<Callout>
+    **`mergeProps` is useful, when making certain styles flexible with
+    `props`.**
+</Callout>
+
+## 1. Type definition
+
+```ts
+declare const createTools: <StyleType extends NestedObject>() => {
+    mergeProps: (baseStyle: StyleType, styleProps: StyleType) => string
+}
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+tw.mergeProps(baseStyle, styleProps)
+```
+
+### Parameter: `baseStyle`
+
+-   type: `Tailwindest`
+-   usage: default style for merge targets
+
+### Parameter: `styleProps`
+
+-   type: `Tailwindest`
+-   usage: if the key of `styleProps` is equal to the key of `baseStyle`, the value of `styleProps` is overwritten
+
+### Example
+
+Applying **fontSize** after receiving `size prop` from `Text`.
+
+Define a `Text` component that can have **variable font size**.
+
+```tsx
+import { tw } from "~/tw"
+
+const text = tw.style({
+    color: "text-black",
+    fontSize: "text-base",
+    fontWeight: "font-medium",
+})
+
+interface TextProps {
+    children: React.ReactNode
+    // type Tailwindest is typeset of tailwindcss classnames
+    size: Tailwindest["fontSize"]
+}
+const Text = ({ children, size = "text-base" }: TextProps) => (
+    <p
+        className={tw.mergeProps(text.style, {
+            fontSize: size,
+        })}
+    >
+        {children}
+    </p>
+)
+```
+
+`Text` can now adjust the **font size** via **`size props`**.
+
+```tsx
+import { Text } from "./text"
+
+const SomeComponent = () => (
+    <>
+        <Text size="text-9xl">Wow Heading 1</Text>
+        <Text size="text-7xl">Wow Heading 2</Text>
+        <Text>Wow Text</Text>
+    </>
+)
+```

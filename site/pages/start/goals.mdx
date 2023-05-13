@@ -1,0 +1,185 @@
+import { Callout } from "nextra-theme-docs"
+import { Underline, CodeCompletion } from "~components/common"
+
+# Design goals
+
+## 1. <Underline>Type-safety</Underline>
+
+Bringing a type system to Tailwind was the overarching goal of this project.
+Let's take a look at how you can benefit from type stability with tailwindest.
+
+### Get type definition of `tailwind`
+
+**Hover the <Underline>`TailwindClass`</Underline>**
+
+export const suggestions = () => {
+    const emSuggestions = [
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-100",
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-200",
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-300",
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-400",
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-50",
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-500",
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-600",
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-700",
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-800",
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-900",
+        "after:before:file:first-letter:first-line:marker:placeholder:selection:active:autofill:bg-emerald-950",
+    ]
+    return new Map([
+        [
+            "TailwindClass",
+            <CodeCompletion.Hint.Property type='"blur" | "grayscale" | "invert" | "flex" | "sepia" | "transition" | "shadow" | `[${string}]` | "transition-opacity" | "transition-none" | "transition-all" | "transition-colors" | ... 10987 more ... | undefined' />,
+        ],
+        [
+            '"em"',
+            <CodeCompletion.Hint.Auto
+                autos={emSuggestions}
+                originalName='"em"'
+            />,
+        ],
+    ])
+}
+
+<CodeCompletion.Container suggestions={suggestions()}>
+
+```ts /TailwindClass/
+type TailwindClass = Tailwindest[keyof Tailwindest]
+```
+
+</ CodeCompletion.Container>
+
+### Infinite nest condition
+
+`typescript`'s recursive type computation allows you to write infinite Nested Break conditions.
+
+**Hover the <Underline>`"em"`</Underline>**
+
+<CodeCompletion.Container suggestions={suggestions()}>
+
+```ts /"em"/
+const autocompleted = tw.style({
+    "::after": {
+        "::before": {
+            "::file": {
+                "::first-letter": {
+                    "::first-line": {
+                        "::marker": {
+                            "::placeholder": {
+                                "::selection": {
+                                    ":active": {
+                                        ":autofill": {
+                                            backgroundColor: "em",
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+})
+```
+
+</ CodeCompletion.Container>
+
+## 2. <Underline>Readable</Underline>
+
+Design an **intuitive, primitive, familiar API** is essential process.
+Final conclusion is going back to the most primitive form, as if we were writing down pure `CSS`. And this led to the conclusion that the CSS in JS form is the best fit.
+
+<Callout type="info">
+    Most of the `tailwindcss` **properties name is based on pure `CSS`
+    properties,** except `tailwind`'s sole utility properties like `mx-1`.
+</Callout>
+
+```ts
+const box = tw.style({
+    display: "flex",
+    flexDirection: "flex-row",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+
+    gap: "gap-2",
+
+    marginX: "mx-2",
+})
+```
+
+### Colocate nest conditions
+
+In pure `tailwind`, you should write nest conditions like this.
+
+```ts
+const smConditions =
+    "sm:flex sm:items-center sm:justify-center sm:p-2 sm:m-2 sm:border sm:rounded-sm"
+```
+
+As you can see, the `sm:` expression is repeated. But in tailwindest, you can colocate nest conditions in one `object`.
+
+```ts
+const easyToRead = tw.style({
+    "@sm": {
+        display: "sm:flex",
+        alignItems: "sm:items-center",
+        justifyContent: "sm:justify-center",
+
+        padding: "sm:p-2",
+        margin: "sm:m-2",
+
+        borderWidth: "sm:border",
+        borderRadius: "sm:rounded-sm",
+    },
+})
+```
+
+## 3. <Underline>Reusable</Underline>
+
+tailwindest handles `string`. That means, we can reuse all the elements of function.
+
+### Reuse all elements
+
+```ts
+const box = tw.style({
+    display: "flex",
+    flexDirection: "flex-row",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    gap: "gap-2",
+})
+```
+
+1. <Underline>classname</Underline>: **`string`**
+
+    get classname
+
+    ```ts
+    const boxClass = box.class
+    // flex flex-row items-center justify-center gap-2
+    ```
+
+2. <Underline>styleSheet</Underline>: **`object`**{" "}
+
+    extract styleSheet
+
+    ```ts
+    const boxStyle = box.style
+    /**
+    {
+        display: "flex",
+        flexDirection: "flex-row",
+        alignItems: "items-center",
+        justifyContent: "justify-center",
+        gap: "gap-2",
+    }
+    **/
+    ```
+
+**`classname` and `styleSheet` are just `string` and `object`.** So you can
+modifying it whatever you want.
+
+## It's time to dive 🏄
+
+Now, you are ready to dive in. Let's get into it!

@@ -1,0 +1,26 @@
+{
+    "createTools": {
+        "title": "createTools"
+    },
+    "style": {
+        "title": "tool: style"
+    },
+    "toggle": {
+        "title": "tool: toggle"
+    },
+    "rotary": {
+        "title": "tool: rotary"
+    },
+    "variants": {
+        "title": "tool: variants"
+    },
+    "mergeProps": {
+        "title": "tool: mergeProps"
+    },
+    "GetVariants": {
+        "title": "type: GetVariants"
+    },
+    "Tailwindest": {
+        "title": "type: Tailwindest"
+    }
+}

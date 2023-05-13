@@ -1,0 +1,191 @@
+import { Callout } from "nextra-theme-docs"
+
+# `style`
+
+## Briefly
+
+Core style generator `function`, with **no variants**.
+
+## 1. Type Definition
+
+```ts
+interface StyleGeneratorStyle<StyleType extends NestedObject> {
+    class: string
+    style: StyleType
+
+    compose: (...styles: StyleType[]) => {
+        class: string
+        style: StyleType
+    }
+}
+
+declare const createTools: <StyleType extends NestedObject>() => {
+    style: (style: StyleType) => StyleGeneratorStyle<StyleType>
+}
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+tw.style(style)
+```
+
+### Parameter: `style`
+
+-   type: `Tailwindest`
+-   usage: Define tailwind style
+
+### Example
+
+```ts /style/
+const center = tw.style({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+})
+```
+
+## 3. Returns
+
+### `class`
+
+#### Briefly
+
+**Returns `className` `string`**
+
+#### Usage
+
+```ts
+tw.style(style).class
+```
+
+#### Example
+
+```ts /class/
+const centerClass = center.class
+// flex items-center justify-center
+```
+
+### `style`
+
+#### Briefly
+
+**Returns input `styleSheet` `object`**
+
+#### Usage
+
+```ts
+tw.style(style).style
+```
+
+#### Example
+
+```ts /style/
+const centerStyle = center.style
+/*
+{
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+}
+*/
+```
+
+### `compose`
+
+#### Briefly
+
+Compose **Array of `styleSheet` `object`** into **single `styleSheet`**.
+
+#### Usage
+
+```ts
+tw.style(style).compose(...styleSheets)
+```
+
+**The order** of `...styleSheets` is very important.
+If `styleSheet` is **placed behind** in `...styleSheets`, **it has higher priority
+in styling**.
+
+```ts /compose/ /p-4/ /style/
+const paddingWillBe4 = tw
+    .style({
+        padding: "p-0.5",
+    })
+    .compose(
+        {
+            // first compose target
+            padding: "p-1",
+        },
+        {
+            // second compose target
+            padding: "p-2",
+        },
+        {
+            // ✅ last compose target
+            padding: "p-4",
+        }
+    )
+
+const result = paddingWillBe4.class
+// p-4
+```
+
+<Callout type="warning">
+    `compose` will **change styleSheets permanently**.
+</Callout>
+
+#### Parameter: `...styleSheets`
+
+-   type: `Array<Tailwindest>`
+-   usage: **compose** `...styleSheets` into **one `styleSheet`** **`object`**
+
+#### Example
+
+1. Make `style` instances
+
+```ts
+const center = tw.style({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+})
+
+const border = tw.style({
+    borderWidth: "border",
+    borderColor: "border-gray-50",
+    borderRadius: "rounded-sm",
+})
+```
+
+2. Compose all `styleSheet`
+
+```ts /compose/ /center.style/ /border.style/
+const box = tw
+    .style({
+        backgroundColor: "bg-white",
+    })
+    .compose(center.style, border.style)
+```
+
+3. Get composed result
+
+```ts /class/ /style/
+const boxClass = box.class
+// "flex items-center justify-center border border-gray-50 rounded-sm bg-white"
+
+const boxStyle = box.style
+/*
+{
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    borderWidth: "border",
+    borderColor: "border-gray-50",
+    borderRadius: "rounded-sm",
+    backgroundColor: "bg-white",
+}
+*/
+```

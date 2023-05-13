@@ -14,129 +14,178 @@
 
 # Overview
 
-## 1. Define style functions
+## 1. Define styling tools
 
 ```ts
-import { createWind, type Tailwindest } from "tailwindest"
+import { createTools, type Tailwindest } from "tailwindest"
 
-const { wind, toggle, wind$, mergeProps } = createWind<Tailwindest>()
+export const tw = createTools<Tailwindest>()
 ```
 
-<br />
+## 2. Styling tools
 
-## 2. Make complex `tailwind` style
-
-```ts
-const themeBtn = wind$("dark", "light")(
-    {
-        position: "absolute",
-        top: "top-4",
-        right: "right-4",
-
-        display: "flex",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-
-        paddingX: "px-[2.25px]",
-        paddingY: "py-1",
-
-        borderColor: "border-transparent",
-        borderBottomWidth: "border-b",
-
-        backgroundColor: "bg-transparent",
-        ":hover": {
-            opacity: "hover:opacity-75",
-        },
-
-        transition: "transition",
-    },
-    {
-        dark: {
-            color: "text-white",
-            ":hover": {
-                borderColor: "hover:border-gray-200/50",
-            },
-        },
-        light: {
-            color: "text-black",
-            ":hover": {
-                borderColor: "hover:border-gray-800",
-            },
-        },
-    }
-)
-```
-
-<br />
-
-## 3. Use it in components
-
-> `tailwindest` is just a function that generates classnames like `clsx`, meaning it's **platform independent** 🏖️.
-
-### React
+### A. Define style - `style`
 
 ```tsx
-/* themeBtn style is here */
+// Define style sheet
+const box = tw.style({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
 
-const ThemeButton = () => {
-    const [isDark, setIsDark] = useState(true)
+    paddingX: "px-[2.25px]",
+    paddingY: "py-1",
 
-    return (
-        <button
-            className={themeBtn.class(isDark ? "dark" : "light")}
-            onClick={() => setIsDark((mode) => !mode)}
-        >
-            {isDark ? "light" : "dark"}
-        </button>
-    )
+    borderColor: "border-transparent",
+    borderBottomWidth: "border-b",
+
+    backgroundColor: "bg-transparent",
+
+    transition: "transition",
+    transitionDuration: "duration-75",
+
+    ":hover": {
+        opacity: "hover:opacity-90",
+    },
+})
+
+// Use it in component
+const Box = ({ children }) => <div className={box.class}>{children}</div>
+```
+
+### B. Conditional styling - `toggle`
+
+If you want to change the style based on a **single `boolean` condition**, use `toggle`.
+
+```tsx
+// Define toggle style
+const themeBtn = tw.toggle({
+    truthy: {}, // 🌝 light mode
+    falsy: {}, // 🌚 dark mode
+    base: {}, // [optional] base style
+})
+
+// Use it in component
+const ThemeBtn = ({ children }) => {
+    const [isLight, setIsLight] = useState(false)
+    return <button className={themeBtn.class(isLight)}>{children}</button>
 }
 ```
 
-## Svelte
+### C. Conditional styling - `rotary`
 
-```svelte
-<script>
-    /* themeBtn style is here */
+If you need to change styles based on **three or more conditions within a single category**, use `rotary`.
 
-    let isDark = false;
-</script>
+```tsx
+// Define rotary style
+const btn = tw.rotary({
+    default: {},
+    success: {},
+    warning: {},
+    base: {}, // [optional] base style
+})
 
-<button
-    class={themeBtn.class(isDark ? "dark" : "light")}
-    on:click={() => {
-        isDark = !isDark
-    }}
->
-    {isDark ? "light" : "dark"}
-</button>
+// Get rotary type with GetVariants
+interface BtnProps {
+    onClick: () => void
+    children: ReactNode
+    type?: GetVariants<typeof btn>
+}
+
+// Use it in component
+const Btn = ({ onClick, children, type = "default" }: BtnProps) => (
+    <button className={btn.class(type)} onClick={onClick}>
+        {children}
+    </button>
+)
 ```
 
-## Vanilla Js
+### D. Conditional styling - `variants`
 
-```js
-/* themeBtn style is here */
+Use `variants` for **combinations of rotary**, where **each style condition is defined within several categories**.
 
-const btn = document.getElementById("themeBtn")
+```tsx
+// Define variants style
+const btn = tw.variants({
+    variants: {
+        type: {
+            default: {},
+            success: {},
+            warning: {},
+        },
+        size: {
+            sm: {},
+            md: {},
+            lg: {},
+        },
+    },
+    base: {}, // [optional] base style
+})
 
-let isDark = false
+// Get variants type with GetVariants
+interface BtnProps extends GetVariants<typeof btn> {
+    onClick: () => void
+    children: ReactNode
+}
 
-btn.classList.add(themeBtn.class(isDark ? "dark" : "light"))
+// Use it in component
+const Btn = ({
+    children,
+    size = "md",
+    type = "default",
+    onClick,
+}: BtnProps) => (
+    <button className={btn.class({ size, type })} onClick={onClick}>
+        {children}
+    </button>
+)
+```
+
+### E. Utility - `mergeProps`
+
+Use it for merging input `styleSheet`.
+
+```tsx
+const text = tw.style({
+    color: "text-gray-950",
+    fontWeight: "font-bold",
+    fontSize: "text-base/normal",
+    "@dark": {
+        color: "dark:text-gray-100",
+    },
+})
+
+const Text = ({
+    children,
+    ...option
+}: PropsWithChildren<Pick<Tailwindest, "color" | "fontWeight">>) => {
+    return (
+        <p
+            className={tw.mergeProps(
+                text.style,
+                option // override color and fontWeight
+            )}
+        >
+            {children}
+        </p>
+    )
+}
 ```
 
 <br />
 
 # Features
 
-1. Fully-typed `tailwind`
-2. Support custom type, defined in `tailwind.config.js`
-3. Level up conditional styling with variants API
-4. Tiny bundle size, `638B`
-5. Performant
-6. Document link embedded
-7. Platform free
+1. Type-safe `tailwind`
+2. Supports all platforms
+3. Tiny bundle size, `748B`
+4. Elegant conditional styling
+5. `tailwind` document link embedded
+6. Support custom type, defined in `tailwind.config.js`
+7. Performant
 
 <br />
 
 # LICENSE
 
-MIT
+<strong><p style="color:teal">MIT</p></strong>

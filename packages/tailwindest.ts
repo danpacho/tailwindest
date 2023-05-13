@@ -14,7 +14,7 @@ type PlugOptionType = Record<string, unknown>
  * @description Add custom property, defined at `tailwind.config.js`
  * @see {@link https://tailwindcss.com/docs/configuration tailwind configuration}
  * @example
- * // Plug customized type to createWind generic
+ * // Plug customized type to createTools generic
  * type Custom = Tailwindest<
  *    {
  *        // Add color, sizing, screens global property
@@ -31,6 +31,8 @@ type PlugOptionType = Record<string, unknown>
  *        shadow: "my-shadow1" | "my-shadow2"
  *    }
  * >
+ *
+ * export const tw = createTools<Custom>()
  * @description Pick specific type
  * @example
  *

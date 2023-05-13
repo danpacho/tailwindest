@@ -1,6 +1,6 @@
-import { wind } from "wind"
+import { tw } from "wind"
 
-const underline = wind({
+const underline = tw.style({
     fontFamily: "font-mono",
     fontWeight: "font-semibold",
     paddingBottom: "pb-0.5",
@@ -11,16 +11,16 @@ const underline = wind({
 
     letterSpacing: "tracking-tight",
 
-    "@md": {
-        borderBottomWidth: "md:border-b-2",
-    },
     "@dark": {
         color: "dark:text-white",
     },
-}).class()
+    "@md": {
+        paddingBottom: "md:pb-[0.2rem]",
+    },
+})
 
 const Underline = ({ children }: React.PropsWithChildren) => (
-    <code className={underline}>{children}</code>
+    <code className={underline.class}>{children}</code>
 )
 
 export { Underline }

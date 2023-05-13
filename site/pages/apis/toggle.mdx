@@ -1,0 +1,111 @@
+import { Callout } from "nextra-theme-docs"
+
+# `mergeProps`
+
+## Briefly
+
+Core style generator `function` to handle toggle conditions.
+
+## 1. Type definition
+
+```ts
+interface StyleGeneratorToggle<StyleType extends NestedObject> {
+    class: (toggleCondition: boolean) => string
+    style: (toggleCondition: boolean) => StyleType
+
+    compose: (...styles: StyleType[]) => {
+        class: (toggleCondition: boolean) => string
+        style: (toggleCondition: boolean) => StyleType
+    }
+}
+declare const createTools: <StyleType extends NestedObject>() => {
+    toggle: (toggleVariants: {
+        truthy: StyleType
+        falsy: StyleType
+        base?: StyleType
+    }) => StyleGeneratorToggle<StyleType>
+}
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+tw.toggle({
+    base: baseStyle,
+    truthy: truthyStyle,
+    falsy: falsyStyle,
+})
+```
+
+### Parameter: `baseStyle`
+
+-   type: `Tailwindest`
+-   usage: common style for `true` and `false` condition
+
+### Parameter: `truthyStyle`
+
+-   type: `Tailwindest`
+-   usage: if condition is `true`, it will applied.
+
+### Parameter: `falsyStyle`
+
+-   type: `Tailwindest`
+-   usage: if condition is `false`, it will applied.
+
+## 3. Returns
+
+### `class`
+
+#### Briefly
+
+**Returns `className` `string`**
+
+#### Usage
+
+```ts
+tw.toggle(...toggleStyles).class(toggleCondition)
+```
+
+#### Example
+
+```ts /toggle/ /truthy/ /falsy/
+const themeBtn = tw.toggle({
+    base: {}, //    [optional] base style
+    truthy: {}, //  🌝 light mode
+    falsy: {}, //   🌚 dark mode
+})
+```
+
+```ts /class/ /true/ /false/
+const lightMode = themeBtn.class(true)
+const darkMode = themeBtn.class(false)
+```
+
+### `style`
+
+#### Briefly
+
+**Returns input `styleSheet` `object`**
+
+#### Usage
+
+```ts /style/
+tw.rotary(...toggleStyles).style(toggleCondition)
+```
+
+#### Example
+
+```ts /style/
+const warningButton = button.style("warning")
+const successButton = button.style("success")
+```
+
+### `compose`
+
+#### Briefly
+
+Compose all styles into **`base`** `styleSheet`.
+
+**The functionality of compose is same as [style's compose](./style#compose).**

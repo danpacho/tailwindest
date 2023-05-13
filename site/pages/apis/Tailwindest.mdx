@@ -1,0 +1,214 @@
+import { Callout } from "nextra-theme-docs"
+
+# `Tailwindest`
+
+## Briefly
+
+1. Use to create a type with a custom value defined in **`tailwind.config.js`**.
+2. Use to **pick the `tailwind` type** for `prop` typing.
+
+## 1. Type definition
+
+```ts
+type Tailwindest<
+    TailwindGlobal extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
+    TailwindStyle extends TailwindStylePlugOption = TailwindDefaultStylePlug
+> = TailwindGlobal["screens"] extends PlugOptionType
+    ? TailwindStyle["aria"] extends PlugOptionType
+        ? Partial<
+              TailwindestTypeSet<
+                  TailwindWithOption<TailwindGlobal, TailwindStyle>,
+                  TailwindestNestKey<TailwindGlobal["screens"]>,
+                  TailwindGlobal["screens"],
+                  TailwindStyle["aria"]
+              >
+          >
+        : Partial<
+              TailwindestTypeSet<
+                  TailwindWithOption<TailwindGlobal, TailwindStyle>,
+                  TailwindestNestKey<TailwindGlobal["screens"]>,
+                  TailwindGlobal["screens"]
+              >
+          >
+    : Partial<
+          TailwindestTypeSet<
+              TailwindWithOption<TailwindGlobal, TailwindStyle>,
+              TailwindestNestKey
+          >
+      >
+```
+
+## 2. Spec
+
+### Usage
+
+1. basic tailwind type
+
+```ts
+type Basic = Tailwindest
+```
+
+2. customized tailwind type
+
+<Callout type="info">Add custom properties at **`tailwind.config.js`**</Callout>
+
+```ts
+type Customized = Tailwindest<TailwindGlobal, TailwindStyle>
+```
+
+### Generic Parameter: `TailwindGlobal`
+
+#### type
+
+**All property is `[ optional ]`**
+
+<Callout type="info">type **`Custom`** = `string literal union`</Callout>
+
+```ts
+type TailwindGlobal = {
+    color?: Custom
+    opacity?: Custom
+    sizing?: Custom
+    screens?: {
+        conditionA?: ShouldBeOneStringLiteral
+        conditionB?: ShouldBeOneStringLiteral
+        conditionC?: ShouldBeOneStringLiteral
+        conditionD?: ShouldBeOneStringLiteral
+        conditionE?: ShouldBeOneStringLiteral
+        conditionF?: ShouldBeOneStringLiteral
+        conditionG?: ShouldBeOneStringLiteral
+        conditionH?: ShouldBeOneStringLiteral
+        conditionI?: ShouldBeOneStringLiteral
+        conditionJ?: ShouldBeOneStringLiteral
+        conditionK?: ShouldBeOneStringLiteral
+        conditionL?: ShouldBeOneStringLiteral
+        conditionM?: ShouldBeOneStringLiteral
+        conditionN?: ShouldBeOneStringLiteral
+        conditionO?: ShouldBeOneStringLiteral
+        conditionP?: ShouldBeOneStringLiteral
+        conditionQ?: ShouldBeOneStringLiteral
+        conditionR?: ShouldBeOneStringLiteral
+        conditionS?: ShouldBeOneStringLiteral
+        conditionT?: ShouldBeOneStringLiteral
+        conditionU?: ShouldBeOneStringLiteral
+        conditionV?: ShouldBeOneStringLiteral
+        conditionW?: ShouldBeOneStringLiteral
+        conditionY?: ShouldBeOneStringLiteral
+        conditionZ?: ShouldBeOneStringLiteral
+    }
+}
+```
+
+#### Usage
+
+**add global property**
+
+-   **`color`**: font color, background color, border color, ring color, ...etc
+
+-   **`opacity`**: opacity of all color. (bg-gray-100/15 ...etc)
+
+-   **`sizing`**: padding, margin, ...etc,
+
+-   **`screens`**: break condition like `@md`, `@lg`, ...etc,
+
+<Callout type="warning">
+    `ShouldBeOneStringLiteral`: 
+    **SHOULD BE ONLY ONE** `string literal union` type
+
+    ```ts
+    screens: {
+        conditionA: ShouldBeOneStringLiteral
+        conditionB: ShouldBeOneStringLiteral
+        conditionC: ShouldBeOneStringLiteral
+        //...
+    }
+    ```
+
+    Do like this
+    ```ts
+    screens: {
+        conditionA: "@good"
+        conditionB: "@nice"
+    }
+    ```
+
+    Don't do like this
+    ```ts
+    screens: {
+        conditionA: "@don_t" | "@do_this" | "@plz"
+    }
+    ```
+
+</Callout>
+
+### Generic Parameter: `TailwindStyle`
+
+#### Usage
+
+Add specific property
+
+### Example
+
+#### Define custom tailwind type
+
+```ts
+type MyCustom = Tailwindest<
+    {
+        color: "my-color-1" | "my-color-2" | "my-color-3"
+        opacity: "15" | "25" | "35" | "45" | "55"
+        sizing: "0.1" | "0.2" | "0.3" | "0.4" | "0.5"
+        screens: {
+            conditionA: "@iphone7"
+            conditionB: "@ipad"
+            conditionC: "@mac13"
+            conditionD: "@mac14"
+            conditionE: "@mac16"
+            conditionF: "@imac"
+        }
+    },
+    {
+        accentColor: "my-accent-1" | "my-accent-2"
+        borderRadius: "my-rad-1" | "my-rad-2"
+        aria: {
+            conditionA: "my-aria"
+        }
+    }
+>
+```
+
+#### Pick specific tailwind value
+
+<Callout type="info">
+    If you want to extract type of `tailwindcss`, wrap up `Tailwindest` type
+    with `Required` and export it.
+
+    ```ts
+    export type Tailwind = Required<Tailwindest>
+    export type CustomizedTailwind = Required<Tailwindest<{}, {}>>
+    ```
+
+</Callout>
+
+-   **basic type**
+
+```ts
+type BgColor = Tailwind["backgroundColor"]
+```
+
+-   **custom type**
+
+```ts
+type BgColor = CustomizedTailwind["backgroundColor"]
+```
+
+-   **use picked type for typing of props**
+
+```tsx
+interface BoxProps {
+    //...
+    bg?: CustomizedTailwind["backgroundColor"]
+    //...
+}
+
+const Box = (props: BoxProps) => <div bg={props.bg}>{...}</div>
+```

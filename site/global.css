@@ -2,17 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-    background: linear-gradient(
-        to left,
-        rgba(18, 18, 18, 0.9) 0%,
-        rgba(24, 24, 24, 0.75) 100%
-    ) !important;
+pre {
+    background-color: rgb(18, 18, 18) !important;
+    border: 1px solid rgb(254 243 199 / 0.1) !important;
 }
 
-pre {
-    background-color: rgba(24, 24, 24, 0.8) !important;
-    border: 1px solid #49202c;
+/* for code suggestion blocks */
+.highlighted:not(.line) {
+    color: #eea84d !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    font-weight: 400 !important;
+    transition: all ease 0.2s !important;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+}
+.highlighted:not(.line):hover {
+    text-decoration-color: #eea84d;
 }
 
 @keyframes appear {
@@ -25,14 +31,14 @@ pre {
 }
 
 .dark {
-    --shiki-token-keyword: #e96c6c;
+    --shiki-token-keyword: #ff7777;
     --shiki-token-string: #ba9090;
     --shiki-token-string-expression: #ba9090;
     --shiki-color-text: #dadada;
-    --shiki-token-function: #eaaf56;
-    --shiki-token-parameter: #f4d8b0;
+    --shiki-token-function: #ffca7b;
+    --shiki-token-parameter: #ffca7b;
     --shiki-token-comment: #808995;
-    --shiki-token-constant: #f4d8b0;
+    --shiki-token-constant: #ffe5c1;
     --shiki-token-punctuation: #bbbbbb;
     --shiki-token-link: #6ecd8a;
 }

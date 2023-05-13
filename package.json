@@ -1,7 +1,7 @@
 {
     "name": "tailwindest",
-    "version": "1.2.1",
-    "description": "Fully typed className for tailwindcss",
+    "version": "2.0.0",
+    "description": "Typesafe tailwindcss",
     "author": "danpacho",
     "license": "MIT",
     "private": false,
@@ -24,7 +24,8 @@
         "build:watch": "rollup -cw",
         "build:class": "node ./js/scripts/extract && prettier './packages/types/tailwind.nested/**.ts' --write",
         "clean": "rimraf {dist,dist/watch}",
-        "bench": "node ./js/benchmark/bench.js",
+        "bench:skip": "node ./js/benchmark/bench.js",
+        "bench": "pnpm build && pnpm bench:skip",
         "prettier": "prettier 'packages/**/*.{ts,js,md}' --check",
         "prettier:fix": "prettier 'packages/**/*.{ts,js,md}' --write",
         "eslint": "eslint 'packages/**/*.{ts,js}'",
@@ -35,6 +36,7 @@
         "test:ts-typecheck": "tsc --noEmit",
         "test:ts-performance": "rimraf ts-perf && tsc --noEmit --generateTrace ts-perf",
         "test:ci": "jest --no-coverage",
+        "test:prepublish": "pnpm test:ci && pnpm bench",
         "pre-commit": "lint-staged",
         "prepare": "husky install"
     },

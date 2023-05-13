@@ -63,10 +63,7 @@ export interface TailwindTransforms<
             >
         >,
         TailwindScaleType<
-            ToPlugin<
-                TailwindSpacing | TailwindScaleVariants,
-                TransformsPlug["scale"]
-            >
+            ToPlugin<TailwindScaleVariants, TransformsPlug["scale"]>
         >,
         TailwindTransformOriginType<TransformsPlug["transformOrigin"]>,
         TailwindTranslateType<

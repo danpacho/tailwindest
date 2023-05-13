@@ -1,0 +1,131 @@
+import { Callout } from "nextra-theme-docs"
+
+# `variants`
+
+## Briefly
+
+Core style generator `function` to handle variants.
+
+## 1. Type Definition
+
+```ts
+interface StyleGeneratorVariants<
+    StyleType extends NestedObject,
+    VariantOption
+> {
+    class: (variantOption: VariantOption) => string
+    style: (variantOption: VariantOption) => StyleType
+
+    compose: (...styles: StyleType[]) => {
+        class: (variantOption: VariantOption) => string
+        style: (variantOption: VariantOption) => StyleType
+    }
+}
+
+declare const createTools: <StyleType extends NestedObject>() => {
+    variants: <VariantsList>({
+        base,
+        variants,
+    }: {
+        variants: {
+            [RotaryVariants in keyof VariantsList]: Record<
+                keyof VariantsList[RotaryVariants],
+                StyleType
+            >
+        }
+    } & {
+        base?: StyleType
+    }) => StyleGeneratorVariants<
+        StyleType,
+        { [Key in keyof VariantsList]: keyof VariantsList[Key] }
+    >
+}
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+tw.variants({
+    base: baseStyle,
+    variants: variantsStyles,
+})
+```
+
+### Parameter: `variantsStyles`
+
+-   type: `Record<string, Record<string, Tailwindest>>`
+-   usage: Define variants `styleSheet` of each conditions
+
+### Example
+
+Define **variant** `styleSheet`
+
+```ts /variants/ /type/ /success/ /warning/ /size/ /sm/ /md/ /lg/
+const button = tw.variants({
+    base: {
+        // base button style
+        backgroundColor: "bg-white",
+    },
+    variants: {
+        type: {
+            success: {},
+            warning: {},
+        },
+        size: {
+            sm: {},
+            md: {},
+            lg: {},
+        },
+    },
+})
+```
+
+## 3. Returns
+
+### `class`
+
+#### Briefly
+
+**Returns `className` `string`**
+
+#### Usage
+
+```ts
+tw.variants(...).class(variantsOption)
+```
+
+#### Example
+
+```ts /class/ /"warning"/ /"success"/ /"sm"/ /"lg"/
+const warningSmClass = button.class({ type: "warning", size: "sm" })
+const successLgClass = button.class({ type: "success", size: "lg" })
+```
+
+### `style`
+
+#### Briefly
+
+**Returns input `styleSheet` `object`**
+
+#### Usage
+
+```ts /style/
+tw.rotary(...).style(variantsOption)
+```
+
+#### Example
+
+```ts /style/ /"warning"/ /"success"/ /"sm"/ /"lg"/
+const warningSmStyle = button.style({ type: "warning", size: "sm" })
+const successLgStyle = button.style({ type: "success", size: "lg" })
+```
+
+### `compose`
+
+#### Briefly
+
+Compose all styles into **`base`** `styleSheet`.
+
+**The functionality of compose is same as [style's compose](./style#compose).**

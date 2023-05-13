@@ -1,45 +1,45 @@
-import { wind } from "wind"
+import { TailwindCustom, tw } from "wind"
+import { Underline } from "./Underline"
+import Link from "next/link"
 
-export const cardContainer = wind({
-    backgroundColor: "bg-amber-600/10",
+export const cardContainer = tw.style({
+    backgroundColor: "bg-amber-700/5",
 
-    borderRadius: "rounded",
-    borderColor: "border-amber-400/20",
+    borderRadius: "rounded-lg",
+    borderColor: "border-amber-400/10",
     borderWidth: "border",
 })
 
-const card = wind({
-    display: "flex",
-    flexDirection: "flex-col",
-    alignItems: "items-start",
-    justifyContent: "justify-between",
-    gap: "gap-2",
+const card = tw
+    .style({
+        display: "flex",
+        flexDirection: "flex-col",
+        alignItems: "items-start",
+        justifyContent: "justify-between",
+        gap: "gap-4",
 
-    padding: "p-2",
+        padding: "p-3",
 
-    ":hover": {
-        transformTranslateY: "hover:translate-y-[1.5px]",
-        borderColor: "hover:border-transparent",
-        opacity: "hover:opacity-100",
-    },
-    ":active": {
-        borderColor: "active:border-amber-400/10",
-        opacity: "active:opacity-75",
-    },
-    transition: "transition-all ease-in",
-    transitionDuration: "duration-75",
-    userSelect: "select-none",
+        ":hover": {
+            transformTranslateY: "hover:translate-y-[1.5px]",
+            borderColor: "hover:border-transparent",
+            opacity: "hover:opacity-100",
+        },
+        ":active": {
+            borderColor: "active:border-amber-400/10",
+            opacity: "active:opacity-75",
+        },
+        transition: "transition-all ease-in",
+        transitionDuration: "duration-75",
+        userSelect: "select-none",
 
-    "@sm": {
-        flexDirection: "sm:flex-row",
-        alignItems: "sm:items-center",
-        padding: "sm:p-2.5",
-    },
-})
-    .compose(cardContainer.style())
-    .class()
+        "@sm": {
+            padding: "sm:p-5",
+        },
+    })
+    .compose(cardContainer.style)
 
-const cardIcon = wind({
+const cardIcon = tw.style({
     width: "w-6",
     height: "h-6",
     minWidth: "min-w-[1.5rem]",
@@ -47,12 +47,12 @@ const cardIcon = wind({
 
     padding: "p-1",
 
-    backgroundImage: "bg-gradient-to-bl",
-    backgroundImageGradientStart: "from-amber-700/30",
-    backgroundImageGradientEnd: "to-amber-700/50",
+    gradient: "bg-gradient-to-bl",
+    gradientStart: "from-amber-700/30",
+    gradientEnd: "to-amber-700/50",
 
     borderColor: "border-amber-400",
-    borderWidth: "border",
+    borderWidth: "border-[0.1px]",
     borderRadius: "rounded",
 
     "@md": {
@@ -63,31 +63,52 @@ const cardIcon = wind({
 
         padding: "md:p-1.5",
     },
-}).class()
+})
+
+const CardIcon = ({ icon }: { icon: React.ReactNode }) => (
+    <div className={cardIcon.class}>{icon}</div>
+)
+
+const CardHeader = ({
+    icon,
+    title,
+}: {
+    title: React.ReactNode
+    icon: React.ReactNode
+}) => (
+    <div className="flex flex-row md:gap-4 gap-2 items-center justify-between">
+        <CardIcon icon={icon} />
+        <div className="font-bold text-sm md:text-base md:font-semibold text-start">
+            <Underline>{title}</Underline>
+        </div>
+    </div>
+)
 
 const Card = ({
-    children,
+    title,
+    description,
     icon,
-    onClick,
-    className,
-}: {
-    children: React.ReactNode
+    href,
+    tw: twS,
+    children,
+}: React.PropsWithChildren<{
+    title: React.ReactNode
+    description: React.ReactNode
     icon: React.ReactNode
-    onClick: () => void
-    className?: string
-}) => {
+    href: string
+    tw?: TailwindCustom
+}>) => {
     return (
-        <button
-            className={`${card} ${className}`}
+        <Link
+            className={twS ? tw.mergeProps(card.style, twS) : card.class}
             type="button"
-            onClick={onClick}
+            href={href}
         >
-            <div className={cardIcon}>{icon}</div>
-            <div className="font-bold text-sm md:text-base md:font-semibold text-start">
-                {children}
-            </div>
-        </button>
+            <CardHeader icon={icon} title={title} />
+            <p className="text-amber-100/50 text-start">{description}</p>
+            {children}
+        </Link>
     )
 }
 
-export { Card }
+export { Card, CardIcon, CardHeader }

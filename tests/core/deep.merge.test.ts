@@ -1,10 +1,11 @@
 import { describe, expect, test } from "@jest/globals"
 import { deepMerge } from "../../packages/core"
+import type { NestedObject } from "../../packages/utils"
 import { label } from "../label"
 
 describe(label.unit("deepMerge"), () => {
     test(label.case("merge nested object"), () => {
-        const baseObject = {
+        const baseObject: NestedObject = {
             a: "a",
             b: "b",
             c: {
@@ -16,18 +17,19 @@ describe(label.unit("deepMerge"), () => {
                 },
             },
         }
-        const mergeTargetObject = {
+        const mergeTargetObject: NestedObject = {
             a: "Im, a",
             b: "Im, b",
             c: {
                 d: "Im, d",
                 f: {
                     g: "Im, g",
+                    i: "i",
                 },
             },
         }
 
-        const expectedMergedObject = {
+        const expectedMergedObject: NestedObject = {
             a: "Im, a",
             b: "Im, b",
             c: {
@@ -36,6 +38,7 @@ describe(label.unit("deepMerge"), () => {
                 f: {
                     g: "Im, g",
                     h: "h",
+                    i: "i",
                 },
             },
         }

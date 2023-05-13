@@ -1,32 +1,27 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { WindVariants } from "tailwindest"
-import { wind$ } from "wind"
+import { GetVariants } from "tailwindest"
+import { tw } from "wind"
+import { util } from "~components/utils"
 
-const btn = wind$("outline", "fill")(
-    {
+const btn = tw.rotary({
+    base: {
         display: "flex",
         width: "w-fit",
 
-        borderRadius: "rounded",
+        borderRadius: "rounded-sm",
 
-        color: "text-black",
-        "@dark": {
-            color: "dark:text-white",
-        },
+        paddingX: "px-1",
+        paddingY: "py-1",
+        fontWeight: "font-normal",
 
-        paddingX: "px-1.5",
-        paddingY: "py-1.5",
-        fontWeight: "font-medium",
-        fontSize: "text-sm",
-
+        letterSpacing: "tracking-normal",
         "@sm": {
             fontSize: "sm:text-base",
         },
         "@md": {
-            paddingX: "md:px-2.5",
-            paddingY: "md:py-1.5",
-            fontSize: "md:text-lg",
+            paddingX: "md:px-2",
+            paddingY: "md:py-1",
         },
 
         borderWidth: "border",
@@ -39,25 +34,25 @@ const btn = wind$("outline", "fill")(
             transformTranslateY: "active:translate-y-0.5",
         },
     },
-    {
-        fill: {
-            backgroundColor: "bg-neutral-100",
-            "@dark": {
-                backgroundColor: "dark:bg-neutral-700",
-            },
+    fill: {
+        ...util.goldGradient.style,
+        borderColor: "border-amber-300",
+        borderWidth: "border-[0.5px]",
+        "@dark": {
+            color: "dark:text-black",
         },
-        outline: {
-            backgroundColor: "bg-transparent",
-            borderColor: "border-neutral-100",
-            "@dark": {
-                borderColor: "dark:border-neutral-700",
-            },
-        },
-        defaultVariant: "fill",
-    }
-)
+    },
+    outline: {
+        backgroundColor: "bg-transparent",
 
-type BtnType = WindVariants<typeof btn>
+        "@dark": {
+            borderColor: "dark:border-amber-100/20",
+            color: "dark:text-amber-100/80",
+        },
+    },
+})
+
+type BtnType = GetVariants<typeof btn>
 
 const LinkButton = ({
     children,

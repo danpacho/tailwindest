@@ -16,11 +16,11 @@ const cache = <Key, Value>(): Cache<Key, Value> => {
     const store = new Map<Key, Value>()
 
     return {
-        set: (key: Key, value: Value) => {
+        set: (key, value) => {
             store.set(key, value)
         },
-        has: (key: Key) => store.has(key),
-        get: (key: Key, cacheFindFallback: () => Value) => {
+        has: (key) => store.has(key),
+        get: (key, cacheFindFallback) => {
             if (store.has(key)) return store.get(key) as Value
 
             const newCacheValue = cacheFindFallback()

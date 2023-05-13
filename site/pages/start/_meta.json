@@ -1,0 +1,14 @@
+{
+    "introduction": {
+        "title": "Introduction"
+    },
+    "drawbacks": {
+        "title": "Drawbacks of tailwind"
+    },
+    "goals": {
+        "title": "Design goals"
+    },
+    "overview": {
+        "title": "Overview"
+    }
+}
