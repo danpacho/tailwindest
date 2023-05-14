@@ -1,7 +1,7 @@
 {
-    "name": "tailwindest-docs",
-    "version": "2.0.0-rc.0",
-    "description": "document of tailwindest",
+    "name": "tailwindest-documentation",
+    "version": "2.0.0",
+    "description": "tailwindest official documentation",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
@@ -24,7 +24,7 @@
         "nextra-theme-docs": "2.5.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "tailwindest": "2.0.0-rc.1"
+        "tailwindest": "2.0.0"
     },
     "devDependencies": {
         "@types/node": "18.11.10",

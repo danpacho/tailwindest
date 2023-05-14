@@ -1,10 +1,8 @@
 import { useState } from "react"
 import { Text, TouchableOpacity, View } from "react-native"
-import { createWind, type Tailwindest } from "tailwindest"
+import { tw } from "./tw"
 
-const { wind, wind$ } = createWind<Tailwindest>()
-
-const container = wind({
+const container = tw.style({
     flex: "flex-1",
     display: "flex",
     flexDirection: "flex-col",
@@ -12,32 +10,30 @@ const container = wind({
     alignItems: "items-center",
     justifyContent: "justify-center",
     backgroundColor: "bg-teal-50",
-}).class()
+}).class
 
-const button = wind$("plus", "minus")(
-    {
+const button = tw.rotary({
+    base: {
         display: "flex",
         alignItems: "items-center",
         justifyContent: "justify-center",
         padding: "p-3",
         borderRadius: "rounded-lg",
-        border: "border-transparent border-solid",
+        borderColor: "border-transparent",
         borderWidth: "border-2",
         ":active": {
             opacity: "active:opacity-70",
         },
     },
-    {
-        plus: {
-            backgroundColor: "bg-red-500",
-            borderColor: "border-red-100",
-        },
-        minus: {
-            backgroundColor: "bg-blue-500",
-            borderColor: "border-blue-100",
-        },
-    }
-)
+    plus: {
+        backgroundColor: "bg-red-500",
+        borderColor: "border-red-100",
+    },
+    minus: {
+        backgroundColor: "bg-blue-500",
+        borderColor: "border-blue-100",
+    },
+})
 
 export default function App() {
     const [count, setCount] = useState(0)

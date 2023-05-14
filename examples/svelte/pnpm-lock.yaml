@@ -2,8 +2,8 @@ lockfileVersion: '6.0'
 
 dependencies:
   tailwindest:
-    specifier: ^1.1.0
-    version: 1.1.0
+    specifier: 2.0.0
+    version: 2.0.0
 
 devDependencies:
   '@sveltejs/adapter-auto':
@@ -1893,8 +1893,8 @@ packages:
       - ts-node
     dev: true
 
-  /tailwindest@1.1.0:
-    resolution: {integrity: sha512-PgxX7JTNsLwH9e4KqaqFxTrOHTRzzA+L2H6RCpNtpnVECX7vqXyquPfTLZ0/x7YSLOHQMedTYgphBsw+yo7rDQ==}
+  /tailwindest@2.0.0:
+    resolution: {integrity: sha512-aDgriUz1Xl4sDqcr1+HVkEpGnsno/NwdfzZAY6iQerecVbBAvQUu/mP1GlKLjsxw6DAMZ9bTNZuIvdfDN9O1Uw==}
     dev: false
 
   /text-table@0.2.0:

@@ -1,27 +1,26 @@
 <script>
 	import '../app.css';
-	import { wind } from '../wind';
+	import { tw } from '../tw';
 
-	const layout = wind({
+	const layout = tw.style({
 		position: 'relative',
 
 		display: 'flex',
 		flexDirection: 'flex-col',
 		alignItems: 'items-center',
 		justifyContent: 'justify-center',
-		gap: 'gap-10',
+		gap: 'gap-7',
 
-		height: 'h-full',
-		minHeight: 'min-h-max',
+		height: 'h-screen',
+		minHeight: 'min-h-screen',
 
 		paddingY: 'py-10',
 		'@dark': {
 			backgroundColor: 'dark:bg-neutral-900'
-		},
-		transition: 'transition'
-	}).class();
+		}
+	});
 </script>
 
-<main class={layout}>
+<main class={layout.class}>
 	<slot />
 </main>

@@ -1,10 +1,10 @@
 "use client"
 
+import { tw } from "@/tw"
 import { useEffect, useState } from "react"
-import { wind$ } from "@/wind"
 
-const themeButton = wind$("dark", "light")(
-    {
+const themeButton = tw.toggle({
+    base: {
         position: "absolute",
         top: "top-4",
         right: "right-4",
@@ -22,21 +22,19 @@ const themeButton = wind$("dark", "light")(
         },
         transition: "transition",
     },
-    {
-        dark: {
-            color: "text-white",
-            ":hover": {
-                borderColor: "hover:border-gray-200",
-            },
+    truthy: {
+        color: "text-white",
+        ":hover": {
+            borderColor: "hover:border-gray-200",
         },
-        light: {
-            color: "text-black",
-            ":hover": {
-                borderColor: "hover:border-gray-800",
-            },
+    },
+    falsy: {
+        color: "text-black",
+        ":hover": {
+            borderColor: "hover:border-gray-800",
         },
-    }
-)
+    },
+})
 
 const ThemeButton = () => {
     const [isDark, setIsDark] = useState(true)
@@ -55,7 +53,7 @@ const ThemeButton = () => {
     return (
         <button
             type="button"
-            className={themeButton.class(isDark ? "dark" : "light")}
+            className={themeButton.class(isDark)}
             onClick={() => setIsDark((mode) => !mode)}
         >
             {isDark ? "dark" : "light"}

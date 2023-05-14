@@ -1,9 +1,9 @@
-<script lang="ts">
+<script>
 	import { isDarkMode } from '../store/theme';
-	import { wind$ } from '../wind';
+	import { tw } from '../tw';
 
-	const button = wind$('dark', 'light')(
-		{
+	const button = tw.toggle({
+		base: {
 			position: 'absolute',
 			top: 'top-4',
 			right: 'right-4',
@@ -15,30 +15,29 @@
 			paddingY: 'py-1',
 			borderBottomWidth: 'border-b',
 			borderColor: 'border-transparent',
+			backgroundColor: 'bg-transparent',
 			':hover': {
 				opacity: 'hover:opacity-75'
 			},
 			transition: 'transition'
 		},
-		{
-			dark: {
-				color: 'text-white',
-				':hover': {
-					borderColor: 'hover:border-gray-200'
-				}
-			},
-			light: {
-				color: 'text-black',
-				':hover': {
-					borderColor: 'hover:border-gray-800'
-				}
+		truthy: {
+			color: 'text-white',
+			':hover': {
+				borderColor: 'hover:border-gray-200'
+			}
+		},
+		falsy: {
+			color: 'text-black',
+			':hover': {
+				borderColor: 'hover:border-gray-800'
 			}
 		}
-	);
+	});
 </script>
 
 <button
-	class={button.class($isDarkMode ? 'dark' : 'light')}
+	class={button.class($isDarkMode)}
 	on:click={() => {
 		const { body } = document;
 		body.classList.remove($isDarkMode ? 'dark' : 'light');

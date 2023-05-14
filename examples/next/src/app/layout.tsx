@@ -1,4 +1,4 @@
-import { wind } from "@/wind"
+import { tw } from "@/tw"
 import "./globals.css"
 
 export const metadata = {
@@ -6,7 +6,7 @@ export const metadata = {
     description: "example of tailwindest and nextJs",
 }
 
-const layout = wind({
+const layout = tw.style({
     position: "relative",
 
     display: "flex",
@@ -21,7 +21,7 @@ const layout = wind({
     "@dark": {
         backgroundColor: "dark:bg-neutral-900",
     },
-}).class()
+})
 
 export default function RootLayout({
     children,
@@ -30,7 +30,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <body className={layout}>{children}</body>
+            <body className={layout.class}>{children}</body>
         </html>
     )
 }

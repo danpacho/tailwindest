@@ -3,7 +3,6 @@
     "version": "1.0.0",
     "main": "node_modules/expo/AppEntry.js",
     "private": true,
-
     "scripts": {
         "dev": "expo start",
         "dev:android": "expo start --android",
@@ -16,7 +15,7 @@
         "nativewind": "^2.0.11",
         "react": "18.2.0",
         "react-native": "0.71.6",
-        "tailwindest": "^1.1.0"
+        "tailwindest": "^2.0.0"
     },
     "devDependencies": {
         "@babel/core": "^7.20.0",

@@ -2,19 +2,29 @@
 
 import { useState } from "react"
 import { ThemeButton } from "@/components"
-import { wind, wind$ } from "@/wind"
+import { tw } from "@/tw"
 
-const header = wind({
+const header = tw.style({
     fontSize: "text-3xl",
     fontWeight: "font-bold",
-    color: "text-neutral-900",
-    "@dark": {
-        color: "dark:text-neutral-100",
-    },
-}).class()
+    color: "text-transparent",
 
-const button = wind$("plus", "minus")(
-    {
+    gradient: "bg-gradient-to-l",
+    gradientStart: "from-red-600",
+    gradientMiddle: "via-amber-300",
+    gradientEnd: "to-amber-500",
+    gradientMiddlePosition: "via-50%",
+    backgroundClip: "bg-clip-text",
+
+    "@dark": {
+        gradientStart: "dark:from-amber-300",
+        gradientMiddle: "dark:via-amber-600",
+        gradientEnd: "dark:to-red-400",
+    },
+})
+
+const button = tw.rotary({
+    base: {
         display: "flex",
         alignItems: "items-center",
         justifyContent: "justify-center",
@@ -38,35 +48,33 @@ const button = wind$("plus", "minus")(
         transition: "transition",
         transitionDuration: "duration-75",
     },
-    {
-        minus: {
-            color: "text-blue-700",
-            borderColor: "border-blue-700",
-            "@dark": {
-                color: "dark:text-blue-300",
-                borderColor: "dark:border-blue-300",
-                ":hover": {
-                    color: "dark:hover:text-blue-700",
-                    backgroundColor: "dark:hover:bg-blue-300",
-                    borderColor: "dark:hover:border-blue-700",
-                },
+    minus: {
+        color: "text-blue-700",
+        borderColor: "border-blue-700",
+        "@dark": {
+            color: "dark:text-blue-300",
+            borderColor: "dark:border-blue-300",
+            ":hover": {
+                color: "dark:hover:text-blue-700",
+                backgroundColor: "dark:hover:bg-blue-300",
+                borderColor: "dark:hover:border-blue-700",
             },
         },
-        plus: {
-            color: "text-green-700",
-            borderColor: "border-green-700",
-            "@dark": {
-                color: "dark:text-green-300",
-                borderColor: "dark:border-green-300",
-                ":hover": {
-                    color: "dark:hover:text-green-700",
-                    backgroundColor: "dark:hover:bg-green-300",
-                    borderColor: "dark:hover:border-green-700",
-                },
+    },
+    plus: {
+        color: "text-green-700",
+        borderColor: "border-green-700",
+        "@dark": {
+            color: "dark:text-green-300",
+            borderColor: "dark:border-green-300",
+            ":hover": {
+                color: "dark:hover:text-green-700",
+                backgroundColor: "dark:hover:bg-green-300",
+                borderColor: "dark:hover:border-green-700",
             },
         },
-    }
-)
+    },
+})
 
 export default function CounterExample() {
     const [count, setCount] = useState(0)
@@ -75,7 +83,7 @@ export default function CounterExample() {
         <>
             <ThemeButton />
 
-            <h1 className={header}>Counter: {count}</h1>
+            <h1 className={header.class}>Counter: {count}</h1>
             <div className="h-10" />
 
             <div className="flex flex-row gap-2 items-center justify-between">
