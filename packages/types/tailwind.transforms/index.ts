@@ -57,10 +57,7 @@ export interface TailwindTransforms<
 > extends TailwindHardwareAccelerationType,
         TailwindRotateType<TransformsPlug["rotate"]>,
         TailwindSkewType<
-            ToPlugin<
-                TailwindSpacing | TailwindSkewVariants,
-                TransformsPlug["skew"]
-            >
+            ToPlugin<TailwindSkewVariants, TransformsPlug["skew"]>
         >,
         TailwindScaleType<
             ToPlugin<TailwindScaleVariants, TransformsPlug["scale"]>
