@@ -1,4 +1,13 @@
+/**
+ * @description Identifier of `tailwindest` nest conditions
+ */
 export type TAILWINDEST_IDENTIFIER = ":" | "@"
+
+/**
+ * @description Identifier of short-handed version of `tailwindest` nest conditions
+ * @description Access condition without commas
+ */
+export type SHORT_TAILWINDEST_IDENTIFIER = "$"
 
 /**
  * @example
@@ -36,29 +45,36 @@ export type RemoveIdentifier<
  * }
  * ```
  */
-type CombineKeyAtProperty<NestObject, Condition extends string> = {
+type CombineKeyAtProperty<
+    NestObject,
+    Condition extends string,
+    Identifier extends string = TAILWINDEST_IDENTIFIER
+> = {
     [NestKey in keyof NestObject]?: NestKey extends string
         ? CombineKeyAtProperty<
               NestObject[NestKey],
-              `${Condition}:${RemoveIdentifier<NestKey>}`
+              `${Condition}:${NestKey}`,
+              Identifier
           >
         : never
 }
 
 export type TailwindestGetNest<
     NestStyle,
-    NestCondition extends string = ""
-> = CombineKeyAtProperty<NestStyle, NestCondition>
+    NestCondition extends string = "",
+    Identifier extends string = TAILWINDEST_IDENTIFIER
+> = CombineKeyAtProperty<NestStyle, NestCondition, Identifier>
 
 /**
  * Combine nest condition at child style property
  */
 type CombineNestConditionAtNestStyleProperty<
     NestStyle,
-    NestCondition extends string = ""
+    NestCondition extends string = "",
+    Identifier extends string = TAILWINDEST_IDENTIFIER
 > = {
     [NestKey in keyof NestStyle]?: NestStyle[NestKey] extends string
-        ? `${RemoveIdentifier<NestCondition>}:${NestStyle[NestKey]}`
+        ? `${RemoveIdentifier<NestCondition, Identifier>}:${NestStyle[NestKey]}`
         : never
 }
 
@@ -68,16 +84,22 @@ type CombineNestConditionAtNestStyleProperty<
 export type GetNestStyle<
     Nest extends string,
     NestStyle,
-    NestCondition extends string = ""
+    NestCondition extends string = "",
+    Identifier extends string = TAILWINDEST_IDENTIFIER
 > = {
     [Key in Exclude<Nest, NestCondition>]?: Key extends ""
         ? NestStyle
         : GetNestStyle<
               Exclude<Nest, Key | NestCondition>,
               NestStyle,
-              `${NestCondition}:${RemoveIdentifier<Key>}`
+              `${NestCondition}:${RemoveIdentifier<Key, Identifier>}`,
+              Identifier
           >
-} & CombineNestConditionAtNestStyleProperty<NestStyle, NestCondition>
+} & CombineNestConditionAtNestStyleProperty<
+    NestStyle,
+    NestCondition,
+    Identifier
+>
 
 type UnusedNestProperty = "transition"
 /**
