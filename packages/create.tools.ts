@@ -40,9 +40,6 @@ const createTools = <StyleType extends NestedObject>() => {
          *      display: "flex",
          *      alignItems: "items-center",
          *      justifyContent: "justify-center",
-         *      padding: "p-3",
-         *      borderWidth: "border",
-         *      borderColor: "border-gray-100",
          * })
          *
          * // Use it in component
