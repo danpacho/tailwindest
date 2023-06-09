@@ -8,6 +8,12 @@
         "noEmit": true,
         "forceConsistentCasingInFileNames": true
     },
-    "include": ["./benchmark", "./plugin", "./scripts", "../rollup.config.mjs"],
+    "include": [
+        "./benchmark",
+        "./plugin",
+        "./scripts",
+        "../rollup.config.mjs",
+        "../parser.ts"
+    ],
     "exclude": ["../packages", "../node_modules/", "../dist"]
 }
