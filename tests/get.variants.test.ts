@@ -1,5 +1,5 @@
 import { describe, test } from "@jest/globals"
-import { TypeEqual, expectType } from "ts-expect"
+import { type TypeEqual, expectType } from "ts-expect"
 import { type GetVariants, type Tailwindest, createTools } from "../packages"
 import { label } from "./label"
 
@@ -96,7 +96,7 @@ describe(label.unit("GetVariants - style"), () => {
     })
 })
 
-describe(label.unit("GetVariants - variants"), () => {
+describe(label.unit("GetVariants - variants: without boolean | number"), () => {
     const totVariants = tw.variants({
         base: {},
         variants: {
@@ -150,6 +150,105 @@ describe(label.unit("GetVariants - variants"), () => {
                 {
                     size?: GetVariants<typeof sizeRotary>
                     color?: GetVariants<typeof colorRotary>
+                }
+            >
+        >(true)
+    })
+})
+
+describe(label.unit("GetVariants - variants: with boolean | number"), () => {
+    const withBooleanAndNumber = tw.variants({
+        base: {},
+        variants: {
+            color: {
+                black: {},
+                blue: {},
+                green: {},
+                purple: {},
+                red: {},
+                white: {},
+                yellow: {},
+            },
+            size: {
+                "2xl": {},
+                xl: {},
+                lg: {},
+                md: {},
+                sm: {},
+                xs: {},
+                "2xs": {},
+            },
+            light: {
+                true: {},
+                false: {},
+            },
+            onlyTrue: {
+                true: {},
+            },
+            onlyFalse: {
+                false: {},
+            },
+            numbers: {
+                [1]: {},
+                [2]: {},
+            },
+            never: {
+                [Symbol()]: {},
+            },
+            withNever: {
+                [Symbol()]: {},
+                withNever: {},
+            },
+            combinations: {
+                [Symbol()]: {},
+                withNever: {},
+                [1]: {},
+                true: {},
+                false: {},
+            },
+        },
+    })
+
+    test("infer variants type", () => {
+        expectType<
+            TypeEqual<
+                GetVariants<typeof withBooleanAndNumber>,
+                {
+                    size?: "sm" | "md" | "lg" | "xl" | "2xl" | "xs" | "2xs"
+                    color?:
+                        | "red"
+                        | "yellow"
+                        | "green"
+                        | "blue"
+                        | "purple"
+                        | "black"
+                        | "white"
+                    light?: boolean
+                    onlyTrue?: true
+                    onlyFalse?: false
+                    numbers?: 1 | 2
+                    never?: never
+                    withNever?: "withNever"
+                    combinations?: "withNever" | 1 | boolean
+                }
+            >
+        >(true)
+    })
+
+    test("infer variants type - by rotary", () => {
+        expectType<
+            TypeEqual<
+                GetVariants<typeof withBooleanAndNumber>,
+                {
+                    size?: GetVariants<typeof sizeRotary>
+                    color?: GetVariants<typeof colorRotary>
+                    light?: boolean
+                    onlyTrue?: true
+                    onlyFalse?: false
+                    numbers?: 1 | 2
+                    never?: never
+                    withNever?: "withNever"
+                    combinations?: "withNever" | 1 | boolean
                 }
             >
         >(true)
