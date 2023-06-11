@@ -60,17 +60,17 @@ export interface StyleGeneratorToggle<StyleType extends NestedObject> {
 }
 export interface StyleGeneratorRotary<
     StyleType extends NestedObject,
-    RotaryVariant extends string
+    RotaryVariant
 > {
     /**
      * @description Get rotary variant className `string`
-     * @param variant Name of rotary variant `string`
+     * @param variant Key of rotary variant
      */
     class: (variant: RotaryVariant) => string
 
     /**
      * @description Get rotary variant styleSheet `object`
-     * @param variant Name of rotary variant `string`
+     * @param variant Key of rotary variant
      */
     style: (variant: RotaryVariant) => StyleType
 
@@ -81,13 +81,13 @@ export interface StyleGeneratorRotary<
     compose: (...styles: StyleType[]) => {
         /**
          * @description Get rotary variant className `string`
-         * @param variant Name of rotary variant `string`
+         * @param variant Key of rotary variant
          */
         class: (variant: RotaryVariant) => string
 
         /**
          * @description Get rotary variant styleSheet `object`
-         * @param variant Name of rotary variant `string`
+         * @param variant Key of rotary variant
          */
         style: (variant: RotaryVariant) => StyleType
     }
