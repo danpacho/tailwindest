@@ -7,13 +7,17 @@ export interface Cache<Key, Value> {
      * @returns cached value
      */
     get: (key: Key, cacheFindFallback: () => Value) => Value
+    /**
+     * @description reset store
+     */
+    reset: () => void
 }
 
 /**
  * Simple cache with `Map` data structure
  */
 const cache = <Key, Value>(): Cache<Key, Value> => {
-    const store = new Map<Key, Value>()
+    let store = new Map<Key, Value>()
 
     return {
         set: (key, value) => {
@@ -26,6 +30,9 @@ const cache = <Key, Value>(): Cache<Key, Value> => {
             const newCacheValue = cacheFindFallback()
             store.set(key, newCacheValue)
             return newCacheValue
+        },
+        reset: () => {
+            store = new Map<Key, Value>()
         },
     }
 }
