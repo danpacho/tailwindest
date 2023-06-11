@@ -1,9 +1,9 @@
 import { BASE_KEY } from "../../constants"
 import type {
     CacheKey,
+    GetVariantsKey,
     NestedObject,
     StyleGeneratorCache,
-    ToString,
 } from "../../utils"
 import { cache } from "../cache"
 import { deepMerge } from "../deep.merge"
@@ -23,21 +23,19 @@ const createRotary =
         base?: StyleType
     }): StyleGeneratorRotary<
         StyleType,
-        ToString<Exclude<keyof VariantsStylesType, "base">>
+        GetVariantsKey<Exclude<keyof VariantsStylesType, "base">>
     > => {
         const rotaryCache = cache<CacheKey, StyleGeneratorCache<StyleType>>()
         let isBaseUpdated = false
-
         const getCachedBaseStyle = (): StyleType =>
             rotaryCache.get(BASE_KEY, () => [base ?? ({} as StyleType), ""])[0]
-
         const getCachedValues = (
-            variant: ToString<Exclude<keyof VariantsStylesType, "base">>
+            variant: GetVariantsKey<Exclude<keyof VariantsStylesType, "base">>
         ): StyleGeneratorCache<StyleType> => {
             if (isBaseUpdated) {
                 const updatedVariantStyle = deepMerge<StyleType>(
                     getCachedBaseStyle(),
-                    styles[variant]
+                    styles[variant as keyof typeof styles]
                 )
                 const updated: StyleGeneratorCache<StyleType> = [
                     updatedVariantStyle,
@@ -50,16 +48,19 @@ const createRotary =
             const cachedVariantStyle = rotaryCache.get(variant, () => {
                 const variantStyle = deepMerge<StyleType>(
                     getCachedBaseStyle(),
-                    styles[variant]
+                    styles[variant as keyof typeof styles]
                 )
                 return [variantStyle, getTailwindClass(variantStyle)]
             })
             return cachedVariantStyle
         }
+
         return {
             style: (variant) => getCachedValues(variant)[0],
             class: (variant) => getCachedValues(variant)[1],
             compose: function (...styles) {
+                rotaryCache.reset() // reset cache
+
                 const composedStyle = deepMerge(getCachedBaseStyle(), ...styles)
                 rotaryCache.set(BASE_KEY, [
                     composedStyle,
