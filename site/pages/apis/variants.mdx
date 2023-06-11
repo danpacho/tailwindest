@@ -23,13 +23,13 @@ interface StyleGeneratorVariants<
 }
 
 declare const createTools: <StyleType extends NestedObject>() => {
-    variants: <VariantsList>({
+    variants: <Variants>({
         base,
         variants,
     }: {
         variants: {
-            [RotaryVariants in keyof VariantsList]: Record<
-                keyof VariantsList[RotaryVariants],
+            [VariantsKey in keyof Variants]: Record<
+                keyof Variants[VariantsKey],
                 StyleType
             >
         }
@@ -37,7 +37,11 @@ declare const createTools: <StyleType extends NestedObject>() => {
         base?: StyleType
     }) => StyleGeneratorVariants<
         StyleType,
-        { [Key in keyof VariantsList]: keyof VariantsList[Key] }
+        {
+            [VariantsKey_1 in keyof Variants]: GetVariantsKey<
+                keyof Variants[VariantsKey_1]
+            >
+        }
     >
 }
 ```
@@ -62,7 +66,7 @@ tw.variants({
 
 Define **variant** `styleSheet`
 
-```ts /variants/ /type/ /success/ /warning/ /size/ /sm/ /md/ /lg/
+```ts /variants/ /type/ /success/ /warning/ /size/ /sm/ /md/ /lg/ /light/ /true/ /false/
 const button = tw.variants({
     base: {
         // base button style
@@ -77,6 +81,10 @@ const button = tw.variants({
             sm: {},
             md: {},
             lg: {},
+        },
+        light: {
+            true: {},
+            false: {},
         },
     },
 })
@@ -98,9 +106,17 @@ tw.variants(...).class(variantsOption)
 
 #### Example
 
-```ts /class/ /"warning"/ /"success"/ /"sm"/ /"lg"/
-const warningSmClass = button.class({ type: "warning", size: "sm" })
-const successLgClass = button.class({ type: "success", size: "lg" })
+```ts /class/ /"warning"/ /"success"/ /"sm"/ /"lg"/ /true/ /false/
+const warningSmLightClass = button.class({
+    type: "warning",
+    size: "sm",
+    light: true,
+})
+const successLgDarkClass = button.class({
+    type: "success",
+    size: "lg",
+    light: false,
+})
 ```
 
 ### `style`
@@ -117,9 +133,17 @@ tw.rotary(...).style(variantsOption)
 
 #### Example
 
-```ts /style/ /"warning"/ /"success"/ /"sm"/ /"lg"/
-const warningSmStyle = button.style({ type: "warning", size: "sm" })
-const successLgStyle = button.style({ type: "success", size: "lg" })
+```ts /style/ /"warning"/ /"success"/ /"sm"/ /"lg"/ /true/ /false/
+const warningSmLightStyle = button.style({
+    type: "warning",
+    size: "sm",
+    light: true,
+})
+const successLgDarkStyle = button.style({
+    type: "success",
+    size: "lg",
+    light: false,
+})
 ```
 
 ### `compose`

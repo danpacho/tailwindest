@@ -11,7 +11,6 @@ import { Callout } from "nextra-theme-docs"
 ```ts
 declare const createTools: <StyleType extends NestedObject>() => {
     style: (style: StyleType) => StyleGeneratorStyle<StyleType>
-
     toggle: (toggleVariants: {
         truthy: StyleType
         falsy: StyleType
@@ -29,16 +28,16 @@ declare const createTools: <StyleType extends NestedObject>() => {
         base?: StyleType
     }) => StyleGeneratorRotary<
         StyleType,
-        Extract<Exclude<keyof VariantsStylesType, "base">, string>
+        GetVariantsKey<Exclude<keyof VariantsStylesType, "base">>
     >
 
-    variants: <VariantsList>({
+    variants: <Variants>({
         base,
         variants,
     }: {
         variants: {
-            [RotaryVariants in keyof VariantsList]: Record<
-                keyof VariantsList[RotaryVariants],
+            [VariantsKey in keyof Variants]: Record<
+                keyof Variants[VariantsKey],
                 StyleType
             >
         }
@@ -46,7 +45,11 @@ declare const createTools: <StyleType extends NestedObject>() => {
         base?: StyleType
     }) => StyleGeneratorVariants<
         StyleType,
-        { [Key in keyof VariantsList]: keyof VariantsList[Key] }
+        {
+            [VariantsKey_1 in keyof Variants]: GetVariantsKey<
+                keyof Variants[VariantsKey_1]
+            >
+        }
     >
 
     mergeProps: (baseStyle: StyleType, styleProps: StyleType) => string
