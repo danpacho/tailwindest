@@ -134,6 +134,10 @@ const createTools = <StyleType extends NestedObject>() => {
          *              md: {},
          *              lg: {},
          *          },
+         *          light: {
+         *              true: {}, // truthy boolean
+         *              false: {}, // falsy boolean
+         *          }
          *      },
          *      base: {}, // [optional] base style
          * })
@@ -149,10 +153,11 @@ const createTools = <StyleType extends NestedObject>() => {
          *      children,
          *      size = "md",
          *      type = "default",
+         *      light = false,
          *      onClick,
          * }: BtnProps) => (
          *      <button
-         *          className={btn.class({ size, type })}
+         *          className={btn.class({ size, type, light })}
          *          onClick={onClick}
          *      >
          *          {children}

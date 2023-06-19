@@ -28,51 +28,51 @@ export const features = {
         icon: <VariableIcon />,
         description: (
             <>
-                Type-safety and autocompletion magics, will give you the best
-                DX.
+                Type-safety and autocompletion magics, will give you the best DX
+                and solid product.
             </>
         ),
         href: "#dx",
+    },
+    alikeCssInJs: {
+        title: "Easy to use",
+        icon: <RocketLaunchIcon />,
+        description: (
+            <>
+                It's as easy and as quickly to get started as if you were
+                writing <Code>CSS in JS</Code>.
+            </>
+        ),
+        href: "#dx",
+    },
+    conditionalStyling: {
+        title: "Variants based",
+        icon: <SquaresPlusIcon />,
+        description: (
+            <>
+                Use <Code>variants</Code> based modern conditional styling
+                approaches such as <Code>stitches</Code> and <Code>cva</Code>.
+            </>
+        ),
+        href: "/start/introduction#elegant-conditional-styling",
     },
     customizable: {
         title: "Customizable",
         icon: <SwatchIcon />,
         description: (
             <>
-                Define custom type definition, in{" "}
-                <Code>tailwind.config.js</Code>.
+                Define custom styles defined in <Code>tailwind.config.js</Code>{" "}
+                via <Code>Tailwindest</Code> type.
             </>
         ),
         href: "/recipe/customize#Tailwindest",
     },
-    conditionalStyling: {
-        title: "Elegant conditional styling",
-        icon: <SquaresPlusIcon />,
-        description: (
-            <>
-                Using modern approaches based on variants such as{" "}
-                <Code>stitches</Code> and <Code>cva</Code>.
-            </>
-        ),
-        href: "/start/introduction#elegant-conditional-styling",
-    },
-    alikeCssInJs: {
-        title: "CSS in TS",
-        icon: <RocketLaunchIcon />,
-        description: (
-            <>
-                It's as easy and as quickly to get started as if you were
-                writing <Code>CSS in TS</Code>.
-            </>
-        ),
-        href: "#dx",
-    },
     tiny: {
-        title: <>Tiny, 748B</>,
+        title: <>Tiny, 768B</>,
         icon: <SparklesIcon />,
         description: (
             <>
-                Don't have to worry about bundle size. It is <Code>748B</Code>{" "}
+                Don't have to worry about bundle size. It is <Code>768B</Code>{" "}
                 tiny library.
             </>
         ),
@@ -208,6 +208,10 @@ export const suggestions = () => {
         <CodeCompletion.Hint.Property type={'type: "sm" | "md" | "lg"'}/>
     ,],
     [
+        "light",
+        <CodeCompletion.Hint.Property type={'type: boolean'}/>
+    ,],
+    [
         "borderColor",
          <CodeCompletion.Hint.Property
             type={"borderColor?: CombineKeyAtProperty≺`'dark:hover:border-slate-100' |'dark:hover:border-slate-200' | 'dark:hover:border-slate-300' |'dark:hover:border-slate-500' | 'dark:hover:border-slate-700' | ... 253 more ... | undefined, '@dark:hover:borderColor'≻"}
@@ -217,12 +221,12 @@ export const suggestions = () => {
         />
     ],
     [
-        "outlineWithSm",
+        "outlineWithSmLight",
         <CodeCompletion.Hint.Property type={"string"} />
     ],
     [
-        "solidWithMdStyle",
-        <CodeCompletion.Hint.Property type={"Tailwindest"} />
+        "solidWithMdDarkStyle",
+        <CodeCompletion.Hint.Property type={"MyTailwind"} />
     ],
     [
         "class",
@@ -284,8 +288,8 @@ export const suggestions = () => {
 <br />
 
 <div className="text-base mb-7">
-    Feel the power of type safety without installation. Just hover highlighted
-    blocks.
+    Feel the power of type-safety without installation. Just hover the
+    highlighted blocks.
 </div>
 
 <CodeCompletion.Container suggestions={suggestions()}>
@@ -307,7 +311,7 @@ export const tw = createTools<MyTailwind>()
 
 <CodeCompletion.Container suggestions={suggestions()}>
 
-```ts filename="button.ts" /display/ /class/ /style/ /backgroundColor/ /"re"/ /borderColor/ /"am1"/ /shape/ /size/ /outlineWithSm/ /solidWithMdStyle/ /"se"/ /"pr"/
+```ts filename="button.ts" /display/ /class/ /style/ /backgroundColor/ /"re"/ /borderColor/ /"am1"/ /shape/ /size/ /outlineWithSmLight/ /solidWithMdDarkStyle/ /"se"/ /"pr"/ /light/
 import { tw } from "~/tw"
 
 const button = tw.variants({
@@ -340,17 +344,23 @@ const button = tw.variants({
             md: {},
             lg: {},
         },
+        light: {
+            true: {},
+            false: {},
+        },
     },
 })
 
-const outlineWithSm = button.class({
+const outlineWithSmLight = button.class({
     shape: "outline",
     size: "sm",
+    light: true,
 })
 
-const solidWithMdStyle = button.style({
+const solidWithMdDarkStyle = button.style({
     shape: "solid",
     size: "md",
+    light: false,
 })
 ```
 

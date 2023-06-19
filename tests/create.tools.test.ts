@@ -71,7 +71,6 @@ describe(label.unit("createTools - plug custom type"), () => {
             "text",
             MyCustomUnion<"color">
         >
-
         expectType<TypeEqual<CustomColor, ExpectedCustomColor>>(true)
     })
     test(label.case("global - custom sizing"), () => {
@@ -234,15 +233,9 @@ describe(label.unit("createTools - toggle"), () => {
         expect(testToggle2.class(true)).toBe(
             "bg-my-color-9 text-my-color-1 flex"
         )
-        expect(
-            testToggle2
-                .compose({
-                    display: "flex",
-                    backgroundColor: "bg-my-color-9",
-                    color: "text-amber-100",
-                })
-                .class(false)
-        ).toBe("bg-my-color-9 text-my-color-9 flex")
+        expect(testToggle2.class(false)).toBe(
+            "bg-my-color-9 text-my-color-9 flex"
+        )
     })
     test(label.case("plugged toggle, with base - styleSheet"), () => {
         expect(
@@ -290,10 +283,30 @@ describe(label.unit("createTools - rotary"), () => {
             },
         },
     })
+    const withBooleanRotary = tw.rotary({
+        base: {
+            padding: "p-2",
+        },
+        true: {
+            backgroundColor: "bg-green-500",
+        },
+        false: {
+            backgroundColor: "bg-red-500",
+        },
+        amber: {
+            backgroundColor: "bg-amber-500",
+        },
+    })
 
     test(label.case("rotary second argument type is CustomTailwind"), () => {
         expectType<
             FirstArgument<typeof boxRotary> extends CustomTailwind
+                ? true
+                : false
+        >(true)
+
+        expectType<
+            FirstArgument<typeof withBooleanRotary> extends CustomTailwind
                 ? true
                 : false
         >(true)
@@ -303,6 +316,9 @@ describe(label.unit("createTools - rotary"), () => {
         expect(boxRotary.class("test")).toBe(
             "md:p-2 text-my-color-1 -p-my-size-1 m-my-size-1 my:text-my-color-1 my:-p-my-size-1 my:m-my-size-1"
         )
+        expect(withBooleanRotary.class(true)).toBe("p-2 bg-green-500")
+        expect(withBooleanRotary.class(false)).toBe("p-2 bg-red-500")
+        expect(withBooleanRotary.class("amber")).toBe("p-2 bg-amber-500")
     })
     test(label.case("plugged rotary - variant stylesheet"), () => {
         expect(boxRotary.style("test")).toStrictEqual({
@@ -317,7 +333,20 @@ describe(label.unit("createTools - rotary"), () => {
                 padding: "my:-p-my-size-1",
                 margin: "my:m-my-size-1",
             },
-        })
+        } satisfies CustomTailwind)
+
+        expect(withBooleanRotary.style(true)).toStrictEqual({
+            padding: "p-2",
+            backgroundColor: "bg-green-500",
+        } satisfies CustomTailwind)
+        expect(withBooleanRotary.style(false)).toStrictEqual({
+            padding: "p-2",
+            backgroundColor: "bg-red-500",
+        } satisfies CustomTailwind)
+        expect(withBooleanRotary.style("amber")).toStrictEqual({
+            padding: "p-2",
+            backgroundColor: "bg-amber-500",
+        } satisfies CustomTailwind)
     })
     test(label.case("plugged rotary - compose"), () => {
         boxRotary.compose({
@@ -325,187 +354,237 @@ describe(label.unit("createTools - rotary"), () => {
                 padding: "md:p-10",
             },
             color: "text-my-color-9",
-        })
+        } satisfies CustomTailwind)
         expect(boxRotary.class("test")).toBe(
             "md:p-10 text-my-color-1 -p-my-size-1 m-my-size-1 my:text-my-color-1 my:-p-my-size-1 my:m-my-size-1"
+        )
+
+        withBooleanRotary.compose({
+            color: "text-my-color-9",
+            backgroundColor: "bg-yellow-500",
+        } satisfies CustomTailwind)
+        expect(withBooleanRotary.class(true)).toBe(
+            "p-2 text-my-color-9 bg-green-500"
+        )
+        expect(withBooleanRotary.class(false)).toBe(
+            "p-2 text-my-color-9 bg-red-500"
+        )
+        expect(withBooleanRotary.class("amber")).toBe(
+            "p-2 text-my-color-9 bg-amber-500"
         )
     })
 })
 
-describe(label.unit("createTools - variants"), () => {
-    const boxVariants = tw.variants({
-        base: {
-            display: "flex",
-            alignItems: "items-center",
-            justifyContent: "justify-center",
+const boxVariants = tw.variants({
+    base: {
+        display: "flex",
+        alignItems: "items-center",
+        justifyContent: "justify-center",
 
-            fontSize: "text-base",
-            backgroundColor: "bg-amber-50",
+        fontSize: "text-base",
+        backgroundColor: "bg-amber-50",
 
-            borderRadius: "rounded-md",
+        borderRadius: "rounded-md",
+    },
+    variants: {
+        size: {
+            true: {
+                padding: "p-1",
+            },
+            false: {
+                padding: "p-2",
+            },
         },
-        variants: {
-            size: {
-                sm: {
-                    padding: "p-1",
-                },
-                md: {
-                    padding: "p-2",
+        type: {
+            badge: {
+                flexDirection: "flex-row",
+                gap: "gap-1",
+            },
+            outline: {
+                borderColor: "border-transparent",
+                borderStyle: "border-solid",
+                borderWidth: "border-2",
+            },
+        },
+        color: {
+            blue: {
+                backgroundColor: "bg-indigo-500",
+                borderColor: "border-indigo-300",
+                color: "text-white",
+                "@dark": {
+                    backgroundColor: "dark:bg-indigo-900",
+                    borderColor: "dark:border-indigo-700",
                 },
             },
-            type: {
-                badge: {
-                    flexDirection: "flex-row",
-                    gap: "gap-1",
-                },
-                outline: {
-                    borderColor: "border-transparent",
-                    borderStyle: "border-solid",
-                    borderWidth: "border-2",
-                },
-            },
-            color: {
-                blue: {
-                    backgroundColor: "bg-indigo-500",
-                    borderColor: "border-indigo-300",
-                    color: "text-white",
-                    "@dark": {
-                        backgroundColor: "dark:bg-indigo-900",
-                        borderColor: "dark:border-indigo-700",
-                    },
-                },
-                red: {
-                    backgroundColor: "bg-red-500",
-                    borderColor: "border-red-300",
-                    color: "text-white",
-                    "@dark": {
-                        backgroundColor: "dark:bg-red-900",
-                        borderColor: "dark:border-red-700",
-                    },
+            red: {
+                backgroundColor: "bg-red-500",
+                borderColor: "border-red-300",
+                color: "text-white",
+                "@dark": {
+                    backgroundColor: "dark:bg-red-900",
+                    borderColor: "dark:border-red-700",
                 },
             },
         },
-    })
+    },
+})
 
-    const variantsCase: Array<
-        Required<GetVariants<typeof boxVariants>> & {
-            expectedClass: string
-            expectedComposedClass: string
-        }
-    > = [
-        {
-            size: "sm",
-            type: "badge",
-            color: "blue",
-            expectedClass:
-                "flex items-center justify-center text-base bg-indigo-500 rounded-md p-1 flex-row gap-1 border-indigo-300 text-white dark:bg-indigo-900 dark:border-indigo-700",
-            expectedComposedClass:
-                "grid items-center justify-center text-base bg-indigo-500 rounded-md accent-red-400 p-1 flex-row gap-1 border-indigo-300 text-white dark:bg-indigo-900 dark:border-indigo-700",
-        },
-        {
-            size: "sm",
-            type: "badge",
-            color: "red",
-            expectedClass:
-                "flex items-center justify-center text-base bg-red-500 rounded-md p-1 flex-row gap-1 border-red-300 text-white dark:bg-red-900 dark:border-red-700",
-            expectedComposedClass:
-                "grid items-center justify-center text-base bg-red-500 rounded-md accent-red-400 p-1 flex-row gap-1 border-red-300 text-white dark:bg-red-900 dark:border-red-700",
-        },
-        {
-            size: "sm",
-            type: "outline",
-            color: "blue",
-            expectedClass:
-                "flex items-center justify-center text-base bg-indigo-500 rounded-md p-1 border-indigo-300 border-solid border-2 text-white dark:bg-indigo-900 dark:border-indigo-700",
-            expectedComposedClass:
-                "grid items-center justify-center text-base bg-indigo-500 rounded-md accent-red-400 p-1 border-indigo-300 border-solid border-2 text-white dark:bg-indigo-900 dark:border-indigo-700",
-        },
-        {
-            size: "sm",
-            type: "outline",
-            color: "red",
-            expectedClass:
-                "flex items-center justify-center text-base bg-red-500 rounded-md p-1 border-red-300 border-solid border-2 text-white dark:bg-red-900 dark:border-red-700",
-            expectedComposedClass:
-                "grid items-center justify-center text-base bg-red-500 rounded-md accent-red-400 p-1 border-red-300 border-solid border-2 text-white dark:bg-red-900 dark:border-red-700",
-        },
-        {
-            size: "md",
-            type: "badge",
-            color: "blue",
-            expectedClass:
-                "flex items-center justify-center text-base bg-indigo-500 rounded-md p-2 flex-row gap-1 border-indigo-300 text-white dark:bg-indigo-900 dark:border-indigo-700",
-            expectedComposedClass:
-                "grid items-center justify-center text-base bg-indigo-500 rounded-md accent-red-400 p-2 flex-row gap-1 border-indigo-300 text-white dark:bg-indigo-900 dark:border-indigo-700",
-        },
-        {
-            size: "md",
-            type: "badge",
-            color: "red",
-            expectedClass:
-                "flex items-center justify-center text-base bg-red-500 rounded-md p-2 flex-row gap-1 border-red-300 text-white dark:bg-red-900 dark:border-red-700",
-            expectedComposedClass:
-                "grid items-center justify-center text-base bg-red-500 rounded-md accent-red-400 p-2 flex-row gap-1 border-red-300 text-white dark:bg-red-900 dark:border-red-700",
-        },
-        {
-            size: "md",
-            type: "outline",
-            color: "blue",
-            expectedClass:
-                "flex items-center justify-center text-base bg-indigo-500 rounded-md p-2 border-indigo-300 border-solid border-2 text-white dark:bg-indigo-900 dark:border-indigo-700",
-            expectedComposedClass:
-                "grid items-center justify-center text-base bg-indigo-500 rounded-md accent-red-400 p-2 border-indigo-300 border-solid border-2 text-white dark:bg-indigo-900 dark:border-indigo-700",
-        },
-        {
-            size: "md",
-            type: "outline",
-            color: "red",
-            expectedClass:
-                "flex items-center justify-center text-base bg-red-500 rounded-md p-2 border-red-300 border-solid border-2 text-white dark:bg-red-900 dark:border-red-700",
-            expectedComposedClass:
-                "grid items-center justify-center text-base bg-red-500 rounded-md accent-red-400 p-2 border-red-300 border-solid border-2 text-white dark:bg-red-900 dark:border-red-700",
-        },
-    ]
+const variantsCase: Array<
+    Required<GetVariants<typeof boxVariants>> & {
+        expectedClass: string
+        expectedComposedClass: string
+    }
+> = [
+    {
+        size: true,
+        type: "badge",
+        color: "blue",
+        expectedClass:
+            "flex items-center justify-center text-base bg-indigo-500 rounded-md p-1 flex-row gap-1 border-indigo-300 text-white dark:bg-indigo-900 dark:border-indigo-700",
+        expectedComposedClass:
+            "grid items-center justify-center text-base bg-indigo-500 rounded-md accent-red-400 p-1 flex-row gap-1 border-indigo-300 text-white dark:bg-indigo-900 dark:border-indigo-700",
+    },
+    {
+        size: true,
+        type: "badge",
+        color: "red",
+        expectedClass:
+            "flex items-center justify-center text-base bg-red-500 rounded-md p-1 flex-row gap-1 border-red-300 text-white dark:bg-red-900 dark:border-red-700",
+        expectedComposedClass:
+            "grid items-center justify-center text-base bg-red-500 rounded-md accent-red-400 p-1 flex-row gap-1 border-red-300 text-white dark:bg-red-900 dark:border-red-700",
+    },
+    {
+        size: true,
+        type: "outline",
+        color: "blue",
+        expectedClass:
+            "flex items-center justify-center text-base bg-indigo-500 rounded-md p-1 border-indigo-300 border-solid border-2 text-white dark:bg-indigo-900 dark:border-indigo-700",
+        expectedComposedClass:
+            "grid items-center justify-center text-base bg-indigo-500 rounded-md accent-red-400 p-1 border-indigo-300 border-solid border-2 text-white dark:bg-indigo-900 dark:border-indigo-700",
+    },
+    {
+        size: true,
+        type: "outline",
+        color: "red",
+        expectedClass:
+            "flex items-center justify-center text-base bg-red-500 rounded-md p-1 border-red-300 border-solid border-2 text-white dark:bg-red-900 dark:border-red-700",
+        expectedComposedClass:
+            "grid items-center justify-center text-base bg-red-500 rounded-md accent-red-400 p-1 border-red-300 border-solid border-2 text-white dark:bg-red-900 dark:border-red-700",
+    },
+    {
+        size: false,
+        type: "badge",
+        color: "blue",
+        expectedClass:
+            "flex items-center justify-center text-base bg-indigo-500 rounded-md p-2 flex-row gap-1 border-indigo-300 text-white dark:bg-indigo-900 dark:border-indigo-700",
+        expectedComposedClass:
+            "grid items-center justify-center text-base bg-indigo-500 rounded-md accent-red-400 p-2 flex-row gap-1 border-indigo-300 text-white dark:bg-indigo-900 dark:border-indigo-700",
+    },
+    {
+        size: false,
+        type: "badge",
+        color: "red",
+        expectedClass:
+            "flex items-center justify-center text-base bg-red-500 rounded-md p-2 flex-row gap-1 border-red-300 text-white dark:bg-red-900 dark:border-red-700",
+        expectedComposedClass:
+            "grid items-center justify-center text-base bg-red-500 rounded-md accent-red-400 p-2 flex-row gap-1 border-red-300 text-white dark:bg-red-900 dark:border-red-700",
+    },
+    {
+        size: false,
+        type: "outline",
+        color: "blue",
+        expectedClass:
+            "flex items-center justify-center text-base bg-indigo-500 rounded-md p-2 border-indigo-300 border-solid border-2 text-white dark:bg-indigo-900 dark:border-indigo-700",
+        expectedComposedClass:
+            "grid items-center justify-center text-base bg-indigo-500 rounded-md accent-red-400 p-2 border-indigo-300 border-solid border-2 text-white dark:bg-indigo-900 dark:border-indigo-700",
+    },
+    {
+        size: false,
+        type: "outline",
+        color: "red",
+        expectedClass:
+            "flex items-center justify-center text-base bg-red-500 rounded-md p-2 border-red-300 border-solid border-2 text-white dark:bg-red-900 dark:border-red-700",
+        expectedComposedClass:
+            "grid items-center justify-center text-base bg-red-500 rounded-md accent-red-400 p-2 border-red-300 border-solid border-2 text-white dark:bg-red-900 dark:border-red-700",
+    },
+]
 
+const cacheAccessCount = 1000
+const getVariantsOptionName = (option: {
+    size: true | false
+    type: "outline" | "badge"
+    color: "red" | "blue"
+}): string => {
+    const optionEntries = Object.entries(option)
+    const variantsOption =
+        optionEntries.length === 0
+            ? "{}, empty option"
+            : optionEntries.reduce(
+                  (option, [key, value], i) =>
+                      `${
+                          i === 0 ? `{ ${option}` : `${option}`
+                      }${key}: "${value}"${i === 2 ? " }" : ", "}`,
+                  ""
+              )
+    return variantsOption
+}
+
+describe(label.unit("createTools - variants: before compose"), () => {
+    // cache validation - before compose
     variantsCase.forEach(
-        ({ expectedClass, expectedComposedClass, ...option }) => {
-            const optionEntries = Object.entries(option)
-            const variantsOption =
-                optionEntries.length === 0
-                    ? "{}, empty option"
-                    : optionEntries.reduce(
-                          (option, [key, value], i) =>
-                              `${
-                                  i === 0 ? `{ ${option}` : `${option}`
-                              }${key}: "${value}"${i === 2 ? " }" : ", "}`,
-                          ""
-                      )
-
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ({ expectedClass, expectedComposedClass: _, ...option }) => {
             const cachedClass = boxVariants.class(option)
 
-            test(label.case(`box variants, ${variantsOption}`), () => {
-                expect(cachedClass).toBe(expectedClass)
-            })
-
-            const cacheAccessCount = 1000
-            test(label.case(`box variants cache, ${variantsOption}`), () => {
-                for (let i = 0; i < cacheAccessCount; i++) {
-                    expect(boxVariants.class(option)).toBe(cachedClass)
+            test(
+                label.case(`box variants, ${getVariantsOptionName(option)}`),
+                () => {
+                    expect(cachedClass).toBe(expectedClass)
                 }
+            )
+        }
+    )
+})
+
+describe(label.unit("createTools - variants: after compose"), () => {
+    // cache validation - after compose
+    variantsCase.forEach(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ({ expectedClass: _, expectedComposedClass, ...option }) => {
+            boxVariants.compose({
+                display: "grid",
+                accentColor: "accent-red-400",
             })
 
-            test(label.case(`box variants compose, ${variantsOption}`), () => {
-                boxVariants.compose({
-                    display: "grid",
-                    accentColor: "accent-red-400",
-                })
-                const cachedComposedClass = boxVariants.class(option)
-
-                expect(cachedComposedClass).toBe(expectedComposedClass)
-                for (let i = 0; i < cacheAccessCount; i++) {
-                    expect(boxVariants.class(option)).toBe(cachedComposedClass)
+            const cachedComposedClass = boxVariants.class(option)
+            test(
+                label.case(
+                    `box variants composed, ${getVariantsOptionName(option)}`
+                ),
+                () => {
+                    expect(cachedComposedClass).toBe(expectedComposedClass)
                 }
-            })
+            )
+        }
+    )
+})
+
+describe(label.unit("createTools - variants: composed cache"), () => {
+    variantsCase.forEach(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ({ expectedClass: _, expectedComposedClass, ...option }) => {
+            test(
+                label.case(
+                    `box variants cache, ${getVariantsOptionName(option)}`
+                ),
+                () => {
+                    for (let i = 0; i < cacheAccessCount; i++) {
+                        expect(boxVariants.class(option)).toBe(
+                            expectedComposedClass
+                        )
+                    }
+                }
+            )
         }
     )
 })

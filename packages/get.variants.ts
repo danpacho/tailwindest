@@ -6,9 +6,10 @@
  * const rotaryBtn = tw.rotary({
  *      success: {},
  *      fail: {},
+ *      true: {}, // only truthy boolean
  * })
  * type InferredRotary = GetVariants<typeof rotaryBtn>
- * type InferredRotary = "success" | "fail"
+ * type InferredRotary = "success" | "fail" | true
  *
  * // 🛠️ variants
  * const complexBtn = tw.variants({
@@ -21,6 +22,10 @@
  *          fail: {
  *              success: {},
  *              fail: {},
+ *          },
+ *          light: {
+ *              true: {}, // truthy boolean
+ *              false: {}, // falsy boolean
  *          }
  *      }
  * })
@@ -28,9 +33,10 @@
  * type InferredVariants = {
  *      size?: "sm" | "md" | "lg"
  *      type?: "success" | "fail"
+ *      light?: boolean
  * }
  *
- * // ❌ never
+ * // 🚫 never
  * const never = tw.toggle({
  *      truthy: {},
  *      falsy: {}

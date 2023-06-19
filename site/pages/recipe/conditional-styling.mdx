@@ -202,6 +202,14 @@ const button = tw.variants({
                 borderWidth: "border-2",
             },
         },
+        light: {
+            true: {
+                color: "text-gray-900",
+            },
+            false: {
+                color: "text-gray-50",
+            },
+        },
     },
 })
 ```
@@ -229,6 +237,7 @@ const Button = ({
     onClick,
     size = "md",
     type = "default",
+    light = false,
 }): ButtonProps => {
     return (
         <button
@@ -236,6 +245,7 @@ const Button = ({
             className={button({
                 type,
                 size,
+                light,
             })}
         >
             {children}
@@ -250,7 +260,7 @@ Use universal button.
 const SomeComponent = () => {
     return (
         <div>
-            <Button size="lg" type="success" onClick={welcome}>
+            <Button size="lg" type="success" light onClick={welcome}>
                 Succeeded
             </Button>
         </div>

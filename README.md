@@ -178,7 +178,7 @@ const Text = ({
 
 1. Type-safe `tailwind`
 2. Supports all platforms
-3. Tiny bundle size, `748B`
+3. Tiny bundle size, `768B`
 4. Elegant conditional styling
 5. `tailwind` document link embedded
 6. Support custom type, defined in `tailwind.config.js`
