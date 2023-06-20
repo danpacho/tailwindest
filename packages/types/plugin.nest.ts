@@ -1,5 +1,6 @@
 import type { Pluggable } from "./plugin"
 import type { TailwindNestedBasicType } from "./tailwind.nested/@basic"
+import type { ShortTailwindNestedBasicType } from "./tailwind.nested/@basic.short"
 import type {
     TailwindestDefaultNestPlug,
     TailwindestNestPlugOption,
@@ -39,3 +40,7 @@ type ToPluggableNestKey<
 export type TailwindestNestKey<
     PlugOption extends TailwindestNestPlugOption = TailwindestDefaultNestPlug
 > = TailwindNestedBasicType | ToPluggableNestKey<PlugOption>
+
+export type ShortTailwindestNestKey<
+    PlugOption extends TailwindestNestPlugOption = TailwindestDefaultNestPlug
+> = ShortTailwindNestedBasicType | ToPluggableNestKey<PlugOption>

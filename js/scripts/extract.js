@@ -90,14 +90,36 @@ const BasicNestKeys = [
     ...THEME_CONDITION,
 ]
 
+const SHORT_HANDED_IDENTIFIER = "$"
+
+/**
+ * Replaces `:`, `::`, and `@` with `$`.
+ * @param {string[]} classNames - The input array of strings to transform.
+ */
+const toShortTailwindestIdentifier = (classNames) =>
+    classNames.map((inputString) => {
+        // replace ':', '::', '@' with '$'
+        const replacedInputString = inputString
+            .replaceAll(/@/g, SHORT_HANDED_IDENTIFIER)
+            .replaceAll(/::/g, SHORT_HANDED_IDENTIFIER)
+            .replaceAll(/:/g, SHORT_HANDED_IDENTIFIER)
+
+        return replacedInputString
+    })
+
 /**
  * @type {{fileName: string; typeName: string; types: string[]}[]}
  */
-const data = [
+const buildData = [
     {
         fileName: "basic",
         typeName: "TailwindNestedBasicType",
         types: BasicNestKeys,
+    },
+    {
+        fileName: "basic.short",
+        typeName: "ShortTailwindNestedBasicType",
+        types: toShortTailwindestIdentifier(BasicNestKeys),
     },
 ]
 
@@ -106,7 +128,7 @@ const data = [
  * @param {string} fileName
  * @param {string} data
  */
-const extract = (fileName, data) => {
+const extractFile = (fileName, data) => {
     writeFile(fileName, data, (err) => {
         if (err) {
             throw new Error(`Write to ${fileName} failed`, err)
@@ -131,13 +153,17 @@ const toUnionTypes = (keys, typeName) => {
     return exportType
 }
 
-const TYPE = {
-    LOCATION: "packages/types/tailwind.nested",
-    TYPE: "ts",
-    IDENT: "@",
+const buildClass = () => {
+    const TYPE_BUILD_INFO = {
+        LOCATION: "packages/types/tailwind.nested",
+        FILE_FORMAT: "ts",
+        IDENTIFIER: "@",
+    }
+
+    buildData.forEach((data) => {
+        const fileName = `${TYPE_BUILD_INFO.LOCATION}/${TYPE_BUILD_INFO.IDENTIFIER}${data.fileName}.${TYPE_BUILD_INFO.FILE_FORMAT}`
+        extractFile(fileName, toUnionTypes(data.types, data.typeName))
+    })
 }
 
-data.forEach((data) => {
-    const fileName = `${TYPE.LOCATION}/${TYPE.IDENT}${data.fileName}.${TYPE.TYPE}`
-    extract(fileName, toUnionTypes(data.types, data.typeName))
-})
+buildClass()

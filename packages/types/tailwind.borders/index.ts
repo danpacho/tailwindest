@@ -12,13 +12,13 @@ import {
     TailwindBorderWidthType,
     TailwindDivideWidthType,
 } from "./@border.width"
-import { TailwindOutlineWidthType } from "./@outline"
 import { TailwindOutlineColorType } from "./@outline.color"
 import { TailwindOutlineOffsetType } from "./@outline.offset"
 import { TailwindOutlineStyleType } from "./@outline.style"
+import { TailwindOutlineWidthType } from "./@outline.width"
 import { TailwindRingColorType } from "./@ring.color"
-import { TailwindRingOffsetWidthType } from "./@ring.offset"
 import { TailwindRingOffsetColorType } from "./@ring.offset.color"
+import { TailwindRingOffsetWidthType } from "./@ring.offset.width"
 import { TailwindRingWidthType } from "./@ring.width"
 
 export interface TailwindBorders<
