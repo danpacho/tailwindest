@@ -4,6 +4,7 @@ type TailwindBoxShadowVariants<Plug extends PlugBase = ""> =
     | Pluggable<Plug>
     | "sm"
     | "md"
+    | "lg"
     | "xl"
     | "2xl"
     | "inner"
