@@ -6,28 +6,50 @@
 
 <br />
 
-# Start with documentation
+## Write tailwind with confidence
+
+1.  Type-safe `tailwind`
+2.  Provide full type definition of `tailwind` properties
+3.  Solid conditional styling, inspired by `cva`
+
+## Useful features
+
+-   Support all JS-frameworks
+-   Zero dependencies
+-   `768B`, tiny bundle size
+-   `tailwind` document link embedded via `JSDoc`
+-   Support custom type, defined in `tailwind.config.js`
+
+## Start with docs
 
 **[Let's dive in 🏄‍♂️](https://tailwindest.vercel.app)**
 
 <br />
 
-# Overview
+## Overview
 
-## 1. Define styling tools
+### 0. Install package
+
+```bash
+npm i tailwindest
+```
+
+### 1. Define styling tools
 
 ```ts
 import { createTools, type Tailwindest } from "tailwindest"
 
+// name it whatever you want
 export const tw = createTools<Tailwindest>()
 ```
 
-## 2. Styling tools
+### 2. Use styling tools
 
-### A. Define style - `style`
+#### A. Basic style
+
+Define basic style sheet with `style`.
 
 ```tsx
-// Define style sheet
 const box = tw.style({
     display: "flex",
     alignItems: "items-center",
@@ -35,49 +57,44 @@ const box = tw.style({
 
     paddingX: "px-[2.25px]",
     paddingY: "py-1",
-
-    borderColor: "border-transparent",
-    borderBottomWidth: "border-b",
-
-    backgroundColor: "bg-transparent",
-
-    transition: "transition",
-    transitionDuration: "duration-75",
-
     ":hover": {
         opacity: "hover:opacity-90",
     },
+    '@sm': {
+        paddingX: "sm:px-[4.5px]",
+        paddingY: "sm:py-2",
+    },
+    }
 })
 
-// Use it in component
 const Box = ({ children }) => <div className={box.class}>{children}</div>
 ```
 
-### B. Conditional styling - `toggle`
+#### B. Toggling
 
 If you want to change the style based on a **single `boolean` condition**, use `toggle`.
 
 ```tsx
-// Define toggle style
 const themeBtn = tw.toggle({
     truthy: {}, // 🌝 light mode
     falsy: {}, // 🌚 dark mode
     base: {}, // [optional] base style
 })
 
-// Use it in component
 const ThemeBtn = ({ children }) => {
     const [isLight, setIsLight] = useState(false)
+
     return <button className={themeBtn.class(isLight)}>{children}</button>
 }
 ```
 
-### C. Conditional styling - `rotary`
+#### C. Various conditions
 
 If you need to change styles based on **three or more conditions within a single category**, use `rotary`.
 
 ```tsx
-// Define rotary style
+import { type GetVariants } from "tailwindest"
+
 const btn = tw.rotary({
     default: {},
     success: {},
@@ -85,14 +102,12 @@ const btn = tw.rotary({
     base: {}, // [optional] base style
 })
 
-// Get rotary type with GetVariants
 interface BtnProps {
     onClick: () => void
     children: ReactNode
     type?: GetVariants<typeof btn>
 }
 
-// Use it in component
 const Btn = ({ onClick, children, type = "default" }: BtnProps) => (
     <button className={btn.class(type)} onClick={onClick}>
         {children}
@@ -100,12 +115,9 @@ const Btn = ({ onClick, children, type = "default" }: BtnProps) => (
 )
 ```
 
-### D. Conditional styling - `variants`
-
-Use `variants` for **combinations of rotary**, where **each style condition is defined within several categories**.
+#### D. [Variants](https://stitches.dev/docs/variants)
 
 ```tsx
-// Define variants style
 const btn = tw.variants({
     variants: {
         type: {
@@ -118,74 +130,75 @@ const btn = tw.variants({
             md: {},
             lg: {},
         },
+        border: {
+            true: {},
+            false: {},
+        },
     },
     base: {}, // [optional] base style
 })
 
-// Get variants type with GetVariants
 interface BtnProps extends GetVariants<typeof btn> {
     onClick: () => void
     children: ReactNode
 }
 
-// Use it in component
 const Btn = ({
     children,
     size = "md",
     type = "default",
+    border = true,
     onClick,
 }: BtnProps) => (
-    <button className={btn.class({ size, type })} onClick={onClick}>
+    <button className={btn.class({ size, type, border })} onClick={onClick}>
         {children}
     </button>
 )
 ```
 
-### E. Utility - `mergeProps`
+#### E. Merging styles
 
-Use it for merging input `styleSheet`.
+Use `mergeProps` to **merge multiple styles** and **make prop-injectable universal components**.
 
 ```tsx
 const text = tw.style({
-    color: "text-gray-950",
-    fontWeight: "font-bold",
-    fontSize: "text-base/normal",
-    "@dark": {
-        color: "dark:text-gray-100",
-    },
+    // text base style
 })
 
-const Text = ({
-    children,
-    ...option
-}: PropsWithChildren<Pick<Tailwindest, "color" | "fontWeight">>) => {
-    return (
-        <p
-            className={tw.mergeProps(
-                text.style,
-                option // override color and fontWeight
-            )}
-        >
-            {children}
-        </p>
-    )
+interface TextProps {
+    color?: Tailwindest["color"]
+    fontWeight?: Tailwindest["fontWeight"]
 }
+export const UniversalText = ({
+    children,
+    ...textOptions
+}: React.PropsWithChildren<TextProps>) => (
+    <p
+        className={tw.mergeProps(
+            text.style,
+            textOptions
+            // override color and fontWeight
+        )}
+    >
+        {children}
+    </p>
+)
+
+const SomeComponent = () => (
+    <>
+        <UniversalText color="text-red-100" fontWeight="font-medium">
+            color: red-100 & fontWeight: font-medium
+        </UniversalText>
+
+        <UniversalText color="text-blue-300" fontWeight="font-bold">
+            color: blue-300 & fontWeight: font-bold
+        </UniversalText>
+    </>
+)
 ```
 
 <br />
 
-# Features
-
-1. Type-safe `tailwind`
-2. Supports all platforms
-3. Tiny bundle size, `768B`
-4. Elegant conditional styling
-5. `tailwind` document link embedded
-6. Support custom type, defined in `tailwind.config.js`
-7. Performant
-
-<br />
-
-# LICENSE
+## LICENSE
 
 <strong><p style="color:teal">MIT</p></strong>
