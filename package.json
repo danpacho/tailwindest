@@ -38,7 +38,7 @@
         "test:ci": "jest --no-coverage",
         "test:prepublish": "pnpm test:ci && pnpm bench",
         "pre-commit": "lint-staged",
-        "prepare": "husky install"
+        "prepare": "husky install && pnpm build:class"
     },
     "type": "module",
     "files": [
