@@ -4,7 +4,6 @@ about: Make a better open-source software with bug report
 title: "[bug]"
 labels: bug
 assignees: danpacho
-
 ---
 
 **Describe the bug**
