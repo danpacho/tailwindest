@@ -60,11 +60,10 @@ const box = tw.style({
     ":hover": {
         opacity: "hover:opacity-90",
     },
-    '@sm': {
+    "@sm": {
         paddingX: "sm:px-[4.5px]",
         paddingY: "sm:py-2",
     },
-    }
 })
 
 const Box = ({ children }) => <div className={box.class}>{children}</div>
