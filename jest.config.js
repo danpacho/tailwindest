@@ -4,9 +4,9 @@ export default {
     rootDir: ".",
     testRegex: "test.(ts)$",
     testEnvironment: "node",
-    modulePathIgnorePatterns: ["dist", "js", "website"],
     collectCoverage: true,
     coverageDirectory: "./coverage/",
+    collectCoverageFrom: ["packages/**/*.ts"],
+    modulePathIgnorePatterns: ["node_modules", "site"],
     coverageReporters: ["text", "text-summary", "json", "html"],
-    collectCoverageFrom: ["packages/**/*.ts", "tests/**/*.ts"],
 }
