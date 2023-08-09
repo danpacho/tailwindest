@@ -18,6 +18,8 @@
         "test": "jest",
         "test:dev": "jest --watch --no-coverage",
         "test:ci": "jest --no-coverage",
+        "ts:typecheck": "tsc --noEmit",
+        "ts:performance": "rimraf ts-perf && tsc --noEmit --generateTrace ts-perf",
         "bench": "pnpm -r --filter=./packages build && node ./scripts/bench.js",
         "bench:skip": "node ./scripts/bench.js",
         "build:class": "node ./scripts/build.class.js && pnpm prettier:fix",
