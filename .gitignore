@@ -3,6 +3,7 @@
 
 # Build
 dist
+.turbo
 
 # Dependencies
 node_modules/
