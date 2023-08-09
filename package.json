@@ -27,10 +27,12 @@
         "prettier:fix": "prettier 'packages/**/*.{ts,js,md}' --write",
         "eslint": "eslint 'packages/**/*.{ts,js}'",
         "eslint:fix": "eslint --fix '{packages,js}**/*.{ts,js}'",
+        "release": "pnpm build && changeset publish",
         "pre-commit": "lint-staged",
         "prepare": "husky install && pnpm -r build:class"
     },
     "devDependencies": {
+        "@changesets/cli": "^2.26.2",
         "@jest/globals": "^29.5.0",
         "@typescript-eslint/eslint-plugin": "^6.3.0",
         "@typescript-eslint/parser": "^6.3.0",
