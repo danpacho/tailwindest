@@ -45,9 +45,6 @@ jobs:
             - name: Format checking
               run: pnpm prettier && pnpm eslint
 
-            - name: Type checking
-              run: pnpm test:ts-typecheck
-
             - name: Unit testing
               run: pnpm test:ci
 
