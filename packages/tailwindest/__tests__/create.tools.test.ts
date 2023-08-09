@@ -3,6 +3,9 @@ import { type TypeEqual, expectType } from "ts-expect"
 import { type GetVariants, type Tailwindest, createTools } from "../src"
 import { label } from "./label"
 
+//TODO: typescript's weird error, TypeEqual is not generic, at ts v5.1.6
+expectType<TypeEqual<"", "">>(true)
+
 type FirstArgument<FuncWithArgs> = FuncWithArgs extends (
     ...args: infer Args
 ) => unknown
