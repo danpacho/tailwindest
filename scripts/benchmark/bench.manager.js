@@ -3,17 +3,12 @@ import { logger } from "./logger.js"
 /** @typedef {(...arg: any[]) => any} Func*/
 /** @typedef {{label: string, iterTime: number, iteration: number}} BenchResult*/
 
-class BenchManager {
-    /** @type {BenchManager | null}*/
-    static #instance = null
-
+export class BenchManager {
     /** @type {BenchResult[]} */
     #benchResult = []
 
     constructor() {
-        if (BenchManager.#instance === null) {
-            BenchManager.#instance = this
-        }
+        return
     }
     /**
      * start bench
@@ -103,15 +98,4 @@ class BenchManager {
             logger.divider()
         }
     }
-
-    /**
-     * get bench singleton instance
-     */
-    getInstance() {
-        return BenchManager.#instance ?? this
-    }
 }
-
-const benchManager = new BenchManager().getInstance()
-
-export { benchManager }

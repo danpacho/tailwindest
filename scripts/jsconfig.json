@@ -8,6 +8,6 @@
         "noEmit": true,
         "forceConsistentCasingInFileNames": true
     },
-    "include": ["../lib"],
-    "exclude": ["../src"]
+    "include": ["../scripts"],
+    "exclude": ["../packages", "../node_modules", "../site"]
 }

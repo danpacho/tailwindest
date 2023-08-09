@@ -1,7 +1,7 @@
 //@ts-check
-import { createTools } from "../../dist/index.js"
+import { createTools } from "../packages/tailwindest/dist/index.mjs"
 
-/** @typedef {import("../../src").Tailwindest<{}, {}>} CustomTailwind */
+/** @typedef {import("../packages/tailwindest/src/index.js").Tailwindest<{}, {}>} CustomTailwind */
 /** @typedef {ReturnType<typeof createTools<CustomTailwind>>} CreateWind */
 /** @typedef {Required<CustomTailwind>} Tailwind */
 
@@ -61,7 +61,7 @@ const base = {
 /**
  * @description `style`, no variants mode
  */
-const test__style = tw.style(base)
+const style = tw.style(base)
 
 /**
  * @description centering style, composed to the `wind$`
@@ -77,7 +77,7 @@ const centering = tw.style({
  * @description `wind$` with `warn` | `pending` variants
  * @description compose with `base` & `centering` styles
  */
-const test__rotary = tw
+const rotary = tw
     .rotary({
         base: {
             display: "hidden",
@@ -122,7 +122,7 @@ const test__rotary = tw
     })
     .compose(base, centering)
 
-const test__toggle = tw.toggle({
+const toggle = tw.toggle({
     falsy: {
         borderColor: "border-red-100",
         backgroundColor: "bg-white",
@@ -160,7 +160,7 @@ const test__toggle = tw.toggle({
     },
 })
 
-const test__variants = tw.variants({
+const variants = tw.variants({
     base: {
         display: "hidden",
         alignItems: "items-baseline",
@@ -236,4 +236,4 @@ const test__variants = tw.variants({
     },
 })
 
-export { base, test__variants, test__rotary, test__style, test__toggle, tw }
+export { base, variants, rotary, style, toggle, tw }

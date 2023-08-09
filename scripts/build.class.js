@@ -155,7 +155,7 @@ const toUnionTypes = (keys, typeName) => {
 
 const buildNestClass = () => {
     const TYPE_BUILD_INFO = {
-        LOCATION: "./src/types/tailwind.nested",
+        LOCATION: `${process.cwd()}/packages/tailwindest/src/types/tailwind.nested`,
         FILE_FORMAT: "ts",
         IDENTIFIER: "@",
     }
