@@ -25,20 +25,6 @@ jobs:
                   version: 7
                   run_install: false
 
-            - name: Get pnpm store directory
-              id: pnpm-cache
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-            - uses: actions/cache@v3
-              name: Setup pnpm cache
-              with:
-                  path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-store-
-
             - name: Install package dependencies
               run: pnpm install --no-frozen-lockfile
 
@@ -50,9 +36,3 @@ jobs:
 
             - name: Build testing
               run: pnpm build
-
-            - uses: actions/upload-artifact@v3
-              name: Uploading build artifact
-              with:
-                  path: dist
-                  if-no-files-found: error
