@@ -1,14 +1,17 @@
 {
     "compilerOptions": {
-        "target": "esnext",
         "strict": true,
+        "target": "esnext",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "baseUrl": ".",
         "esModuleInterop": true,
         "moduleResolution": "node",
         "noUncheckedIndexedAccess": true,
         "exactOptionalPropertyTypes": true,
-        "baseUrl": ".",
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": true,
+        "skipLibCheck": true
     },
     "include": ["packages"],
-    "exclude": ["node_modules", "dist"]
+    "exclude": ["node_modules", "dist", "site"]
 }
