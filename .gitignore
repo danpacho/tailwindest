@@ -3,7 +3,6 @@
 
 # Build
 dist
-dist:watch
 
 # Dependencies
 node_modules/
@@ -16,6 +15,7 @@ node_modules/
 # Testing
 coverage
 ts-perf
+tsconfig.tsbuildinfo
 
 # Logs
 npm-debug.log*
