@@ -10,6 +10,7 @@ export type TAILWINDEST_IDENTIFIER = ":" | "@"
 export type SHORT_TAILWINDEST_IDENTIFIER = "$"
 
 /**
+ * @description remove identifier from class name
  * @example
  * ```ts
  * //pseudo type visualization
@@ -25,79 +26,50 @@ export type RemoveIdentifier<
     ? RemoveIdentifier<RemovedClassString, Identifier>
     : ClassName
 
-/**
- * Combine parent object key at child properties
- * @example
- * ```ts
- * //pseudo type visualization
- * const nested = {
- *     "@key": {
- *          a: "a",
- *          b: "b"
- *     }
- * }
- * // adjust type
- * const typeResult = {
- *     "@key": {
- *          a: "@key:a",
- *          b: "@key:b"
- *      }
- * }
- * ```
- */
-type CombineKeyAtProperty<
-    NestObject,
-    Condition extends string,
-    Identifier extends string = TAILWINDEST_IDENTIFIER,
-> = {
-    [NestKey in keyof NestObject]?: NestKey extends string
-        ? CombineKeyAtProperty<
-              NestObject[NestKey],
-              `${Condition}:${NestKey}`,
-              Identifier
-          >
-        : never
-}
-
-export type TailwindestGetNest<
-    NestStyle,
-    NestCondition extends string = "",
-    Identifier extends string = TAILWINDEST_IDENTIFIER,
-> = CombineKeyAtProperty<NestStyle, NestCondition, Identifier>
+type FIRST_DEPTH_NEST_CONDITION = ""
 
 /**
- * Combine nest condition at child style property
+ * @description combine nest condition at current style sheet
  */
-type CombineNestConditionAtNestStyleProperty<
+type CombineNestConditionAtCurrentStyleSheet<
     NestStyle,
-    NestCondition extends string = "",
+    NestCondition extends string = FIRST_DEPTH_NEST_CONDITION,
     Identifier extends string = TAILWINDEST_IDENTIFIER,
 > = {
     [NestKey in keyof NestStyle]?: NestStyle[NestKey] extends string
-        ? `${RemoveIdentifier<NestCondition, Identifier>}:${NestStyle[NestKey]}`
+        ? NestCondition extends FIRST_DEPTH_NEST_CONDITION
+            ? NestStyle[NestKey]
+            : `${RemoveIdentifier<
+                  NestCondition,
+                  Identifier
+              >}:${NestStyle[NestKey]}`
         : never
 }
 
 /**
- * Get nest style
+ * @description get deeply nested style sheet
  */
-export type GetNestStyle<
-    Nest extends string,
-    NestStyle,
-    NestCondition extends string = "",
+export type GetNestStyleSheet<
+    AllNestConditions extends string,
+    StyleSheet,
+    ParentNestCondition extends string = FIRST_DEPTH_NEST_CONDITION,
     Identifier extends string = TAILWINDEST_IDENTIFIER,
 > = {
-    [Key in Exclude<Nest, NestCondition>]?: Key extends ""
-        ? NestStyle
-        : GetNestStyle<
-              Exclude<Nest, Key | NestCondition>,
-              NestStyle,
-              `${NestCondition}:${RemoveIdentifier<Key, Identifier>}`,
-              Identifier
-          >
-} & CombineNestConditionAtNestStyleProperty<
-    NestStyle,
-    NestCondition,
+    [CurrentNestCondition in Exclude<
+        AllNestConditions,
+        ParentNestCondition
+    >]?: GetNestStyleSheet<
+        Exclude<AllNestConditions, CurrentNestCondition | ParentNestCondition>,
+        StyleSheet,
+        `${ParentNestCondition}:${RemoveIdentifier<
+            CurrentNestCondition,
+            Identifier
+        >}`,
+        Identifier
+    >
+} & CombineNestConditionAtCurrentStyleSheet<
+    StyleSheet,
+    ParentNestCondition,
     Identifier
 >
 
