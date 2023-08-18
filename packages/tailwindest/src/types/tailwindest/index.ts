@@ -3,7 +3,10 @@ import type {
     TailwindestDefaultNestPlug,
     TailwindestNestPlugOption,
 } from "../tailwind.plugin.option"
-import type { TailwindestNest, TailwindestNestBasic } from "./@nest.basic"
+import type {
+    TailwindestBasicNestStyleSheet,
+    TailwindestNestBasic,
+} from "./@nest.basic"
 import type { RemoveUnusedNestProperty } from "./@nest.core"
 import type {
     TailwindestAria,
@@ -19,32 +22,32 @@ type TailwindestPlugExtendedTypeSet<
     Nest extends string,
     Tailwind,
     T extends TailwindestNestPlugOption = TailwindestDefaultNestPlug,
-> = TailwindestNest<Nest, Tailwind, Pluggable<T["conditionA"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionB"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionC"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionD"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionE"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionF"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionG"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionH"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionI"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionJ"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionK"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionL"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionM"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionN"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionO"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionP"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionQ"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionR"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionS"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionT"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionU"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionV"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionW"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionX"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionY"]>> &
-    TailwindestNest<Nest, Tailwind, Pluggable<T["conditionZ"]>>
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionA"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionB"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionC"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionD"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionE"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionF"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionG"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionH"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionI"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionJ"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionK"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionL"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionM"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionN"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionO"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionP"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionQ"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionR"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionS"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionT"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionU"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionV"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionW"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionX"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionY"]>> &
+    TailwindestBasicNestStyleSheet<Nest, Tailwind, Pluggable<T["conditionZ"]>>
 
 type TailwindestNestPlugType<
     Nest extends string,

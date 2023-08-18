@@ -6,12 +6,12 @@ const PSEUDO_ELEMENTS = [
     "::placeholder",
     "::file",
     "::marker",
+    "::backdrop",
     "::selection",
     "::first-line",
     "::first-letter",
 ]
 const PSEUDO_CLASSES = [
-    ":backdrop",
     ":hover",
     ":active",
     ":first",
@@ -41,6 +41,7 @@ const PSEUDO_CLASSES = [
     ":focus",
     ":focus-within",
     ":focus-visible",
+    ":optional",
 ]
 
 const MEDIA_CONDITIONS = [
