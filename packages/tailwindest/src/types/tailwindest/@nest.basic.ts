@@ -1,71 +1,57 @@
-import type { GetNestStyle, TailwindestGetNest } from "./@nest.core"
+import type { GetNestStyleSheet } from "./@nest.core"
 
-type TailwindestPickNest<NestStyle, OneNestCondition extends string> = {
-    [ShouldBeOnlyOneKey in OneNestCondition]?: TailwindestGetNest<
-        NestStyle,
+export type TailwindestBasicNestStyleSheet<
+    Nest extends string,
+    Tailwind,
+    OneNestCondition extends string,
+> = {
+    [ShouldBeOnlyOneKey in OneNestCondition]?: GetNestStyleSheet<
+        Nest,
+        Tailwind,
         OneNestCondition
     >
 }
 
-export type TailwindestNest<
+type TailwindestSm<
     Nest extends string,
     Tailwind,
-    OneNestCondition extends string,
-> = TailwindestPickNest<
-    GetNestStyle<Nest, Tailwind, OneNestCondition>,
-    OneNestCondition
->
-
-type TailwindestSm<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@sm">
+type TailwindestMaxSm<
+    Nest extends string,
     Tailwind,
-    "@sm"
->
-type TailwindestMaxSm<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@max-sm">
+type TailwindestMd<
+    Nest extends string,
     Tailwind,
-    "@max-sm"
->
-type TailwindestMd<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@md">
+type TailwindestMaxMd<
+    Nest extends string,
     Tailwind,
-    "@md"
->
-type TailwindestMaxMd<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@max-md">
+type TailwindestLg<
+    Nest extends string,
     Tailwind,
-    "@max-md"
->
-type TailwindestLg<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@lg">
+type TailwindestMaxLg<
+    Nest extends string,
     Tailwind,
-    "@lg"
->
-type TailwindestMaxLg<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@max-lg">
+type TailwindestXl<
+    Nest extends string,
     Tailwind,
-    "@max-lg"
->
-type TailwindestXl<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@xl">
+type TailwindestMaxXl<
+    Nest extends string,
     Tailwind,
-    "@xl"
->
-type TailwindestMaxXl<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@max-xl">
+type Tailwindest2Xl<
+    Nest extends string,
     Tailwind,
-    "@max-xl"
->
-type Tailwindest2Xl<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@2xl">
+type TailwindestMax2Xl<
+    Nest extends string,
     Tailwind,
-    "@2xl"
->
-type TailwindestMax2Xl<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
-    Tailwind,
-    "@max-2xl"
->
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@max-2xl">
 interface TailwindestSizeCondition<Nest extends string, Tailwind>
     extends TailwindestSm<Nest, Tailwind>,
         TailwindestMd<Nest, Tailwind>,
@@ -78,57 +64,47 @@ interface TailwindestSizeCondition<Nest extends string, Tailwind>
         TailwindestMaxXl<Nest, Tailwind>,
         TailwindestMax2Xl<Nest, Tailwind> {}
 
-type TailwindestDark<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+type TailwindestDark<
+    Nest extends string,
     Tailwind,
-    "@dark"
->
-type TailwindestContrastMore<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@dark">
+type TailwindestContrastMore<
+    Nest extends string,
     Tailwind,
-    "@contrast-more"
->
-type TailwindestContrastLess<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@contrast-more">
+type TailwindestContrastLess<
+    Nest extends string,
     Tailwind,
-    "@contrast-less"
->
-type TailwindestMotionReduce<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@contrast-less">
+type TailwindestMotionReduce<
+    Nest extends string,
     Tailwind,
-    "@motion-reduce"
->
-type TailwindestMotionSafe<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@motion-reduce">
+type TailwindestMotionSafe<
+    Nest extends string,
     Tailwind,
-    "@motion-safe"
->
-type TailwindestPortrait<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@motion-safe">
+type TailwindestPortrait<
+    Nest extends string,
     Tailwind,
-    "@portrait"
->
-type TailwindestLandscape<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@portrait">
+type TailwindestLandscape<
+    Nest extends string,
     Tailwind,
-    "@landscape"
->
-type TailwindestPrint<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@landscape">
+type TailwindestPrint<
+    Nest extends string,
     Tailwind,
-    "@print"
->
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@print">
 
-type TailwindestLTR<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+type TailwindestLTR<
+    Nest extends string,
     Tailwind,
-    "@ltr"
->
-type TailwindestRTL<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@ltr">
+type TailwindestRTL<
+    Nest extends string,
     Tailwind,
-    "@rtl"
->
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "@rtl">
 interface TailwindestMedia<Nest extends string, Tailwind>
     extends TailwindestDark<Nest, Tailwind>,
         TailwindestRTL<Nest, Tailwind>,
@@ -141,51 +117,42 @@ interface TailwindestMedia<Nest extends string, Tailwind>
         TailwindestContrastLess<Nest, Tailwind>,
         TailwindestMotionReduce<Nest, Tailwind> {}
 
-type TailwindestBefore<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+type TailwindestBefore<
+    Nest extends string,
     Tailwind,
-    "::before"
->
-type TailwindestAfter<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "::before">
+type TailwindestAfter<
+    Nest extends string,
     Tailwind,
-    "::after"
->
-type TailwindestPlaceholder<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "::after">
+type TailwindestPlaceholder<
+    Nest extends string,
     Tailwind,
-    "::placeholder"
->
-type TailwindestFile<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "::placeholder">
+type TailwindestFile<
+    Nest extends string,
     Tailwind,
-    "::file"
->
-type TailwindestMarker<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "::file">
+type TailwindestMarker<
+    Nest extends string,
     Tailwind,
-    "::marker"
->
-type TailwindestSelection<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "::marker">
+type TailwindestSelection<
+    Nest extends string,
     Tailwind,
-    "::selection"
->
-type TailwindestFirstLine<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "::selection">
+type TailwindestFirstLine<
+    Nest extends string,
     Tailwind,
-    "::first-line"
->
-type TailwindestFirstLetter<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "::first-line">
+type TailwindestFirstLetter<
+    Nest extends string,
     Tailwind,
-    "::first-letter"
->
-type TailwindestBackdrop<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "::first-letter">
+type TailwindestBackdrop<
+    Nest extends string,
     Tailwind,
-    "::backdrop"
->
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, "::backdrop">
 interface TailwindestPseudoElements<Nest extends string, Tailwind>
     extends TailwindestBefore<Nest, Tailwind>,
         TailwindestFile<Nest, Tailwind>,
@@ -197,150 +164,122 @@ interface TailwindestPseudoElements<Nest extends string, Tailwind>
         TailwindestFirstLetter<Nest, Tailwind>,
         TailwindestPlaceholder<Nest, Tailwind> {}
 
-type TailwindestHover<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+type TailwindestHover<
+    Nest extends string,
     Tailwind,
-    ":hover"
->
-type TailwindestActive<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":hover">
+type TailwindestActive<
+    Nest extends string,
     Tailwind,
-    ":active"
->
-type TailwindestFirst<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":active">
+type TailwindestFirst<
+    Nest extends string,
     Tailwind,
-    ":first"
->
-type TailwindestLast<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":first">
+type TailwindestLast<
+    Nest extends string,
     Tailwind,
-    ":last"
->
-type TailwindestOnly<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":last">
+type TailwindestOnly<
+    Nest extends string,
     Tailwind,
-    ":only"
->
-type TailwindestOdd<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":only">
+type TailwindestOdd<
+    Nest extends string,
     Tailwind,
-    ":odd"
->
-type TailwindestEven<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":odd">
+type TailwindestEven<
+    Nest extends string,
     Tailwind,
-    ":even"
->
-type TailwindestFirstOfType<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":even">
+type TailwindestFirstOfType<
+    Nest extends string,
     Tailwind,
-    ":first-of-type"
->
-type TailwindestLastOfType<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":first-of-type">
+type TailwindestLastOfType<
+    Nest extends string,
     Tailwind,
-    ":last-of-type"
->
-type TailwindestOnlyOfType<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":last-of-type">
+type TailwindestOnlyOfType<
+    Nest extends string,
     Tailwind,
-    ":only-of-type"
->
-type TailwindestEmpty<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":only-of-type">
+type TailwindestEmpty<
+    Nest extends string,
     Tailwind,
-    ":empty"
->
-type TailwindestEnabled<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":empty">
+type TailwindestEnabled<
+    Nest extends string,
     Tailwind,
-    ":enabled"
->
-type TailwindestIndeterminate<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":enabled">
+type TailwindestIndeterminate<
+    Nest extends string,
     Tailwind,
-    ":indeterminate"
->
-type TailwindestDefault<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":indeterminate">
+type TailwindestDefault<
+    Nest extends string,
     Tailwind,
-    ":default"
->
-type TailwindestRequired<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":default">
+type TailwindestRequired<
+    Nest extends string,
     Tailwind,
-    ":required"
->
-type TailwindestValid<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":required">
+type TailwindestValid<
+    Nest extends string,
     Tailwind,
-    ":valid"
->
-type TailwindestInvalid<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":valid">
+type TailwindestInvalid<
+    Nest extends string,
     Tailwind,
-    ":invalid"
->
-type TailwindestInRange<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":invalid">
+type TailwindestInRange<
+    Nest extends string,
     Tailwind,
-    ":in-range"
->
-type TailwindestOutOfRange<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":in-range">
+type TailwindestOutOfRange<
+    Nest extends string,
     Tailwind,
-    ":out-of-range"
->
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":out-of-range">
 type TailwindestPlaceholderShown<
     Nest extends string,
     Tailwind,
-> = TailwindestNest<Nest, Tailwind, ":placeholder-shown">
-type TailwindestAutofill<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":placeholder-shown">
+type TailwindestAutofill<
+    Nest extends string,
     Tailwind,
-    ":autofill"
->
-type TailwindestReadonly<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":autofill">
+type TailwindestReadonly<
+    Nest extends string,
     Tailwind,
-    ":read-only"
->
-type TailwindestChecked<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":read-only">
+type TailwindestChecked<
+    Nest extends string,
     Tailwind,
-    ":checked"
->
-type TailwindestDisabled<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":checked">
+type TailwindestDisabled<
+    Nest extends string,
     Tailwind,
-    ":disabled"
->
-type TailwindestVisited<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":disabled">
+type TailwindestVisited<
+    Nest extends string,
     Tailwind,
-    ":visited"
->
-type TailwindestTarget<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":visited">
+type TailwindestTarget<
+    Nest extends string,
     Tailwind,
-    ":target"
->
-type TailwindestFocus<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":target">
+type TailwindestFocus<
+    Nest extends string,
     Tailwind,
-    ":focus"
->
-type TailwindestFocusWithin<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":focus">
+type TailwindestFocusWithin<
+    Nest extends string,
     Tailwind,
-    ":focus-within"
->
-type TailwindestFocusVisible<Nest extends string, Tailwind> = TailwindestNest<
-    Nest,
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":focus-within">
+type TailwindestFocusVisible<
+    Nest extends string,
     Tailwind,
-    ":focus-visible"
->
+> = TailwindestBasicNestStyleSheet<Nest, Tailwind, ":focus-visible">
 interface TailwindestPseudoClass<Nest extends string, Tailwind>
     extends TailwindestLast<Nest, Tailwind>,
         TailwindestOnly<Nest, Tailwind>,

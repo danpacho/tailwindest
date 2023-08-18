@@ -1,161 +1,149 @@
-import type {
-    GetNestStyle,
-    RemoveIdentifier,
-    TailwindestGetNest,
-} from "./@nest.core"
+import type { GetNestStyleSheet, RemoveIdentifier } from "./@nest.core"
 
 type DASH_IDENTIFIER = "-"
 
-type TailwindestPickNestWithTitle<
-    NestStyle,
-    DashNestCondition extends string,
-    OneNestCondition extends string,
+type TailwindestExtendedNestStyleSheet<
+    AllNestConditions extends string,
+    Tailwind,
+    ExtendedNestCondition extends "group" | "peer" | "aria",
+    OnlyOneNestCondition extends string,
 > = {
-    [ShouldBeOnlyOneKey in OneNestCondition]?: TailwindestGetNest<
-        NestStyle,
-        `${DashNestCondition}${DASH_IDENTIFIER}${RemoveIdentifier<OneNestCondition>}`
+    [ShouldBeOnlyOneKey in OnlyOneNestCondition]?: GetNestStyleSheet<
+        AllNestConditions,
+        Tailwind,
+        `${ExtendedNestCondition}${DASH_IDENTIFIER}${RemoveIdentifier<OnlyOneNestCondition>}`
     >
 }
-
-type TailwindestNestWithTitle<
-    Nest extends string,
-    Tailwind,
-    DashNestCondition extends "group" | "peer" | "aria",
-    Condition extends string,
-> = TailwindestPickNestWithTitle<
-    GetNestStyle<
-        Nest,
-        Tailwind,
-        `${DashNestCondition}${DASH_IDENTIFIER}${RemoveIdentifier<Condition>}`
-    >,
-    DashNestCondition,
-    Condition
->
 
 type TailwindestGroupBackdrop<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":backdrop">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", "::backdrop">
 type TailwindestGroupHover<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":hover">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":hover">
 type TailwindestGroupActive<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":active">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":active">
 type TailwindestGroupFirst<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":first">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":first">
 type TailwindestGroupLast<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":last">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":last">
 type TailwindestGroupOnly<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":only">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":only">
 type TailwindestGroupOdd<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":odd">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":odd">
 type TailwindestGroupEven<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":even">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":even">
 type TailwindestGroupFirstOfType<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":first-of-type">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":first-of-type">
 type TailwindestGroupLastOfType<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":last-of-type">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":last-of-type">
 type TailwindestGroupOnlyOfType<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":only-of-type">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":only-of-type">
 type TailwindestGroupEmpty<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":empty">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":empty">
 type TailwindestGroupEnabled<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":enabled">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":enabled">
 type TailwindestGroupIndeterminate<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":indeterminate">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":indeterminate">
 type TailwindestGroupDefault<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":default">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":default">
 type TailwindestGroupRequired<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":required">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":required">
 type TailwindestGroupOptional<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":optional">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":optional">
 type TailwindestGroupValid<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":valid">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":valid">
 type TailwindestGroupInvalid<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":invalid">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":invalid">
 type TailwindestGroupInRange<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":in-range">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":in-range">
 type TailwindestGroupOutOfRange<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":out-of-range">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":out-of-range">
 type TailwindestGroupPlaceholderShown<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":placeholder-shown">
+> = TailwindestExtendedNestStyleSheet<
+    Nest,
+    Tailwind,
+    "group",
+    ":placeholder-shown"
+>
 type TailwindestGroupAutofill<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":autofill">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":autofill">
 type TailwindestGroupReadonly<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":read-only">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":read-only">
 type TailwindestGroupChecked<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":checked">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":checked">
 type TailwindestGroupDisabled<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":disabled">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":disabled">
 type TailwindestGroupVisited<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":visited">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":visited">
 type TailwindestGroupTarget<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":target">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":target">
 type TailwindestGroupFocus<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":focus">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":focus">
 type TailwindestGroupFocusWithin<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":focus-within">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":focus-within">
 type TailwindestGroupFocusVisible<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "group", ":focus-visible">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "group", ":focus-visible">
 
 interface TailwindestGroupPseudoClass<Nest extends string, Tailwind>
     extends TailwindestGroupOdd<Nest, Tailwind>,
@@ -193,127 +181,132 @@ interface TailwindestGroupPseudoClass<Nest extends string, Tailwind>
 type TailwindestPeerBackdrop<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":backdrop">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", "::backdrop">
 type TailwindestPeerHover<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":hover">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":hover">
 type TailwindestPeerActive<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":active">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":active">
 type TailwindestPeerFirst<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":first">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":first">
 type TailwindestPeerLast<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":last">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":last">
 type TailwindestPeerOnly<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":only">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":only">
 type TailwindestPeerOdd<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":odd">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":odd">
 type TailwindestPeerEven<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":even">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":even">
 type TailwindestPeerFirstOfType<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":first-of-type">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":first-of-type">
 type TailwindestPeerLastOfType<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":last-of-type">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":last-of-type">
 type TailwindestPeerOnlyOfType<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":only-of-type">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":only-of-type">
 type TailwindestPeerEmpty<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":empty">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":empty">
 type TailwindestPeerEnabled<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":enabled">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":enabled">
 type TailwindestPeerIndeterminate<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":indeterminate">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":indeterminate">
 type TailwindestPeerDefault<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":default">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":default">
 type TailwindestPeerRequired<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":required">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":required">
 type TailwindestPeerOptional<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":optional">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":optional">
 type TailwindestPeerValid<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":valid">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":valid">
 type TailwindestPeerInvalid<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":invalid">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":invalid">
 type TailwindestPeerInRange<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":in-range">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":in-range">
 type TailwindestPeerOutOfRange<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":out-of-range">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":out-of-range">
 type TailwindestPeerPlaceholderShown<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":placeholder-shown">
+> = TailwindestExtendedNestStyleSheet<
+    Nest,
+    Tailwind,
+    "peer",
+    ":placeholder-shown"
+>
 type TailwindestPeerAutofill<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":autofill">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":autofill">
 type TailwindestPeerReadonly<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":read-only">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":read-only">
 type TailwindestPeerChecked<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":checked">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":checked">
 type TailwindestPeerDisabled<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":disabled">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":disabled">
 type TailwindestPeerVisited<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":visited">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":visited">
 type TailwindestPeerTarget<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":target">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":target">
 type TailwindestPeerFocus<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":focus">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":focus">
 type TailwindestPeerFocusWithin<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":focus-within">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":focus-within">
 type TailwindestPeerFocusVisible<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "peer", ":focus-visible">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "peer", ":focus-visible">
 
 interface TailwindestPeerPseudoClass<Nest extends string, Tailwind>
     extends TailwindestPeerOdd<Nest, Tailwind>,
@@ -351,35 +344,35 @@ interface TailwindestPeerPseudoClass<Nest extends string, Tailwind>
 type TailwindestAriaChecked<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":checked">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "aria", ":checked">
 type TailwindestAriaDisabled<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":disabled">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "aria", ":disabled">
 type TailwindestAriaExpanded<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":expanded">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "aria", ":expanded">
 type TailwindestAriaHidden<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":hidden">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "aria", ":hidden">
 type TailwindestAriaPressed<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":pressed">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "aria", ":pressed">
 type TailwindestAriaReadonly<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":readonly">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "aria", ":readonly">
 type TailwindestAriaRequired<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":required">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "aria", ":required">
 type TailwindestAriaSelected<
     Nest extends string,
     Tailwind,
-> = TailwindestNestWithTitle<Nest, Tailwind, "aria", ":selected">
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "aria", ":selected">
 
 interface TailwindestAriaClass<Nest extends string, Tailwind>
     extends TailwindestAriaChecked<Nest, Tailwind>,
@@ -407,7 +400,7 @@ export type TailwindestAriaCustom<
     Nest extends string,
     Tailwind,
     CustomAria extends string,
-> = TailwindestNestWithTitle<Nest, Tailwind, "aria", CustomAria>
+> = TailwindestExtendedNestStyleSheet<Nest, Tailwind, "aria", CustomAria>
 
 interface TailwindestGroup<Nest extends string, Tailwind> {
     /**
