@@ -3,10 +3,7 @@ export type CacheKey = string | symbol | number
 /**
  * @description Cache data set of style generators
  */
-export type StyleGeneratorCache<StyleType extends NestedObject> = [
-    StyleType,
-    ClassName,
-]
+export type StyleGeneratorCache<StyleType> = [StyleType, ClassName]
 
 /**
  * @description Stylesheet type restriction, some kind of deeply nested object type definition
@@ -43,3 +40,5 @@ export type GetVariantsKey<VariantsKey> = VariantsKey extends string | number
         ? false
         : VariantsKey
     : "Error: typeof variants key should be <string> | <number> | <'true' | 'false'>"
+
+export type UndefinableString = string | undefined
