@@ -1,14 +1,25 @@
-import type { ShortTailwindestNestKey } from "./types/plugin.nest"
-import type { ShortTailwindWithOption } from "./types/tailwind.plugin"
+import type {
+    TailwindNestConditionIdentifierOption,
+    TailwindestNestKeys,
+} from "./tailwindest.nest.keys"
+import type { ShortTailwindPlugin } from "./types/tailwind"
 import type {
     TailwindDefaultGlobalPlugOption,
     TailwindDefaultStylePlug,
     TailwindGlobalPlugOption,
     TailwindStylePlugOption,
-} from "./types/tailwind.plugin.option"
-import type { ShortTailwindestTypeSet } from "./types/tailwindest/short"
+} from "./types/tailwind/plugin"
+import type {
+    GetNestStyleSheet,
+    TailwindestExtendedNest,
+} from "./types/tailwindest"
 
-type PlugOptionType = Record<string, unknown>
+type ShortTailwindestTypeSet<
+    AllNestKeys extends string,
+    Tailwind,
+    Identifier extends string,
+> = GetNestStyleSheet<AllNestKeys, Tailwind, Identifier> &
+    TailwindestExtendedNest<AllNestKeys, Tailwind, Identifier>
 
 /**
  * @description Short-handed version of `Tailwindest`
@@ -21,10 +32,7 @@ type PlugOptionType = Record<string, unknown>
  *        // Add color, sizing, screens global property
  *        color: "my-color1" | "my-color2"
  *        sizing: "0.25" | "0.5" | "0.75"
- *        screens: {
- *            // only one string union
- *            conditionA: "@do-this"
- *        }
+ *        screens: "@ipad" | "@iphone13pro" | "@iphone13proMax"
  *    },
  *    {
  *        // Add "emoji", "my-shadow1" & "my-shadow2"
@@ -44,26 +52,19 @@ export type ShortTailwindest<
     TailwindGlobal extends
         TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
     TailwindStyle extends TailwindStylePlugOption = TailwindDefaultStylePlug,
-> = TailwindGlobal["screens"] extends PlugOptionType
-    ? TailwindStyle["aria"] extends PlugOptionType
-        ? Partial<
-              ShortTailwindestTypeSet<
-                  ShortTailwindWithOption<TailwindGlobal, TailwindStyle>,
-                  ShortTailwindestNestKey<TailwindGlobal["screens"]>,
-                  TailwindGlobal["screens"],
-                  TailwindStyle["aria"]
-              >
-          >
-        : Partial<
-              ShortTailwindestTypeSet<
-                  ShortTailwindWithOption<TailwindGlobal, TailwindStyle>,
-                  ShortTailwindestNestKey<TailwindGlobal["screens"]>,
-                  TailwindGlobal["screens"]
-              >
-          >
-    : Partial<
-          ShortTailwindestTypeSet<
-              ShortTailwindWithOption<TailwindGlobal, TailwindStyle>,
-              ShortTailwindestNestKey
-          >
-      >
+    TailwindNestConditionPrefix extends
+        TailwindNestConditionIdentifierOption = {
+        breakIdentifier: "$"
+        pseudoClassIdentifier: "$"
+        pseudoElementIdentifier: "$"
+    },
+> = ShortTailwindestTypeSet<
+    TailwindestNestKeys<
+        TailwindNestConditionPrefix,
+        { screens: TailwindGlobal["screens"]; aria: TailwindStyle["aria"] }
+    >,
+    ShortTailwindPlugin<TailwindGlobal, TailwindStyle>,
+    | TailwindNestConditionPrefix["breakIdentifier"]
+    | TailwindNestConditionPrefix["pseudoClassIdentifier"]
+    | TailwindNestConditionPrefix["pseudoElementIdentifier"]
+>
