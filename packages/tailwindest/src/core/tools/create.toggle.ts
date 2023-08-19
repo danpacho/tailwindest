@@ -1,12 +1,11 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { NestedObject } from "../../utils"
 import { createRotary } from "./create.rotary"
 import type {
     StyleGeneratorRotary,
     StyleGeneratorToggle,
 } from "./tool.interface"
 
-type Toggle<StyleType extends NestedObject> = {
+type Toggle<StyleType> = {
     /**
      * `true` condition `styleSheet`
      */
@@ -24,8 +23,9 @@ type Toggle<StyleType extends NestedObject> = {
 const TOGGLE_TRUTHY_KEY = "truthy" as const
 const TOGGLE_FALSY_KEY = "falsy" as const
 
-const createToggle = <StyleType extends NestedObject>() => {
+const createToggle = <StyleType>() => {
     const rotary = createRotary<StyleType>()
+
     return (
         toggleVariants: Toggle<StyleType>
     ): StyleGeneratorToggle<StyleType> => {

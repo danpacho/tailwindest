@@ -1,18 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BASE_KEY } from "../../constants"
-import type {
-    CacheKey,
-    GetVariantsKey,
-    NestedObject,
-    StyleGeneratorCache,
-} from "../../utils"
+import type { CacheKey, GetVariantsKey, StyleGeneratorCache } from "../../utils"
 import { cache } from "../cache"
 import { deepMerge } from "../deep.merge"
 import { getTailwindClass } from "../get.tailwind.class"
 import type { StyleGeneratorVariants } from "./tool.interface"
 
 const createVariants =
-    <StyleType extends NestedObject>() =>
+    <StyleType>() =>
     <Variants>({
         base,
         variants,
@@ -38,8 +33,9 @@ const createVariants =
                 keyof Variants[VariantsKey]
             >
         }
-        const variantCache = cache<CacheKey, StyleGeneratorCache<StyleType>>()
         let isBaseUpdated = false
+
+        const variantCache = cache<CacheKey, StyleGeneratorCache<StyleType>>()
 
         const getCachedBaseStyle = (): StyleType =>
             variantCache.get(BASE_KEY, () => [base ?? ({} as StyleType), ""])[0]

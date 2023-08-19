@@ -1,11 +1,9 @@
-import type { ClassName, NestedObject } from "../../utils"
+import type { ClassName } from "../../utils"
 import { deepMerge } from "../deep.merge"
 import { getTailwindClass } from "../get.tailwind.class"
 import type { StyleGeneratorStyle } from "./tool.interface"
 
-class StyleSheet<StyleType extends NestedObject>
-    implements StyleGeneratorStyle<StyleType>
-{
+class StyleSheet<StyleType> implements StyleGeneratorStyle<StyleType> {
     private s: StyleType
     private c: ClassName
 
@@ -30,7 +28,7 @@ class StyleSheet<StyleType extends NestedObject>
 }
 
 const createStyle =
-    <StyleType extends NestedObject>() =>
+    <StyleType>() =>
     (style: StyleType): StyleGeneratorStyle<StyleType> =>
         new StyleSheet<StyleType>(style)
 

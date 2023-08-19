@@ -5,7 +5,6 @@ import {
     createToggle,
     createVariants,
 } from "./core"
-import type { NestedObject } from "./utils"
 
 /**
  * @description Create tools with `Tailwindest` type
@@ -23,7 +22,7 @@ import type { NestedObject } from "./utils"
  * export { tw }
  * ```
  */
-const createTools = <StyleType extends NestedObject>() => {
+const createTools = <StyleType>() => {
     const styleWithType = createStyle<StyleType>()
     const toggleWithType = createToggle<StyleType>()
     const rotaryWithType = createRotary<StyleType>()
