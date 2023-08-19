@@ -1,5 +1,11 @@
 # tailwindest
 
+## 2.2.0
+
+### Minor Changes
+
+-   feat: redesign Tailwindest generic option type to improve dx
+
 ## 2.1.3
 
 ### Patch Changes
