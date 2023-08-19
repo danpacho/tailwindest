@@ -1,6 +1,4 @@
-import type { NestedObject } from "../../utils"
-
-export interface StyleGeneratorStyle<StyleType extends NestedObject> {
+export interface StyleGeneratorStyle<StyleType> {
     /**
      * @description Get className `string`
      */
@@ -27,7 +25,7 @@ export interface StyleGeneratorStyle<StyleType extends NestedObject> {
         style: StyleType
     }
 }
-export interface StyleGeneratorToggle<StyleType extends NestedObject> {
+export interface StyleGeneratorToggle<StyleType> {
     /**
      * @param toggleCondition Toggling condition, `true` | `false`
      * @description Get toggled className `string`
@@ -58,10 +56,7 @@ export interface StyleGeneratorToggle<StyleType extends NestedObject> {
         style: (toggleCondition: boolean) => StyleType
     }
 }
-export interface StyleGeneratorRotary<
-    StyleType extends NestedObject,
-    RotaryVariant,
-> {
+export interface StyleGeneratorRotary<StyleType, RotaryVariant> {
     /**
      * @description Get rotary variant className `string`
      * @param variant Key of rotary variant
@@ -93,10 +88,7 @@ export interface StyleGeneratorRotary<
     }
 }
 
-export interface StyleGeneratorVariants<
-    StyleType extends NestedObject,
-    VariantOption,
-> {
+export interface StyleGeneratorVariants<StyleType, VariantOption> {
     /**
      * @description Get variant className `string`
      * @param variant Variant option `object`
