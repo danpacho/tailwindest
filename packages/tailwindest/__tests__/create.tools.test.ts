@@ -27,16 +27,7 @@ type CustomTailwind = Tailwindest<
     {
         color: MyCustomUnion<"color">
         sizing: MyCustomUnion<"size">
-        screens: {
-            conditionA: "@my"
-            conditionB: "@my1"
-            conditionC: "@my2"
-            conditionD: "@my3"
-            conditionE: "@my4"
-            conditionF: "@my5"
-            conditionG: "@my6"
-            conditionH: "@my7"
-        }
+        screens: "my" | "my1" | "my2" | "my3" | "my4" | "my5" | "my6" | "my7"
     },
     {
         accentColor: "for-the-accent"
@@ -148,11 +139,9 @@ describe(label.unit("createTools - style"), () => {
 
     test(label.case("plugged style - compose"), () => {
         box.compose({
-            "@aria": {
-                ":checked": {
-                    "::after": {
-                        backgroundColor: "aria-checked:after:bg-amber-100",
-                    },
+            "@aria-checked": {
+                "::after": {
+                    backgroundColor: "aria-checked:after:bg-amber-100",
                 },
             },
         })
@@ -165,11 +154,9 @@ describe(label.unit("createTools - style"), () => {
                 padding: "my:-p-my-size-1",
                 margin: "my:m-my-size-1",
             },
-            "@aria": {
-                ":checked": {
-                    "::after": {
-                        backgroundColor: "aria-checked:after:bg-amber-100",
-                    },
+            "@aria-checked": {
+                "::after": {
+                    backgroundColor: "aria-checked:after:bg-amber-100",
                 },
             },
         })
