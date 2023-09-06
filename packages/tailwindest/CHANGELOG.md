@@ -1,5 +1,11 @@
 # tailwindest
 
+## 2.2.1
+
+### Patch Changes
+
+-   Add missing verticalAlign property and add "aria-" prefix at Tailwindest custom aria field
+
 ## 2.2.0
 
 ### Minor Changes
