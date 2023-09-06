@@ -2,25 +2,28 @@
     "createTools": {
         "title": "createTools"
     },
+    "Tailwindest": {
+        "title": "Tailwindest"
+    },
+    "ShortTailwindest": {
+        "title": "ShortTailwindest"
+    },
     "style": {
-        "title": "tool: style"
+        "title": "style"
     },
     "toggle": {
-        "title": "tool: toggle"
+        "title": "toggle"
     },
     "rotary": {
-        "title": "tool: rotary"
+        "title": "rotary"
     },
     "variants": {
-        "title": "tool: variants"
+        "title": "variants"
     },
     "mergeProps": {
-        "title": "tool: mergeProps"
+        "title": "mergeProps"
     },
     "GetVariants": {
-        "title": "type: GetVariants"
-    },
-    "Tailwindest": {
-        "title": "type: Tailwindest"
+        "title": "GetVariants"
     }
 }

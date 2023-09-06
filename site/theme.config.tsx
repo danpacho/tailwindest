@@ -51,7 +51,8 @@ const tailwindestLogo = (
 
         <style jsx>{`
             div {
-                transition: mask-position 0.75s ease,
+                transition:
+                    mask-position 0.75s ease,
                     -webkit-mask-position 0.75s ease;
                 mask-image: linear-gradient(
                     75deg,
@@ -129,21 +130,21 @@ const config: DocsThemeConfig = {
             </>
         )
     },
-    banner: {
-        key: "v2 release",
-        text: (
-            <span>
-                <p className="inline-block font-mono font-semibold text-amber-300">
-                    v2
-                </p>{" "}
-                is released 🎉! Experience the newly designed{" "}
-                <p className="inline-block font-mono font-semibold text-amber-300">
-                    variants-based
-                </p>{" "}
-                apis and more.
-            </span>
-        ),
-    },
+    // banner: {
+    //     key: "v2 release",
+    //     text: (
+    //         <span>
+    //             <p className="inline-block font-mono font-semibold text-amber-300">
+    //                 v2
+    //             </p>{" "}
+    //             is released 🎉! Experience the newly designed{" "}
+    //             <p className="inline-block font-mono font-semibold text-amber-300">
+    //                 variants-based
+    //             </p>{" "}
+    //             apis and more.
+    //         </span>
+    //     ),
+    // },
     editLink: {
         text: "Edit this page on GitHub →",
     },

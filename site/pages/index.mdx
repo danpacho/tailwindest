@@ -95,7 +95,42 @@ export const features = {
 
 <Divider id="dx" />
 
-# Elegant DX
+# Combine two worlds
+
+Write **tailwindcss** and **CSS-in-JS** like syntax at the same time. Get the best of two worlds.
+
+```tsx
+const button = tw.style({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+
+    padding: "p-2",
+    borderRadius: "rounded-md",
+
+    color: "text-white",
+    fontSize: "text-base",
+    fontWeight: "font-medium",
+
+    backgroundColor: "bg-blue-700",
+})
+
+const InlineAndCSSInJs = () => {
+    return (
+        <div className="flex flex-row gap-2 items-center justify-between">
+            <button className={button.class}>
+                <p className="text-yellow-300 text-2xl">Button 1</p>
+            </button>
+
+            <button className={button.class}>Button 2</button>
+        </div>
+    )
+}
+```
+
+<Divider id="dx" />
+
+# Great DX
 
 export const suggestions = () => {
     const autoForRe = [
@@ -288,8 +323,8 @@ export const suggestions = () => {
 <br />
 
 <div className="text-base mb-7">
-    Feel the power of type-safety without installation. Just hover the
-    highlighted blocks.
+    Get the power of type-safety without installation. Hover the highlighted
+    blocks.
 </div>
 
 <CodeCompletion.Container suggestions={suggestions()}>
@@ -298,9 +333,7 @@ export const suggestions = () => {
 import { createTools, type Tailwindest } from "tailwindest"
 
 type MyTailwind = Tailwindest<{
-    screens: {
-        conditionA: "@my"
-    }
+    screens: "my"
     color: "primary" | "secondary"
 }>
 
