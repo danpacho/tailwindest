@@ -56,42 +56,7 @@ const card = tw.style({
 
 ## Group break conditions
 
-Access break conditions via three types of identifier.
-
-1. `:`: [pseudo classes](https://tailwindcss.com/docs/hover-focus-and-other-states#pseudo-classes)
-2. `::`: [pseudo elements](https://tailwindcss.com/docs/hover-focus-and-other-states#pseudo-elements)
-3. `@`: [media and feature queries](https://tailwindcss.com/docs/hover-focus-and-other-states#media-and-feature-queries)
-
-<Callout>
-    Define [custom break conditions](../apis/Tailwindest#usage-1)
-
-    ```ts
-    type TailwindCustom = Tailwindest<{
-        screens: {
-            conditionA: "@my-condition"
-            conditionB: ":my-pseudo-classes"
-            conditionC: "::my-pseudo-element"
-        }
-    }, {}>
-
-    const customBreakCondition: TailwindCustom = {
-        '@my-condition': {
-            backgroundColor: 'my-condition:bg-amber-300'
-        },
-        ':my-pseudo-classes': {
-            backgroundColor: 'my-pseudo-classes:bg-amber-300'
-        },
-        '@dark': {
-            '::my-pseudo-element': {
-                backgroundColor: 'dark:my-pseudo-element:bg-amber-300'
-            }
-        }
-    }
-    ```
-
-</Callout>
-
-Group break conditions with `:`, `::`, `@` modifiers.
+Group break conditions.
 
 ```tsx
 const nest = tw.style({
@@ -110,9 +75,30 @@ const nest = tw.style({
 })
 ```
 
+<Callout>
+    Define [custom break conditions](../apis/Tailwindest#usage-1)
+
+    ```ts
+    type TailwindCustom = Tailwindest<{
+        screens: "my1" | "my2" | "my3"
+    }>
+
+    const customBreakCondition: TailwindCustom = {
+        my1: {
+            my2: {
+                my3: {
+                    backgroundColor: "my1:my2:my3:bg-red-500"
+                }
+            }
+        }
+    }
+    ```
+
+</Callout>
+
 ## Define utility styles
 
-Extract and define common styles in your components to maximize reusability.
+Extract and define **common styles** in your components to maximize reusability.
 
 ```ts
 const layout = tw.style({
@@ -166,7 +152,7 @@ export { util }
 2. **`style`**: returns styleSheet `object` = input argument
 3. **`compose`**: compose styleSheets into main styleSheet
 
-The `compose` function allows you to **overwrite styles** without the need for a `className` merging library like `tailwind-merge`.
+> The `compose` function allows you to **overwrite styles** without the need for a `className` merging library like `tailwind-merge`.
 
 ### Usage - merge styleSheets
 

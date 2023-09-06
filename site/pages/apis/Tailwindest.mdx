@@ -5,37 +5,31 @@ import { Callout } from "nextra-theme-docs"
 ## Briefly
 
 1. Use to create a type with a custom value defined in **`tailwind.config.js`**.
-2. Use to **pick the `tailwind` type** for `prop` typing.
+2. Use to **pick the `tailwind` property type** for typing.
 
 ## 1. Type definition
 
 ```ts
 type Tailwindest<
-    TailwindGlobal extends TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
-    TailwindStyle extends TailwindStylePlugOption = TailwindDefaultStylePlug
-> = TailwindGlobal["screens"] extends PlugOptionType
-    ? TailwindStyle["aria"] extends PlugOptionType
-        ? Partial<
-              TailwindestTypeSet<
-                  TailwindWithOption<TailwindGlobal, TailwindStyle>,
-                  TailwindestNestKey<TailwindGlobal["screens"]>,
-                  TailwindGlobal["screens"],
-                  TailwindStyle["aria"]
-              >
-          >
-        : Partial<
-              TailwindestTypeSet<
-                  TailwindWithOption<TailwindGlobal, TailwindStyle>,
-                  TailwindestNestKey<TailwindGlobal["screens"]>,
-                  TailwindGlobal["screens"]
-              >
-          >
-    : Partial<
-          TailwindestTypeSet<
-              TailwindWithOption<TailwindGlobal, TailwindStyle>,
-              TailwindestNestKey
-          >
-      >
+    TailwindGlobal extends
+        TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
+    TailwindStyle extends TailwindStylePlugOption = TailwindDefaultStylePlug,
+    TailwindNestConditionPrefix extends
+        TailwindNestConditionIdentifierOption = {
+        breakIdentifier: "@"
+        pseudoClassIdentifier: ":"
+        pseudoElementIdentifier: "::"
+    },
+> = TailwindestTypeSet<
+    TailwindestNestKeys<
+        TailwindNestConditionPrefix,
+        { screens: TailwindGlobal["screens"]; aria: TailwindStyle["aria"] }
+    >,
+    TailwindPlugin<TailwindGlobal, TailwindStyle>,
+    | TailwindNestConditionPrefix["breakIdentifier"]
+    | TailwindNestConditionPrefix["pseudoClassIdentifier"]
+    | TailwindNestConditionPrefix["pseudoElementIdentifier"]
+>
 ```
 
 ## 2. Spec
@@ -53,49 +47,35 @@ type Basic = Tailwindest
 <Callout type="info">Add custom properties at **`tailwind.config.js`**</Callout>
 
 ```ts
-type Customized = Tailwindest<TailwindGlobal, TailwindStyle>
+type CustomizedStyle = Tailwindest<TailwindGlobal, TailwindStyle>
+```
+
+3. customize break condition identifier prefix
+
+```ts
+type CustomizedIdentifier = Tailwindest<
+    TailwindGlobal,
+    TailwindStyle,
+    CustomizedBreakIdentifier
+>
 ```
 
 ### Generic Parameter: `TailwindGlobal`
 
 #### type
 
-**All property is `[ optional ]`**
+**All property is `[optional]`**
 
 <Callout type="info">type **`Custom`** = `string literal union`</Callout>
 
 ```ts
+type Custom = "write string literal union"
+
 type TailwindGlobal = {
     color?: Custom
     opacity?: Custom
     sizing?: Custom
-    screens?: {
-        conditionA?: ShouldBeOneStringLiteral
-        conditionB?: ShouldBeOneStringLiteral
-        conditionC?: ShouldBeOneStringLiteral
-        conditionD?: ShouldBeOneStringLiteral
-        conditionE?: ShouldBeOneStringLiteral
-        conditionF?: ShouldBeOneStringLiteral
-        conditionG?: ShouldBeOneStringLiteral
-        conditionH?: ShouldBeOneStringLiteral
-        conditionI?: ShouldBeOneStringLiteral
-        conditionJ?: ShouldBeOneStringLiteral
-        conditionK?: ShouldBeOneStringLiteral
-        conditionL?: ShouldBeOneStringLiteral
-        conditionM?: ShouldBeOneStringLiteral
-        conditionN?: ShouldBeOneStringLiteral
-        conditionO?: ShouldBeOneStringLiteral
-        conditionP?: ShouldBeOneStringLiteral
-        conditionQ?: ShouldBeOneStringLiteral
-        conditionR?: ShouldBeOneStringLiteral
-        conditionS?: ShouldBeOneStringLiteral
-        conditionT?: ShouldBeOneStringLiteral
-        conditionU?: ShouldBeOneStringLiteral
-        conditionV?: ShouldBeOneStringLiteral
-        conditionW?: ShouldBeOneStringLiteral
-        conditionY?: ShouldBeOneStringLiteral
-        conditionZ?: ShouldBeOneStringLiteral
-    }
+    screens?: Custom
 }
 ```
 
@@ -109,74 +89,110 @@ type TailwindGlobal = {
 
 -   **`sizing`**: padding, margin, ...etc,
 
--   **`screens`**: break condition like `@md`, `@lg`, ...etc,
+-   **`screens`**: break condition like `md`, `lg`, ...etc,
 
-<Callout type="warning">
-    `ShouldBeOneStringLiteral`: 
-    **SHOULD BE ONLY ONE** `string literal union` type
+### Example
 
-    ```ts
-    screens: {
-        conditionA: ShouldBeOneStringLiteral
-        conditionB: ShouldBeOneStringLiteral
-        conditionC: ShouldBeOneStringLiteral
-        //...
-    }
-    ```
+Define all the global values via `string literal union` types.
 
-    Do like this
-    ```ts
-    screens: {
-        conditionA: "@good"
-        conditionB: "@nice"
-    }
-    ```
-
-    Don't do like this
-    ```ts
-    screens: {
-        conditionA: "@don_t" | "@do_this" | "@plz"
-    }
-    ```
-
-</Callout>
+```ts
+type MyCustom = Tailwindest<{
+    color: "my-color-1" | "my-color-2" | "my-color-3"
+    opacity: "15" | "25" | "35" | "45" | "55"
+    sizing: "0.1" | "0.2" | "0.3" | "0.4" | "0.5"
+    screens: "iphone7" | "ipad" | "mac13" | "mac14" | "mac16" | "imac"
+}>
+```
 
 ### Generic Parameter: `TailwindStyle`
 
 #### Usage
 
-Add specific property
+Add specific style's custom property, like `borderRadius`, `aria`, ...etc
 
 ### Example
 
 #### Define custom tailwind type
 
+Define specific style property's custom value via `string literal union` types.
+
 ```ts
 type MyCustom = Tailwindest<
-    {
-        color: "my-color-1" | "my-color-2" | "my-color-3"
-        opacity: "15" | "25" | "35" | "45" | "55"
-        sizing: "0.1" | "0.2" | "0.3" | "0.4" | "0.5"
-        screens: {
-            conditionA: "@iphone7"
-            conditionB: "@ipad"
-            conditionC: "@mac13"
-            conditionD: "@mac14"
-            conditionE: "@mac16"
-            conditionF: "@imac"
-        }
-    },
+    {},
     {
         accentColor: "my-accent-1" | "my-accent-2"
         borderRadius: "my-rad-1" | "my-rad-2"
-        aria: {
-            conditionA: "my-aria"
-        }
+        aria: "my-aria1" | "my-aria2" | "my-aria3"
     }
 >
 ```
 
-#### Pick specific tailwind value
+### Generic Parameter: `CustomizedBreakIdentifier`
+
+#### Usage
+
+Customize break condition identifier prefix.
+
+<Callout type="info">
+Three types of break condition identifier prefix are available.
+
+1. **breakIdentifier**: `md`, `lg`, `aria-*`, ...etc
+2. **pseudoClassIdentifier**: `hover`, `focus`, ...etc
+3. **pseudoElementIdentifier**: `before`, `after`, ...etc
+
+</Callout>
+
+Default value is like this.
+
+```ts
+{
+    breakIdentifier: "@"
+    pseudoClassIdentifier: ":"
+    pseudoElementIdentifier: "::"
+}
+```
+
+### Example
+
+#### Define custom break identifier prefix
+
+Define identifier prefix via `string literal union` types.
+
+<Callout type="warning">
+    All the identifier should be only **one** `string literal`
+</Callout>
+
+```ts
+type MyCustom = Tailwindest<
+    {},
+    {},
+    {
+        breakIdentifier: "@"
+        pseudoClassIdentifier: "$"
+        pseudoElementIdentifier: "::"
+    }
+>
+```
+
+Then you can access break conditions like this.
+
+```ts /"@md"/ /$hover/ /"::before"/
+const tw = createTools<MyCustom>()
+
+const box = tw.style({
+    "@md": {
+        $hover: {
+            "::before": {
+                //...
+            },
+        },
+    },
+    $hover: {},
+    "::before": {},
+})
+```
+
+### Pick specific tailwind value
 
 <Callout type="info">
     If you want to extract type of `tailwindcss`, wrap up `Tailwindest` type
