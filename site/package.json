@@ -1,6 +1,7 @@
 {
     "name": "tailwindest-documentation",
     "version": "2.0.0",
+    "private": true,
     "description": "tailwindest official documentation",
     "scripts": {
         "dev": "next dev",
