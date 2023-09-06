@@ -22,6 +22,7 @@ import { TailwindTextIndentType } from "./@text.indent"
 import { TailwindTextOverflowType } from "./@text.overflow"
 import { TailwindTextTransformType } from "./@text.transform"
 import { TailwindTextUnderlineOffsetType } from "./@text.underline.offset"
+import { TailwindVerticalAlignType } from "./@vertical.align"
 import { TailwindWhitespaceType } from "./@whitespace"
 
 export interface TailwindFont<
@@ -88,4 +89,5 @@ export interface TailwindFont<
         TailwindLineClampType<FontPlug["lineClamp"]>,
         TailwindHyphensType<FontPlug["hyphens"]>,
         TailwindListStylePositionType,
+        TailwindVerticalAlignType,
         TailwindWhitespaceType {}
