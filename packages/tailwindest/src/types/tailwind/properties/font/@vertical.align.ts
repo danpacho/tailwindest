@@ -1,3 +1,5 @@
+import type { TailwindArbitrary } from "../common/@arbitrary"
+
 type TailwindVerticalAlignVariants =
     | "baseline"
     | "top"
@@ -7,6 +9,7 @@ type TailwindVerticalAlignVariants =
     | "text-bottom"
     | "sub"
     | "super"
+    | TailwindArbitrary
 type TailwindVerticalAlign = `align-${TailwindVerticalAlignVariants}`
 export type TailwindVerticalAlignType = {
     /**
