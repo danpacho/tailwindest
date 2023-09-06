@@ -98,40 +98,60 @@ export type TailwindNestConditionIdentifierOption = {
      */
     pseudoElementIdentifier: string
 }
-type TailwindNestConditions = {
+type TailwindestNestConditions = {
     break: string
     pseudoClass: string
     pseudoElement: string
 }
 
-type GetTailwindNestKeys<
-    NestConditions extends TailwindNestConditions,
+type GetTailwindestBaseNestKeys<
     IdentifierOption extends TailwindNestConditionIdentifierOption,
+    NestConditions extends TailwindestNestConditions,
 > =
     | `${IdentifierOption["breakIdentifier"]}${NestConditions["break"]}`
     | `${IdentifierOption["pseudoClassIdentifier"]}${NestConditions["pseudoClass"]}`
     | `${IdentifierOption["pseudoElementIdentifier"]}${NestConditions["pseudoElement"]}`
 
-type TailwindNestPluginOptions = {
+type GetTailwindestCustomScreenKeys<
+    IdentifierOption extends TailwindNestConditionIdentifierOption,
+    PluginOptions extends TailwindestNestPluginOptions,
+> = `${IdentifierOption["breakIdentifier"]}${Pluggable<
+    PluginOptions["screens"]
+>}`
+
+/**
+ * @description aria prefix of custom properties
+ * @example
+ * ```ts
+ * type MyAria = "checked" | "disabled"
+ * type Result = "aria-checked" | "aria-disabled"
+ * ```
+ */
+type ARIA_PREFIX = "aria-"
+
+type GetTailwindestCustomAriaKeys<
+    IdentifierOption extends TailwindNestConditionIdentifierOption,
+    PluginOptions extends TailwindestNestPluginOptions,
+> = `${IdentifierOption["breakIdentifier"]}${ARIA_PREFIX}${Pluggable<
+    PluginOptions["aria"]
+>}`
+
+type TailwindestNestPluginOptions = {
     screens: UndefinableString
     aria: UndefinableString
 }
 
 export type TailwindestNestKeys<
     IdentifierOption extends TailwindNestConditionIdentifierOption,
-    PluginOptions extends TailwindNestPluginOptions,
+    PluginOptions extends TailwindestNestPluginOptions,
 > =
-    | GetTailwindNestKeys<
+    | GetTailwindestBaseNestKeys<
+          IdentifierOption,
           {
               break: TailwindBreakConditions
               pseudoClass: TailwindPseudoClassConditions
               pseudoElement: TailwindPseudoElementConditions
-          },
-          IdentifierOption
+          }
       >
-    | `${IdentifierOption["breakIdentifier"]}${Pluggable<
-          PluginOptions["screens"]
-      >}`
-    | `${IdentifierOption["breakIdentifier"]}${Pluggable<
-          PluginOptions["aria"]
-      >}`
+    | GetTailwindestCustomScreenKeys<IdentifierOption, PluginOptions>
+    | GetTailwindestCustomAriaKeys<IdentifierOption, PluginOptions>
