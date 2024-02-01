@@ -15,17 +15,19 @@ import { TailwindTouchActionType } from "./@touch.action"
 import { TailwindUserSelectType } from "./@user.select"
 import { TailwindWillChangeType } from "./@will.change"
 
+export interface TailwindInteractivityPlug {
+    cursor?: string
+    willChange?: string
+    caretColor?: string
+    accentColor?: string
+    scrollMargin?: string
+    scrollPadding?: string
+}
+
 export interface TailwindInteractivity<
     TailwindColor extends string,
     TailwindSpacing extends string,
-    InteractivityPlug extends {
-        cursor?: string
-        willChange?: string
-        caretColor?: string
-        accentColor?: string
-        scrollMargin?: string
-        scrollPadding?: string
-    } = {
+    InteractivityPlug extends TailwindInteractivityPlug = {
         cursor: ""
         willChange: ""
         caretColor: ""

@@ -39,15 +39,17 @@ type TailwindTranslateVariants =
     | "full"
     | TailwindArbitrary
 
+export interface TailwindTransformsPlug {
+    skew?: string
+    scale?: string
+    rotate?: string
+    translate?: string
+    transformOrigin?: string
+}
+
 export interface TailwindTransforms<
     TailwindSpacing extends string,
-    TransformsPlug extends {
-        skew?: string
-        scale?: string
-        rotate?: string
-        translate?: string
-        transformOrigin?: string
-    } = {
+    TransformsPlug extends TailwindTransformsPlug = {
         skew: ""
         scale: ""
         rotate: ""

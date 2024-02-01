@@ -1,3 +1,4 @@
+import { TailwindSizingPlug } from ".."
 import {
     ShortTailwindHeightType,
     ShortTailwindMaxHeightType,
@@ -11,14 +12,8 @@ import {
 
 export interface ShortTailwindSizing<
     TailwindSpacing extends string,
-    SizingPlug extends {
-        width?: string
-        maxWidth?: string
-        minWidth?: string
-        height?: string
-        maxHeight?: string
-        minHeight?: string
-    } = {
+    SizingPlug extends TailwindSizingPlug = {
+        size: ""
         width: ""
         maxWidth: ""
         minWidth: ""

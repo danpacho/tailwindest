@@ -2,6 +2,12 @@ import { TailwindFillType } from "./@fill"
 import { TailwindStrokeType } from "./@stroke"
 import { TailwindStrokeWidthType } from "./@stroke.width"
 
+export interface TailwindSvgPlug {
+    fill?: string
+    stroke?: string
+    strokeWidth?: string
+}
+
 export interface TailwindSvg<
     TailwindColor extends string,
     SvgPlug extends {

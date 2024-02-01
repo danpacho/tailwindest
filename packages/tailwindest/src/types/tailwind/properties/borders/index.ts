@@ -21,22 +21,24 @@ import { TailwindRingOffsetColorType } from "./@ring.offset.color"
 import { TailwindRingOffsetWidthType } from "./@ring.offset.width"
 import { TailwindRingWidthType } from "./@ring.width"
 
+export interface TailwindBordersPlug {
+    borderColor?: string
+    borderRadius?: string
+    borderWidth?: string
+    divideColor?: string
+    divideWidth?: string
+    outlineColor?: string
+    outlineOffset?: string
+    outlineWidth?: string
+    ringOffsetColor?: string
+    ringOffsetWidth?: string
+    ringColor?: string
+    ringWidth?: string
+}
+
 export interface TailwindBorders<
     TailwindColor extends string,
-    BordersPlug extends {
-        borderColor?: string
-        borderRadius?: string
-        borderWidth?: string
-        divideColor?: string
-        divideWidth?: string
-        outlineColor?: string
-        outlineOffset?: string
-        outlineWidth?: string
-        ringOffsetColor?: string
-        ringOffsetWidth?: string
-        ringColor?: string
-        ringWidth?: string
-    } = {
+    BordersPlug extends TailwindBordersPlug = {
         borderColor: ""
         borderRadius: ""
         borderWidth: ""
