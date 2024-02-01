@@ -17,15 +17,17 @@ import { TailwindPositionType, TailwindPositionValueType } from "./@position"
 import { TailwindVisibilityType } from "./@visibility"
 import { TailwindZIndexType } from "./@z.index"
 
+export interface TailwindLayoutPlug {
+    inset?: string
+    zIndex?: string
+    columns?: string
+    aspectRatio?: string
+    objectPosition?: string
+}
+
 export interface TailwindLayout<
     GlobalPlug extends string,
-    LayoutPlug extends {
-        inset?: string
-        zIndex?: string
-        columns?: string
-        aspectRatio?: string
-        objectPosition?: string
-    } = {
+    LayoutPlug extends TailwindLayoutPlug = {
         inset: ""
         zIndex: ""
         columns: ""

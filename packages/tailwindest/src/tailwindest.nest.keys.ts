@@ -1,7 +1,8 @@
-import { TailwindBreakConditions } from "./types/nest.keys/break"
-import { TailwindPseudoClassConditions } from "./types/nest.keys/pseudo.class"
-import { TailwindPseudoElementConditions } from "./types/nest.keys/pseudo.element"
-import { Pluggable } from "./types/plugin"
+import type { TailwindBreakConditions } from "./types/nest.keys/break"
+import type { TailwindGlobalConditions } from "./types/nest.keys/global"
+import type { TailwindPseudoClassConditions } from "./types/nest.keys/pseudo.class"
+import type { TailwindPseudoElementConditions } from "./types/nest.keys/pseudo.element"
+import type { Pluggable } from "./types/plugin"
 import type { UndefinableString } from "./utils"
 
 export type TailwindNestConditionIdentifierOption = {
@@ -145,6 +146,7 @@ export type TailwindestNestKeys<
     IdentifierOption extends TailwindNestConditionIdentifierOption,
     PluginOptions extends TailwindestNestPluginOptions,
 > =
+    | TailwindGlobalConditions
     | GetTailwindestBaseNestKeys<
           IdentifierOption,
           {

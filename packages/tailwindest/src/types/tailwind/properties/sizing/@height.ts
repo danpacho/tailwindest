@@ -1,6 +1,8 @@
 import { PlugBase, Pluggable } from "../../../plugin"
 import { MinSizingVariants, SizingVariants } from "./@sizing.variants"
 
+type HeightFeature = "svh" | "lvh" | "dvh"
+
 type TailwindHeightVariants<TailwindSpacing extends string> =
     | SizingVariants<TailwindSpacing>
     | "1/2"
@@ -27,20 +29,31 @@ export type TailwindHeightType<
      *@unit Gap `1` = `4px` = `0.25rem`
      *@see {@link https://tailwindcss.com/docs/height height}
      */
-    height: `h-${TailwindHeightVariants<TailwindSpacing> | Pluggable<Plug>}`
+    height: `h-${
+        | TailwindHeightVariants<TailwindSpacing>
+        | HeightFeature
+        | Pluggable<Plug>}`
 }
 
-type TailwindMinHeight<Plug extends PlugBase = ""> = `min-h-${
+type TailwindMinHeight<
+    TailwindSpacing extends string,
+    Plug extends PlugBase = "",
+> = `min-h-${
     | "screen"
     | MinSizingVariants
+    | TailwindSpacing
+    | HeightFeature
     | Pluggable<Plug>}`
-export type TailwindMinHeightType<Plug extends PlugBase = ""> = {
+export type TailwindMinHeightType<
+    TailwindSpacing extends string,
+    Plug extends PlugBase = "",
+> = {
     /**
      *@description Utilities for setting the minimum height of an element.
      *@unit Gap `1` = `4px` = `0.25rem`
      *@see {@link https://tailwindcss.com/docs/min-height min-height}
      */
-    minHeight: TailwindMinHeight<Plug>
+    minHeight: TailwindMinHeight<TailwindSpacing, Plug>
 }
 
 export type TailwindMaxHeightType<
@@ -55,5 +68,6 @@ export type TailwindMaxHeightType<
     maxHeight: `max-h-${
         | "screen"
         | Exclude<SizingVariants<TailwindSpacing>, "auto">
+        | HeightFeature
         | Pluggable<Plug>}`
 }

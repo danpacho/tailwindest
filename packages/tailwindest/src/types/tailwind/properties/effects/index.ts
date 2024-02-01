@@ -4,6 +4,11 @@ import { TailwindBoxShadowColorType } from "./@box.shadow.color"
 import { TailwindMixBlendModeType } from "./@mix.blend.mode"
 import { TailwindOpacityType } from "./@opacity"
 
+export interface TailwindEffectsPlug {
+    boxShadow?: string
+    boxShadowColor?: string
+}
+
 export interface TailwindEffects<
     TailwindColor extends string,
     TailwindOpacity extends string,

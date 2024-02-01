@@ -1,5 +1,11 @@
 # tailwindest
 
+## 2.3.0
+
+### Minor Changes
+
+-   Support tailwindcss v3.4
+
 ## 2.2.1
 
 ### Patch Changes

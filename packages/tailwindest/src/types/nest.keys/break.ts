@@ -8,6 +8,7 @@ export type TailwindBreakConditions =
     | "print"
     | "rtl"
     | "ltr"
+    | "forced-colors"
     | "sm"
     | "md"
     | "lg"

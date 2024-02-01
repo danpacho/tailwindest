@@ -54,6 +54,7 @@ const MEDIA_CONDITIONS = [
     "print",
     "rtl",
     "ltr",
+    "forced-colors",
 ]
 
 const SCREEN_CONDITIONS = [
@@ -79,6 +80,8 @@ const ARIA_CONDITIONS = [
     "aria-required",
     "aria-selected",
 ]
+
+const CHILD_CONDITIONS = ["*"]
 
 const THEME_CONDITION = ["dark"]
 
@@ -137,6 +140,11 @@ const buildData = [
         fileName: "pseudo.element",
         typeName: "TailwindPseudoElementConditions",
         types: PSEUDO_ELEMENTS,
+    },
+    {
+        fileName: "global",
+        typeName: "TailwindGlobalConditions",
+        types: CHILD_CONDITIONS,
     },
 ]
 

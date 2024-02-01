@@ -9,15 +9,17 @@ import { TailwindBackgroundSizeType } from "./@background.size"
 import { TailwindBackgroundImageType } from "./@gradient"
 import { TailwindGradientColorStopsType } from "./@gradient.color.stops"
 
+export interface TailwindBackgroundPlug {
+    backgroundSize?: string
+    backgroundColor?: string
+    backgroundImage?: string
+    backgroundPosition?: string
+    gradientColorStops?: string
+}
+
 export interface TailwindBackgrounds<
     TailwindColor extends string,
-    BackgroundsPlug extends {
-        backgroundSize?: string
-        backgroundColor?: string
-        backgroundImage?: string
-        backgroundPosition?: string
-        gradientColorStops?: string
-    } = {
+    BackgroundsPlug extends TailwindBackgroundPlug = {
         backgroundSize: ""
         backgroundColor: ""
         backgroundImage: ""

@@ -1,4 +1,4 @@
-import {
+import type {
     TailwindNestConditionIdentifierOption,
     TailwindestNestKeys,
 } from "./tailwindest.nest.keys"
@@ -28,17 +28,22 @@ type TailwindestTypeSet<
  * // Plug customized type to createTools generic
  * type Custom = Tailwindest<
  *    {
- *        // Add color, sizing, screens global property
+ *        // Global style custom property
  *        color: "my-color1" | "my-color2"
  *        sizing: "0.25" | "0.5" | "0.75"
  *        screens: "@ipad" | "@iphone13pro" | "@iphone13proMax"
  *    },
  *    {
- *        // Add "emoji", "my-shadow1" & "my-shadow2"
+ *        // Specific style custom property
  *        listStyleType: "emoji"
  *        shadow: "my-shadow1" | "my-shadow2"
+ *    },
+ *    {
+ *        // Customize condition identifiers
+ *        breakIdentifier: "@",
+ *        pseudoClassIdentifier: ":",
+ *        pseudoElementIdentifier: "::",
  *    }
- * >
  *
  * export const tw = createTools<Custom>()
  * @description Pick specific type

@@ -45,12 +45,13 @@ import {
     TailwindGridTemplateRowsType,
 } from "./@grid.template"
 
+interface TailwindFlexGridCommonPlug {
+    gap?: string
+    order?: string
+}
 export interface TailwindFlexGridCommon<
     TailwindSpacing extends string,
-    FlexGridCommonPlug extends {
-        gap?: string
-        order?: string
-    } = {
+    FlexGridCommonPlug extends TailwindFlexGridCommonPlug = {
         gap: ""
         order: ""
     },
@@ -63,14 +64,16 @@ export interface TailwindFlexGridCommon<
             TailwindSpacing | Pluggable<FlexGridCommonPlug["gap"]>
         > {}
 
+interface TailwindFlexPlug {
+    flex?: string
+    flexBasis?: string
+    flexGrow?: string
+    flexShrink?: string
+}
+
 export interface TailwindFlex<
     TailwindSpacing extends string,
-    FlexPlug extends {
-        flex?: string
-        flexBasis?: string
-        flexGrow?: string
-        flexShrink?: string
-    } = {
+    FlexPlug extends TailwindFlexPlug = {
         flex: ""
         flexBasis: ""
         flexGrow: ""
@@ -83,19 +86,21 @@ export interface TailwindFlex<
         TailwindFlexShrinkType<FlexPlug["flexShrink"]>,
         TailwindFlexBasisType<TailwindSpacing, FlexPlug["flexBasis"]> {}
 
+interface TailwindGridPlug {
+    gridAutoColumns?: string
+    gridAutoRows?: string
+    gridColumn?: string
+    gridColumnStart?: string
+    gridColumnEnd?: string
+    gridRow?: string
+    gridRowEnd?: string
+    gridRowStart?: string
+    gridTemplateColumns?: string
+    gridTemplateRows?: string
+}
+
 export interface TailwindGrid<
-    GridPlug extends {
-        gridAutoColumns?: string
-        gridAutoRows?: string
-        gridColumn?: string
-        gridColumnStart?: string
-        gridColumnEnd?: string
-        gridRow?: string
-        gridRowEnd?: string
-        gridRowStart?: string
-        gridTemplateColumns?: string
-        gridTemplateRows?: string
-    } = {
+    GridPlug extends TailwindGridPlug = {
         gridAutoColumns: ""
         gridAutoRows: ""
         gridColumn: ""
@@ -123,3 +128,8 @@ export interface TailwindGrid<
         TailwindGridAutoColumnsType<GridPlug["gridAutoColumns"]>,
         TailwindGridTemplateRowsType<GridPlug["gridTemplateRows"]>,
         TailwindGridTemplateColumnsType<GridPlug["gridTemplateColumns"]> {}
+
+export interface TailwindFlexGridPlug
+    extends TailwindFlexGridCommonPlug,
+        TailwindFlexPlug,
+        TailwindGridPlug {}

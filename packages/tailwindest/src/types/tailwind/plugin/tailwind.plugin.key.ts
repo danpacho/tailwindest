@@ -1,3 +1,20 @@
+import type {
+    TailwindBackgroundPlug,
+    TailwindBordersPlug,
+    TailwindEffectsPlug,
+    TailwindFiltersPlug,
+    TailwindFlexGridPlug,
+    TailwindFontPlug,
+    TailwindInteractivityPlug,
+    TailwindLayoutPlug,
+    TailwindSizingPlug,
+    TailwindSpacingPlug,
+    TailwindSvgPlug,
+    TailwindTablesPlug,
+    TailwindTransformsPlug,
+    TailwindTransitionAnimationPlug,
+} from "../properties"
+
 /**
  * @description Global style supported list
  * @see {@link https://tailwindcss.com/docs/theme#configuration-reference configuration reference}
@@ -9,106 +26,19 @@ export type TailwindGlobalPluginKey = "color" | "opacity" | "sizing"
  * @see {@link https://tailwindcss.com/docs/theme#configuration-reference configuration reference}
  */
 export type TailwindStylePluginKey =
+    // aria attributes
     | "aria"
-    | "accentColor"
-    | "animation"
-    | "aspectRatio"
-    | "backdropBlur"
-    | "backdropBrightness"
-    | "backdropContrast"
-    | "backdropGrayscale"
-    | "backdropHueRotate"
-    | "backdropInvert"
-    | "backdropOpacity"
-    | "backdropSaturate"
-    | "backdropSepia"
-    | "backgroundColor"
-    | "backgroundImage"
-    | "backgroundPosition"
-    | "backgroundSize"
-    | "blur"
-    | "brightness"
-    | "borderColor"
-    | "borderRadius"
-    | "borderSpacing"
-    | "borderWidth"
-    | "boxShadow"
-    | "boxShadowColor"
-    | "columns"
-    | "caretColor"
-    | "contrast"
-    | "content"
-    | "cursor"
-    | "divideColor"
-    | "divideWidth"
-    | "dropShadow"
-    | "fill"
-    | "grayscale"
-    | "hueRotate"
-    | "hyphens"
-    | "invert"
-    | "flex"
-    | "flexBasis"
-    | "flexGrow"
-    | "flexShrink"
-    | "fontFamily"
-    | "fontSize"
-    | "fontWeight"
-    | "gap"
-    | "gradientColorStops"
-    | "gridAutoColumns"
-    | "gridAutoRows"
-    | "gridColumn"
-    | "gridColumnEnd"
-    | "gridColumnStart"
-    | "gridRow"
-    | "gridRowStart"
-    | "gridRowEnd"
-    | "gridTemplateColumns"
-    | "gridTemplateRows"
-    | "height"
-    | "inset"
-    | "letterSpacing"
-    | "lineHeight"
-    | "lineClamp"
-    | "listStyleType"
-    | "listStyleImage"
-    | "margin"
-    | "maxHeight"
-    | "maxWidth"
-    | "minHeight"
-    | "minWidth"
-    | "objectPosition"
-    | "order"
-    | "padding"
-    | "outlineColor"
-    | "outlineOffset"
-    | "outlineWidth"
-    | "ringColor"
-    | "ringOffsetColor"
-    | "ringOffsetWidth"
-    | "ringWidth"
-    | "rotate"
-    | "saturate"
-    | "scale"
-    | "scrollMargin"
-    | "scrollPadding"
-    | "sepia"
-    | "skew"
-    | "space"
-    | "stroke"
-    | "strokeWidth"
-    | "textColor"
-    | "textDecorationColor"
-    | "textDecorationThickness"
-    | "textUnderlineOffset"
-    | "textIndent"
-    | "transformOrigin"
-    | "transitionDelay"
-    | "transitionDuration"
-    | "transitionProperty"
-    | "transitionTimingFunction"
-    | "translate"
-    | "width"
-    | "willChange"
-    | "zIndex"
+    | Exclude<keyof TailwindBackgroundPlug, "gradientColorStops">
+    | keyof TailwindTransitionAnimationPlug
+    | keyof TailwindTransformsPlug
+    | keyof TailwindTablesPlug
+    | keyof TailwindSvgPlug
+    | keyof TailwindSpacingPlug
+    | keyof TailwindLayoutPlug
+    | keyof TailwindBordersPlug
+    | keyof TailwindEffectsPlug
+    | keyof TailwindFiltersPlug
+    | keyof TailwindFlexGridPlug
+    | keyof TailwindFontPlug
+    | keyof TailwindInteractivityPlug
+    | keyof TailwindSizingPlug

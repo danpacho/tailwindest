@@ -22,28 +22,31 @@ import { TailwindTextIndentType } from "./@text.indent"
 import { TailwindTextOverflowType } from "./@text.overflow"
 import { TailwindTextTransformType } from "./@text.transform"
 import { TailwindTextUnderlineOffsetType } from "./@text.underline.offset"
+import { TailwindTextWrapType } from "./@text.wrap"
 import { TailwindVerticalAlignType } from "./@vertical.align"
 import { TailwindWhitespaceType } from "./@whitespace"
 
+export interface TailwindFontPlug {
+    content?: string
+    fontFamily?: string
+    fontSize?: string
+    fontWeight?: string
+    textColor?: string
+    textIndent?: string
+    textDecorationColor?: string
+    textDecorationThickness?: string
+    textUnderlineOffset?: string
+    letterSpacing?: string
+    lineHeight?: string
+    lineClamp?: string
+    listStyleType?: string
+    listStyleImage?: string
+    hyphens?: string
+}
+
 export interface TailwindFont<
     TailwindColor extends string,
-    FontPlug extends {
-        content?: string
-        fontFamily?: string
-        fontSize?: string
-        fontWeight?: string
-        textColor?: string
-        textIndent?: string
-        textDecorationColor?: string
-        textDecorationThickness?: string
-        textUnderlineOffset?: string
-        letterSpacing?: string
-        lineHeight?: string
-        lineClamp?: string
-        listStyleType?: string
-        listStyleImage?: string
-        hyphens?: string
-    } = {
+    FontPlug extends TailwindFontPlug = {
         content: ""
         fontFamily: ""
         fontSize: ""
@@ -60,7 +63,8 @@ export interface TailwindFont<
         listStyleImage: ""
         hyphens: ""
     },
-> extends TailwindTextAlignType,
+> extends TailwindTextWrapType,
+        TailwindTextAlignType,
         TailwindTextOverflowType,
         TailwindTextTransformType,
         TailwindTextDecorationType,

@@ -41,14 +41,16 @@ type TailwindTransitionDelayVariants =
     | "1000"
     | TailwindArbitrary
 
+export interface TailwindTransitionAnimationPlug {
+    animation?: string
+    transitionDelay?: string
+    transitionDuration?: string
+    transitionProperty?: string
+    transitionTimingFunction?: string
+}
+
 export interface TailwindTransitionAnimation<
-    TransitionAnimationPlug extends {
-        animation?: string
-        transitionDelay?: string
-        transitionDuration?: string
-        transitionProperty?: string
-        transitionTimingFunction?: string
-    } = {
+    TransitionAnimationPlug extends TailwindTransitionAnimationPlug = {
         animation: ""
         transitionDelay: ""
         transitionDuration: ""

@@ -1,4 +1,3 @@
-import { PluginOption } from "../../../plugin"
 import { TailwindBackdropOpacityType } from "./@backdrop.opacity"
 import { TailwindBackdropBlurType, TailwindBlurType } from "./@blur"
 import {
@@ -19,32 +18,48 @@ import { TailwindBackdropInvertType, TailwindInvertType } from "./@invert"
 import { TailwindBackdropSaturateType, TailwindSaturateType } from "./@saturate"
 import { TailwindBackdropSepiaType, TailwindSepiaType } from "./@sepia"
 
-type FiltersPluginKey =
-    | "dropShadow"
-    | "blur"
-    | "contrast"
-    | "grayscale"
-    | "hueRotate"
-    | "invert"
-    | "opacity"
-    | "saturate"
-    | "sepia"
-    | "backdropBrightness"
-    | "backdropBlur"
-    | "backdropContrast"
-    | "backdropGrayscale"
-    | "backdropHueRotate"
-    | "backdropInvert"
-    | "backdropOpacity"
-    | "backdropSaturate"
-    | "backdropSepia"
-    | "brightness"
+export interface TailwindFiltersPlug {
+    dropShadow?: string
+    blur?: string
+    contrast?: string
+    grayscale?: string
+    hueRotate?: string
+    invert?: string
+    saturate?: string
+    sepia?: string
+    backdropBrightness?: string
+    backdropBlur?: string
+    backdropContrast?: string
+    backdropGrayscale?: string
+    backdropHueRotate?: string
+    backdropInvert?: string
+    backdropOpacity?: string
+    backdropSaturate?: string
+    backdropSepia?: string
+    brightness?: string
+}
 
 export interface TailwindFilters<
-    FiltersPlug extends PluginOption<FiltersPluginKey> = PluginOption<
-        FiltersPluginKey,
-        ""
-    >,
+    FiltersPlug extends TailwindFiltersPlug = {
+        dropShadow: ""
+        blur: ""
+        contrast: ""
+        grayscale: ""
+        hueRotate: ""
+        invert: ""
+        saturate: ""
+        sepia: ""
+        backdropBrightness: ""
+        backdropBlur: ""
+        backdropContrast: ""
+        backdropGrayscale: ""
+        backdropHueRotate: ""
+        backdropInvert: ""
+        backdropOpacity: ""
+        backdropSaturate: ""
+        backdropSepia: ""
+        brightness: ""
+    },
 > extends TailwindBlurType<FiltersPlug["blur"]>,
         TailwindBrightnessType<FiltersPlug["brightness"]>,
         TailwindContrastType<FiltersPlug["contrast"]>,
