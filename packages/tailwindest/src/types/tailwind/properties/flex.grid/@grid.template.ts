@@ -1,7 +1,8 @@
 import { PlugBase, Pluggable } from "../../../plugin"
 import { TailwindArbitrary } from "../common/@arbitrary"
 
-type TailwindGridTemplateRowsVariants<Plug extends PlugBase = ""> =
+type TailwindGridTemplateVariants<Plug extends PlugBase = ""> = Pluggable<
+    | "subgrid"
     | "none"
     | "1"
     | "2"
@@ -9,11 +10,18 @@ type TailwindGridTemplateRowsVariants<Plug extends PlugBase = ""> =
     | "4"
     | "5"
     | "6"
-    | Pluggable<Plug>
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | Plug
     | TailwindArbitrary
+>
 
 type TailwindGridTemplateRows<Plug extends PlugBase = ""> =
-    `grid-rows-${TailwindGridTemplateRowsVariants<Plug>}`
+    `grid-rows-${TailwindGridTemplateVariants<Plug>}`
 export type TailwindGridTemplateRowsType<Plug extends PlugBase = ""> = {
     /**
      *@description Utilities for specifying the rows in a grid layout.
@@ -22,27 +30,8 @@ export type TailwindGridTemplateRowsType<Plug extends PlugBase = ""> = {
     gridTemplateRows: TailwindGridTemplateRows<Plug>
 }
 
-type TailwindGridTemplateColumnsVariants<Plug extends PlugBase = ""> =
-    Pluggable<
-        | "none"
-        | "1"
-        | "2"
-        | "3"
-        | "4"
-        | "5"
-        | "6"
-        | "7"
-        | "8"
-        | "9"
-        | "10"
-        | "11"
-        | "12"
-        | Plug
-        | TailwindArbitrary
-    >
-
 type TailwindGridTemplateColumns<Plug extends PlugBase = ""> =
-    `grid-cols-${TailwindGridTemplateColumnsVariants<Plug>}`
+    `grid-cols-${TailwindGridTemplateVariants<Plug>}`
 export type TailwindGridTemplateColumnsType<Plug extends PlugBase = ""> = {
     /**
      *@description Utilities for specifying the columns in a grid layout.
