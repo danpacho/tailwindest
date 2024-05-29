@@ -25,6 +25,7 @@ import { TailwindTextUnderlineOffsetType } from "./@text.underline.offset"
 import { TailwindTextWrapType } from "./@text.wrap"
 import { TailwindVerticalAlignType } from "./@vertical.align"
 import { TailwindWhitespaceType } from "./@whitespace"
+import { TailwindWordBreakType } from "./@word.break"
 
 export interface TailwindFontPlug {
     content?: string
@@ -94,4 +95,5 @@ export interface TailwindFont<
         TailwindHyphensType<FontPlug["hyphens"]>,
         TailwindListStylePositionType,
         TailwindVerticalAlignType,
-        TailwindWhitespaceType {}
+        TailwindWhitespaceType,
+        TailwindWordBreakType {}
