@@ -44,7 +44,7 @@ type TailwindestTypeSet<
  *        pseudoClassIdentifier: ":",
  *        pseudoElementIdentifier: "::",
  *    }
- *
+ * >
  * export const tw = createTools<Custom>()
  * @description Pick specific type
  * @example
