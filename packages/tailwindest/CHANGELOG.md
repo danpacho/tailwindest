@@ -1,5 +1,11 @@
 # tailwindest
 
+## 2.3.1
+
+### Patch Changes
+
+-   add missing word-break property
+
 ## 2.3.0
 
 ### Minor Changes
