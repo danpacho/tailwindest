@@ -1,4 +1,4 @@
-type TailwindFontStyle = "italic" | "non-italic"
+type TailwindFontStyle = "italic" | "not-italic"
 export type TailwindFontStyleType = {
     /**
      *@description Utilities for controlling the style of text.
