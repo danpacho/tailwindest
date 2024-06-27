@@ -37,7 +37,7 @@ import { Tab, Tabs, Callout, Steps } from "nextra-theme-docs"
 ```ts
 import { createTools, type Tailwindest } from "tailwindest"
 
-type MyTailwind = Tailwindest<{}, {}, {}>
+type MyTailwind = Tailwindest<Record<string, unknown>, Record<string, unknown>>
 type Tailwind = Required<MyTailwind>
 
 // Plug Tailwindest type
@@ -63,7 +63,7 @@ import { createTools, type Tailwindest } from "tailwindest"
  * Custom type definition of tailwindest
  * @see {@link https://tailwindest.vercel.app/apis/Tailwindest api reference}
  */
-type TailwindCustom = Tailwindest<{}, {}, {}>
+type TailwindCustom = Tailwindest<{}, {}>
 /**
  * Full type definition of `tailwindcss`
  */
@@ -81,7 +81,7 @@ Add type with `jsdoc` without any setup.
 ```js filename="tw.js" /createTools/
 import { createTools } from "tailwindest"
 
-/** @typedef {import("tailwindest").Tailwindest<{}, {}, {}>} CustomTailwind */
+/** @typedef {import("tailwindest").Tailwindest<{}, {}>} CustomTailwind */
 /** @typedef {ReturnType<typeof createTools<CustomTailwind>>} CreateTools */
 /** @typedef {Required<CustomTailwind>} Tailwind */
 
