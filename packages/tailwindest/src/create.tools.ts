@@ -5,194 +5,266 @@ import {
     createToggle,
     createVariants,
 } from "./core"
+import { type GetVariantsKey } from "./utils"
+const createTools = <StyleType>(): {
+    /**
+     * @description Create `tailwind` style
+     * @example
+     * ```tsx
+     * // Define tailwind style
+     * const box = tw.style({
+     *      display: "flex",
+     *      alignItems: "items-center",
+     *      justifyContent: "justify-center",
+     * })
+     *
+     * // Use it in component
+     * const Box = ({ children }) => {
+     *      return <div className={box.class}>{children}</div>
+     * }
+     * ```
+     */
+    style: (style: StyleType) => {
+        class: string
+        style: StyleType
+        compose: (...styles: Array<StyleType>) => {
+            class: string
+            style: StyleType
+        }
+    }
 
-/**
- * @description Create tools with `Tailwindest` type
- * @example
- * ```ts
- * type CustomTailwindest = Tailwindest<{
- *      // Add custom colors
- *      color: "my-color1" | "my-color2",
- * }, {}>
- *
- * // Plug type at generic to get style tools
- * const tw = createTools<CustomTailwindest>()
- *
- * // Name the tools, and export it
- * export { tw }
- * ```
- */
-const createTools = <StyleType>() => {
-    const styleWithType = createStyle<StyleType>()
-    const toggleWithType = createToggle<StyleType>()
-    const rotaryWithType = createRotary<StyleType>()
-    const variantsWithType = createVariants<StyleType>()
-    const mergePropsWithType = createMergeProps<StyleType>()
+    /**
+     * @description Create `toggle` style function
+     * @example
+     * ```tsx
+     * // Define toggle style
+     * const themeBtn = tw.toggle({
+     *      truthy: {}, // 🌝 light mode
+     *      falsy: {}, // 🌚 dark mode
+     *      base: {}, // [optional] base style
+     * })
+     *
+     * // Use it in component
+     * const ThemeBtn = ({
+     *      children,
+     * }) => {
+     *      const [isLight, setIsLight] = useState(false)
+     *      return (
+     *          <button
+     *              className={themeBtn.class(isLight)}
+     *          >
+     *              {children}
+     *          </button>
+     *      )
+     * }
+     * ```
+     */
+    toggle: (toggleVariants: {
+        truthy: StyleType
+        falsy: StyleType
+        base?: StyleType
+    }) => {
+        class: (styleArgs: boolean) => string
+        style: (styleArgs: boolean) => StyleType
+        compose: (...styles: Array<StyleType>) => {
+            class: (styleArgs: boolean) => string
+            style: (styleArgs: boolean) => StyleType
+        }
+    }
+
+    /**
+     * @description Create `rotary` style function
+     * @example
+     * ```tsx
+     * // Define rotary style
+     * const btnType = tw.rotary({
+     *      default: {},
+     *      success: {},
+     *      warning: {},
+     *      base: {}, // [optional] base style
+     * })
+     *
+     * // Get rotary type with GetVariants
+     * interface BtnProps {
+     *      onClick: () => void
+     *      children: ReactNode
+     *      type?: GetVariants<typeof btnType>
+     * }
+     *
+     * // Use it in component
+     * const Btn = ({
+     *      onClick,
+     *      children,
+     *      type = "default",
+     * }: BtnProps) => (
+     *      <button
+     *          className={btn.class(type)}
+     *          onClick={onClick}
+     *      >
+     *          {children}
+     *      </button>
+     * )
+     * ```
+     */
+    rotary: <
+        VariantsStylesType extends {
+            [key in keyof VariantsStylesType]: StyleType
+        },
+    >({
+        base,
+        ...styles
+    }: { [key in keyof VariantsStylesType]: StyleType } & {
+        base?: StyleType
+    }) => {
+        class: (
+            styleArgs: GetVariantsKey<Exclude<keyof VariantsStylesType, "base">>
+        ) => string
+        style: (
+            styleArgs: GetVariantsKey<Exclude<keyof VariantsStylesType, "base">>
+        ) => StyleType
+        compose: (...styles: Array<StyleType>) => {
+            class: (
+                styleArgs: GetVariantsKey<
+                    Exclude<keyof VariantsStylesType, "base">
+                >
+            ) => string
+            style: (
+                styleArgs: GetVariantsKey<
+                    Exclude<keyof VariantsStylesType, "base">
+                >
+            ) => StyleType
+        }
+    }
+
+    /**
+     * @description Create `variants` style function. `variants` are combination of rotary switch.
+     * @example
+     * ```tsx
+     * // Define variants style
+     * const btn = tw.variants({
+     *      variants: {
+     *          type: {
+     *              default: {},
+     *              success: {},
+     *              warning: {},
+     *          },
+     *          size: {
+     *              sm: {},
+     *              md: {},
+     *              lg: {},
+     *          },
+     *          light: {
+     *              true: {}, // truthy boolean
+     *              false: {}, // falsy boolean
+     *          }
+     *      },
+     *      base: {}, // [optional] base style
+     * })
+     *
+     * // Get variants type with GetVariants
+     * interface BtnProps extends GetVariants<typeof btn> {
+     *      onClick: () => void
+     *      children: ReactNode
+     * }
+     *
+     * // Use it in component
+     * const Btn = ({
+     *      children,
+     *      size = "md",
+     *      type = "default",
+     *      light = false,
+     *      onClick,
+     * }: BtnProps) => (
+     *      <button
+     *          className={btn.class({ size, type, light })}
+     *          onClick={onClick}
+     *      >
+     *          {children}
+     *      </button>
+     * )
+     * ```
+     */
+    variants: <
+        Variants extends {
+            [VariantsKey in keyof Variants]: {
+                [key in keyof Variants[VariantsKey]]: StyleType
+            }
+        },
+    >({
+        base,
+        variants,
+    }: {
+        variants: Variants
+    } & {
+        base?: StyleType
+    }) => {
+        class: (styleArgs: {
+            [VariantsKey in keyof Variants]: GetVariantsKey<
+                keyof Variants[VariantsKey]
+            >
+        }) => string
+        style: (styleArgs: {
+            [VariantsKey in keyof Variants]: GetVariantsKey<
+                keyof Variants[VariantsKey]
+            >
+        }) => StyleType
+        compose: (...styles: Array<StyleType>) => {
+            class: (styleArgs: {
+                [VariantsKey in keyof Variants]: GetVariantsKey<
+                    keyof Variants[VariantsKey]
+                >
+            }) => string
+            style: (styleArgs: {
+                [VariantsKey in keyof Variants]: GetVariantsKey<
+                    keyof Variants[VariantsKey]
+                >
+            }) => StyleType
+        }
+    }
+
+    /**
+     * @description Override style property
+     * @returns Merged className `string`
+     * @example
+     * ```tsx
+     * // Add specific style props
+     * const Text = ({
+     *      children,
+     *      ...option
+     * }: PropsWithChildren<Pick<Tailwindest, "color" | "fontWeight">>) => {
+     *    return (
+     *        <p
+     *            className={mergeProps(
+     *                {
+     *                    // base style
+     *                    color: "text-gray-950",
+     *                    fontWeight: "font-bold",
+     *                    fontSize: "text-base",
+     *                },
+     *                // override color and fontWeight
+     *                option
+     *            )}
+     *        >
+     *            {children}
+     *        </p>
+     *    )
+     * }
+     * ```
+     */
+    mergeProps: (baseStyle: StyleType, styleProps: StyleType) => string
+} => {
+    const style = createStyle<StyleType>()
+    const toggle = createToggle<StyleType>()
+    const rotary = createRotary<StyleType>()
+    const variants = createVariants<StyleType>()
+    const mergeProps = createMergeProps<StyleType>()
 
     return {
-        /**
-         * @description Create `tailwind` style
-         * @example
-         * ```tsx
-         * // Define tailwind style
-         * const box = tw.style({
-         *      display: "flex",
-         *      alignItems: "items-center",
-         *      justifyContent: "justify-center",
-         * })
-         *
-         * // Use it in component
-         * const Box = ({ children }) => {
-         *      return <div className={box.class}>{children}</div>
-         * }
-         * ```
-         */
-        style: styleWithType,
-
-        /**
-         * @description Create `toggle` style function
-         * @example
-         * ```tsx
-         * // Define toggle style
-         * const themeBtn = tw.toggle({
-         *      truthy: {}, // 🌝 light mode
-         *      falsy: {}, // 🌚 dark mode
-         *      base: {}, // [optional] base style
-         * })
-         *
-         * // Use it in component
-         * const ThemeBtn = ({
-         *      children,
-         * }) => {
-         *      const [isLight, setIsLight] = useState(false)
-         *      return (
-         *          <button
-         *              className={themeBtn.class(isLight)}
-         *          >
-         *              {children}
-         *          </button>
-         *      )
-         * }
-         * ```
-         */
-        toggle: toggleWithType,
-
-        /**
-         * @description Create `rotary` style function
-         * @example
-         * ```tsx
-         * // Define rotary style
-         * const btnType = tw.rotary({
-         *      default: {},
-         *      success: {},
-         *      warning: {},
-         *      base: {}, // [optional] base style
-         * })
-         *
-         * // Get rotary type with GetVariants
-         * interface BtnProps {
-         *      onClick: () => void
-         *      children: ReactNode
-         *      type?: GetVariants<typeof btnType>
-         * }
-         *
-         * // Use it in component
-         * const Btn = ({
-         *      onClick,
-         *      children,
-         *      type = "default",
-         * }: BtnProps) => (
-         *      <button
-         *          className={btn.class(type)}
-         *          onClick={onClick}
-         *      >
-         *          {children}
-         *      </button>
-         * )
-         * ```
-         */
-        rotary: rotaryWithType,
-
-        /**
-         * @description Create `variants` style function. `variants` are combination of rotary switch.
-         * @example
-         * ```tsx
-         * // Define variants style
-         * const btn = tw.variants({
-         *      variants: {
-         *          type: {
-         *              default: {},
-         *              success: {},
-         *              warning: {},
-         *          },
-         *          size: {
-         *              sm: {},
-         *              md: {},
-         *              lg: {},
-         *          },
-         *          light: {
-         *              true: {}, // truthy boolean
-         *              false: {}, // falsy boolean
-         *          }
-         *      },
-         *      base: {}, // [optional] base style
-         * })
-         *
-         * // Get variants type with GetVariants
-         * interface BtnProps extends GetVariants<typeof btn> {
-         *      onClick: () => void
-         *      children: ReactNode
-         * }
-         *
-         * // Use it in component
-         * const Btn = ({
-         *      children,
-         *      size = "md",
-         *      type = "default",
-         *      light = false,
-         *      onClick,
-         * }: BtnProps) => (
-         *      <button
-         *          className={btn.class({ size, type, light })}
-         *          onClick={onClick}
-         *      >
-         *          {children}
-         *      </button>
-         * )
-         * ```
-         */
-        variants: variantsWithType,
-
-        /**
-         * @description Override style property
-         * @returns Merged className `string`
-         * @example
-         * ```tsx
-         * // Add specific style props
-         * const Text = ({
-         *      children,
-         *      ...option
-         * }: PropsWithChildren<Pick<Tailwindest, "color" | "fontWeight">>) => {
-         *    return (
-         *        <p
-         *            className={mergeProps(
-         *                {
-         *                    // base style
-         *                    color: "text-gray-950",
-         *                    fontWeight: "font-bold",
-         *                    fontSize: "text-base",
-         *                },
-         *                // override color and fontWeight
-         *                option
-         *            )}
-         *        >
-         *            {children}
-         *        </p>
-         *    )
-         * }
-         * ```
-         */
-        mergeProps: mergePropsWithType,
+        style,
+        toggle,
+        rotary,
+        variants,
+        mergeProps,
     }
 }
 

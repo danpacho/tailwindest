@@ -1,9 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createRotary } from "./create.rotary"
-import type {
-    StyleGeneratorRotary,
-    StyleGeneratorToggle,
-} from "./tool.interface"
+import type { TailwindestStyler } from "./tool.interface"
 
 type Toggle<StyleType> = {
     /**
@@ -28,8 +25,8 @@ const createToggle = <StyleType>() => {
 
     return (
         toggleVariants: Toggle<StyleType>
-    ): StyleGeneratorToggle<StyleType> => {
-        const toggleCache: StyleGeneratorRotary<StyleType, "truthy" | "falsy"> =
+    ): TailwindestStyler<StyleType, boolean> => {
+        const toggleCache: TailwindestStyler<StyleType, "truthy" | "falsy"> =
             rotary(toggleVariants)
 
         return {

@@ -3,7 +3,7 @@ import type { CacheKey, GetVariantsKey, StyleGeneratorCache } from "../../utils"
 import { cache } from "../cache"
 import { deepMerge } from "../deep.merge"
 import { getTailwindClass } from "../get.tailwind.class"
-import type { StyleGeneratorRotary } from "./tool.interface"
+import type { TailwindestStyler } from "./tool.interface"
 
 const createRotary =
     <StyleType>() =>
@@ -16,7 +16,7 @@ const createRotary =
         ...styles
     }: { [key in keyof VariantsStylesType]: StyleType } & {
         base?: StyleType
-    }): StyleGeneratorRotary<
+    }): TailwindestStyler<
         StyleType,
         GetVariantsKey<Exclude<keyof VariantsStylesType, "base">>
     > => {

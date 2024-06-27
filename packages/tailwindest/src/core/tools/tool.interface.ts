@@ -1,121 +1,37 @@
-export interface StyleGeneratorStyle<StyleType> {
+/**
+ * @description Tailwindest Styler interface
+ */
+export interface TailwindestStyler<
+    StyleSheet,
+    StyleArgs,
+    UseShorthand = false,
+> {
     /**
-     * @description Get className `string`
+     * @description Get class name
      */
-    class: string
-
+    class: UseShorthand extends true ? string : (styleArgs: StyleArgs) => string
     /**
-     * @description Get styleSheet `object`
+     * @description Get style sheet object
      */
-    style: StyleType
-
-    /**
-     * @description Compose styleSheets into `base` styleSheet
-     * @param styles Compose target styleSheets
-     */
-    compose: (...styles: StyleType[]) => {
-        /**
-         * @description Get className `string`
-         */
-        class: string
-
-        /**
-         * @description Get styleSheet `object`
-         */
-        style: StyleType
-    }
-}
-export interface StyleGeneratorToggle<StyleType> {
-    /**
-     * @param toggleCondition Toggling condition, `true` | `false`
-     * @description Get toggled className `string`
-     */
-    class: (toggleCondition: boolean) => string
-
-    /**
-     * @param toggleCondition Toggling condition, `true` | `false`
-     * @description Get toggled styleSheet `object`
-     */
-    style: (toggleCondition: boolean) => StyleType
-
+    style: UseShorthand extends true
+        ? StyleSheet
+        : (styleArgs: StyleArgs) => StyleSheet
     /**
      * @description Compose styleSheets into `base` styleSheet
      * @param styles Compose target styleSheets
      */
-    compose: (...styles: StyleType[]) => {
+    compose: (...styles: Array<StyleSheet>) => {
         /**
-         * @param toggleCondition Toggling condition, `true` | `false`
-         * @description Get toggled className `string`
+         * @description Get class name
          */
-        class: (toggleCondition: boolean) => string
-
+        class: UseShorthand extends true
+            ? string
+            : (styleArgs: StyleArgs) => string
         /**
-         * @param toggleCondition Toggling condition, `true` | `false`
-         * @description Get toggled styleSheet `object`
+         * @description Get style sheet object
          */
-        style: (toggleCondition: boolean) => StyleType
-    }
-}
-export interface StyleGeneratorRotary<StyleType, RotaryVariant> {
-    /**
-     * @description Get rotary variant className `string`
-     * @param variant Key of rotary variant
-     */
-    class: (variant: RotaryVariant) => string
-
-    /**
-     * @description Get rotary variant styleSheet `object`
-     * @param variant Key of rotary variant
-     */
-    style: (variant: RotaryVariant) => StyleType
-
-    /**
-     * @description Compose styleSheets into `base` styleSheet
-     * @param styles Compose target styleSheets
-     */
-    compose: (...styles: StyleType[]) => {
-        /**
-         * @description Get rotary variant className `string`
-         * @param variant Key of rotary variant
-         */
-        class: (variant: RotaryVariant) => string
-
-        /**
-         * @description Get rotary variant styleSheet `object`
-         * @param variant Key of rotary variant
-         */
-        style: (variant: RotaryVariant) => StyleType
-    }
-}
-
-export interface StyleGeneratorVariants<StyleType, VariantOption> {
-    /**
-     * @description Get variant className `string`
-     * @param variant Variant option `object`
-     */
-    class: (variantOption: VariantOption) => string
-
-    /**
-     * @description Get variant styleSheet `object`
-     * @param variant Variant option `object`
-     */
-    style: (variantOption: VariantOption) => StyleType
-
-    /**
-     * @description Compose styleSheets into `base` styleSheet
-     * @param styles Compose target styleSheets
-     */
-    compose: (...styles: StyleType[]) => {
-        /**
-         * @description Get variant className `string`
-         * @param variant Variant option `object`
-         */
-        class: (variantOption: VariantOption) => string
-
-        /**
-         * @description Get variant styleSheet `object`
-         * @param variant Variant option `object`
-         */
-        style: (variantOption: VariantOption) => StyleType
+        style: UseShorthand extends true
+            ? StyleSheet
+            : (styleArgs: StyleArgs) => StyleSheet
     }
 }
