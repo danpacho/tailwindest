@@ -1,5 +1,11 @@
 # tailwindest
 
+## 2.3.2
+
+### Patch Changes
+
+-   Fix ts4023 error and fix type typo at font-style property
+
 ## 2.3.1
 
 ### Patch Changes
