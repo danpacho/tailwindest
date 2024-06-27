@@ -13,6 +13,5 @@
         "skipLibCheck": true
     },
     "include": ["packages"],
-    "exclude": ["node_modules", "dist", "site", "examples"],
-    "extends": "expo/tsconfig.base"
+    "exclude": ["node_modules", "dist", "site", "examples"]
 }
