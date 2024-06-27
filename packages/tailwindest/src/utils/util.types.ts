@@ -1,5 +1,5 @@
 export type ClassName = string
-export type CacheKey = string | symbol | number
+export type CacheKey = string | symbol | number | boolean
 /**
  * @description Cache data set of style generators
  */
@@ -37,8 +37,8 @@ export type GetVariantsKey<VariantsKey> = VariantsKey extends string | number
             ? boolean
             : true
         : VariantsKey extends Falsy
-        ? false
-        : VariantsKey
+          ? false
+          : VariantsKey
     : "Error: typeof variants key should be <string> | <number> | <'true' | 'false'>"
 
 export type UndefinableString = string | undefined
