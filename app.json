@@ -1,0 +1,13 @@
+{
+    "expo": {
+        "name": "tailwindest-repository",
+        "slug": "tailwindest-repository",
+        "version": "1.0.0",
+        "description": "Root repository of tailwindest",
+        "sdkVersion": "51.0.0",
+        "platforms": ["ios", "android"],
+        "ios": {
+            "bundleIdentifier": "com.anonymous.tailwindest-repository"
+        }
+    }
+}

@@ -33,7 +33,7 @@ const StackBlitz = ({
     example: keyof typeof exampleEntryPoint
 }) => {
     return (
-        <div className="flex flex-col my-6">
+        <div className="flex flex-col my-6 w-full">
             <div className={exampleTitle.class}>{label}</div>
             <iframe
                 src={`https://stackblitz.com/${examplePath}/${example}?embed=1&file=${exampleEntryPoint[example]}`}

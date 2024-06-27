@@ -1,5 +1,68 @@
 import { StackBlitz } from "../../components/common"
+import { Callout } from "nextra-theme-docs"
 
 # Next.js
+
+<Callout>
+    [Next](https://nextjs.org) project created with
+    [`create-next-app`](https://www.npmjs.com/package/create-next-app).
+</Callout>
+## Setup
+
+1. Create a new Next.js app with `create-next-app`:
+
+    ```bash
+    npx create-next-app@latest next
+    ```
+
+2. Add Tailwind CSS to your Next.js app:
+
+    ```bash
+    npm install tailwindcss@latest postcss@latest autoprefixer@latest
+    ```
+
+3. Initialize Tailwind CSS in your project:
+
+    ```bash
+    npx tailwindcss init -p
+    ```
+
+4. Create a `styles/globals.css` file with the following content:
+
+    ```css
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+    ```
+
+5. Import the `globals.css` file in your `app/_layout.tsx`:
+
+    ```js
+    import "../styles/globals.css"
+
+    //...
+    ```
+
+6. Add `tw.ts` for using `tailwindest`
+
+    ```ts
+    import { createTools, type Tailwindest } from "tailwindest"
+
+    /**
+     * Custom type definition of tailwindest
+     * @see {@link https://tailwindest.vercel.app/apis/Tailwindest api reference}
+     */
+    type TailwindCustom = Tailwindest<{}, {}>
+    /**
+     * Full type definition of `tailwindcss`
+     */
+    type Tailwind = Required<TailwindCustom>
+
+    const tw = createTools<TailwindCustom>()
+
+    export { tw, type Tailwind }
+    ```
+
+There you go! You have successfully set up Tailwind CSS in your Next.js app.
 
 <StackBlitz label="Next counter" example="next" />
