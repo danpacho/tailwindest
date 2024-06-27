@@ -6,27 +6,27 @@
 
 <br />
 
-## Write tailwind with confidence 🦾
+## Write tailwind with confidence
 
 1.  **Type-safe** `tailwind`
 2.  Provide **full type definition** of `tailwind` properties
 3.  **Solid conditional styling**, inspired by `cva`
 
-## Useful features 🔮
+## Useful features
 
 -   Support **all JS-frameworks**
 -   **Zero dependencies**
 -   `768B`, **tiny bundle size**
 -   **Support custom type**, defined in `tailwind.config.js`
--   `tailwind` **doc site link** embedded via `JSDoc`
+-   `tailwind` **doc site link** embedded
 
-## Start with docs 📖
+## Start with docs
 
 **[Let's dive in 🏄‍♂️](https://tailwindest.vercel.app)**
 
 <br />
 
-## Overview 🚀
+## Recipes
 
 ### 0. Install package
 
@@ -198,6 +198,6 @@ const SomeComponent = () => (
 
 <br />
 
-## LICENSE 👻
+## LICENSE
 
-<strong><p style="color:teal">MIT</p></strong>
+<p style="color:green">MIT</p>
