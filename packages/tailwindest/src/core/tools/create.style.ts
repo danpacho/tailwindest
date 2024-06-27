@@ -1,9 +1,11 @@
 import type { ClassName } from "../../utils"
 import { deepMerge } from "../deep.merge"
 import { getTailwindClass } from "../get.tailwind.class"
-import type { StyleGeneratorStyle } from "./tool.interface"
+import type { TailwindestStyler } from "./tool.interface"
 
-class StyleSheet<StyleType> implements StyleGeneratorStyle<StyleType> {
+class StyleSheet<StyleType>
+    implements TailwindestStyler<StyleType, never, true>
+{
     private s: StyleType
     private c: ClassName
 
@@ -29,7 +31,7 @@ class StyleSheet<StyleType> implements StyleGeneratorStyle<StyleType> {
 
 const createStyle =
     <StyleType>() =>
-    (style: StyleType): StyleGeneratorStyle<StyleType> =>
+    (style: StyleType): TailwindestStyler<StyleType, never, true> =>
         new StyleSheet<StyleType>(style)
 
 export { createStyle }

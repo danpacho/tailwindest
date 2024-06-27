@@ -4,7 +4,7 @@ import type { CacheKey, GetVariantsKey, StyleGeneratorCache } from "../../utils"
 import { cache } from "../cache"
 import { deepMerge } from "../deep.merge"
 import { getTailwindClass } from "../get.tailwind.class"
-import type { StyleGeneratorVariants } from "./tool.interface"
+import type { TailwindestStyler } from "./tool.interface"
 
 const createVariants =
     <StyleType>() =>
@@ -20,7 +20,7 @@ const createVariants =
         }
     } & {
         base?: StyleType
-    }): StyleGeneratorVariants<
+    }): TailwindestStyler<
         StyleType,
         {
             [VariantsKey in keyof Variants]: GetVariantsKey<
