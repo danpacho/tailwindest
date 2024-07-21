@@ -1,3 +1,4 @@
+import { TailwindSpacingVariants } from "../common"
 import { TailwindContentType } from "./@content"
 import { TailwindFontFamilyType } from "./@font.family"
 import { TailwindFontSizeType } from "./@font.size"
@@ -77,7 +78,7 @@ export interface TailwindFont<
         TailwindFontWeightType<FontPlug["fontSize"]>,
         TailwindFontFamilyType<FontPlug["fontFamily"]>,
         TailwindTextColorType<TailwindColor, FontPlug["textColor"]>,
-        TailwindTextIndentType<TailwindColor, FontPlug["textIndent"]>,
+        TailwindTextIndentType<TailwindSpacingVariants, FontPlug["textIndent"]>,
         TailwindFontSizeType<FontPlug["fontSize"], FontPlug["lineHeight"]>,
         TailwindTextDecorationColorType<
             TailwindColor,
