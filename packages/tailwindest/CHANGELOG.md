@@ -1,5 +1,11 @@
 # tailwindest
 
+## 2.3.3
+
+### Patch Changes
+
+-   Fix tailwindcss text indent spacing type error
+
 ## 2.3.2
 
 ### Patch Changes
