@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BASE_KEY } from "../../constants"
 import type { CacheKey, GetVariantsKey, StyleGeneratorCache } from "../../utils"
 import { cache } from "../cache"

@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createRotary } from "./create.rotary"
 import type { TailwindestStyler } from "./tool.interface"
 
