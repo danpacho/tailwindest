@@ -7,11 +7,7 @@ import type { TailwindestStyler } from "./tool.interface"
 
 const createRotary =
     <StyleType>() =>
-    <
-        VariantsStylesType extends {
-            [key in keyof VariantsStylesType]: StyleType
-        },
-    >({
+    <VariantsStylesType>({
         base,
         ...styles
     }: { [key in keyof VariantsStylesType]: StyleType } & {

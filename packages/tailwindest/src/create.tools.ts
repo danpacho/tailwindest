@@ -106,11 +106,7 @@ const createTools = <StyleType>(): {
      * )
      * ```
      */
-    rotary: <
-        VariantsStylesType extends {
-            [key in keyof VariantsStylesType]: StyleType
-        },
-    >({
+    rotary: <VariantsStylesType>({
         base,
         ...styles
     }: { [key in keyof VariantsStylesType]: StyleType } & {
@@ -184,17 +180,16 @@ const createTools = <StyleType>(): {
      * )
      * ```
      */
-    variants: <
-        Variants extends {
-            [VariantsKey in keyof Variants]: {
-                [key in keyof Variants[VariantsKey]]: StyleType
-            }
-        },
-    >({
+    variants: <Variants>({
         base,
         variants,
     }: {
-        variants: Variants
+        variants: {
+            [VariantsKey in keyof Variants]: Record<
+                keyof Variants[VariantsKey],
+                StyleType
+            >
+        }
     } & {
         base?: StyleType
     }) => {

@@ -227,15 +227,9 @@ describe(label.unit("GetVariants - variants: with boolean | number"), () => {
                     onlyTrue?: true
                     onlyFalse?: false
                     numbers?: 1 | 2
-                    never?: "Error: typeof variants key should be <string> | <number> | <'true' | 'false'>"
-                    withNever?:
-                        | "withNever"
-                        | "Error: typeof variants key should be <string> | <number> | <'true' | 'false'>"
-                    combinations?:
-                        | 1
-                        | boolean
-                        | "withNever"
-                        | "Error: typeof variants key should be <string> | <number> | <'true' | 'false'>"
+                    never?: never
+                    withNever?: "withNever"
+                    combinations?: 1 | boolean | "withNever"
                 }
             >
         >(true)
@@ -252,15 +246,9 @@ describe(label.unit("GetVariants - variants: with boolean | number"), () => {
                     onlyTrue?: true
                     onlyFalse?: false
                     numbers?: 1 | 2
-                    never?: "Error: typeof variants key should be <string> | <number> | <'true' | 'false'>"
-                    withNever?:
-                        | "withNever"
-                        | "Error: typeof variants key should be <string> | <number> | <'true' | 'false'>"
-                    combinations?:
-                        | 1
-                        | boolean
-                        | "withNever"
-                        | "Error: typeof variants key should be <string> | <number> | <'true' | 'false'>"
+                    never?: never
+                    withNever?: "withNever"
+                    combinations?: 1 | boolean | "withNever"
                 }
             >
         >(true)
