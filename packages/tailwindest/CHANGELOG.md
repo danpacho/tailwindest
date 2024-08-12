@@ -1,5 +1,11 @@
 # tailwindest
 
+## 2.3.4
+
+### Patch Changes
+
+-   Fix invalid typing at createTools.variants
+
 ## 2.3.3
 
 ### Patch Changes
