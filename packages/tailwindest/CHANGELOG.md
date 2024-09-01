@@ -1,5 +1,11 @@
 # tailwindest
 
+## 2.3.5
+
+### Patch Changes
+
+-   Add x,y variants at overflow property
+
 ## 2.3.4
 
 ### Patch Changes
