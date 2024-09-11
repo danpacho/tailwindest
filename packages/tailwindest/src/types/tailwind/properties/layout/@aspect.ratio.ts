@@ -1,12 +1,15 @@
 import { PlugBase, Pluggable } from "../../../plugin"
 import { TailwindArbitrary } from "../common/@arbitrary"
 
-type TailwindAspectRatio<Plug extends PlugBase = ""> =
-    | "aspect-auto"
-    | "aspect-square"
-    | "aspect-video"
+type TailwindAspectRatioVariants<Plug extends PlugBase = ""> =
+    | "auto"
+    | "square"
+    | "video"
     | Pluggable<Plug>
     | TailwindArbitrary
+
+type TailwindAspectRatio<Plug extends PlugBase = ""> =
+    `aspect-${TailwindAspectRatioVariants<Plug>}`
 
 export type TailwindAspectRatioType<Plug extends PlugBase = ""> = {
     /**
