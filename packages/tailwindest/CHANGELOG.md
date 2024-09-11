@@ -1,5 +1,11 @@
 # tailwindest
 
+## 2.3.6
+
+### Patch Changes
+
+-   Fix aspect ratio arbitrary values support `aspect-[x/y]`
+
 ## 2.3.5
 
 ### Patch Changes
