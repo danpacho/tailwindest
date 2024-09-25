@@ -7,12 +7,7 @@ export type AspectRatio =
     | "aspect-video"
 
 export type Container =
-    | "2xl"
     | "container"
-    | "lg"
-    | "md"
-    | "sm"
-    | "xl"
 
 export type Columns =
     | "columns-1"

@@ -31,7 +31,7 @@ const OUTFILE = "packages/tailwindest/__tests__/TailwindTypes.out.ts";
  * export default TailwindTypes
  */
 
-
+// docs pages to skip
 const ignoredPages = [
     "installation",
     "editor-setup",
@@ -60,6 +60,12 @@ const ignoredPages = [
     "preflight",
 ].map(p => `${ENTRY}/${p}`);
 
+// classes to drop from oddly formed tables
+const ignoredClasses = new Set([
+    // from https://tailwindcss.com/docs/container
+    ...[ "2xl", "lg", "md", "sm", "xl" ],
+]);
+
 const scrape = async (url) => JSDOM.fromURL(url).then(root => root.window.document);
 
 const scrapeClasses = (addClass, page) => {
@@ -86,9 +92,12 @@ const scrapePage = async (pages, url) => {
     const page = await scrape(url);
     const classes = new Set();
 
-    // get direct text (not text of children)
-    const textContent = (e) => [...e.childNodes].reduce((s, t) => s + (t.nodeType === 3? t.textContent: ""), "").trim()
-    const addClass = (node) => classes.add(textContent(node))
+    const addClass = (node) => {
+        // get direct text (not text of children)
+        const classname = [...node.childNodes].reduce((s, t) => s + (t.nodeType === 3? t.textContent: ""), "").trim();
+
+        if (!ignoredClasses.has(classname)) classes.add(classname);
+    };
 
     scrapeClasses(addClass, page);
     scrapeArbitraryValues(addClass, page);
