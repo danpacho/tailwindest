@@ -132,7 +132,7 @@ const main = async (entry) => {
 
     const pushType = (name, types) =>
     {
-        text.push("", `export type ${name} =`, ...[...types].map(t => `    | ${t}`));
+        text.push("", `export type ${name} =`, ...[...types].sort().map(t => `    | ${t}`));
     }
 
     for (const [url, classes] of pages.entries()) {
