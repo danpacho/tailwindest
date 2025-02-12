@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals"
+import { describe, expect, test } from "vitest"
 import { flattenObject } from "../../src/core/flatten.object"
 import { label } from "../label"
 

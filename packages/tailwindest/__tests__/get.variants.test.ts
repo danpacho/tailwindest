@@ -1,4 +1,4 @@
-import { describe, test } from "@jest/globals"
+import { describe, test } from "vitest"
 import { type TypeEqual, expectType } from "ts-expect"
 import { type GetVariants, type Tailwindest, createTools } from "../src"
 import { label } from "./label"

@@ -1,6 +1,6 @@
-import { describe, test } from "@jest/globals"
+import { describe, test } from "vitest"
 import { type TypeEqual, expectType } from "ts-expect"
-import type { Tailwindest } from "../../src/"
+import type { Tailwindest } from "../../src"
 import type { NestedObject } from "../../src/utils"
 import { label } from "../label"
 

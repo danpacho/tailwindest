@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals"
+import { describe, expect, test } from "vitest"
 import { type TypeEqual, expectType } from "ts-expect"
 import { type GetVariants, type Tailwindest, createTools } from "../src"
 import { label } from "./label"
@@ -178,8 +178,6 @@ describe(label.unit("createTools - toggle"), () => {
 
     test(label.case("plugged toggle, without base - truthy condition"), () => {
         expect(testToggle.class(true)).toBe("text-my-color-1")
-        expect(testToggle.class(!null)).toBe("text-my-color-1")
-        expect(testToggle.class(!undefined)).toBe("text-my-color-1")
     })
     test(label.case("plugged toggle, without base - falsy condition"), () => {
         expect(testToggle.class(false)).toBe("text-my-color-9")
@@ -199,10 +197,6 @@ describe(label.unit("createTools - toggle"), () => {
     })
     test(label.case("plugged toggle, with base - truthy condition"), () => {
         expect(testToggle2.class(true)).toBe("bg-my-color-1 text-my-color-1")
-        expect(testToggle2.class(!null)).toBe("bg-my-color-1 text-my-color-1")
-        expect(testToggle2.class(!undefined)).toBe(
-            "bg-my-color-1 text-my-color-1"
-        )
     })
     test(label.case("plugged toggle, with base - falsy condition"), () => {
         expect(testToggle2.class(false)).toBe("bg-my-color-1 text-my-color-9")

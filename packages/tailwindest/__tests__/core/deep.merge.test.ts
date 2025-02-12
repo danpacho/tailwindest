@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals"
+import { describe, expect, test } from "vitest"
 import { deepMerge } from "../../src/core"
 import type { NestedObject } from "../../src/utils"
 import { label } from "../label"
