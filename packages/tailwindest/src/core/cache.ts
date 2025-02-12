@@ -1,40 +1,30 @@
-export interface Cache<Key, Value> {
-    set: (key: Key, value: Value) => void
-    has: (key: Key) => boolean
-    /**
-     * @param key store inquire key
-     * @param cacheFindFallback when cache is not found, caching it
-     * @returns cached value
-     */
-    get: (key: Key, cacheFindFallback: () => Value) => Value
-    /**
-     * @description reset store
-     */
-    reset: () => void
-}
+export class CacheMap<Key = string, Value = any> {
+    private readonly _store = new Map<Key, Value>()
+    public get store(): Map<Key, Value> {
+        return this._store
+    }
 
-/**
- * Simple cache with `Map` data structure
- */
-const cache = <Key, Value>(): Cache<Key, Value> => {
-    let store = new Map<Key, Value>()
+    public has(key: Key): boolean {
+        return this.store.has(key)
+    }
+    public set(key: Key, value: Value): void {
+        this.store.set(key, value)
+    }
+    public get(key: Key): Value | undefined
+    public get(key: Key, cacheFindFallback: () => Value): Value
+    public get(key: Key, cacheFindFallback?: () => Value): Value | undefined {
+        const inquired = this.store.get(key)
+        if (inquired === undefined) {
+            const instead = cacheFindFallback?.()
+            if (!instead) return inquired
 
-    return {
-        set: (key, value) => {
-            store.set(key, value)
-        },
-        has: (key) => store.has(key),
-        get: (key, cacheFindFallback) => {
-            if (store.has(key)) return store.get(key) as Value
+            this.set(key, instead)
+            return instead
+        }
 
-            const newCacheValue = cacheFindFallback()
-            store.set(key, newCacheValue)
-            return newCacheValue
-        },
-        reset: () => {
-            store = new Map<Key, Value>()
-        },
+        return inquired
+    }
+    public reset(): void {
+        this.store.clear()
     }
 }
-
-export { cache }
