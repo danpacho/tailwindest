@@ -111,7 +111,7 @@ const Container = ({
     useEffect(() => {
         const suggestionHeight = codeSuggestionRef.current?.offsetHeight
         if (suggestionHeight)
-            setSuggestionBlockTop(top - suggestionHeight - height / 4 ?? 0)
+            setSuggestionBlockTop(top - suggestionHeight - height / 4)
     }, [highlightedBlock])
 
     useEffect(() => {
