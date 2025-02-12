@@ -1,10 +1,10 @@
 import { describe, expect, test } from "@jest/globals"
-import { cache } from "../../src/core"
+import { CacheMap } from "../../src/core"
 import type { NestedObject } from "../../src/utils"
 import { label } from "../label"
 
 describe(label.unit("cache: set | has"), () => {
-    const store = cache<string, NestedObject>()
+    const store = new CacheMap<string, NestedObject>()
 
     const nestedObject = {
         a: "a",
@@ -34,7 +34,7 @@ describe(label.unit("cache: get"), () => {
     type StoreKey = symbol | string | number
     type StoreValue = string | NestedObject
 
-    const store = cache<StoreKey, StoreValue>()
+    const store = new CacheMap<StoreKey, StoreValue>()
 
     const testStringKeys = {
         string: "0",
