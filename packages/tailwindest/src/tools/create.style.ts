@@ -1,6 +1,5 @@
-import type { ClassName } from "../../utils"
-import { deepMerge } from "../deep.merge"
-import { getTailwindClass } from "../get.tailwind.class"
+import type { ClassName } from "../utils"
+import { deepMerge, getTailwindClass } from "../core"
 import type { TailwindestStyler } from "./tool.interface"
 
 class StyleSheet<StyleType>

@@ -1,8 +1,6 @@
-import { BASE_KEY } from "../../constants"
-import type { CacheKey, GetVariantsKey, StyleGeneratorCache } from "../../utils"
-import { cache } from "../cache"
-import { deepMerge } from "../deep.merge"
-import { getTailwindClass } from "../get.tailwind.class"
+import { BASE_KEY } from "../constants"
+import type { CacheKey, GetVariantsKey, StyleGeneratorCache } from "../utils"
+import { CacheMap, deepMerge, getTailwindClass } from "../core"
 import type { TailwindestStyler } from "./tool.interface"
 
 const createVariants =
@@ -34,7 +32,10 @@ const createVariants =
         }
         let isBaseUpdated = false
 
-        const variantCache = cache<CacheKey, StyleGeneratorCache<StyleType>>()
+        const variantCache = new CacheMap<
+            CacheKey,
+            StyleGeneratorCache<StyleType>
+        >()
 
         const getCachedBaseStyle = (): StyleType =>
             variantCache.get(BASE_KEY, () => [base ?? ({} as StyleType), ""])[0]

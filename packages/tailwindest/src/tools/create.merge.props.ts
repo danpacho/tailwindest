@@ -1,5 +1,4 @@
-import { deepMerge } from "../deep.merge"
-import { getTailwindClass } from "../get.tailwind.class"
+import { deepMerge, getTailwindClass } from "../core"
 
 const createMergeProps =
     <StyleType>() =>

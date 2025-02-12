@@ -4,7 +4,7 @@ import {
     createStyle,
     createToggle,
     createVariants,
-} from "./core"
+} from "./tools"
 import { type GetVariantsKey } from "./utils"
 const createTools = <StyleType>(): {
     /**

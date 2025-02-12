@@ -1,8 +1,6 @@
-import { BASE_KEY } from "../../constants"
-import type { CacheKey, GetVariantsKey, StyleGeneratorCache } from "../../utils"
-import { cache } from "../cache"
-import { deepMerge } from "../deep.merge"
-import { getTailwindClass } from "../get.tailwind.class"
+import { BASE_KEY } from "../constants"
+import type { CacheKey, GetVariantsKey, StyleGeneratorCache } from "../utils"
+import { CacheMap, deepMerge, getTailwindClass } from "../core"
 import type { TailwindestStyler } from "./tool.interface"
 
 const createRotary =
@@ -18,7 +16,10 @@ const createRotary =
     > => {
         let isBaseUpdated = false
 
-        const rotaryCache = cache<CacheKey, StyleGeneratorCache<StyleType>>()
+        const rotaryCache = new CacheMap<
+            CacheKey,
+            StyleGeneratorCache<StyleType>
+        >()
 
         const getCachedBaseStyle = (): StyleType =>
             rotaryCache.get(BASE_KEY, () => [base ?? ({} as StyleType), ""])[0]
