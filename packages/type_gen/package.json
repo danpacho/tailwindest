@@ -1,0 +1,52 @@
+{
+    "name": "@tailwindest/type_gen",
+    "version": "1.0.0",
+    "description": "Type generator for tailwindest",
+    "type": "module",
+    "sideEffects": false,
+    "scripts": {
+        "build": "tsup",
+        "build:fast": "tsup --no-dts",
+        "format": "prettier --write \"./{src,tests}/**/*\"",
+        "dev": "pnpm build:fast --sourcemap --clean=false --watch",
+        "test": "pnpm build",
+        "lint:ts": "tsc --noEmit"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "bin": {
+        "create-tailwindest": "./dist/index.cjs"
+    },
+    "files": [
+        "dist"
+    ],
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "keywords": [],
+    "private": false,
+    "author": "danpacho",
+    "license": "MIT",
+    "dependencies": {
+        "@tailwindcss/node": "^4.0.6",
+        "boxen": "^8.0.1",
+        "jsdom": "^26.0.0",
+        "lightningcss": "^1.29.1",
+        "postcss": "^8.4.38",
+        "prettier": "^3.5.0",
+        "prettier-plugin-jsdoc": "^1.3.2",
+        "tailwindcss": "^4.0.6"
+    },
+    "devDependencies": {
+        "@types/jsdom": "^21.1.7",
+        "chalk": "^5.4.1"
+    },
+    "peerDependencies": {
+        "@tailwindcss/node": "^4.0.6",
+        "lightningcss": "^1.29.1",
+        "prettier": "^3.5.0",
+        "prettier-plugin-jsdoc": "^1.3.2",
+        "tailwindcss": "^4.0.6"
+    }
+}
