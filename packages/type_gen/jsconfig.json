@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "strict": true,
+        "allowJs": true,
+        "checkJs": true,
+        "noEmit": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": ["**/*.mjs"],
+    "exclude": ["**/*.ts"]
+}
