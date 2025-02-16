@@ -1,7 +1,7 @@
 import path from "node:path"
 
-// stored at /.../store
-export const STORE_ROOT = path.join(process.cwd(), "$store$")
+// stored at dist for publication purpose
+export const STORE_ROOT = path.join(process.cwd(), "dist", "store")
 
 // site
 export const SITE_URL = "https://tailwindcss.com/docs"
