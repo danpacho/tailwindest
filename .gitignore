@@ -5,6 +5,10 @@
 dist
 .turbo
 
+# Build by scripts
+$store$
+
+
 # Dependencies
 node_modules/
 .pnp
