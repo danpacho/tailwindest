@@ -37,7 +37,7 @@ async function main() {
 
     await prepareStore([
         { type: "doc", filename: DOC_STORE, forceUpdate: true },
-        { type: "type", filename: TYPE_STORE, forceUpdate: true },
+        { type: "type", filename: TYPE_STORE, forceUpdate: false },
     ])
 }
 
