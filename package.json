@@ -11,6 +11,7 @@
         "url": "https://github.com/danpacho/tailwindest"
     },
     "type": "module",
+    "packageManager": "pnpm@10.3.0",
     "scripts": {
         "dev": "turbo run dev",
         "build": "turbo run build",
@@ -25,8 +26,8 @@
         "ts:performance": "rimraf ts-perf && tsc --noEmit --generateTrace ts-perf",
         "bench": "pnpm -r --filter=./packages build && node ./scripts/bench.js",
         "bench:skip": "node ./scripts/bench.js",
-        "build:class": "node ./scripts/build.class.js && pnpm prettier:fix",
-        "reset": "pnpm clean && pnpm -r --parallel exec rimraf node_modules && rimraf node_modules",
+        "reset": "pnpm clean && pnpm -r --parallel exec rimraf node_modules dist && rimraf node_modules dist",
+        "reset:dist": "pnpm -r --parallel exec rimraf dist",
         "prettier": "prettier 'packages/**/*.{ts,js,md}' --check",
         "prettier:fix": "prettier 'packages/**/*.{ts,js,md}' --write",
         "eslint": "eslint packages/**/**/*.ts",
@@ -35,7 +36,7 @@
         "pkg:version": "changeset version",
         "pkg:publish": "changeset publish",
         "pre-commit": "lint-staged",
-        "prepare": "husky install && pnpm -r build:class"
+        "prepare": "husky install"
     },
     "devDependencies": {
         "@changesets/cli": "^2.27.12",
@@ -48,7 +49,6 @@
         "eslint-config-turbo": "^2.4.1",
         "eslint-plugin-import": "^2.31.0",
         "eslint-plugin-prettier": "^5.2.3",
-        "gitmoji-cli": "^9.5.0",
         "husky": "^9.1.7",
         "lint-staged": "^15.4.3",
         "prettier": "^3.5.0",
@@ -61,11 +61,13 @@
         "vite-tsconfig-paths": "^5.1.4",
         "vitest": "^3.0.5"
     },
-    "gitmoji": {
-        "capitalizeTitle": false
-    },
     "engines": {
         "node": ">=20"
     },
-    "packageManager": "pnpm@9.4.0"
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "esbuild",
+            "sharp"
+        ]
+    }
 }
