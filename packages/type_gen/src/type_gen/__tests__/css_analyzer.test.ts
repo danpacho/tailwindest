@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { CSSAnalyzer } from "./css_analyzer"
+import { CSSAnalyzer } from "../css_analyzer"
 
 describe("Property Extraction", () => {
     const css = String.raw
