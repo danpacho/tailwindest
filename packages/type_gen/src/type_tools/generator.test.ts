@@ -116,6 +116,47 @@ describe("TypeSchemaGenerator", () => {
             const expected = `type NumA = number; type StrB = string; type UnionPrim = NumA | StrB;`
             expect(normalize(result)).toBe(normalize(expected))
         })
+
+        it("generate literal with another literal reference", async () => {
+            const opacityLiteral = t.union(
+                Array.from({ length: 5 }).map((_, i) => t.literal(i * 10)),
+                "Opacity"
+            )
+
+            const literals = t.union(
+                [
+                    ...Array.from({ length: 5 }).map((_, i) =>
+                        t.literal(`${i}`)
+                    ),
+                    ...Array.from({ length: 5 }).map((_, i) =>
+                        t.literal(`${i}/\$\{${opacityLiteral.alias}\}`, {
+                            useBackticks: true,
+                        })
+                    ),
+                ],
+                "Union1"
+            )
+
+            const literals2 = t.union(
+                [
+                    opacityLiteral,
+                    literals,
+                    t.literal("[${string}]", {
+                        alias: "WithLiteral",
+                        useBackticks: true,
+                    }),
+                ],
+                "Union2"
+            )
+
+            const result = await generator.generate(literals2)
+
+            expect(normalize(result)).toBe(
+                normalize(
+                    'type Opacity = 0 | 10 | 20 | 30 | 40; type Union1 = | "0" | "1" | "2" | "3" | "4" | `0/${Opacity}` | `1/${Opacity}` | `2/${Opacity}` | `3/${Opacity}` | `4/${Opacity}`; type WithLiteral = `[${string}]`; type Union2 = Opacity | Union1 | WithLiteral;'
+                )
+            )
+        })
     })
 
     // ───────────────────────────────
