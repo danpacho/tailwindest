@@ -122,6 +122,15 @@ export abstract class Type {
     public docs: Partial<Record<JSDocSymbol, string>> = {}
 
     /**
+     * Export or not
+     */
+    public exports: boolean = false
+    public setExport(exports: boolean): this {
+        this.exports = exports
+        return this
+    }
+
+    /**
      * Overloaded signatures for adding doc entries to `docs`.
      */
     public addDoc(doc: string): this
@@ -199,9 +208,11 @@ export abstract class Type {
             return ""
         }
 
+        const typeWithExport = this.exports ? `export type` : "type"
+
         // If no generics, just produce `type MyAlias = ...`
         if (!this.generic || this.generic.length === 0) {
-            return `${this.getDoc()}type ${this.alias} = `
+            return `${this.getDoc()}${typeWithExport} ${this.alias} = `
         }
 
         /**
@@ -235,7 +246,7 @@ export abstract class Type {
             .join(", ")
 
         // E.g. "type MyAlias<T extends Foo = Bar> = "
-        const prefix = `${this.getDoc()}type ${this.alias}<${genericPart}> = `
+        const prefix = `${this.getDoc()}${typeWithExport} ${this.alias}<${genericPart}> = `
         return prefix
     }
 
