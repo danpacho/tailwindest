@@ -28,16 +28,16 @@ export class RecordType extends Type {
 
         if (this.keyword === "type") return typePrefix
 
-        const interfacePrefix = `interface ${typePrefix.replace("type", "").replace("=", "")}`
+        const interfacePrefix = `${typePrefix.replace("type", "interface").replace("=", "")}`
         return interfacePrefix
     }
     toTypeString(genericLiterals?: Array<string>): string {
         const prefix = this.getRecordPrefix()
         const fieldsStr = Object.entries(this.fields)
-            .map(
-                ([name, type]) =>
-                    `${name}: ${type.toTypeString(genericLiterals)}`
-            )
+            .map(([name, type]) => {
+                const fieldType: string = name.includes("?") ? "?:" : ":"
+                return `${name}${fieldType} ${type.toTypeString(genericLiterals)}`
+            })
             .join(";\n  ")
         const recordStr = `{\n  ${fieldsStr}\n}`
         return prefix ? prefix + recordStr : recordStr
