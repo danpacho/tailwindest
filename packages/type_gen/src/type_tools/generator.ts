@@ -8,9 +8,10 @@ abstract class TypeGenerator<Args, Frame> {
      * @param literal The unformatted TypeScript code string.
      * @returns The formatted code string.
      */
-    protected async prettify(literal: string): Promise<string> {
+    public async prettify(literal: string): Promise<string> {
         try {
-            const formatted = prettier.format(literal, {
+            const purified = literal.trim()
+            const formatted = prettier.format(purified, {
                 parser: "typescript",
                 plugins: ["prettier-plugin-jsdoc"],
             })
