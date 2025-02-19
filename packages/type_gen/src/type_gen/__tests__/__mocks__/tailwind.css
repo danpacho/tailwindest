@@ -1,1 +1,192 @@
 @import "tailwindcss";
+
+/* Advanced theme customization */
+@theme {
+    /* Extended color palette with custom color functions */
+    --color-primary-50: #eff6ff;
+    --color-primary-100: #dbeafe;
+    --color-primary-200: #bfdbfe;
+    --color-primary-300: #93c5fd;
+    --color-primary-400: #60a5fa;
+    --color-primary-500: #3b82f6;
+    --color-primary-600: #2563eb;
+    --color-primary-700: #1d4ed8;
+    --color-primary-800: #1e40af;
+    --color-primary-900: #1e3a8a;
+    --color-primary-light: color-mix(
+        in srgb,
+        var(--color-primary-500) 90%,
+        white
+    );
+    --color-primary-dark: color-mix(
+        in srgb,
+        var(--color-primary-500) 90%,
+        black
+    );
+
+    /* Font stacks with variable fonts */
+    --font-sans:
+        "Inter var", "Inter", "ui-sans-serif", "system-ui", "-apple-system",
+        "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial",
+        "Noto Sans", "sans-serif", "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol", "Noto Color Emoji";
+    --font-body: "Nunito var", var(--font-sans);
+    --font-mono:
+        "Fira Code VF", "Fira Code", "ui-monospace", "SFMono-Regular", "Menlo",
+        "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace";
+    --font-display: "Poppins var", "Poppins", var(--font-sans);
+
+    /* Custom spacing with mathematical operations */
+    --spacing-1: calc(0.25rem * var(--scale-factor, 1));
+    --spacing-2: calc(0.5rem * var(--scale-factor, 1));
+    --spacing-3: calc(0.75rem * var(--scale-factor, 1));
+    --spacing-4: calc(1rem * var(--scale-factor, 1));
+    --spacing-5: calc(1.25rem * var(--scale-factor, 1));
+    --spacing-6: calc(1.5rem * var(--scale-factor, 1));
+    --spacing-8: calc(2rem * var(--scale-factor, 1));
+    --spacing-10: calc(2.5rem * var(--scale-factor, 1));
+    --spacing-12: calc(3rem * var(--scale-factor, 1));
+
+    /* Custom breakpoints with overlapping ranges for responsive design */
+    --breakpoint-xs: 0px;
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+    --breakpoint-3xl: 1920px;
+    --breakpoint-4xl: 2560px; /* For ultra-wide or multiple monitor setups */
+
+    /* Animation keyframes */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    @keyframes slideIn {
+        from {
+            transform: translateX(-100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+}
+
+/* Complex utilities with multiple states */
+@utility custom-card {
+    background-color: var(--color-primary-100);
+    border-radius: calc(var(--spacing-3) * 2);
+    padding: var(--spacing-4);
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    @variant hover {
+        transform: translateY(-5px);
+        box-shadow:
+            0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    @variant focus-within {
+        outline: 3px solid var(--color-primary-500);
+    }
+}
+
+@utility custom-nav {
+    display: flex;
+    gap: var(--spacing-3);
+    @variant dark {
+        background-color: #1f2937;
+    }
+    @variant lg {
+        gap: var(--spacing-6);
+    }
+    @variant xl {
+        justify-content: space-between;
+    }
+}
+
+/* Custom state management */
+.element {
+    @variant [data-state="active"] {
+        color: var(--color-primary-500);
+        font-weight: bold;
+    }
+    @variant [data-state="disabled"] {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+}
+
+/* Custom CSS layers for better organization */
+@layer base {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-display);
+    }
+    body {
+        font-family: var(--font-body);
+    }
+}
+
+@layer utilities {
+    .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+    }
+    .custom-animation {
+        animation:
+            fadeIn 1s ease-in-out,
+            slideIn 1s ease-in-out;
+    }
+}
+
+/* Dark mode strategy with custom selector */
+@custom-variant dark (&:where(.dark-theme, .dark-theme *));
+
+/* Prefix for all classes */
+@prefix "app-";
+
+/* Accessibility enhancements */
+@layer base {
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+    .focus-ring {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        @variant focus {
+            outline-color: var(--color-primary-500);
+        }
+    }
+}
+
+/* Custom CSS for complex layouts */
+.complex-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-4);
+    @variant lg {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    @variant xl {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
