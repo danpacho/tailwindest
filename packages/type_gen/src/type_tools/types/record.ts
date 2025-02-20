@@ -5,6 +5,13 @@ type RecordDefineMethod = "type" | "interface"
 
 export class RecordType extends Type {
     private fields: Record<string, Type>
+    public extendsList: Array<RecordType> | null = null
+    public setExtends(extendsList: Array<RecordType>): this {
+        if (extendsList.length > 0) {
+            this.extendsList = extendsList
+        }
+        return this
+    }
     constructor(
         filed: Record<string, Type | string>,
         alias?: string,
@@ -29,6 +36,31 @@ export class RecordType extends Type {
         if (this.keyword === "type") return typePrefix
 
         const interfacePrefix = `${typePrefix.replace("type", "interface").replace("=", "")}`
+
+        if (Array.isArray(this.extendsList)) {
+            const withExtendsPrefix = `${interfacePrefix} extends ${this.extendsList
+                ?.map((e) => {
+                    if (Array.isArray(e.generic)) {
+                        const generics = e.generic
+                            .map((gen) => {
+                                return (
+                                    this.generic?.find((genName) => {
+                                        return typeof gen === "string"
+                                            ? genName === gen
+                                            : genName === gen.name
+                                    }) ?? null
+                                )
+                            })
+                            .filter((e) => e !== null)
+                        return `${e.alias}<${generics.join(", ")}>`
+                    }
+                    return e.alias
+                })
+                .join(", ")}`
+
+            return withExtendsPrefix
+        }
+
         return interfacePrefix
     }
     toTypeString(genericLiterals?: Array<string>): string {
@@ -36,7 +68,7 @@ export class RecordType extends Type {
         const fieldsStr = Object.entries(this.fields)
             .map(([name, type]) => {
                 const fieldType: string = name.includes("?") ? "?:" : ":"
-                return `${name}${fieldType} ${type.toTypeString(genericLiterals)}`
+                return `${name.replaceAll("?", "")}${fieldType} ${type.toTypeString(genericLiterals)}`
             })
             .join(";\n  ")
         const recordStr = `{\n  ${fieldsStr}\n}`
