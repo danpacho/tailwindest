@@ -2,7 +2,7 @@ import prettier from "prettier"
 import { Type } from "./types/type"
 import { RecordType } from "./types/record"
 
-abstract class TypeGenerator<Args, Frame> {
+abstract class TypeGenerator<Arg, Frame> {
     /**
      * Formats the generated type literal string using Prettier.
      * @param literal The unformatted TypeScript code string.
@@ -22,17 +22,29 @@ abstract class TypeGenerator<Args, Frame> {
         }
     }
 
-    public abstract generateFrame(args: Args): Frame
+    public abstract generateFrame(args: Arg): Frame
     public abstract toString(generatedFrame: Frame): string
 
     /**
-     * Generate a TypeScript type literal from the provided arguments.
+     * Generate a typeScript schemas
+     * @param arg single schema
      */
-    public async generate(args: Args): Promise<string> {
-        const frame = this.generateFrame(args)
+    public async generate(arg: Arg): Promise<string> {
+        const frame = this.generateFrame(arg)
         const typeString = this.toString(frame)
 
         return await this.prettify(typeString)
+    }
+
+    /**
+     * Generate all typeScript schemas
+     * @param argList Schemas
+     */
+    public async generateAll(argList: Array<Arg>): Promise<string> {
+        const generatedList = await Promise.all(
+            argList.map((args) => this.generate(args))
+        )
+        return generatedList.join("")
     }
 }
 
