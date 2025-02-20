@@ -270,6 +270,72 @@ describe("TypeSchemaGenerator", () => {
                 `"type AliasNumber = number; type Union<A, B> = A | B | AliasNumber; type AliasArray<A, B> = Array<Union<A, B>>; type AliasedLiteral = "LITERAL"; type List<A, B extends Array<number> = number[]> = | A | B | AliasArray<A, B> | AliasedLiteral; type AliasString = string; type RecordType<A, B extends number[] = number[]> = { name: A; age: B; lists: List<A, B>; intersection: { name: AliasString; } & { age: number; }; };"`
             )
         })
+
+        it("should extends interfaces", async () => {
+            const extend1 = t
+                .record("Extend1", {
+                    "a?": t.string(),
+                    b: t.literal("literal"),
+                })
+                .addDoc("Extend1 description")
+            const extend2 = t
+                .record(
+                    "Extend2",
+                    {
+                        "c?": t.string(),
+                        d: t.literal("literal"),
+                        e: "A",
+                        f: t.union([
+                            t.intersection([
+                                t.literal("f/${string}", {
+                                    useBackticks: true,
+                                }),
+                                t.record({}),
+                            ]),
+                            t.literal("f"),
+                        ]),
+                    },
+                    { generic: ["A"] }
+                )
+                .addDoc("Extend2 description")
+            const root = t
+                .record(
+                    "Root",
+                    {
+                        root: t.union(
+                            Array.from({ length: 5 }).map((_, i) =>
+                                t.literal(`root_${i}`)
+                            )
+                        ),
+                    },
+                    { keyword: "interface", generic: ["A"] }
+                )
+                .setExtends([extend1, extend2])
+                .setExport(true)
+                .addDoc("Root description")
+
+            const result = await generator.generateAll([extend1, extend2, root])
+
+            expect(result).toMatchInlineSnapshot(`
+              "/** Extend1 description */
+              type Extend1 = {
+                a?: string;
+                b: "literal";
+              };
+              /** Extend2 description */
+              type Extend2<A> = {
+                c?: string;
+                d: "literal";
+                e: A;
+                f: (\`f/\${string}\` & {}) | "f";
+              };
+              /** Root description */
+              export interface Root<A> extends Extend1, Extend2<A> {
+                root: "root_0" | "root_1" | "root_2" | "root_3" | "root_4";
+              }
+              "
+            `)
+        })
     })
 
     // ───────────────────────────────
