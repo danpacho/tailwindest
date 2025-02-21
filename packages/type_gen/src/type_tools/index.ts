@@ -1,2 +1,2 @@
 export * from "./types"
-export * from "./generator"
+export * from "./type_generator"

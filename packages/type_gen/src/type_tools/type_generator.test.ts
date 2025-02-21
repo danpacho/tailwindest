@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import * as t from "./"
+import * as t from "."
 
 function normalize(str: string): string {
     return str.replace(/\s+/g, " ").trim()
