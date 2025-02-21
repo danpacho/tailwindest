@@ -183,16 +183,8 @@ export abstract class Type {
         this.skipDocs = skipOption
         return this
     }
-    /**
-     * Returns the JSDoc comment block if any documentation is present.
-     * Each key-value pair in the docs record is output as:
-     *
-     *   * key
-     *   * (doc text, preserving line breaks)
-     */
-    public getDoc(): string {
-        if (this.skipDocs) return ""
 
+    public getDocString(): string {
         const lines: string[] = []
         for (const [key, value] of Object.entries(this.docs)) {
             if (!["title", "@example"].includes(key)) {
@@ -207,6 +199,18 @@ export abstract class Type {
 
         const doc = lines.length ? "/**\n" + lines.join("\n") + "\n */\n" : ""
         return doc
+    }
+    /**
+     * Returns the JSDoc comment block if any documentation is present.
+     * Each key-value pair in the docs record is output as:
+     *
+     *   * key
+     *   * (doc text, preserving line breaks)
+     */
+    public getDoc(): string {
+        if (this.skipDocs) return ""
+
+        return this.getDocString()
     }
 
     /**
