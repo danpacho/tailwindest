@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest"
-import { backgroundImage, display } from "./__mocks__/collection"
+import {
+    backgroundBlendMode,
+    backgroundColor,
+    backgroundImage,
+    display,
+} from "./__mocks__/collection"
 
 interface TailwindCollectionRecord {
     propertyName: string
@@ -144,7 +149,99 @@ function createOptimizableMap(
         return collectedPrefixes
     }
 
-    const prefixGroups = findPrefixGroups(classNames, [])
+    const findUniquePrefixGroups = (
+        classNames: Array<string>,
+        independentPrefixGroups: Array<string>
+    ): Array<string> => {
+        const samePrefixGroups = findPrefixGroups(independentPrefixGroups, [])
+
+        const groups = samePrefixGroups.map((rootPrefix) => {
+            return {
+                samePrefixGroups: independentPrefixGroups.filter((prefix) =>
+                    prefix.startsWith(rootPrefix)
+                ),
+                matched: classNames.filter(
+                    (className) =>
+                        className.startsWith(`${rootPrefix}-`) &&
+                        className !== rootPrefix
+                ),
+            }
+        })
+
+        const countMatching = (
+            prefix: string,
+            classNames: Array<string>
+        ): number => {
+            return classNames.reduce<number>((matched, className) => {
+                if (
+                    className.startsWith(`${prefix}-`) ||
+                    className === prefix
+                ) {
+                    return matched + 1
+                }
+                return matched
+            }, 0)
+        }
+
+        const uniqueGroupByLength: Array<string> = groups.reduce<Array<string>>(
+            (finalPrefixGroups, group) => {
+                const matchedGroups = group.samePrefixGroups.map(
+                    (samePrefix) =>
+                        [
+                            samePrefix,
+                            countMatching(samePrefix, group.matched),
+                        ] as const
+                )
+                const uniqueGroups = matchedGroups.reduce<Map<number, string>>(
+                    (matched, groups) => {
+                        const [prefix, count] = groups
+                        const prevPrefix = matched.get(count)
+                        if (!prevPrefix) {
+                            // new group
+                            matched.set(count, prefix)
+                            return matched
+                        }
+
+                        // check uniqueness by prefix length, if same count then longer prefix will be unique prefix
+                        if (prefix.length > prevPrefix.length) {
+                            matched.set(count, prefix)
+                        }
+                        return matched
+                    },
+                    new Map()
+                )
+
+                const uniquePrefixes = Object.values(
+                    Object.fromEntries(uniqueGroups)
+                )
+                finalPrefixGroups.push(...uniquePrefixes)
+
+                return finalPrefixGroups
+            },
+            []
+        )
+
+        const finalGroups: Array<string> = Array.from(
+            new Set([
+                ...independentPrefixGroups.filter((prefix) =>
+                    samePrefixGroups.length >= 1
+                        ? samePrefixGroups.some(
+                              (samePrefix) => samePrefix !== prefix
+                          )
+                        : true
+                ),
+                ...uniqueGroupByLength,
+            ])
+        )
+
+        return finalGroups
+    }
+
+    const prefixGroups = findUniquePrefixGroups(
+        classNames,
+        findPrefixGroups(classNames, [])
+    )
+
     const soleGroups = Array.from(
         new Set(
             classNames.filter((className) => {
@@ -291,7 +388,7 @@ function createOptimizableMap(
     let refCounter: number = 1
     const clusterRefs = new Map<number, string>()
     clusters.forEach((cluster, idx) => {
-        if (cluster.indices.length >= 2 && cluster.commonTokens.length > 0) {
+        if (cluster.indices.length >= 1 && cluster.commonTokens.length > 0) {
             clusterRefs.set(idx, `$ref${refCounter}`)
             refCounter++
         }
@@ -386,13 +483,13 @@ describe("CreateOptimizableMap", () => {
 
         expect(backgroundImageMap).toMatchSnapshot()
         expect(backgroundImageMap.prefixGroups).toEqual([
-            "bg",
             "bg-conic",
             "bg-linear",
             "bg-linear-to",
             "from",
             "to",
             "via",
+            "bg",
         ])
         expect(backgroundImageMap.soleGroups).toEqual([])
     })
@@ -415,5 +512,22 @@ describe("CreateOptimizableMap", () => {
             "sr-only",
             "table",
         ])
+    })
+
+    it("should create optimization map for <bg-blend-mode>", () => {
+        const bgBlendMode = createOptimizableMap(
+            backgroundBlendMode,
+            prefixRules
+        )
+
+        expect(bgBlendMode.prefixGroups).toEqual(["bg-blend", "bg-blend-color"])
+        expect(bgBlendMode).toMatchSnapshot()
+    })
+
+    it("should create optimization map for <bg-color>", () => {
+        const bgColor = createOptimizableMap(backgroundColor, prefixRules)
+
+        expect(bgColor).toMatchSnapshot()
+        expect(bgColor.prefixGroups).toEqual(["bg"])
     })
 })
