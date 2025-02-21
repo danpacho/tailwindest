@@ -4,6 +4,7 @@ import {
     backgroundColor,
     backgroundImage,
     display,
+    placeItems,
 } from "./__mocks__/collection"
 
 interface TailwindCollectionRecord {
@@ -62,9 +63,6 @@ function createOptimizableMap(
                         const splitted = e.split("-")
 
                         if (splitted.length === 1) {
-                            if (parentPrefix.length === 0) {
-                                return splitted[0]
-                            }
                             return null
                         }
 
@@ -100,9 +98,6 @@ function createOptimizableMap(
                     matched.push(token)
                 }
 
-                if (matchingCount === 0) {
-                    matched.push(token)
-                }
                 return matched
             },
             []
@@ -155,7 +150,12 @@ function createOptimizableMap(
     ): Array<string> => {
         const samePrefixGroups = findPrefixGroups(independentPrefixGroups, [])
 
-        const groups = samePrefixGroups.map((rootPrefix) => {
+        const targetAnalysisPrefixGroups: Array<string> =
+            samePrefixGroups.length === 0
+                ? independentPrefixGroups
+                : samePrefixGroups
+
+        const groups = targetAnalysisPrefixGroups.map((rootPrefix) => {
             return {
                 samePrefixGroups: independentPrefixGroups.filter((prefix) =>
                     prefix.startsWith(rootPrefix)
@@ -224,11 +224,9 @@ function createOptimizableMap(
         const finalGroups: Array<string> = Array.from(
             new Set([
                 ...independentPrefixGroups.filter((prefix) =>
-                    samePrefixGroups.length >= 1
-                        ? samePrefixGroups.some(
-                              (samePrefix) => samePrefix !== prefix
-                          )
-                        : true
+                    targetAnalysisPrefixGroups.every(
+                        (samePrefix) => samePrefix !== prefix
+                    )
                 ),
                 ...uniqueGroupByLength,
             ])
@@ -388,12 +386,16 @@ function createOptimizableMap(
     let refCounter: number = 1
     const clusterRefs = new Map<number, string>()
     clusters.forEach((cluster, idx) => {
-        if (cluster.indices.length >= 1 && cluster.commonTokens.length > 0) {
+        // if it can be extracted as variables, we should(global optimizations)
+        const REFERENCE_THRESHOLD = 1 as const
+        const shouldMakeReference =
+            cluster.indices.length >= REFERENCE_THRESHOLD &&
+            cluster.commonTokens.length > 0
+        if (shouldMakeReference) {
             clusterRefs.set(idx, `$ref${refCounter}`)
             refCounter++
         }
     })
-
     // Create the valueReferenceMap from clusters
     const valueReferenceMap = new Map<string, string[]>()
     clusters.forEach((cluster, idx) => {
@@ -475,6 +477,13 @@ describe("CreateOptimizableMap", () => {
             return false
         },
     ]
+
+    it("should create optimization map for <placeItems>", () => {
+        const placeItemsMap = createOptimizableMap(placeItems, prefixRules)
+
+        expect(placeItemsMap).toMatchSnapshot()
+        expect(placeItemsMap.prefixGroups).toEqual(["place-items"])
+    })
     it("should create optimization map for <backgroundImage>", () => {
         const backgroundImageMap = createOptimizableMap(
             backgroundImage,
@@ -520,8 +529,8 @@ describe("CreateOptimizableMap", () => {
             prefixRules
         )
 
-        expect(bgBlendMode.prefixGroups).toEqual(["bg-blend", "bg-blend-color"])
         expect(bgBlendMode).toMatchSnapshot()
+        expect(bgBlendMode.prefixGroups).toEqual(["bg-blend", "bg-blend-color"])
     })
 
     it("should create optimization map for <bg-color>", () => {
