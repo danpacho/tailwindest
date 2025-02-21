@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest"
 import { ClassEntry, TailwindCompiler, VariantEntry } from "./compiler"
-import { CSSAnalyzer } from "../type_gen/css_analyzer"
+import { CSSAnalyzer } from "../generator/css_analyzer"
 
 describe("TailwindCompiler - Internal", () => {
     let compiler: TailwindCompiler
