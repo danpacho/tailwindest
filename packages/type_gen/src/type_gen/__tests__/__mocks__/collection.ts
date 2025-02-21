@@ -1,4 +1,4 @@
-export const collected = {
+export const backgroundImage = {
     propertyName: "backgroundImage",
     classNames: [
         "-bg-conic-0",
@@ -25,6 +25,7 @@ export const collected = {
         "-bg-linear-270",
         "-bg-linear-300",
         "-bg-linear-330",
+        "bg-conic",
         "bg-conic-0",
         "bg-conic-30",
         "bg-conic-60",
@@ -932,4 +933,34 @@ export const collected = {
         "95",
         "100",
     ],
+}
+
+export const display = {
+    propertyName: "display",
+    classNames: [
+        "block",
+        "contents",
+        "flex",
+        "flow-root", // this is not flex-root. It is "flow"-root
+        "grid",
+        "hidden",
+        "inline",
+        "inline-block",
+        "inline-flex",
+        "inline-grid",
+        "inline-table",
+        "list-item",
+        "not-sr-only",
+        "sr-only",
+        "table",
+        "table-caption",
+        "table-cell",
+        "table-column",
+        "table-column-group",
+        "table-footer-group",
+        "table-header-group",
+        "table-row",
+        "table-row-group",
+    ],
+    variants: [],
 }
