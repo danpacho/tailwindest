@@ -408,8 +408,8 @@ describe("TypeGenerator", () => {
 
     it("should build types", async () => {
         await generator.buildTypes({
-            tailwindClass: `${__dirname}/__mocks__/dist/class.css`,
-            tailwindRecord: `${__dirname}/__mocks__/dist/record.json`,
+            tailwindest: `${__dirname}/__mocks__/dist/tailwindest.ts`,
+            tailwind: `${__dirname}/__mocks__/dist/tailwind.ts`,
         })
     })
 })
