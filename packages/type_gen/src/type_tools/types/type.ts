@@ -102,14 +102,24 @@ export type GenericOption = Array<
     | string
 >
 
-/**
- * The base abstract class for a type node.
- */
 export abstract class Type {
+    private _alias: string | undefined = undefined
+    public get alias(): string | undefined {
+        return this._alias
+    }
+
     /**
      * Alias for Type.
      */
-    public alias: string | undefined = undefined
+    public set alias(newAlias: string | undefined) {
+        if (!newAlias) return
+        this._alias = newAlias = newAlias.replace(/[^A-Za-z0-9]/g, "")
+    }
+
+    public setAlias(newAlias: string): this {
+        this.alias = newAlias
+        return this
+    }
 
     /**
      * Generics for Type.
@@ -177,8 +187,6 @@ export abstract class Type {
     public getDoc(): string {
         const lines: string[] = []
         for (const [key, value] of Object.entries(this.docs)) {
-            // If it's not 'title' or '@example', prepend " * key".
-            // 'title' or '@example' will just have their contents appended.
             if (!["title", "@example"].includes(key)) {
                 lines.push(` * ${key}`)
             }
@@ -186,15 +194,11 @@ export abstract class Type {
             // Split the doc text by line to preserve line breaks
             const valueLines = value.split("\n")
             for (const line of valueLines) {
-                // Escape '@' symbols to avoid JSDoc confusion
                 const linePurified = line.replaceAll("@", "\\@")
                 lines.push(` * ${linePurified}`)
             }
         }
 
-        /**
-         * If there are lines, wrap them in a JSDoc comment. Otherwise, return empty string.
-         */
         const doc = lines.length ? "/**\n" + lines.join("\n") + "\n */\n" : ""
         return doc
     }
