@@ -302,11 +302,13 @@ describe("TypeSchemaGenerator", () => {
                 .record(
                     "Root",
                     {
-                        root: t.union(
-                            Array.from({ length: 5 }).map((_, i) =>
-                                t.literal(`root_${i}`)
+                        root: t
+                            .union(
+                                Array.from({ length: 5 }).map((_, i) =>
+                                    t.literal(`root_${i}`)
+                                )
                             )
-                        ),
+                            .addDoc("Root documentation"),
                     },
                     { keyword: "interface", generic: ["A"] }
                 )
@@ -331,6 +333,7 @@ describe("TypeSchemaGenerator", () => {
               };
               /** Root description */
               export interface Root<A> extends Extend1, Extend2<A> {
+                /** Root documentation */
                 root: "root_0" | "root_1" | "root_2" | "root_3" | "root_4";
               }
               "
