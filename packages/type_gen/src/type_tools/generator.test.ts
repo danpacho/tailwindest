@@ -443,17 +443,16 @@ describe("TypeSchemaGenerator", () => {
               "/**
                * ArrType is a specific type
                *
-               * @returns It returns some kind of array
-               *
-               *   @example
-               *
+               * @example
                *   \`\`\`css
                *   .dark:bg-red-700 {
-               *     \\@media (prefers-color-scheme: dark) {
-               *       background-color: var(--color-red-700);
-               *     }
-               *   }
-               *   \`\`\`
+               *           @media (prefers-color-scheme: dark) {
+               *             background-color: var(--color-red-700);
+               *           }
+               *         }
+               *   \`\`\`;
+               *
+               * @returns It returns some kind of array
                */
               type ArrType = Array<string>;
               "
@@ -472,13 +471,12 @@ describe("TypeSchemaGenerator", () => {
               /**
                * ChainedType title
                *
-               * @param value - a number value
-               *
-               *   @example
-               *
+               * @example
                *   \`\`\`ts
                *   const x = 1;
-               *   \`\`\`
+               *   \`\`\`;
+               *
+               * @param value - a number value
                */
               type ChainedType = {
                 value: Num;
