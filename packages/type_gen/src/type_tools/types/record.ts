@@ -68,7 +68,7 @@ export class RecordType extends Type {
         const fieldsStr = Object.entries(this.fields)
             .map(([name, type]) => {
                 const fieldType: string = name.includes("?") ? "?:" : ":"
-                return `${type.getDoc()}${name.replaceAll("?", "")}${fieldType} ${type.toTypeString(genericLiterals)}`
+                return `${type.getDocString()}${name.replaceAll("?", "")}${fieldType} ${type.toTypeString(genericLiterals)}`
             })
             .join(";\n  ")
         const recordStr = `{\n  ${fieldsStr}\n}`
