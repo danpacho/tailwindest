@@ -1,4 +1,3 @@
-import { write } from "fs"
 import type {
     ClassEntry,
     TailwindCompiler,
@@ -18,6 +17,7 @@ const capitalize = (...text: string[]): string =>
             } else if (word.length === 2) {
                 return word[0]!.toUpperCase() + word[1]!.toLowerCase()
             } else {
+                if (!word[0]) return word[0]
                 return word[0]!.toUpperCase() + word.slice(1)
             }
         })
@@ -39,10 +39,13 @@ const isTwClassPure = (text: string): boolean => {
 
 const sanitizeTwClass = (className: string): string => {
     const nonSigned = className.startsWith("-") ? className.slice(1) : className
-    const direction = new Set(["x", "y", "t", "l", "b", "r"])
-    const nonDirection = nonSigned
-        .split("-")
-        .filter((e) => direction.has(e) === false)
+    const direction = new Set(["x", "y", "z", "t", "l", "b", "r", "e", "s"])
+    const tokens = nonSigned.split("-")
+    const nonDirection = tokens.filter(
+        (e) =>
+            direction.has(e) === false ||
+            (e.length === 2 && direction.has(e[1] ?? ""))
+    )
 
     return nonDirection.join("-")
 }
@@ -125,6 +128,32 @@ interface TailwindDocs {
     classNames: Array<string>
     uniqueIdentifier: Array<string>
 }
+
+interface TailwindCollectionRecord {
+    propertyName: string
+    classNames: Array<string>
+    variants: Array<string>
+}
+
+interface OptimizableMap {
+    propertyName: string
+    hasNegative: boolean
+    soleGroups: Array<string>
+    prefixGroups: Array<string>
+    valueGroups: Array<string>
+    variants: Array<string> | null
+    prefixValueMapping: Array<{
+        prefix: string
+        values: Array<string>
+        hasNegative: boolean
+    }>
+    valueReferenceMap: Map<string, Array<string>>
+}
+
+type TailwindCollection = Record<
+    TailwindCollectionRecord["propertyName"],
+    Omit<TailwindCollectionRecord, "propertyName">
+>
 
 type TailwindTypeAliasMap = Map<
     TailwindDocs["uniqueIdentifier"][number],
@@ -211,17 +240,17 @@ export class TailwindTypeGenerator {
         this._docStore = store
 
         const typeAliasMap = store.reduce<TailwindTypeAliasMap>((acc, curr) => {
-            curr.uniqueIdentifier.forEach((ident) => {
+            curr.uniqueIdentifier.forEach((identifier) => {
                 const alias = kebabToCamelCase(curr.title)
 
                 if (isTwClassPure(alias)) {
-                    const aliasMap: Map<
+                    const propertyMap: Map<
                         Set<TailwindDocs["classNames"][number]>,
                         TailwindDocs["title"]
-                    > = acc.get(ident) ?? new Map()
+                    > = acc.get(identifier) ?? new Map()
 
-                    aliasMap.set(new Set(curr.classNames), alias)
-                    acc.set(ident, aliasMap)
+                    propertyMap.set(new Set(curr.classNames), alias)
+                    acc.set(identifier, propertyMap)
                 }
             })
             return acc
@@ -301,6 +330,13 @@ export class TailwindTypeGenerator {
         return (h1 >>> 0).toString(16)
     }
 
+    private extractTypeFromMap(
+        mapType: Map<string, string | t.Type>
+    ): Array<t.Type> {
+        return Object.values(Object.fromEntries(mapType)).filter(
+            (e) => typeof e !== "string"
+        )
+    }
     private variantsMap: Map<string, t.Type> = new Map()
     private getVariantsLiteral(variants: Array<string>): t.Type {
         const key = this.hash(variants.join(""))
@@ -309,13 +345,8 @@ export class TailwindTypeGenerator {
             return this.variantsMap.get(key)!
         }
         const literalType = t.union(
-            [
-                ...variants.map((variant) => t.literal(variant)),
-                t.literal("${string}", {
-                    useBackticks: true,
-                }),
-            ],
-            `Variants__${key}`
+            variants.map((variant) => t.literal(variant)),
+            capitalize("variants", key)
         )
 
         this.variantsMap.set(key, literalType)
@@ -360,74 +391,139 @@ export class TailwindTypeGenerator {
     }
 
     private getPropertyNameTailwindKeyNotFounded(
-        css: string,
         className: string,
         useNativeCombine: boolean
     ): string | null {
-        const extractUniqueKeysFromStyleSheet = (
-            styleSheet: Record<string, string>
-        ): readonly [string | null, Array<string>] => {
-            const keys = Object.keys(styleSheet)
+        const findTrierClassNames = [
+            // purified -> original
+            sanitizeTwClass(className),
+            className,
+        ] as const
 
-            const uniqueKey = keys
-                .map((key) => {
-                    if (key === "") return null
-                    if (key.startsWith("--") || key.startsWith("-")) return null
-                    if (key.startsWith("var")) return null
-                    return key
-                })
-                .filter((e) => e !== null)
-                .map(toValidCSSProperty)
+        const findPropertyByCSS = (className: string): string | null => {
+            const extractUniqueKeysFromStyleSheet = (
+                styleSheet: Record<string, string>
+            ): readonly [string | null, Array<string>] => {
+                const keys = Object.keys(styleSheet)
 
-            if (uniqueKey.length !== 1) return [null, keys] as const
+                const uniqueKey = keys
+                    .map((key) => {
+                        if (key === "") return null
+                        if (key.startsWith("--") || key.startsWith("-"))
+                            return null
+                        if (key.startsWith("var")) return null
+                        return key
+                    })
+                    .filter((e) => e !== null)
+                    .map(toValidCSSProperty)
 
-            return [uniqueKey[0]!, keys] as const
-        }
+                if (uniqueKey.length !== 1) return [null, keys] as const
 
-        const styleBlock = this.cssAnalyzer.parseStyleBlock(css)
-        if (!styleBlock) {
-            this.$.warn(
-                `Can not generate css block from <${className}> css = ${typeof css}`
-            )
-            return null
-        }
-
-        const [uniqueProperty, styleValues] = extractUniqueKeysFromStyleSheet(
-            styleBlock.styles
-        )
-
-        const matchedVariantName = this.variants.find((variant) =>
-            className.includes(variant)
-        )
-
-        if (uniqueProperty) {
-            if (matchedVariantName && useNativeCombine) {
-                const withTwNative = `${matchedVariantName}${capitalize(
-                    uniqueProperty
-                )}`
-                return withTwNative
+                return [uniqueKey[0]!, keys] as const
             }
-            return uniqueProperty
+            const css = this.ds.candidatesToCss([className])[0]
+            if (!css) {
+                return null
+            }
+
+            const styleBlock = this.cssAnalyzer.parseStyleBlock(css)
+            if (!styleBlock) {
+                this.$.warn(
+                    `Can not generate css block from <${className}> css = ${typeof css}`
+                )
+                return null
+            }
+
+            const [uniqueProperty, styleValues] =
+                extractUniqueKeysFromStyleSheet(styleBlock.styles)
+
+            const matchedVariantName = this.variants.find((variant) =>
+                className.includes(variant)
+            )
+
+            if (uniqueProperty) {
+                if (matchedVariantName && useNativeCombine) {
+                    const withTwNative = `${matchedVariantName}${capitalize(
+                        uniqueProperty
+                    )}`
+                    return withTwNative
+                }
+                return uniqueProperty
+            }
+
+            if (!matchedVariantName) return null
+
+            const combinedSet: Array<string> = styleValues
+                .filter((value) => value.startsWith("--") === false)
+                .map((value) => capitalize(matchedVariantName, value))
+
+            if (combinedSet.length !== 1) return null
+
+            return combinedSet[0]!
         }
 
-        if (!matchedVariantName) return null
+        const removeDirectionName = (property: string): string => {
+            const splitCamelCase = (input: string): string[] => {
+                return input
+                    .split(/(?=[A-Z])/)
+                    .map((word) => word.toLowerCase())
+            }
+            const tokens = splitCamelCase(property)
 
-        const combinedSet: Array<string> = styleValues
-            .filter((value) => value.startsWith("--") === false)
-            .map((value) => capitalize(matchedVariantName, value))
+            const filterOutDirectionalToken = (token: string) => {
+                const directional = new Set([
+                    "start",
+                    "end",
+                    "left",
+                    "right",
+                    "top",
+                    "bottom",
+                ])
+                return directional.has(token)
+            }
 
-        if (combinedSet.length !== 1) return null
+            const filtered = tokens.filter(filterOutDirectionalToken)
+            if (filtered.length === 0) {
+                return property
+            }
 
-        return combinedSet[0]!
+            const directionRemovedProperty = kebabToCamelCase(
+                filtered.join("-")
+            )
+
+            return directionRemovedProperty
+        }
+
+        const purifiedBasedProperty = findPropertyByCSS(findTrierClassNames[0])
+        if (purifiedBasedProperty) {
+            return removeDirectionName(purifiedBasedProperty)
+        }
+
+        const fullNameBasedProperty = findPropertyByCSS(findTrierClassNames[1])
+        if (fullNameBasedProperty) {
+            return removeDirectionName(fullNameBasedProperty)
+        }
+
+        return null
     }
+
+    private exceptionalRules: Map<string, string> = new Map([
+        ["bg-conic", "backgroundImage"],
+    ])
 
     private getPropertyName(
         className: string,
-        uniqueKeySet: Set<string>
-    ): string | null {
+        uniqueKeySet: Set<string>,
+        colorVarSet: Set<string>
+    ): string | Array<string> | null {
+        // Exceptional case
+        if (this.exceptionalRules.has(className)) {
+            return this.exceptionalRules.get(className)!
+        }
+
         const CSS = this.ds.candidatesToCss([className])[0]
         if (!CSS) {
-            this.$.warn(`Can not transform <${className}> into css`)
+            this.$.warn(`Can not transform <${className}> into css.`)
             return null
         }
 
@@ -436,19 +532,10 @@ export class TailwindTypeGenerator {
             this.generateKey(className, uniqueKeySet)
 
         if (tailwindKey === null) {
-            const property =
-                this.getPropertyNameTailwindKeyNotFounded(
-                    CSS,
-                    sanitizeTwClass(className),
-                    false
-                ) ??
-                this.getPropertyNameTailwindKeyNotFounded(CSS, className, false)
-
-            if (!property) {
-                // console.log(property, className)
-            } else {
-                // console.log("success", className)
-            }
+            const property = this.getPropertyNameTailwindKeyNotFounded(
+                className,
+                false
+            )
 
             return property
         }
@@ -457,7 +544,12 @@ export class TailwindTypeGenerator {
 
         const aliasList = Array.from(propertyAliasPossibility ?? [])
 
-        const finder = (className: string, aliasSet: Set<string>): boolean => {
+        const finder = (
+            className: string,
+            aliasSet: Set<string>
+        ): "EXACT_FOUNDED" | "SIMILAR_FOUNDED" | "NOT_FOUNDED" => {
+            if (aliasSet.has(className)) return "EXACT_FOUNDED"
+
             const sanitizedClassName = sanitizeTwClass(className)
 
             const tester = Array.from(aliasSet)
@@ -465,7 +557,7 @@ export class TailwindTypeGenerator {
                 .filter((e) => e !== null)
 
             if (tester.some((tester) => tester.test(sanitizedClassName))) {
-                return true
+                return "SIMILAR_FOUNDED"
             }
 
             const possibilities = className.split("-")
@@ -498,133 +590,983 @@ export class TailwindTypeGenerator {
             )
 
             const founded = key.some((e) => aliasSet.has(e))
-            return founded
+            return founded ? "SIMILAR_FOUNDED" : "NOT_FOUNDED"
         }
 
-        const propertyName = aliasList.find(([aliasSet]) => {
-            if (finder(className, aliasSet)) {
-                return true
+        const propertyNameSymbol = aliasList.reduce<{
+            exact: Set<string>
+            similar: Set<string>
+        }>(
+            (acc, [aliasSet, propertyName]) => {
+                const foundType = finder(className, aliasSet)
+                if (foundType === "EXACT_FOUNDED") {
+                    acc.exact.add(propertyName)
+                } else if (foundType === "SIMILAR_FOUNDED") {
+                    acc.similar.add(propertyName)
+                }
+
+                return acc
+            },
+            {
+                exact: new Set(),
+                similar: new Set(),
             }
-            return false
-        })?.[1]
+        )
 
-        if (!propertyName) {
-            return this.getPropertyNameTailwindKeyNotFounded(
-                CSS,
-                sanitizeTwClass(className),
-                true
-            )
+        const exactNames = Array.from(propertyNameSymbol.exact)
+        const similarNames = Array.from(propertyNameSymbol.similar)
+        const propertyNameNotFounded =
+            exactNames.length === 0 && similarNames.length === 0
+
+        if (propertyNameNotFounded) {
+            return this.getPropertyNameTailwindKeyNotFounded(className, true)
         }
 
-        return propertyName
+        if (exactNames.length >= 1) {
+            return exactNames
+        }
+
+        if (similarNames.length === 1) {
+            return similarNames[0]!
+        }
+
+        const distinguishSimilarNames = (
+            className: string,
+            similarNames: Array<string>
+        ): string | Array<string> | null => {
+            let isColorProperty: boolean = false
+
+            const divider = "-" as const
+            const tokens = className.split("-")
+            let ptr = tokens.length - 1
+            let token: string = tokens[ptr]!
+            while (ptr >= 1) {
+                token = tokens[ptr - 1]! + divider + token
+                if (colorVarSet.has(token)) {
+                    isColorProperty = true
+                    break
+                }
+                ptr = ptr - 1
+            }
+
+            const cssBlock = this.cssAnalyzer.parseStyleBlock(CSS)
+            const colorProperty = new Set(
+                Object.entries(cssBlock?.styles ?? {}).reduce<Array<string>>(
+                    (acc, [key, value]) => {
+                        if (value.toLowerCase().includes("color")) {
+                            acc.push(key)
+                        }
+                        return acc
+                    },
+                    []
+                )
+            )
+
+            const nameMap = similarNames.reduce<{
+                color: string[]
+                nonColor: string[]
+            }>(
+                (acc, property) => {
+                    const isColorProperty = property
+                        .toLowerCase()
+                        .includes("color")
+
+                    if (isColorProperty || colorProperty.has(property)) {
+                        acc.color.push(property)
+                        return acc
+                    } else {
+                        acc.nonColor.push(property)
+                        return acc
+                    }
+                },
+                {
+                    color: [],
+                    nonColor: [],
+                }
+            )
+
+            if (isColorProperty) {
+                if (nameMap.color.length === 0) {
+                    this.$.error(
+                        `Color-like property ${className} has not found appropriate property in ${similarNames.toString()}`
+                    )
+                    return null
+                }
+                if (nameMap.color.length > 1) {
+                    this.$.error(
+                        `Color-like property ${className} has found many appropriate property in ${nameMap.color.toString()}`
+                    )
+                    return nameMap.color[0]!
+                }
+                return nameMap.color[0]!
+            }
+
+            if (nameMap.nonColor.length === 0) {
+                this.$.error(
+                    `NonColor-like property ${className} has not found appropriate property in ${similarNames.toString()}`
+                )
+                return null
+            }
+
+            // if(nameMap.nonColor.length === 1)
+            return nameMap.nonColor
+        }
+
+        return distinguishSimilarNames(className, similarNames)
+    }
+
+    private legacyRulePrefixes = ["bg-gradient"] as const
+    private shouldSkip(className: string): boolean {
+        if (
+            this.legacyRulePrefixes.some((skipPrefix) =>
+                className.startsWith(skipPrefix)
+            )
+        ) {
+            return true
+        }
+        return false
     }
 
     public async buildTypes(saveRoot: {
-        tailwindRecord: string
-        tailwindClass: string
+        tailwind: string
+        tailwindest: string
     }) {
         await this.init()
 
         const uniqueKeySet = new Set<string>(
             Array.from(this.typeAliasMap.keys())
         )
-        const collectedRecord: Record<string, Array<t.Type>> = {}
+
+        const tailwindCollection: TailwindCollection = {}
 
         try {
+            // symbolic type generation needed
+            const compiled = await this.compiler.compileCss(
+                this.classList.map((e) => e[0])
+            )
+
+            const compiledStyleBlock =
+                this.cssAnalyzer.parseStyleDefinition(compiled)
+
+            const colorVariableSet: Set<string> = new Set(
+                compiledStyleBlock
+                    .filter((e) => e.property.startsWith("--color"))
+                    .map((e) => e.property.replace("--color-", ""))
+            )
+            const colorVariables: Array<string> = Array.from(colorVariableSet)
+
             for (const entry of this.classList) {
                 const [className, variants] = entry
 
-                const property = this.getPropertyName(className, uniqueKeySet)
-
-                if (!property) {
-                    this.$.warn(`Can not find property & css for ${className}.`)
+                if (this.shouldSkip(className)) {
+                    this.$.info(`Skip <${className}>, depreciated at v4.`)
                     continue
                 }
 
-                if (!collectedRecord[property]) {
-                    collectedRecord[property] = []
+                let property = this.getPropertyName(
+                    className,
+                    uniqueKeySet,
+                    colorVariableSet
+                )
+
+                if (!property) {
+                    const isUserDefined =
+                        this.ds.candidatesToCss([className])[0] !== null
+
+                    if (isUserDefined) {
+                        property = "custom"
+                        this.$.info(`Mark <${className}> as custom property.`)
+                    } else {
+                        this.$.warn(
+                            `Not valid classname <${className}>. Skipped generation.`
+                        )
+                        continue
+                    }
                 }
 
-                const classLiteral: t.Type = t.literal(className)
-                collectedRecord[property].push(classLiteral)
-
-                const hasVariants = variants.modifiers.length > 0
-
-                if (hasVariants) {
-                    const variantLiteral = this.getVariantsLiteral(
-                        variants.modifiers
-                    )
-                    const COMBINE = "/" as const
-                    const withVariants = t.literal(
-                        `${className}${COMBINE}\$\{${variantLiteral.alias}\}`,
-                        {
-                            useBackticks: true,
+                const assignRecord = (property: string): void => {
+                    if (!tailwindCollection[property]) {
+                        tailwindCollection[property] = {
+                            classNames: [],
+                            variants: [],
                         }
-                    )
+                    }
 
-                    collectedRecord[property].push(withVariants)
+                    tailwindCollection[property]!.classNames.push(className)
+
+                    if (variants.modifiers.length === 0) return
+
+                    const prevVariantSet = new Set(
+                        tailwindCollection[property]!.variants
+                    )
+                    variants.modifiers.forEach((variant) => {
+                        if (!prevVariantSet.has(variant)) {
+                            tailwindCollection[property]!.variants.push(variant)
+                        }
+                    })
+                }
+                if (Array.isArray(property)) {
+                    property.forEach(assignRecord)
+                } else {
+                    assignRecord(property)
                 }
             }
 
-            console.log(Object.keys(collectedRecord).toSorted().join("\n"))
-            // Generate type
-
-            const recordType = Object.entries(collectedRecord).reduce<
-                Record<string, t.Type>
-            >((record, [key, shouldBeUnion]) => {
-                const typeName = `Tailwind${capitalize(key)}`
-                record[key] = t.union(shouldBeUnion, typeName).setExport(true)
-                return record
-            }, {})
-
-            const tailwindestSchema = t
-                .record("Tailwindest", recordType, {
-                    keyword: "interface",
-                })
-                .setExport(true)
-            const literalType = await Promise.all(
-                Array.from(this.variantsMap.values()).map(
-                    async (e) => await this.generator.generate(e)
-                )
+            const colorNames = new Set(
+                colorVariables.map((e) => e.split("-")[0])
             )
-            const tailwindClassListSchema = t
-                .union(
-                    Object.values(collectedRecord).flat(),
-                    "TailwindClassNames"
-                )
-                .setExport(true)
 
-            const classListType = await this.generator.generate(
-                tailwindClassListSchema
+            const optimizedMapList = await this.createOptimizableMapList(
+                tailwindCollection,
+                [
+                    // color like
+                    (prefixStr) => {
+                        if (colorNames.has(prefixStr)) return false
+                        return true
+                    },
+                    // number like
+                    (prefixStr) => {
+                        if (Number.isNaN(parseFloat(prefixStr))) return true
+                        return false
+                    },
+                ]
             )
-            const classTypeset: string = (
-                literalType +
-                "\n" +
-                classListType
-            ).replaceAll(",", "")
 
-            const tailwindestType =
-                await this.generator.generate(tailwindestSchema)
-
-            const recordTypeset: string = (
-                literalType +
-                "\n" +
-                tailwindestType
-            ).replaceAll(",", "")
+            const [tailwind, tailwindest] = await Promise.all([
+                this.generateType({
+                    type: "tailwind",
+                    globalReference: { color: colorVariables },
+                    optimizationList: optimizedMapList,
+                }),
+                this.generateType({
+                    type: "tailwindest",
+                    globalReference: { color: colorVariables },
+                    optimizationList: optimizedMapList,
+                }),
+            ])
 
             await Promise.all([
-                writeFile(saveRoot.tailwindClass, classTypeset, {
+                writeFile(saveRoot.tailwindest, tailwindest, {
                     encoding: "utf-8",
                 }),
-                writeFile(saveRoot.tailwindRecord, recordTypeset, {
+                writeFile(saveRoot.tailwind, tailwind, {
                     encoding: "utf-8",
                 }),
+                writeFile(
+                    `${saveRoot.tailwind}.json`,
+                    JSON.stringify(tailwindCollection, null, 4)
+                ),
             ])
         } catch (e) {
             this.$.error("build type error occurred")
-            this.$.error(JSON.stringify(e, null, 4))
+            console.error(e)
         }
 
         this.$.success("build type finished")
+    }
+
+    private createOptimizableMap(
+        collectionRecord: TailwindCollectionRecord,
+        prefixRules: Array<(someText: string) => boolean> = []
+    ): OptimizableMap {
+        const {
+            propertyName,
+            classNames: originalClassNames,
+            variants,
+        } = collectionRecord
+
+        const hasNegative = originalClassNames.some((className) =>
+            className.startsWith("-")
+        )
+
+        // Purify class names if negative values exist
+        let classNames: string[] = []
+        if (hasNegative) {
+            classNames = originalClassNames.map((e) =>
+                e.startsWith("-") ? e.slice(1) : e
+            )
+        } else {
+            classNames = originalClassNames
+        }
+
+        const findPrefixGroups = (
+            classGroups: string[],
+            parentPrefix: string[]
+        ): string[] => {
+            const uniquePrefixTokens = Array.from(
+                new Set(
+                    classGroups
+                        .map((e) => {
+                            const splitted = e.split("-")
+
+                            if (splitted.length === 1) {
+                                if (parentPrefix.length === 0) {
+                                    return splitted[0]
+                                }
+                                return null
+                            }
+
+                            const possiblePrefix = splitted[0]
+                            if (!possiblePrefix) return null
+
+                            const isNotPrefix = prefixRules.some(
+                                (rule) => rule(possiblePrefix) === false
+                            )
+                            if (isNotPrefix) return null
+
+                            return possiblePrefix
+                        })
+                        .filter((e) => Boolean(e) && e !== "")
+                )
+            )
+
+            if (uniquePrefixTokens.length === 0) return []
+            if (classGroups.length === 0) return []
+
+            const matchedPrefixes = uniquePrefixTokens.reduce<string[]>(
+                (matched, token) => {
+                    if (!token) return matched
+
+                    const matchingCount = classGroups.reduce(
+                        (count, className) => {
+                            if (className.includes(token)) {
+                                return count + 1
+                            }
+                            return count
+                        },
+                        0
+                    )
+
+                    if (matchingCount > 2) {
+                        matched.push(token)
+                    }
+
+                    if (matchingCount === 0) {
+                        matched.push(token)
+                    }
+                    return matched
+                },
+                []
+            )
+            const parentRemovedPrefixes = matchedPrefixes.filter(
+                (e) => parentPrefix.includes(e) === false
+            )
+            if (parentRemovedPrefixes.length === 0) return []
+
+            const prefixGroups = parentRemovedPrefixes.reduce<string[][]>(
+                (recursiveCollected, prefix) => {
+                    const group: string[] = classGroups.reduce<string[]>(
+                        (groupList, className) => {
+                            if (className.includes(prefix)) {
+                                const childrenToken = className.replace(
+                                    `${prefix}-`,
+                                    ""
+                                )
+                                groupList.push(childrenToken)
+                            }
+                            return groupList
+                        },
+                        []
+                    )
+
+                    const childPrefixes = findPrefixGroups(
+                        group,
+                        matchedPrefixes
+                    )
+
+                    recursiveCollected.push([prefix])
+                    if (childPrefixes.length !== 0) {
+                        const combined = childPrefixes.map(
+                            (childPrefix) => `${prefix}-${childPrefix}`
+                        )
+                        recursiveCollected.push(combined)
+                    }
+                    return recursiveCollected
+                },
+                []
+            )
+
+            const collectedPrefixes = Array.from(
+                new Set([prefixGroups.flat()])
+            ).flat()
+
+            return collectedPrefixes
+        }
+
+        const prefixGroups = findPrefixGroups(classNames, [])
+        const soleGroups = Array.from(
+            new Set(
+                classNames.filter((className) => {
+                    return (
+                        prefixGroups.some(
+                            (prefix) =>
+                                className.startsWith(`${prefix}-`) &&
+                                className !== prefix
+                        ) === false
+                    )
+                })
+            )
+        )
+
+        const valueGroups = Array.from(
+            new Set(
+                classNames.map((className) => {
+                    const valueList = prefixGroups.map((prefix) =>
+                        className.replace(`${prefix}-`, "")
+                    )
+                    const shortestString = valueList.reduce(
+                        (a, b) => (a!.length <= b.length ? a : b),
+                        valueList[0]
+                    )!
+                    return shortestString
+                })
+            )
+        )
+
+        const removeAt = <ArrayT extends Array<any>>(
+            arr: ArrayT,
+            i: number
+        ): ArrayT => {
+            if (i < 0 || i >= arr.length) return arr.slice() as ArrayT
+            return [...arr.slice(0, i), ...arr.slice(i + 1)] as ArrayT
+        }
+
+        // Create an array mapping each prefix to its corresponding values.
+        const prefixValueMapping = prefixGroups.map((prefix, i, totPrexies) => {
+            const otherPrefixes = removeAt(totPrexies, i)
+            const values = Array.from(
+                new Set(
+                    classNames
+                        .filter((className) => {
+                            const possible = className.startsWith(`${prefix}-`)
+                            if (!possible) return false
+                            const otherPossiblePrefix = otherPrefixes
+                                .map((p) =>
+                                    className.startsWith(`${p}-`) ? p : null
+                                )
+                                .filter((e) => e !== null)
+                            if (otherPossiblePrefix.length === 0) {
+                                return true
+                            }
+                            const biggestLength = Math.max(
+                                prefix.length,
+                                ...otherPossiblePrefix.map((e) => e.length)
+                            )
+                            if (biggestLength === prefix.length) {
+                                return true
+                            }
+                            return false
+                        })
+                        .map((className) => className.slice(prefix.length + 1))
+                )
+            )
+
+            const groupHasNegative = originalClassNames.some((className) =>
+                className.startsWith("-")
+            )
+
+            if (
+                values.length === 0 &&
+                otherPrefixes.some((other) => other.includes(prefix))
+            ) {
+                return {
+                    prefix,
+                    values: [],
+                    hasNegative: groupHasNegative,
+                }
+            }
+
+            return { prefix, values, hasNegative: groupHasNegative }
+        })
+
+        // Standalone case
+        const isStandAlone = prefixValueMapping.length === 0
+
+        if (isStandAlone) {
+            return {
+                propertyName,
+                variants: variants.length > 0 ? variants : null,
+                hasNegative,
+                prefixGroups,
+                soleGroups,
+                valueGroups: classNames,
+                prefixValueMapping: classNames.map((property) => ({
+                    hasNegative: property.startsWith("-"),
+                    prefix: property,
+                    values: [],
+                })),
+                valueReferenceMap: new Map(),
+            }
+        }
+
+        // Generate symbolic clusters
+        const arrayIntersection = (arr1: string[], arr2: string[]): string[] =>
+            arr1.filter((token) => arr2.includes(token))
+
+        type Cluster = { commonTokens: string[]; indices: number[] }
+        const clusters: Array<Cluster> = []
+        for (let i = 0; i < prefixValueMapping.length; i++) {
+            const current = prefixValueMapping[i]?.values
+
+            if (!current) {
+                continue
+            }
+
+            let assigned = false
+            for (let cluster of clusters) {
+                const common = arrayIntersection(cluster.commonTokens, current)
+                if (common.length <= 5) {
+                    // Skip too small common things --> overhead
+                    continue
+                }
+
+                if (
+                    common.length ===
+                    Math.min(cluster.commonTokens.length, current.length)
+                ) {
+                    // They are compatible; update cluster common tokens and add index.
+                    cluster.commonTokens = common
+                    cluster.indices.push(i)
+                    assigned = true
+                    break
+                }
+            }
+            if (!assigned) {
+                clusters.push({ commonTokens: current.slice(), indices: [i] })
+            }
+        }
+
+        // Add symbol to clusters :: Maps cluster index -> reference symbol
+        let refCounter: number = 1
+        const clusterRefs = new Map<number, string>()
+        clusters.forEach((cluster, idx) => {
+            if (
+                cluster.indices.length >= 2 &&
+                cluster.commonTokens.length > 0
+            ) {
+                clusterRefs.set(idx, `$ref${refCounter}`)
+                refCounter++
+            }
+        })
+
+        // Create the valueReferenceMap from clusters
+        const valueReferenceMap = new Map<string, string[]>()
+        clusters.forEach((cluster, idx) => {
+            if (clusterRefs.has(idx) && cluster.commonTokens.length > 0) {
+                valueReferenceMap.set(
+                    clusterRefs.get(idx)!,
+                    cluster.commonTokens
+                )
+            }
+        })
+
+        // Update prefixValueMapping with clusters
+        clusters.forEach((cluster, clusterIdx) => {
+            if (!clusterRefs.has(clusterIdx)) return // no optimization if only one group in cluster
+
+            const refSymbol = clusterRefs.get(clusterIdx)!
+
+            cluster.indices.forEach((idx) => {
+                const originalTokens = prefixValueMapping[idx]?.values
+                if (originalTokens) {
+                    const nonSymbolicValues = originalTokens.filter(
+                        (token) => !cluster.commonTokens.includes(token)
+                    )
+
+                    prefixValueMapping[idx]!.values =
+                        nonSymbolicValues.length > 0
+                            ? [refSymbol, ...nonSymbolicValues]
+                            : [refSymbol]
+                }
+            })
+        })
+
+        return {
+            propertyName,
+            variants: variants.length > 0 ? variants : null,
+            hasNegative,
+            prefixGroups,
+            soleGroups,
+            valueGroups,
+            prefixValueMapping,
+            valueReferenceMap,
+        }
+    }
+
+    private async createOptimizableMapList(
+        tailwindCollection: TailwindCollection,
+        prefixRules: Array<(someText: string) => boolean> = []
+    ): Promise<Array<OptimizableMap>> {
+        const optimizationList = Object.entries(tailwindCollection).map(
+            ([propertyName, { classNames, variants }]) => {
+                return this.createOptimizableMap(
+                    {
+                        propertyName,
+                        classNames,
+                        variants,
+                    },
+                    prefixRules
+                )
+            }
+        )
+
+        return optimizationList
+    }
+
+    private generateInterface(
+        globalReference: { color: Array<string> },
+        optimizableMap: OptimizableMap
+    ): {
+        referenceTypeMap: Map<string, string | t.Type>
+        tailwindProperty: t.RecordType
+        tailwindestProperty: t.RecordType
+    } {
+        const getSubset = (
+            parent: Array<string>,
+            subset: Array<string>,
+            removeSubset: boolean = true
+        ): [boolean, Array<string>] => {
+            const parentSet = new Set(parent)
+            const isSubset = subset.every((element) => parentSet.has(element))
+
+            let removed = parent
+            if (isSubset && removeSubset) {
+                const childSet = new Set(subset)
+                removed = parent.filter((e) => !childSet.has(e))
+            }
+
+            return [isSubset, removed]
+        }
+
+        const {
+            propertyName,
+            prefixGroups,
+            soleGroups,
+            valueReferenceMap,
+            prefixValueMapping,
+            variants,
+        } = optimizableMap
+
+        const updateRefMapFromGlobalRef = (
+            refMap: Map<string, string[]>
+        ): Map<string, string[]> => {
+            const newRefMap = new Map(refMap)
+
+            for (const [refName, refValue] of newRefMap) {
+                const [isColorIncluded, colorRemoved] = getSubset(
+                    refValue,
+                    globalReference.color,
+                    true
+                )
+
+                if (isColorIncluded) {
+                    colorRemoved.push("$global_color")
+                    newRefMap.set(refName, colorRemoved)
+                }
+            }
+            return newRefMap
+        }
+
+        const valueRefMapWithGlobal =
+            updateRefMapFromGlobalRef(valueReferenceMap)
+
+        const globalLiteralMap = Object.keys(globalReference).reduce(
+            (refMap, key) => {
+                refMap.set(
+                    `$global_${key}`,
+                    this.getGlobalLiteral(`$global_${key}`)
+                )
+                return refMap
+            },
+            new Map<string, t.Type>()
+        )
+
+        const referenceTypeMap = Object.entries(
+            Object.fromEntries(valueRefMapWithGlobal)
+        ).reduce((refTypeMap, [refKey, values]) => {
+            const literalUnion = t.union(
+                values.map((value) => {
+                    if (value.startsWith("$global")) {
+                        const globalLiteral = globalLiteralMap.get(value)!
+                        if (!globalLiteral) {
+                            this.$.error(
+                                `Ref error: ${value} is global reference, but it is not found`
+                            )
+                        }
+                        return globalLiteral.alias!
+                    } else {
+                        return t.literal(value)
+                    }
+                }),
+                capitalize(propertyName, refKey.replace("$", ""))
+            )
+            refTypeMap.set(refKey, literalUnion)
+            return refTypeMap
+        }, new Map<string, t.Type | string>())
+
+        const variantsLiteral = variants
+            ? this.getVariantsLiteral(variants)
+            : null
+
+        const soleUnion = t.union(
+            soleGroups.map((soleClass) => t.literal(soleClass))
+        )
+        const propertyUnion = t.union(
+            [
+                // sole
+                soleUnion,
+                // prefix-value
+                ...prefixValueMapping.reduce<Array<t.Type>>(
+                    (propertyLiteralList, mapping) => {
+                        if (mapping.values.length === 0) {
+                            const independentValue = t.literal(mapping.prefix)
+                            propertyLiteralList.push(independentValue)
+                            return propertyLiteralList
+                        }
+
+                        const prefix = kebabToCamelCase(mapping.prefix)
+                        const literalName = capitalize(
+                            propertyName,
+                            prefix
+                                .toLowerCase()
+                                .replace(propertyName.toLowerCase(), ""),
+                            "literal"
+                        )
+                        const literalUnion = t.union(
+                            mapping.values.map((value) => {
+                                const isReferenceFounded = value.startsWith("$")
+                                if (isReferenceFounded) {
+                                    const reference =
+                                        referenceTypeMap.get(value)!
+                                    if (typeof reference === "string") {
+                                        return t.literal(
+                                            `${mapping.prefix}-\${${reference}}`,
+                                            {
+                                                useBackticks: true,
+                                            }
+                                        )
+                                    }
+
+                                    return t.literal(
+                                        `${mapping.prefix}-\${${reference.alias}}`,
+                                        {
+                                            useBackticks: true,
+                                        }
+                                    )
+                                } else {
+                                    return t.literal(
+                                        `${mapping.prefix}-${value}`
+                                    )
+                                }
+                            }),
+                            literalName
+                        )
+
+                        if (mapping.hasNegative) {
+                            const withNegative = t.union(
+                                [
+                                    literalUnion,
+                                    t.literal(`-\${${literalUnion.alias}}`, {
+                                        useBackticks: true,
+                                    }),
+                                ],
+                                capitalize(literalName, "with", "sign")
+                            )
+                            propertyLiteralList.push(withNegative)
+                        } else {
+                            propertyLiteralList.push(literalUnion)
+                        }
+                        return propertyLiteralList
+                    },
+                    []
+                ),
+            ],
+            capitalize(propertyName, "property")
+        )
+
+        // arbitrary supports
+        const arbitrarySupport = prefixGroups.map((prefix) =>
+            t.union([
+                // prefix-${string}
+                t.intersection([
+                    t.literal(`${prefix}-\${string}`, {
+                        useBackticks: true,
+                    }),
+                    t.record({}),
+                ]),
+                // prefix-[${string}]
+                t.intersection([
+                    t.literal(`${prefix}-[\${string}]`, {
+                        useBackticks: true,
+                    }),
+                    t.record({}),
+                ]),
+            ])
+        )
+
+        const propertyUnionWithVariants = variantsLiteral
+            ? t.union([
+                  propertyUnion,
+                  t.literal(
+                      `\${${propertyUnion.alias}}/\${${variantsLiteral.alias}}`,
+                      {
+                          useBackticks: true,
+                      }
+                  ),
+              ])
+            : propertyUnion
+
+        const propertyValue = t.union(
+            [propertyUnionWithVariants, ...arbitrarySupport],
+            capitalize(propertyName, "value")
+        )
+
+        const propertyInterface = t.record(
+            capitalize("tailwind", propertyName),
+            {
+                [`${propertyName}?`]: propertyValue,
+            },
+            {
+                keyword: "interface",
+            }
+        )
+
+        const propertyInterfaceTailwindest = t.record(
+            capitalize("tailwindest", propertyName),
+            {
+                [`${propertyName}?`]: t.union(
+                    [t.array(propertyValue), propertyValue],
+                    capitalize(propertyName, "value", "with", "array")
+                ),
+            },
+            {
+                keyword: "interface",
+            }
+        )
+
+        return {
+            tailwindProperty: propertyInterface,
+            tailwindestProperty: propertyInterfaceTailwindest,
+            referenceTypeMap: referenceTypeMap,
+        }
+    }
+
+    private globalMap: Map<string, t.Type> = new Map()
+    private getGlobalLiteral(globalRefKey: string): t.Type {
+        let key: string = globalRefKey
+        if (!globalRefKey.startsWith("$global_")) {
+            this.$.warn(
+                `Global literal should access with $global keyword. But received ${globalRefKey}`
+            )
+            key = "$global_" + globalRefKey
+        }
+        if (!this.globalMap.has(key)) {
+            throw new Error(`Global ref ${key} is not exist`)
+        }
+        return this.globalMap.get(key)!
+    }
+    private setGlobalLiteral(globalReference: { color: Array<string> }): void {
+        Object.entries(globalReference).forEach(
+            ([globalRefKey, globalVariants]) => {
+                const literalType = t
+                    .union(
+                        globalVariants.map((variant) => t.literal(variant)),
+                        capitalize("tailwind", "global", globalRefKey)
+                    )
+                    .setExport(true)
+                    .addDoc(
+                        "@description",
+                        `Tailwind global ${globalRefKey} property`
+                    )
+
+                const withGlobalPrefix = `$global_${globalRefKey}`
+                this.globalMap.set(withGlobalPrefix, literalType)
+            }
+        )
+    }
+    private async generateType({
+        type,
+        globalReference,
+        optimizationList,
+    }: {
+        type: "tailwind" | "tailwindest"
+        globalReference: { color: Array<string> }
+        optimizationList: Array<OptimizableMap>
+    }) {
+        // Global reference injection
+        this.setGlobalLiteral(globalReference)
+
+        const interfaceList = optimizationList.reduce<{
+            tailwindInterface: Array<t.RecordType>
+            tailwindestInterface: Array<t.RecordType>
+            referenceTypeMap: Array<t.Type>
+        }>(
+            (interfaceList, optimizationMap) => {
+                const {
+                    tailwindProperty,
+                    tailwindestProperty,
+                    referenceTypeMap,
+                } = this.generateInterface(globalReference, optimizationMap)
+                interfaceList.tailwindInterface.push(tailwindProperty)
+                interfaceList.tailwindestInterface.push(tailwindestProperty)
+                interfaceList.referenceTypeMap.push(
+                    ...this.extractTypeFromMap(referenceTypeMap)
+                )
+
+                return interfaceList
+            },
+            {
+                referenceTypeMap: [],
+                tailwindInterface: [],
+                tailwindestInterface: [],
+            }
+        )
+
+        let response: string = ""
+        if (type === "tailwind") {
+            const tailwindSchema = t
+                .record(
+                    "Tailwind",
+                    {},
+                    {
+                        keyword: "interface",
+                    }
+                )
+                .setExport(true)
+                .setExtends(interfaceList.tailwindInterface)
+
+            response = await this.generator.generateAll([
+                ...this.extractTypeFromMap(this.globalMap),
+                ...this.extractTypeFromMap(this.variantsMap),
+                ...interfaceList.referenceTypeMap,
+                //
+                ...interfaceList.tailwindInterface,
+                tailwindSchema,
+                //
+            ])
+        } else {
+            const tailwindestSchema = t
+                .record(
+                    "Tailwindest",
+                    {},
+                    {
+                        keyword: "interface",
+                    }
+                )
+                .setExport(true)
+                .setExtends(interfaceList.tailwindestInterface)
+
+            response = await this.generator.generateAll([
+                ...this.extractTypeFromMap(this.globalMap),
+                ...this.extractTypeFromMap(this.variantsMap),
+                ...interfaceList.referenceTypeMap,
+                //
+                ...interfaceList.tailwindestInterface,
+                tailwindestSchema,
+                //
+            ])
+        }
+
+        return response
     }
 }
