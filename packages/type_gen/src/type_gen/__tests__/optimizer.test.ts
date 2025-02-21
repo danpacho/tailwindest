@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest"
-import { collected } from "./__mocks__/collection"
+import { backgroundImage, display } from "./__mocks__/collection"
 
-function createOptimizableMap(
-    collected: {
-        propertyName: string
-        classNames: Array<string>
-        variants: Array<string>
-    },
-    prefixRules: Array<(someText: string) => boolean> = []
-): {
+interface TailwindCollectionRecord {
+    propertyName: string
+    classNames: Array<string>
+    variants: Array<string>
+}
+
+interface OptimizableMap {
     propertyName: string
     hasNegative: boolean
+    soleGroups: Array<string>
     prefixGroups: Array<string>
     valueGroups: Array<string>
     variants: Array<string> | null
@@ -20,8 +20,17 @@ function createOptimizableMap(
         hasNegative: boolean
     }>
     valueReferenceMap: Map<string, Array<string>>
-} {
-    const { propertyName, classNames: originalClassNames, variants } = collected
+}
+
+function createOptimizableMap(
+    collectionRecord: TailwindCollectionRecord,
+    prefixRules: Array<(someText: string) => boolean> = []
+): OptimizableMap {
+    const {
+        propertyName,
+        classNames: originalClassNames,
+        variants,
+    } = collectionRecord
 
     const hasNegative = originalClassNames.some((className) =>
         className.startsWith("-")
@@ -47,7 +56,12 @@ function createOptimizableMap(
                     .map((e) => {
                         const splitted = e.split("-")
 
-                        if (splitted.length === 1) return null
+                        if (splitted.length === 1) {
+                            if (parentPrefix.length === 0) {
+                                return splitted[0]
+                            }
+                            return null
+                        }
 
                         const possiblePrefix = splitted[0]
                         if (!possiblePrefix) return null
@@ -78,6 +92,10 @@ function createOptimizableMap(
                 }, 0)
 
                 if (matchingCount > 2) {
+                    matched.push(token)
+                }
+
+                if (matchingCount === 0) {
                     matched.push(token)
                 }
                 return matched
@@ -127,6 +145,19 @@ function createOptimizableMap(
     }
 
     const prefixGroups = findPrefixGroups(classNames, [])
+    const soleGroups = Array.from(
+        new Set(
+            classNames.filter((className) => {
+                return (
+                    prefixGroups.some(
+                        (prefix) =>
+                            className.startsWith(`${prefix}-`) &&
+                            className !== prefix
+                    ) === false
+                )
+            })
+        )
+    )
 
     const valueGroups = Array.from(
         new Set(
@@ -143,10 +174,10 @@ function createOptimizableMap(
         )
     )
 
-    function removeAt<ArrayT extends Array<any>>(
+    const removeAt = <ArrayT extends Array<any>>(
         arr: ArrayT,
         i: number
-    ): ArrayT {
+    ): ArrayT => {
         if (i < 0 || i >= arr.length) return arr.slice() as ArrayT
         return [...arr.slice(0, i), ...arr.slice(i + 1)] as ArrayT
     }
@@ -180,13 +211,44 @@ function createOptimizableMap(
                     .map((className) => className.slice(prefix.length + 1))
             )
         )
-        values
 
         const groupHasNegative = originalClassNames.some((className) =>
             className.startsWith("-")
         )
+
+        if (
+            values.length === 0 &&
+            otherPrefixes.some((other) => other.includes(prefix))
+        ) {
+            return {
+                prefix,
+                values: [],
+                hasNegative: groupHasNegative,
+            }
+        }
+
         return { prefix, values, hasNegative: groupHasNegative }
     })
+
+    // Standalone case
+    const isStandAlone = prefixValueMapping.length === 0
+
+    if (isStandAlone) {
+        return {
+            propertyName,
+            variants: variants.length > 0 ? variants : null,
+            hasNegative,
+            prefixGroups,
+            soleGroups,
+            valueGroups: classNames,
+            prefixValueMapping: classNames.map((property) => ({
+                hasNegative: property.startsWith("-"),
+                prefix: property,
+                values: [],
+            })),
+            valueReferenceMap: new Map(),
+        }
+    }
 
     // Generate symbolic clusters
     const arrayIntersection = (arr1: string[], arr2: string[]): string[] =>
@@ -204,6 +266,11 @@ function createOptimizableMap(
         let assigned = false
         for (let cluster of clusters) {
             const common = arrayIntersection(cluster.commonTokens, current)
+            if (common.length <= 5) {
+                // Skip too small common things --> overhead
+                continue
+            }
+
             if (
                 common.length ===
                 Math.min(cluster.commonTokens.length, current.length)
@@ -222,9 +289,9 @@ function createOptimizableMap(
 
     // Add symbol to clusters :: Maps cluster index -> reference symbol
     let refCounter: number = 1
-    const clusterRefs = new Map<typeof refCounter, string>()
+    const clusterRefs = new Map<number, string>()
     clusters.forEach((cluster, idx) => {
-        if (cluster.indices.length >= 2) {
+        if (cluster.indices.length >= 2 && cluster.commonTokens.length > 0) {
             clusterRefs.set(idx, `$ref${refCounter}`)
             refCounter++
         }
@@ -233,7 +300,7 @@ function createOptimizableMap(
     // Create the valueReferenceMap from clusters
     const valueReferenceMap = new Map<string, string[]>()
     clusters.forEach((cluster, idx) => {
-        if (clusterRefs.has(idx)) {
+        if (clusterRefs.has(idx) && cluster.commonTokens.length > 0) {
             valueReferenceMap.set(clusterRefs.get(idx)!, cluster.commonTokens)
         }
     })
@@ -264,54 +331,89 @@ function createOptimizableMap(
         variants: variants.length > 0 ? variants : null,
         hasNegative,
         prefixGroups,
+        soleGroups,
         valueGroups,
         prefixValueMapping,
         valueReferenceMap,
     }
 }
 
-describe("Optimizer", () => {
-    it("should create optimization map", () => {
-        const colorSet = new Set([
-            "red",
-            "orange",
-            "amber",
-            "yellow",
-            "lime",
-            "green",
-            "emerald",
-            "teal",
-            "cyan",
-            "sky",
-            "blue",
-            "indigo",
-            "violet",
-            "purple",
-            "fuchsia",
-            "pink",
-            "rose",
-            "slate",
-            "gray",
-            "zinc",
-            "neutral",
-            "stone",
-            "black",
-            "white",
-            "primary",
-        ])
-        const optimizationMap = createOptimizableMap(collected, [
-            // color like
-            (prefixStr) => {
-                if (colorSet.has(prefixStr)) return false
-                return true
-            },
-            // number like
-            (prefixStr) => {
-                if (Number.isNaN(parseFloat(prefixStr))) return true
-                return false
-            },
-        ])
+describe("CreateOptimizableMap", () => {
+    const colorSet = new Set([
+        "red",
+        "orange",
+        "amber",
+        "yellow",
+        "lime",
+        "green",
+        "emerald",
+        "teal",
+        "cyan",
+        "sky",
+        "blue",
+        "indigo",
+        "violet",
+        "purple",
+        "fuchsia",
+        "pink",
+        "rose",
+        "slate",
+        "gray",
+        "zinc",
+        "neutral",
+        "stone",
+        "black",
+        "white",
+        "primary",
+    ])
+    const prefixRules = [
+        // color like
+        (prefixStr: string) => {
+            if (colorSet.has(prefixStr)) return false
+            return true
+        },
+        // number like
+        (prefixStr: string) => {
+            if (Number.isNaN(parseFloat(prefixStr))) return true
+            return false
+        },
+    ]
+    it("should create optimization map for <backgroundImage>", () => {
+        const backgroundImageMap = createOptimizableMap(
+            backgroundImage,
+            prefixRules
+        )
 
-        expect(optimizationMap).toMatchSnapshot()
+        expect(backgroundImageMap).toMatchSnapshot()
+        expect(backgroundImageMap.prefixGroups).toEqual([
+            "bg",
+            "bg-conic",
+            "bg-linear",
+            "bg-linear-to",
+            "from",
+            "to",
+            "via",
+        ])
+        expect(backgroundImageMap.soleGroups).toEqual([])
+    })
+
+    it("should create optimization map for <display>", () => {
+        const displayMap = createOptimizableMap(display, prefixRules)
+
+        expect(displayMap).toMatchSnapshot()
+        expect(displayMap.prefixGroups).toEqual(["inline", "table"])
+        expect(displayMap.soleGroups).toEqual([
+            "block",
+            "contents",
+            "flex",
+            "flow-root",
+            "grid",
+            "hidden",
+            "inline",
+            "list-item",
+            "not-sr-only",
+            "sr-only",
+            "table",
+        ])
     })
 })
