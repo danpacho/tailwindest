@@ -129,7 +129,7 @@ export abstract class Type {
     /**
      * JSDoc documentation for the type stored as a record.
      */
-    public docs: Partial<Record<JSDocSymbol, string>> = {}
+    public docs: Partial<Record<JSDocSymbol, Array<string>>> = {}
 
     /**
      * Export or not
@@ -155,25 +155,26 @@ export abstract class Type {
         doc?: string,
         options?: { lang?: JSDocLanguage }
     ): this {
-        /**
-         * If `doc` is undefined, we're calling `addDoc("some string")`,
-         * so that is treated as the 'title'.
-         */
         if (doc === undefined) {
-            this.docs["title"] = keyOrRawTitle
+            if (!this.docs["title"]) {
+                this.docs["title"] = []
+            }
+            this.docs["title"]!.push(keyOrRawTitle)
             return this
         }
 
         let formattedDoc = doc
-        /**
-         * For `@example`, we insert a fenced code block if a language is provided.
-         */
+
         if (keyOrRawTitle === "@example" && options?.lang) {
             formattedDoc = `\n@example\n\`\`\`${options.lang}\n${doc}\n\`\`\``
         }
 
-        // Store it in the docs record, keyed by something like "@param" / "@example" / "title", etc.
-        this.docs[keyOrRawTitle as JSDocSymbol] = formattedDoc
+        if (!this.docs[keyOrRawTitle as JSDocSymbol]) {
+            this.docs[keyOrRawTitle as JSDocSymbol] = []
+        }
+        this.docs[keyOrRawTitle as JSDocSymbol]!.push(
+            formattedDoc.replace(/\\+/g, "")
+        )
         return this
     }
 
@@ -191,11 +192,9 @@ export abstract class Type {
                 lines.push(` * ${key}`)
             }
 
-            // Split the doc text by line to preserve line breaks
-            const valueLines = value.split("\n")
+            const valueLines = value.join("\n").split("\n")
             for (const line of valueLines) {
-                const linePurified = line.replaceAll("@", "\\@")
-                lines.push(` * ${linePurified}`)
+                lines.push(` * ${line}`)
             }
         }
 
