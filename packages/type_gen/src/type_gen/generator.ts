@@ -1594,6 +1594,7 @@ export class TailwindTypeGenerator {
                         "@see",
                         `{@link https://developer.mozilla.org/en-US/docs/Web/CSS/${camelToKebabCase(propertyName)} , MDN docs}`
                     )
+                    .setSkipDocs(true)
             )
         } else {
             const target = [propertyValue, propertyValueForTailwindest]
@@ -1608,6 +1609,7 @@ export class TailwindTypeGenerator {
                         "@see",
                         `{@link https://developer.mozilla.org/en-US/docs/Web/CSS/${camelToKebabCase(propertyName)} , MDN docs}`
                     )
+                    .setSkipDocs(true)
             )
         }
 
