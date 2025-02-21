@@ -27,6 +27,10 @@ const kebabToCamelCase = (str: string): string => {
     return str.replace(/-./g, (match) => match[1]?.toUpperCase() ?? "")
 }
 
+const camelToKebabCase = (str: string): string => {
+    return str.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)
+}
+
 const toValidCSSProperty = (property: string): string => {
     const withoutPrefix = property.replace(/^-(webkit|moz|ms|o)-/, "")
 
@@ -507,8 +511,18 @@ export class TailwindTypeGenerator {
         return null
     }
 
-    private exceptionalRules: Map<string, string> = new Map([
-        ["bg-conic", "backgroundImage"],
+    private exceptionalRules = new Map<
+        string | RegExp,
+        { property: string | Array<string>; tester?: RegExp }
+    >([
+        ["bg-conic", { property: "backgroundImage" }],
+        [
+            "size",
+            {
+                property: ["width", "height"],
+                tester: generateValidator("size-${string}")!,
+            },
+        ],
     ])
 
     private getPropertyName(
@@ -517,8 +531,17 @@ export class TailwindTypeGenerator {
         colorVarSet: Set<string>
     ): string | Array<string> | null {
         // Exceptional case
-        if (this.exceptionalRules.has(className)) {
-            return this.exceptionalRules.get(className)!
+        const exceptionRuleToken = className.split("-")[0] ?? className
+        if (this.exceptionalRules.has(exceptionRuleToken)) {
+            const { property, tester } =
+                this.exceptionalRules.get(exceptionRuleToken)!
+            if (tester) {
+                const testResult = tester.test(className)
+                if (testResult) {
+                    return property
+                }
+            }
+            return property
         }
 
         const CSS = this.ds.candidatesToCss([className])[0]
@@ -667,9 +690,8 @@ export class TailwindTypeGenerator {
                 nonColor: string[]
             }>(
                 (acc, property) => {
-                    const isColorProperty = property
-                        .toLowerCase()
-                        .includes("color")
+                    const lowerCasedProperty = property.toLowerCase()
+                    const isColorProperty = lowerCasedProperty.includes("color")
 
                     if (isColorProperty || colorProperty.has(property)) {
                         acc.color.push(property)
@@ -708,7 +730,33 @@ export class TailwindTypeGenerator {
                 return null
             }
 
-            // if(nameMap.nonColor.length === 1)
+            if (nameMap.nonColor.length > 1) {
+                const findFinalNonColorProperty = (
+                    nonColorLike: Array<string>
+                ) => {
+                    return nonColorLike.filter((property) =>
+                        ["width", "height", "margin", "padding", "inset"].some(
+                            (nonColorProperty) =>
+                                property
+                                    .toLowerCase()
+                                    .includes(nonColorProperty)
+                        )
+                    )
+                }
+
+                const shouldBeNonColorProperty = findFinalNonColorProperty(
+                    nameMap.nonColor
+                )
+
+                if (shouldBeNonColorProperty.length !== 1) {
+                    this.$.warn(
+                        `NonColor-like property ${className} has found many appropriate property in ${shouldBeNonColorProperty.toString()}`
+                    )
+                }
+
+                return shouldBeNonColorProperty
+            }
+
             return nameMap.nonColor
         }
 
@@ -900,9 +948,6 @@ export class TailwindTypeGenerator {
                             const splitted = e.split("-")
 
                             if (splitted.length === 1) {
-                                if (parentPrefix.length === 0) {
-                                    return splitted[0]
-                                }
                                 return null
                             }
 
@@ -941,9 +986,6 @@ export class TailwindTypeGenerator {
                         matched.push(token)
                     }
 
-                    if (matchingCount === 0) {
-                        matched.push(token)
-                    }
                     return matched
                 },
                 []
@@ -1002,7 +1044,12 @@ export class TailwindTypeGenerator {
                 []
             )
 
-            const groups = samePrefixGroups.map((rootPrefix) => {
+            const targetAnalysisPrefixGroups: Array<string> =
+                samePrefixGroups.length === 0
+                    ? independentPrefixGroups
+                    : samePrefixGroups
+
+            const groups = targetAnalysisPrefixGroups.map((rootPrefix) => {
                 return {
                     samePrefixGroups: independentPrefixGroups.filter((prefix) =>
                         prefix.startsWith(rootPrefix)
@@ -1070,11 +1117,9 @@ export class TailwindTypeGenerator {
             const finalGroups: Array<string> = Array.from(
                 new Set([
                     ...independentPrefixGroups.filter((prefix) =>
-                        samePrefixGroups.length >= 1
-                            ? samePrefixGroups.some(
-                                  (samePrefix) => samePrefix !== prefix
-                              )
-                            : true
+                        targetAnalysisPrefixGroups.every(
+                            (samePrefix) => samePrefix !== prefix
+                        )
                     ),
                     ...uniqueGroupByLength,
                 ])
@@ -1085,7 +1130,6 @@ export class TailwindTypeGenerator {
 
         const prefixGroups = findUniquePrefixGroups(
             classNames,
-            // pass independent prefix group
             findPrefixGroups(classNames, [])
         )
 
@@ -1245,7 +1289,6 @@ export class TailwindTypeGenerator {
                 refCounter++
             }
         })
-
         // Create the valueReferenceMap from clusters
         const valueReferenceMap = new Map<string, string[]>()
         clusters.forEach((cluster, idx) => {
@@ -1518,6 +1561,56 @@ export class TailwindTypeGenerator {
             capitalize(propertyName, "value")
         )
 
+        const propertyValueForTailwindest = t.union(
+            [t.array(propertyValue), propertyValue],
+            capitalize(propertyName, "value", "with", "array")
+        )
+
+        const foundedDocumentation = this.docStore.find((e) => {
+            const purifiedTitle = e.title.replaceAll(" ", "").trim()
+            if (purifiedTitle.includes("/")) {
+                const titles = purifiedTitle.split("/")
+                return titles.some(
+                    (title) => kebabToCamelCase(title) === propertyName
+                )
+            }
+            return kebabToCamelCase(purifiedTitle) === propertyName
+        })
+
+        if (foundedDocumentation) {
+            const target = [propertyValue, propertyValueForTailwindest]
+            const title = kebabToCamelCase(
+                foundedDocumentation.title.toLowerCase()
+            )
+            target.forEach((type) =>
+                type
+                    .addDoc("title", `\`${capitalize(title)}\``)
+                    .addDoc("@description", foundedDocumentation.description)
+                    .addDoc(
+                        "@see",
+                        `{@link ${foundedDocumentation.link} Tailwind docs}`
+                    )
+                    .addDoc(
+                        "@see",
+                        `{@link https://developer.mozilla.org/en-US/docs/Web/CSS/${camelToKebabCase(propertyName)} , MDN docs}`
+                    )
+            )
+        } else {
+            const target = [propertyValue, propertyValueForTailwindest]
+            target.forEach((type) =>
+                type
+                    .addDoc("title", `\`${capitalize(propertyName)}\``)
+                    .addDoc(
+                        "@see",
+                        `{@link https://tailwindcss.com/docs Tailwind docs}`
+                    )
+                    .addDoc(
+                        "@see",
+                        `{@link https://developer.mozilla.org/en-US/docs/Web/CSS/${camelToKebabCase(propertyName)} , MDN docs}`
+                    )
+            )
+        }
+
         const propertyInterface = t.record(
             capitalize("tailwind", propertyName),
             {
@@ -1531,10 +1624,7 @@ export class TailwindTypeGenerator {
         const propertyInterfaceTailwindest = t.record(
             capitalize("tailwindest", propertyName),
             {
-                [`${propertyName}?`]: t.union(
-                    [t.array(propertyValue), propertyValue],
-                    capitalize(propertyName, "value", "with", "array")
-                ),
+                [`${propertyName}?`]: propertyValueForTailwindest,
             },
             {
                 keyword: "interface",
