@@ -2,7 +2,7 @@ import { getGeneric } from "./get.generic"
 import { toGenericTypeString } from "./to.generic.type.string"
 import { type GenericOption, Type } from "./type"
 
-class UnionType extends Type {
+export class UnionType extends Type {
     private types: Array<Type>
 
     constructor(

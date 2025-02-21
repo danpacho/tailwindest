@@ -1,6 +1,6 @@
 import { Type } from "./type"
 
-class PrimitiveType extends Type {
+export class PrimitiveType extends Type {
     constructor(
         private typeName: string,
         alias?: string
@@ -17,7 +17,7 @@ class PrimitiveType extends Type {
     }
 }
 
-class LiteralType extends Type {
+export class LiteralType extends Type {
     private useBacktick: boolean
     constructor(
         private value: string | number | boolean,

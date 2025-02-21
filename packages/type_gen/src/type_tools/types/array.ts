@@ -1,7 +1,7 @@
 import { toGenericTypeString } from "./to.generic.type.string"
 import { type GenericOption, Type } from "./type"
 
-class ArrayType extends Type {
+export class ArrayType extends Type {
     constructor(
         private elementType: Type,
         alias?: string,

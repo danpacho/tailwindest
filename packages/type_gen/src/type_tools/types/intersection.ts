@@ -2,7 +2,7 @@ import { getGeneric } from "./get.generic"
 import { toGenericTypeString } from "./to.generic.type.string"
 import { type GenericOption, Type } from "./type"
 
-class IntersectionType extends Type {
+export class IntersectionType extends Type {
     private types: Array<Type>
 
     constructor(
