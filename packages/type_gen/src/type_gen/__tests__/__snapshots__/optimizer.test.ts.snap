@@ -1411,3 +1411,40 @@ exports[`CreateOptimizableMap > should create optimization map for <display> 1`]
   "variants": null,
 }
 `;
+
+exports[`CreateOptimizableMap > should create optimization map for <placeItems> 1`] = `
+{
+  "hasNegative": false,
+  "prefixGroups": [
+    "place-items",
+  ],
+  "prefixValueMapping": [
+    {
+      "hasNegative": false,
+      "prefix": "place-items",
+      "values": [
+        "$ref1",
+      ],
+    },
+  ],
+  "propertyName": "placeItems",
+  "soleGroups": [],
+  "valueGroups": [
+    "start",
+    "end",
+    "center",
+    "baseline",
+    "stretch",
+  ],
+  "valueReferenceMap": Map {
+    "$ref1" => [
+      "start",
+      "end",
+      "center",
+      "baseline",
+      "stretch",
+    ],
+  },
+  "variants": null,
+}
+`;
