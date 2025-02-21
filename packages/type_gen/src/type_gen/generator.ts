@@ -993,7 +993,102 @@ export class TailwindTypeGenerator {
             return collectedPrefixes
         }
 
-        const prefixGroups = findPrefixGroups(classNames, [])
+        const findUniquePrefixGroups = (
+            classNames: Array<string>,
+            independentPrefixGroups: Array<string>
+        ): Array<string> => {
+            const samePrefixGroups = findPrefixGroups(
+                independentPrefixGroups,
+                []
+            )
+
+            const groups = samePrefixGroups.map((rootPrefix) => {
+                return {
+                    samePrefixGroups: independentPrefixGroups.filter((prefix) =>
+                        prefix.startsWith(rootPrefix)
+                    ),
+                    matched: classNames.filter(
+                        (className) =>
+                            className.startsWith(`${rootPrefix}-`) &&
+                            className !== rootPrefix
+                    ),
+                }
+            })
+
+            const countMatching = (
+                prefix: string,
+                classNames: Array<string>
+            ): number => {
+                return classNames.reduce<number>((matched, className) => {
+                    if (
+                        className.startsWith(`${prefix}-`) ||
+                        className === prefix
+                    ) {
+                        return matched + 1
+                    }
+                    return matched
+                }, 0)
+            }
+
+            const uniqueGroupByLength: Array<string> = groups.reduce<
+                Array<string>
+            >((finalPrefixGroups, group) => {
+                const matchedGroups = group.samePrefixGroups.map(
+                    (samePrefix) =>
+                        [
+                            samePrefix,
+                            countMatching(samePrefix, group.matched),
+                        ] as const
+                )
+                const uniqueGroups = matchedGroups.reduce<Map<number, string>>(
+                    (matched, groups) => {
+                        const [prefix, count] = groups
+                        const prevPrefix = matched.get(count)
+                        if (!prevPrefix) {
+                            // new group
+                            matched.set(count, prefix)
+                            return matched
+                        }
+
+                        // check uniqueness by prefix length, if same count then longer prefix will be unique prefix
+                        if (prefix.length > prevPrefix.length) {
+                            matched.set(count, prefix)
+                        }
+                        return matched
+                    },
+                    new Map()
+                )
+
+                const uniquePrefixes = Object.values(
+                    Object.fromEntries(uniqueGroups)
+                )
+                finalPrefixGroups.push(...uniquePrefixes)
+
+                return finalPrefixGroups
+            }, [])
+
+            const finalGroups: Array<string> = Array.from(
+                new Set([
+                    ...independentPrefixGroups.filter((prefix) =>
+                        samePrefixGroups.length >= 1
+                            ? samePrefixGroups.some(
+                                  (samePrefix) => samePrefix !== prefix
+                              )
+                            : true
+                    ),
+                    ...uniqueGroupByLength,
+                ])
+            )
+
+            return finalGroups
+        }
+
+        const prefixGroups = findUniquePrefixGroups(
+            classNames,
+            // pass independent prefix group
+            findPrefixGroups(classNames, [])
+        )
+
         const soleGroups = Array.from(
             new Set(
                 classNames.filter((className) => {
@@ -1140,10 +1235,12 @@ export class TailwindTypeGenerator {
         let refCounter: number = 1
         const clusterRefs = new Map<number, string>()
         clusters.forEach((cluster, idx) => {
-            if (
-                cluster.indices.length >= 2 &&
+            // if it can be extracted as variables, we should(global optimizations)
+            const REFERENCE_THRESHOLD = 1 as const
+            const shouldMakeReference =
+                cluster.indices.length >= REFERENCE_THRESHOLD &&
                 cluster.commonTokens.length > 0
-            ) {
+            if (shouldMakeReference) {
                 clusterRefs.set(idx, `$ref${refCounter}`)
                 refCounter++
             }
@@ -1539,10 +1636,8 @@ export class TailwindTypeGenerator {
                 ...this.extractTypeFromMap(this.globalMap),
                 ...this.extractTypeFromMap(this.variantsMap),
                 ...interfaceList.referenceTypeMap,
-                //
                 ...interfaceList.tailwindInterface,
                 tailwindSchema,
-                //
             ])
         } else {
             const tailwindestSchema = t
@@ -1560,10 +1655,8 @@ export class TailwindTypeGenerator {
                 ...this.extractTypeFromMap(this.globalMap),
                 ...this.extractTypeFromMap(this.variantsMap),
                 ...interfaceList.referenceTypeMap,
-                //
                 ...interfaceList.tailwindestInterface,
                 tailwindestSchema,
-                //
             ])
         }
 
