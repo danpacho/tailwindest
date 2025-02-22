@@ -166,36 +166,37 @@ type TailwindTypeAliasMap = Map<
 
 interface TailwindTypeGenerationOptions {
     /**
-     * Support arbitrary values.
+     * Supports arbitrary values.
      * @default true
      */
     useArbitraryValue?: boolean
     /**
-     * Support exact variants groups, but might lead to slow down the ts-server-performance.
+     * Supports exact variant groups but might lead to a slowdown in `ts-server` performance.
      * @default false
      */
     useExactVariants?: boolean
     /**
-     * Support soft variants groups, performance optimized. But do not suggest exact literal value.
+     * Supports soft variant groups with performance optimization. However, it does not suggest exact literal values.
      * @default true
      */
     useSoftVariants?: boolean
     /**
-     * Support string-kinda variants groups only. e.g., `'shorter'`, `'longer'`).
+     * Supports only string-based variant groups (e.g., `'shorter'`, `'longer'`).
      * @default false
      */
     useStringKindVariantsOnly?: boolean
     /**
-     * Support tailwind/css documentations.
+     * Supports tailwind & css documentation.
      * @default true
      */
     useDocs?: boolean
     /**
-     * Support optional property at root type (`{property-name} ?: {property-value}`)
+     * Supports optional properties at the root level (`{property-name}?: {property-value}`).
      * @default true
      */
     useOptionalProperty?: boolean
 }
+
 interface TailwindTypeGeneratorDeps {
     compiler: TailwindCompiler
     generator: TypeSchemaGenerator
