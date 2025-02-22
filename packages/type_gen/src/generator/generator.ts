@@ -391,10 +391,31 @@ export class TailwindTypeGenerator {
         if (this.variantsMap.has(key)) {
             return this.variantsMap.get(key)!
         }
-        const literalType = t.union(
-            variants.map((variant) => t.literal(variant)),
-            capitalize("variants", key)
-        )
+
+        let isNumberIncluded: boolean = false
+        const literalList = variants
+            .filter((variant) => {
+                const isNumberLikeVariant = isNumericString(variant)
+                if (isNumberLikeVariant) {
+                    isNumberIncluded = true
+                }
+                if (this.genOptions.useStringKindVariantsOnly) {
+                    return isNumberLikeVariant === false
+                }
+                return true
+            })
+            .map((variant) => t.literal(variant))
+
+        if (isNumberIncluded) {
+            literalList.push(
+                t.intersection([
+                    t.literal("${number}", { useBackticks: true }),
+                    t.record({}),
+                ])
+            )
+        }
+
+        const literalType = t.union(literalList, capitalize("variants", key))
 
         this.variantsMap.set(key, literalType)
 
@@ -1672,18 +1693,41 @@ export class TailwindTypeGenerator {
             })
             .filter((e) => e !== null)
 
-        const propertyUnionWithVariants =
-            variantsLiteral && this.genOptions.useExactVariants
-                ? t.union([
-                      propertyUnion,
-                      t.literal(
-                          `\${${propertyUnion.alias}}/\${${variantsLiteral.alias}}`,
-                          {
-                              useBackticks: true,
-                          }
-                      ),
-                  ])
-                : propertyUnion
+        const getPropertyUnionWithVariants = (): t.Type => {
+            if (variantsLiteral === null) return propertyUnion
+
+            if (this.genOptions.useExactVariants) {
+                return t.union([
+                    propertyUnion,
+                    t.literal(
+                        `\${${propertyUnion.alias}}/\${${variantsLiteral.alias}}`,
+                        {
+                            useBackticks: true,
+                        }
+                    ),
+                ])
+            }
+
+            if (this.genOptions.useSoftVariants) {
+                return t.union([
+                    propertyUnion,
+                    ...prefixGroups.map((prefix) =>
+                        t.intersection([
+                            t.literal(
+                                `${prefix}-\${string}/\${${variantsLiteral.alias}}`,
+                                {
+                                    useBackticks: true,
+                                }
+                            ),
+                            t.record({}),
+                        ])
+                    ),
+                ])
+            }
+
+            return propertyUnion
+        }
+        const propertyUnionWithVariants = getPropertyUnionWithVariants()
 
         const propertyValue = this.genOptions.useArbitraryValue
             ? t.union(
