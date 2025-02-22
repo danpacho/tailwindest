@@ -166,7 +166,9 @@ type TailwindTypeAliasMap = Map<
 
 interface TailwindTypeGenerationOptions {
     useArbitraryValue?: boolean
-    useVariants?: boolean
+    useExactVariants?: boolean
+    useSoftVariants?: boolean
+    useStringKindVariantsOnly?: boolean
     useDocs?: boolean
 }
 interface TailwindTypeGeneratorDeps {
@@ -239,11 +241,20 @@ export class TailwindTypeGenerator {
     }
 
     private genOptions: TailwindTypeGenerationOptions = {
-        useArbitraryValue: true,
         useDocs: true,
-        useVariants: true,
+        useArbitraryValue: true,
+        // variants options
+        useExactVariants: false,
+        useSoftVariants: true,
+        useStringKindVariantsOnly: false,
     }
     public setGenOptions(newOptions: TailwindTypeGenerationOptions): this {
+        if (newOptions.useExactVariants === newOptions.useSoftVariants) {
+            this.$.error(
+                `Invalid generation option, useExactVariants can't be same as useSoftVariants(${newOptions.useSoftVariants}). Skipped.`
+            )
+            return this
+        }
         this.genOptions = newOptions
         return this
     }
@@ -255,8 +266,10 @@ export class TailwindTypeGenerator {
         this._storeRoot = opt.storeRoot ?? null
         this.genOptions = {
             useDocs: opt.useDocs ?? true,
-            useVariants: opt.useVariants ?? true,
             useArbitraryValue: opt.useArbitraryValue ?? true,
+            useSoftVariants: opt.useSoftVariants ?? true,
+            useExactVariants: opt.useExactVariants ?? false,
+            useStringKindVariantsOnly: opt.useStringKindVariantsOnly ?? false,
         }
     }
 
@@ -1556,28 +1569,111 @@ export class TailwindTypeGenerator {
             capitalize(propertyName, "property")
         )
 
+        // doc-data extraction
+        const foundedDocumentation = this.docStore.find((e) => {
+            const purifiedTitle = e.title.replaceAll(" ", "").trim()
+            if (purifiedTitle.includes("/")) {
+                const titles = purifiedTitle.split("/")
+                return titles.some(
+                    (title) => kebabToCamelCase(title) === propertyName
+                )
+            }
+            return kebabToCamelCase(purifiedTitle) === propertyName
+        })
+
         // arbitrary supports
-        const arbitrarySupport = prefixGroups.map((prefix) =>
-            t.union([
-                // prefix-${string}
-                t.intersection([
-                    t.literal(`${prefix}-\${string}`, {
-                        useBackticks: true,
-                    }),
-                    t.record({}),
-                ]),
-                // prefix-[${string}]
-                t.intersection([
-                    t.literal(`${prefix}-[\${string}]`, {
-                        useBackticks: true,
-                    }),
-                    t.record({}),
-                ]),
-            ])
-        )
+        const arbitraryDescriptions: Array<string> = []
+        const arbitrarySupport = prefixGroups
+            .reduce<
+                Array<{
+                    prefix: string
+                    arbitraryTypes: Array<
+                        | {
+                              bracket: readonly ["[", "]"]
+                              description: "<string>"
+                              type: "string"
+                          }
+                        | {
+                              bracket: readonly ["(", ")"]
+                              description: "<var-name>"
+                              type: "string"
+                          }
+                        | {
+                              bracket: readonly ["", ""]
+                              description: "<number>"
+                              type: "number"
+                          }
+                    > | null
+                }>
+            >((arbitraryGroups, prefix) => {
+                // only {prefix}-{${string}}
+                const possibleMatch = foundedDocumentation?.classNames.filter(
+                    (docClassName) =>
+                        docClassName.startsWith(prefix) &&
+                        docClassName.includes("${string}")
+                )
+                if (possibleMatch && possibleMatch.length > 0) {
+                    const types = possibleMatch.map((match) => {
+                        if (match.includes("(") && match.includes(")")) {
+                            return {
+                                bracket: ["(", ")"],
+                                description: "<var-name>",
+                                type: "string",
+                            } as const
+                        }
+
+                        if (match.includes("[") && match.includes("]")) {
+                            return {
+                                bracket: ["[", "]"],
+                                description: "<string>",
+                                type: "string",
+                            } as const
+                        }
+
+                        return {
+                            bracket: ["", ""],
+                            description: "<number>",
+                            type: "number",
+                        } as const
+                    })
+                    arbitraryGroups.push({
+                        prefix,
+                        arbitraryTypes: types,
+                    })
+                } else {
+                    arbitraryGroups.push({
+                        prefix,
+                        arbitraryTypes: null,
+                    })
+                }
+                return arbitraryGroups
+            }, [])
+            .map((analysis) => {
+                if (analysis.arbitraryTypes === null) {
+                    return null
+                }
+
+                const arbitraryIntersectionList = analysis.arbitraryTypes.map(
+                    ({ bracket: [open, close], type, description }) => {
+                        const docString = `${analysis.prefix}-${open}${description}${close}`
+                        arbitraryDescriptions.push(docString)
+
+                        const typeString = `${analysis.prefix}-${open}\${${type}}${close}`
+                        const withArbitrary = t.intersection([
+                            t.literal(typeString, {
+                                useBackticks: true,
+                            }),
+                            t.record({}),
+                        ])
+                        return withArbitrary
+                    }
+                )
+                return t.union(arbitraryIntersectionList)
+            })
+            .filter((e) => e !== null)
 
         const propertyUnionWithVariants =
-            variantsLiteral && this.genOptions.useVariants
+            variantsLiteral && this.genOptions.useExactVariants
                 ? t.union([
                       propertyUnion,
                       t.literal(
@@ -1603,26 +1699,25 @@ export class TailwindTypeGenerator {
             capitalize(propertyName, "value", "with", "array")
         )
 
+        const addArbitraryDocs = (type: t.Type) => {
+            if (
+                this.genOptions.useArbitraryValue &&
+                arbitraryDescriptions.length > 0
+            ) {
+                const arbitraryDescription = `\nArbitrary support\n\n${arbitraryDescriptions.map((e) => `\`${e}\``).join(", ")}`
+                type.addDoc("@description", arbitraryDescription)
+            }
+        }
+
         if (this.genOptions.useDocs) {
-            const foundedDocumentation = this.docStore.find((e) => {
-                const purifiedTitle = e.title.replaceAll(" ", "").trim()
-                if (purifiedTitle.includes("/")) {
-                    const titles = purifiedTitle.split("/")
-                    return titles.some(
-                        (title) => kebabToCamelCase(title) === propertyName
-                    )
-                }
-                return kebabToCamelCase(purifiedTitle) === propertyName
-            })
+            const docInjectionTarget = [
+                propertyValue,
+                propertyValueForTailwindest,
+            ]
 
             if (foundedDocumentation) {
-                const target = [propertyValue, propertyValueForTailwindest]
-                const title = kebabToCamelCase(
-                    foundedDocumentation.title.toLowerCase()
-                )
-                target.forEach((type) =>
-                    type
-                        .addDoc("title", `\`${capitalize(title)}\``)
+                docInjectionTarget.forEach((type) => {
+                    type.addDoc("title", `\`${capitalize(propertyName)}\``)
                         .addDoc(
                             "@description",
                             foundedDocumentation.description
@@ -1636,23 +1731,21 @@ export class TailwindTypeGenerator {
                             `{@link https://developer.mozilla.org/en-US/docs/Web/CSS/${camelToKebabCase(propertyName)} , MDN docs}`
                         )
                         .setSkipDocs(true)
-                )
+                    addArbitraryDocs(type)
+                })
             } else {
-                const target = [propertyValue, propertyValueForTailwindest]
                 if (propertyName === "custom") {
-                    target.forEach((type) =>
-                        type
-                            .addDoc("title", `\`${capitalize(propertyName)}\``)
+                    docInjectionTarget.forEach((type) => {
+                        type.addDoc("title", `\`${capitalize(propertyName)}\``)
                             .addDoc(
                                 "@description",
                                 "Custom properties, defined by user."
                             )
                             .setSkipDocs(true)
-                    )
+                    })
                 } else {
-                    target.forEach((type) =>
-                        type
-                            .addDoc("title", `\`${capitalize(propertyName)}\``)
+                    docInjectionTarget.forEach((type) => {
+                        type.addDoc("title", `\`${capitalize(propertyName)}\``)
                             .addDoc(
                                 "@see",
                                 `{@link https://tailwindcss.com/docs Tailwind docs}`
@@ -1662,7 +1755,8 @@ export class TailwindTypeGenerator {
                                 `{@link https://developer.mozilla.org/en-US/docs/Web/CSS/${camelToKebabCase(propertyName)} , MDN docs}`
                             )
                             .setSkipDocs(true)
-                    )
+                        addArbitraryDocs(type)
+                    })
                 }
             }
         }
@@ -1727,6 +1821,7 @@ export class TailwindTypeGenerator {
             }
         )
     }
+
     private async generateType({
         type,
         globalReference,
