@@ -72,9 +72,7 @@ importers:
         specifier: ^3.0.6
         version: 3.0.6(@types/debug@4.1.12)(@types/node@20.12.13)(jiti@2.4.2)(jsdom@26.0.0)(lightningcss@1.29.1)(yaml@2.7.0)
 
-  packages/tailwindest: {}
-
-  packages/type_gen:
+  packages/create-tailwind-type:
     dependencies:
       '@tailwindcss/node':
         specifier: ^4.0.8
@@ -107,6 +105,8 @@ importers:
       chalk:
         specifier: ^5.4.1
         version: 5.4.1
+
+  packages/tailwindest: {}
 
   site:
     dependencies:
