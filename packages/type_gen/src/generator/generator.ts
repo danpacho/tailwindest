@@ -1750,7 +1750,15 @@ export class TailwindTypeGenerator {
                 this.genOptions.useArbitraryValue &&
                 arbitraryDescriptions.length > 0
             ) {
-                const arbitraryDescription = `\nArbitrary support\n\n${arbitraryDescriptions.map((e) => `\`${e}\``).join(", ")}`
+                const limitAndJoin = (arr: Array<string>, max: number = 5) => {
+                    const wasSliced = arr.length > max
+                    const result = arr
+                        .slice(0, max)
+                        .map((e) => `\`${e}\``)
+                        .join(", ")
+                    return wasSliced ? result + "\n..." : result
+                }
+                const arbitraryDescription = `\nArbitrary support\n\n${limitAndJoin(arbitraryDescriptions)}`
                 type.addDoc("@description", arbitraryDescription)
             }
         }
