@@ -1399,14 +1399,21 @@ export class TailwindTypeGenerator {
             })
         })
 
+        const filteredPrefixValueMapping = prefixValueMapping.filter(
+            (e) => e.values.length > 0
+        )
+        const filteredPrefixGroups = filteredPrefixValueMapping.map(
+            (e) => e.prefix
+        )
+
         return {
             propertyName,
             variants: variants.length > 0 ? variants : null,
             hasNegative,
-            prefixGroups,
-            soleGroups,
             valueGroups,
-            prefixValueMapping,
+            soleGroups,
+            prefixGroups: filteredPrefixGroups,
+            prefixValueMapping: filteredPrefixValueMapping,
             valueReferenceMap,
         }
     }
@@ -1676,7 +1683,7 @@ export class TailwindTypeGenerator {
                                 return {
                                     bracket: ["", ""],
                                     description: "<number>",
-                                    type: "number", // TODO: Number can be problematic for nested type-generation
+                                    type: "number",
                                     hasNegative,
                                 } as const
                             })
