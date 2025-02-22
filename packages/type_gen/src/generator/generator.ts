@@ -190,6 +190,11 @@ interface TailwindTypeGenerationOptions {
      * @default true
      */
     useDocs?: boolean
+    /**
+     * Support optional property at root type ({property-name} ?: {property-value})
+     * @default true
+     */
+    useOptionalProperty?: boolean
 }
 interface TailwindTypeGeneratorDeps {
     compiler: TailwindCompiler
@@ -267,6 +272,8 @@ export class TailwindTypeGenerator {
         useExactVariants: false,
         useSoftVariants: true,
         useStringKindVariantsOnly: false,
+        // optional
+        useOptionalProperty: true,
     }
     public setGenOptions(newOptions: TailwindTypeGenerationOptions): this {
         if (newOptions.useExactVariants === newOptions.useSoftVariants) {
@@ -1827,10 +1834,14 @@ export class TailwindTypeGenerator {
             }
         }
 
+        const PROPERTY_IDENTIFIER: "?" | "" = this.genOptions
+            .useOptionalProperty
+            ? "?"
+            : ""
         const propertyInterface = t.record(
             capitalize("tailwind", propertyName),
             {
-                [`${propertyName}?`]: propertyValue,
+                [`${propertyName}${PROPERTY_IDENTIFIER}`]: propertyValue,
             },
             {
                 keyword: "interface",
@@ -1840,7 +1851,8 @@ export class TailwindTypeGenerator {
         const propertyInterfaceTailwindest = t.record(
             capitalize("tailwindest", propertyName),
             {
-                [`${propertyName}?`]: propertyValueForTailwindest,
+                [`${propertyName}${PROPERTY_IDENTIFIER}`]:
+                    propertyValueForTailwindest,
             },
             {
                 keyword: "interface",
