@@ -36,7 +36,7 @@ async function main() {
     const TYPE_STORE = join(STORE_ROOT, "types.d.ts")
 
     await prepareStore([
-        { type: "doc", filename: DOC_STORE, forceUpdate: true },
+        { type: "doc", filename: DOC_STORE, forceUpdate: false },
         { type: "type", filename: TYPE_STORE, forceUpdate: false },
     ])
 }
