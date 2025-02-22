@@ -7,7 +7,7 @@ describe("TailwindCompiler - Internal", () => {
     beforeAll(async () => {
         compiler = new TailwindCompiler({
             cssRoot: `${__dirname}/__mocks__/tailwind.css`,
-            base: "packages/type_gen/node_modules/@tailwindcss",
+            base: "packages/create-tailwind-type/node_modules/@tailwindcss",
         })
     })
 
