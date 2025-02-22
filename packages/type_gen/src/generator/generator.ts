@@ -1615,94 +1615,140 @@ export class TailwindTypeGenerator {
 
         // arbitrary supports
         const arbitraryDescriptions: Array<string> = []
-        const arbitrarySupport = prefixGroups
-            .reduce<
-                Array<{
-                    prefix: string
-                    arbitraryTypes: Array<
-                        | {
-                              bracket: readonly ["[", "]"]
-                              description: "<string>"
-                              type: "string"
-                          }
-                        | {
-                              bracket: readonly ["(", ")"]
-                              description: "<var-name>"
-                              type: "string"
-                          }
-                        | {
-                              bracket: readonly ["", ""]
-                              description: "<number>"
-                              type: "number"
-                          }
-                    > | null
-                }>
-            >((arbitraryGroups, prefix) => {
-                // only {prefix}-{${string}}
-                const possibleMatch = foundedDocumentation?.classNames.filter(
-                    (docClassName) =>
-                        docClassName.startsWith(prefix) &&
-                        docClassName.includes("${string}")
+        const arbitraryTypeSet: Set<string> = new Set()
+        const arbitrarySupport = t.union(
+            Object.values(
+                Object.fromEntries(
+                    Array.from(
+                        new Set([...soleGroups, ...prefixGroups])
+                    ).reduce<
+                        Map<
+                            string,
+                            {
+                                prefix: string
+                                arbitraryTypes: Array<{
+                                    bracket: readonly [string, string]
+                                    description: string
+                                    type: string
+                                    hasNegative: boolean
+                                }> | null
+                            }
+                        >
+                    >((arbitraryGroups, prefix) => {
+                        // only {prefix}-{${string}}
+                        const possibleMatch =
+                            foundedDocumentation?.classNames.filter(
+                                (docClassName) =>
+                                    (docClassName.startsWith(prefix) ||
+                                        docClassName.startsWith(
+                                            `-${prefix}`
+                                        )) &&
+                                    docClassName.includes("${string}")
+                            )
+                        if (possibleMatch && possibleMatch.length > 0) {
+                            const types = possibleMatch.map((match) => {
+                                const hasNegative = match.startsWith("-")
+
+                                if (
+                                    match.includes("(") &&
+                                    match.includes(")")
+                                ) {
+                                    return {
+                                        bracket: ["(", ")"],
+                                        description: "<var-name>",
+                                        type: "string",
+                                        hasNegative,
+                                    } as const
+                                }
+
+                                if (
+                                    match.includes("[") &&
+                                    match.includes("]")
+                                ) {
+                                    return {
+                                        bracket: ["[", "]"],
+                                        description: "<arbitrary-value>",
+                                        type: "string",
+                                        hasNegative,
+                                    } as const
+                                }
+
+                                return {
+                                    bracket: ["", ""],
+                                    description: "<number>",
+                                    type: "number", // TODO: Number can be problematic for nested type-generation
+                                    hasNegative,
+                                } as const
+                            })
+                            arbitraryGroups.set(prefix, {
+                                prefix,
+                                arbitraryTypes: types,
+                            })
+                        } else {
+                            arbitraryGroups.set(prefix, {
+                                prefix,
+                                arbitraryTypes: null,
+                            })
+                        }
+                        return arbitraryGroups
+                    }, new Map())
                 )
-                if (possibleMatch && possibleMatch.length > 0) {
-                    const types = possibleMatch.map((match) => {
-                        if (match.includes("(") && match.includes(")")) {
-                            return {
-                                bracket: ["(", ")"],
-                                description: "<var-name>",
-                                type: "string",
-                            } as const
-                        }
-
-                        if (match.includes("[") && match.includes("]")) {
-                            return {
-                                bracket: ["[", "]"],
-                                description: "<string>",
-                                type: "string",
-                            } as const
-                        }
-
-                        return {
-                            bracket: ["", ""],
-                            description: "<number>",
-                            type: "number",
-                        } as const
-                    })
-                    arbitraryGroups.push({
-                        prefix,
-                        arbitraryTypes: types,
-                    })
-                } else {
-                    arbitraryGroups.push({
-                        prefix,
-                        arbitraryTypes: null,
-                    })
-                }
-                return arbitraryGroups
-            }, [])
-            .map((analysis) => {
-                if (analysis.arbitraryTypes === null) {
-                    return null
-                }
-
-                const arbitraryIntersectionList = analysis.arbitraryTypes.map(
-                    ({ bracket: [open, close], type, description }) => {
-                        const docString = `${analysis.prefix}-${open}${description}${close}`
-                        arbitraryDescriptions.push(docString)
-
-                        const typeString = `${analysis.prefix}-${open}\${${type}}${close}`
-                        const withArbitrary = t.intersection([
-                            t.literal(typeString, {
-                                useBackticks: true,
-                            }),
-                            t.record({}),
-                        ])
-                        return withArbitrary
+            )
+                .map((analysis) => {
+                    if (analysis.arbitraryTypes === null) {
+                        return null
                     }
-                )
-                return t.union(arbitraryIntersectionList)
-            })
-            .filter((e) => e !== null)
+
+                    const arbitraryIntersectionList = analysis.arbitraryTypes
+                        .map(
+                            ({
+                                bracket: [open, close],
+                                type,
+                                description,
+                                hasNegative,
+                            }) => {
+                                const docString = `${analysis.prefix}-${open}${description}${close}`
+                                const finalDoc = hasNegative
+                                    ? `-${docString}`
+                                    : docString
+
+                                if (arbitraryTypeSet.has(finalDoc)) {
+                                    return null
+                                }
+
+                                arbitraryTypeSet.add(finalDoc)
+                                arbitraryDescriptions.push(finalDoc)
+
+                                const typeString = `${analysis.prefix}-${open}\${${type}}${close}`
+                                const withArbitrary = t.intersection([
+                                    t.literal(typeString, {
+                                        useBackticks: true,
+                                    }),
+                                    t.record({}),
+                                ])
+
+                                if (hasNegative) {
+                                    return t.union([
+                                        withArbitrary,
+                                        // negative-arbitrary support
+                                        t.intersection([
+                                            t.literal(`-${typeString}`, {
+                                                useBackticks: true,
+                                            }),
+                                            t.record({}),
+                                        ]),
+                                    ])
+                                }
+                                return withArbitrary
+                            }
+                        )
+                        .filter((e) => e !== null)
+
+                    return t.union(arbitraryIntersectionList)
+                })
+                .filter((e) => e !== null),
+            capitalize(propertyName, "arbitrary", "value")
+        )
 
         const getPropertyUnionWithVariants = (): t.Type => {
             if (variantsLiteral === null) return propertyUnion
@@ -1740,14 +1786,16 @@ export class TailwindTypeGenerator {
         }
         const propertyUnionWithVariants = getPropertyUnionWithVariants()
 
-        const propertyValue = this.genOptions.useArbitraryValue
-            ? t.union(
-                  [propertyUnionWithVariants, ...arbitrarySupport],
-                  capitalize(propertyName, "value")
-              )
-            : propertyUnionWithVariants.setAlias(
-                  capitalize(propertyName, "value")
-              )
+        const propertyValue =
+            this.genOptions.useArbitraryValue &&
+            arbitrarySupport.types.length > 0
+                ? t.union(
+                      [propertyUnionWithVariants, arbitrarySupport],
+                      capitalize(propertyName, "value")
+                  )
+                : propertyUnionWithVariants.setAlias(
+                      capitalize(propertyName, "value")
+                  )
 
         const addArbitraryDocs = (type: t.Type) => {
             if (
