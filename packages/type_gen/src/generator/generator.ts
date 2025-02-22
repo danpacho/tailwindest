@@ -181,7 +181,7 @@ interface TailwindTypeGenerationOptions {
      */
     useSoftVariants?: boolean
     /**
-     * Support string-kinda variants groups only. e.g., "shorter", "longer").
+     * Support string-kinda variants groups only. e.g., `'shorter'`, `'longer'`).
      * @default false
      */
     useStringKindVariantsOnly?: boolean
@@ -191,7 +191,7 @@ interface TailwindTypeGenerationOptions {
      */
     useDocs?: boolean
     /**
-     * Support optional property at root type ({property-name} ?: {property-value})
+     * Support optional property at root type (`{property-name} ?: {property-value}`)
      * @default true
      */
     useOptionalProperty?: boolean
