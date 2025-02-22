@@ -164,6 +164,23 @@ type TailwindTypeAliasMap = Map<
     Map<Set<TailwindDocs["classNames"][number]>, TailwindDocs["title"]>
 >
 
+interface TailwindTypeGenerationOptions {
+    useArbitraryValue?: boolean
+    useVariants?: boolean
+    useDocs?: boolean
+}
+interface TailwindTypeGeneratorDeps {
+    compiler: TailwindCompiler
+    generator: TypeSchemaGenerator
+    cssAnalyzer: CSSAnalyzer
+}
+interface TailwindTypeGeneratorOptions extends TailwindTypeGenerationOptions {
+    storeRoot?: string
+}
+
+interface TailwindTypeGeneratorConstructor
+    extends TailwindTypeGeneratorDeps,
+        TailwindTypeGeneratorOptions {}
 export class TailwindTypeGenerator {
     private _ds: Awaited<
         ReturnType<(typeof this.compiler)["getDesignSystem"]>
@@ -189,25 +206,12 @@ export class TailwindTypeGenerator {
     public variants: Array<string> = []
 
     private readonly $: Logger = new Logger({
-        name: "create-tailwindest",
+        name: "create-tailwind-type",
     })
 
     public readonly compiler: TailwindCompiler
     public readonly generator: TypeSchemaGenerator
     private readonly cssAnalyzer: CSSAnalyzer
-
-    public constructor(opt: {
-        compiler: TailwindCompiler
-        generator: TypeSchemaGenerator
-        cssAnalyzer: CSSAnalyzer
-        storeRoot?: string
-    }) {
-        this.compiler = opt.compiler
-        this.generator = opt.generator
-        this.cssAnalyzer = opt.cssAnalyzer
-        this._storeRoot = opt.storeRoot ?? null
-    }
-
     private static storeRoot = {
         docs: `${__dirname}/dist/store/docs.json`,
     } as const
@@ -232,6 +236,28 @@ export class TailwindTypeGenerator {
             throw new Error(`DocStore should be exist at ${this.storeRoot}.`)
 
         return this._docStore
+    }
+
+    private genOptions: TailwindTypeGenerationOptions = {
+        useArbitraryValue: true,
+        useDocs: true,
+        useVariants: true,
+    }
+    public setGenOptions(newOptions: TailwindTypeGenerationOptions): this {
+        this.genOptions = newOptions
+        return this
+    }
+
+    public constructor(opt: TailwindTypeGeneratorConstructor) {
+        this.compiler = opt.compiler
+        this.generator = opt.generator
+        this.cssAnalyzer = opt.cssAnalyzer
+        this._storeRoot = opt.storeRoot ?? null
+        this.genOptions = {
+            useDocs: opt.useDocs ?? true,
+            useVariants: opt.useVariants ?? true,
+            useArbitraryValue: opt.useArbitraryValue ?? true,
+        }
     }
 
     private async prepareTypeAliasMap(): Promise<void> {
@@ -265,7 +291,6 @@ export class TailwindTypeGenerator {
 
     public async init() {
         if (this._initialized) {
-            this.$.info("already initialized")
             return
         }
 
@@ -279,6 +304,11 @@ export class TailwindTypeGenerator {
 
             this._initialized = true
             this.$.success("initialized")
+
+            this.$.info("generation options")
+            Object.entries(this.genOptions).forEach(([optKey, optValue]) => {
+                this.$.log(`${optKey} : ${optValue}`)
+            })
         } catch (e) {
             this._initialized = false
             this.$.error("initialization failed")
@@ -911,6 +941,8 @@ export class TailwindTypeGenerator {
         }
 
         this.$.success("build type finished")
+        this.$.log(`tailwind : ${saveRoot.tailwind}`)
+        this.$.log(`tailwindest : ${saveRoot.tailwindest}`)
     }
 
     private createOptimizableMap(
@@ -1544,73 +1576,95 @@ export class TailwindTypeGenerator {
             ])
         )
 
-        const propertyUnionWithVariants = variantsLiteral
-            ? t.union([
-                  propertyUnion,
-                  t.literal(
-                      `\${${propertyUnion.alias}}/\${${variantsLiteral.alias}}`,
-                      {
-                          useBackticks: true,
-                      }
-                  ),
-              ])
-            : propertyUnion
+        const propertyUnionWithVariants =
+            variantsLiteral && this.genOptions.useVariants
+                ? t.union([
+                      propertyUnion,
+                      t.literal(
+                          `\${${propertyUnion.alias}}/\${${variantsLiteral.alias}}`,
+                          {
+                              useBackticks: true,
+                          }
+                      ),
+                  ])
+                : propertyUnion
 
-        const propertyValue = t.union(
-            [propertyUnionWithVariants, ...arbitrarySupport],
-            capitalize(propertyName, "value")
-        )
+        const propertyValue = this.genOptions.useArbitraryValue
+            ? t.union(
+                  [propertyUnionWithVariants, ...arbitrarySupport],
+                  capitalize(propertyName, "value")
+              )
+            : propertyUnionWithVariants.setAlias(
+                  capitalize(propertyName, "value")
+              )
 
         const propertyValueForTailwindest = t.union(
             [t.array(propertyValue), propertyValue],
             capitalize(propertyName, "value", "with", "array")
         )
 
-        const foundedDocumentation = this.docStore.find((e) => {
-            const purifiedTitle = e.title.replaceAll(" ", "").trim()
-            if (purifiedTitle.includes("/")) {
-                const titles = purifiedTitle.split("/")
-                return titles.some(
-                    (title) => kebabToCamelCase(title) === propertyName
-                )
-            }
-            return kebabToCamelCase(purifiedTitle) === propertyName
-        })
+        if (this.genOptions.useDocs) {
+            const foundedDocumentation = this.docStore.find((e) => {
+                const purifiedTitle = e.title.replaceAll(" ", "").trim()
+                if (purifiedTitle.includes("/")) {
+                    const titles = purifiedTitle.split("/")
+                    return titles.some(
+                        (title) => kebabToCamelCase(title) === propertyName
+                    )
+                }
+                return kebabToCamelCase(purifiedTitle) === propertyName
+            })
 
-        if (foundedDocumentation) {
-            const target = [propertyValue, propertyValueForTailwindest]
-            const title = kebabToCamelCase(
-                foundedDocumentation.title.toLowerCase()
-            )
-            target.forEach((type) =>
-                type
-                    .addDoc("title", `\`${capitalize(title)}\``)
-                    .addDoc("@description", foundedDocumentation.description)
-                    .addDoc(
-                        "@see",
-                        `{@link ${foundedDocumentation.link} Tailwind docs}`
+            if (foundedDocumentation) {
+                const target = [propertyValue, propertyValueForTailwindest]
+                const title = kebabToCamelCase(
+                    foundedDocumentation.title.toLowerCase()
+                )
+                target.forEach((type) =>
+                    type
+                        .addDoc("title", `\`${capitalize(title)}\``)
+                        .addDoc(
+                            "@description",
+                            foundedDocumentation.description
+                        )
+                        .addDoc(
+                            "@see",
+                            `{@link ${foundedDocumentation.link} Tailwind docs}`
+                        )
+                        .addDoc(
+                            "@see",
+                            `{@link https://developer.mozilla.org/en-US/docs/Web/CSS/${camelToKebabCase(propertyName)} , MDN docs}`
+                        )
+                        .setSkipDocs(true)
+                )
+            } else {
+                const target = [propertyValue, propertyValueForTailwindest]
+                if (propertyName === "custom") {
+                    target.forEach((type) =>
+                        type
+                            .addDoc("title", `\`${capitalize(propertyName)}\``)
+                            .addDoc(
+                                "@description",
+                                "Custom properties, defined by user."
+                            )
+                            .setSkipDocs(true)
                     )
-                    .addDoc(
-                        "@see",
-                        `{@link https://developer.mozilla.org/en-US/docs/Web/CSS/${camelToKebabCase(propertyName)} , MDN docs}`
+                } else {
+                    target.forEach((type) =>
+                        type
+                            .addDoc("title", `\`${capitalize(propertyName)}\``)
+                            .addDoc(
+                                "@see",
+                                `{@link https://tailwindcss.com/docs Tailwind docs}`
+                            )
+                            .addDoc(
+                                "@see",
+                                `{@link https://developer.mozilla.org/en-US/docs/Web/CSS/${camelToKebabCase(propertyName)} , MDN docs}`
+                            )
+                            .setSkipDocs(true)
                     )
-                    .setSkipDocs(true)
-            )
-        } else {
-            const target = [propertyValue, propertyValueForTailwindest]
-            target.forEach((type) =>
-                type
-                    .addDoc("title", `\`${capitalize(propertyName)}\``)
-                    .addDoc(
-                        "@see",
-                        `{@link https://tailwindcss.com/docs Tailwind docs}`
-                    )
-                    .addDoc(
-                        "@see",
-                        `{@link https://developer.mozilla.org/en-US/docs/Web/CSS/${camelToKebabCase(propertyName)} , MDN docs}`
-                    )
-                    .setSkipDocs(true)
-            )
+                }
+            }
         }
 
         const propertyInterface = t.record(
