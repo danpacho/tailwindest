@@ -1412,6 +1412,194 @@ exports[`CreateOptimizableMap > should create optimization map for <display> 1`]
 }
 `;
 
+exports[`CreateOptimizableMap > should create optimization map for <margin> 1`] = `
+{
+  "hasNegative": true,
+  "prefixGroups": [
+    "m",
+    "mx",
+    "my",
+    "ms",
+    "me",
+    "mt",
+    "mr",
+    "mb",
+    "ml",
+    "space-x",
+    "space-y",
+  ],
+  "prefixValueMapping": [
+    {
+      "hasNegative": true,
+      "prefix": "m",
+      "values": [
+        "$ref1",
+      ],
+    },
+    {
+      "hasNegative": true,
+      "prefix": "mx",
+      "values": [
+        "$ref2",
+      ],
+    },
+    {
+      "hasNegative": true,
+      "prefix": "my",
+      "values": [
+        "$ref3",
+      ],
+    },
+    {
+      "hasNegative": true,
+      "prefix": "ms",
+      "values": [
+        "$ref4",
+      ],
+    },
+    {
+      "hasNegative": true,
+      "prefix": "me",
+      "values": [
+        "$ref5",
+      ],
+    },
+    {
+      "hasNegative": true,
+      "prefix": "mt",
+      "values": [
+        "$ref6",
+      ],
+    },
+    {
+      "hasNegative": true,
+      "prefix": "mr",
+      "values": [
+        "$ref7",
+      ],
+    },
+    {
+      "hasNegative": true,
+      "prefix": "mb",
+      "values": [
+        "$ref8",
+      ],
+    },
+    {
+      "hasNegative": true,
+      "prefix": "ml",
+      "values": [
+        "$ref9",
+      ],
+    },
+    {
+      "hasNegative": true,
+      "prefix": "space-x",
+      "values": [
+        "$ref10",
+      ],
+    },
+    {
+      "hasNegative": true,
+      "prefix": "space-y",
+      "values": [
+        "$ref11",
+      ],
+    },
+  ],
+  "propertyName": "margin",
+  "soleGroups": [],
+  "valueGroups": [
+    "\${string}",
+    "auto",
+    "px",
+    "(\${string})",
+    "[\${string}]",
+    "reverse",
+  ],
+  "valueReferenceMap": Map {
+    "$ref1" => [
+      "\${string}",
+      "auto",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+    ],
+    "$ref2" => [
+      "\${string}",
+      "auto",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+    ],
+    "$ref3" => [
+      "\${string}",
+      "auto",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+    ],
+    "$ref4" => [
+      "\${string}",
+      "auto",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+    ],
+    "$ref5" => [
+      "\${string}",
+      "auto",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+    ],
+    "$ref6" => [
+      "\${string}",
+      "auto",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+    ],
+    "$ref7" => [
+      "\${string}",
+      "auto",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+    ],
+    "$ref8" => [
+      "\${string}",
+      "auto",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+    ],
+    "$ref9" => [
+      "\${string}",
+      "auto",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+    ],
+    "$ref10" => [
+      "\${string}",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+      "reverse",
+    ],
+    "$ref11" => [
+      "\${string}",
+      "px",
+      "(\${string})",
+      "[\${string}]",
+      "reverse",
+    ],
+  },
+  "variants": null,
+}
+`;
+
 exports[`CreateOptimizableMap > should create optimization map for <placeItems> 1`] = `
 {
   "hasNegative": false,

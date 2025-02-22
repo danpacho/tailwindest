@@ -4,6 +4,7 @@ import {
     backgroundColor,
     backgroundImage,
     display,
+    margin,
     placeItems,
 } from "./__mocks__/collection"
 
@@ -425,14 +426,19 @@ function createOptimizableMap(
         })
     })
 
+    const filteredPrefixValueMapping = prefixValueMapping.filter(
+        (e) => e.values.length > 0
+    )
+    const filteredPrefixGroups = filteredPrefixValueMapping.map((e) => e.prefix)
+
     return {
         propertyName,
         variants: variants.length > 0 ? variants : null,
         hasNegative,
-        prefixGroups,
+        prefixGroups: filteredPrefixGroups,
         soleGroups,
         valueGroups,
-        prefixValueMapping,
+        prefixValueMapping: filteredPrefixValueMapping,
         valueReferenceMap,
     }
 }
@@ -530,6 +536,7 @@ describe("CreateOptimizableMap", () => {
         )
 
         expect(bgBlendMode).toMatchSnapshot()
+        expect(bgBlendMode.soleGroups).toEqual([])
         expect(bgBlendMode.prefixGroups).toEqual(["bg-blend", "bg-blend-color"])
     })
 
@@ -538,5 +545,24 @@ describe("CreateOptimizableMap", () => {
 
         expect(bgColor).toMatchSnapshot()
         expect(bgColor.prefixGroups).toEqual(["bg"])
+    })
+
+    it("should create optimization map for <margin>", () => {
+        const marginMap = createOptimizableMap(margin, prefixRules)
+
+        expect(marginMap).toMatchSnapshot()
+        expect(marginMap.prefixGroups).toEqual([
+            "m",
+            "mx",
+            "my",
+            "ms",
+            "me",
+            "mt",
+            "mr",
+            "mb",
+            "ml",
+            "space-x",
+            "space-y",
+        ])
     })
 })
