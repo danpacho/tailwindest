@@ -340,7 +340,9 @@ export class TailwindTypeGenerator {
 
             this.$.info("generation options")
             Object.entries(this.genOptions).forEach(([optKey, optValue]) => {
-                this.$.log(`${optKey} : ${optValue}`)
+                this.$.log(
+                    `${optKey} : ${optValue ? this.$.c.blueBright(optValue) : this.$.c.redBright(optValue)}`
+                )
             })
         } catch (e) {
             this._initialized = false
@@ -1924,7 +1926,19 @@ export class TailwindTypeGenerator {
             }
         )
 
-        let response: string = ""
+        const tailwindVariantsGroups = t
+            .union(
+                this.variants.map((variant) => t.literal(variant)),
+                capitalize("tailwind", "variants", "groups")
+            )
+            .addDoc("@description", "Tailwind variants groups")
+            .addDoc(
+                "@see",
+                `{@link https://tailwindcss.com/docs Tailwind docs}`
+            )
+            .setExport(true)
+
+        let typeString: string = ""
         if (type === "tailwind") {
             const tailwindSchema = t
                 .record(
@@ -1937,12 +1951,13 @@ export class TailwindTypeGenerator {
                 .setExport(true)
                 .setExtends(interfaceList.tailwindInterface)
 
-            response = await this.generator.generateAll([
+            typeString = await this.generator.generateAll([
                 ...this.extractTypeFromMap(this.globalMap),
                 ...this.extractTypeFromMap(this.variantsMap),
                 ...interfaceList.referenceTypeMap,
                 ...interfaceList.tailwindInterface,
                 tailwindSchema,
+                tailwindVariantsGroups,
             ])
         } else {
             const tailwindestSchema = t
@@ -1956,15 +1971,16 @@ export class TailwindTypeGenerator {
                 .setExport(true)
                 .setExtends(interfaceList.tailwindestInterface)
 
-            response = await this.generator.generateAll([
+            typeString = await this.generator.generateAll([
                 ...this.extractTypeFromMap(this.globalMap),
                 ...this.extractTypeFromMap(this.variantsMap),
                 ...interfaceList.referenceTypeMap,
                 ...interfaceList.tailwindestInterface,
                 tailwindestSchema,
+                tailwindVariantsGroups,
             ])
         }
 
-        return response
+        return typeString
     }
 }
