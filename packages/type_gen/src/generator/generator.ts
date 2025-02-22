@@ -165,10 +165,30 @@ type TailwindTypeAliasMap = Map<
 >
 
 interface TailwindTypeGenerationOptions {
+    /**
+     * Support arbitrary values.
+     * @default true
+     */
     useArbitraryValue?: boolean
+    /**
+     * Support exact variants groups, but might lead to slow down the ts-server-performance.
+     * @default false
+     */
     useExactVariants?: boolean
+    /**
+     * Support soft variants groups, performance optimized. But do not suggest exact literal value.
+     * @default true
+     */
     useSoftVariants?: boolean
+    /**
+     * Support string-kinda variants groups only. e.g., "shorter", "longer").
+     * @default false
+     */
     useStringKindVariantsOnly?: boolean
+    /**
+     * Support tailwind/css documentations.
+     * @default true
+     */
     useDocs?: boolean
 }
 interface TailwindTypeGeneratorDeps {
