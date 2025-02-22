@@ -20,8 +20,10 @@ describe("TypeGenerator", () => {
         storeRoot: `${__dirname}/__mocks__/dist/store/docs.json`,
     }).setGenOptions({
         useDocs: true,
-        useVariants: false,
+        useExactVariants: false,
         useArbitraryValue: true,
+        useSoftVariants: true,
+        useStringKindVariantsOnly: true,
     })
 
     it("should init", async () => {
