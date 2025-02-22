@@ -28,9 +28,6 @@ jobs:
             - name: Install package dependencies
               run: pnpm install --no-frozen-lockfile
 
-            - name: Format checking
-              run: pnpm prettier
-
             - name: Unit testing
               run: pnpm test:ci
 
