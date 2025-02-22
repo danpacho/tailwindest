@@ -3,7 +3,7 @@ import { toGenericTypeString } from "./to.generic.type.string"
 import { type GenericOption, Type } from "./type"
 
 export class UnionType extends Type {
-    private types: Array<Type>
+    public types: Array<Type>
 
     constructor(
         types: Array<Type | string>,
@@ -45,6 +45,6 @@ export function union(
     types: Array<Type | string>,
     alias?: string,
     generic?: GenericOption
-): Type {
+): UnionType {
     return new UnionType(types, alias, generic)
 }

@@ -4,7 +4,7 @@ import { type GenericOption, Type } from "./type"
 type RecordDefineMethod = "type" | "interface"
 
 export class RecordType extends Type {
-    private fields: Record<string, Type>
+    public fields: Record<string, Type>
     public extendsList: Array<RecordType> | null = null
     public setExtends(extendsList: Array<RecordType>): this {
         if (extendsList.length > 0) {

@@ -3,7 +3,7 @@ import { type GenericOption, Type } from "./type"
 
 export class ArrayType extends Type {
     constructor(
-        private elementType: Type,
+        public element: Type,
         alias?: string,
         generic?: GenericOption
     ) {
@@ -12,7 +12,7 @@ export class ArrayType extends Type {
         this.generic = generic
     }
     private array(genericLiterals?: Array<string>): string {
-        return `Array<${this.elementType.toTypeString(genericLiterals)}>`
+        return `Array<${this.element.toTypeString(genericLiterals)}>`
     }
     toTypeString(genericLiterals?: Array<string>): string {
         return toGenericTypeString({
@@ -23,7 +23,7 @@ export class ArrayType extends Type {
         })
     }
     collectAliases(genericLiterals?: Array<string>): string[] {
-        const childAliases = this.elementType.collectAliases(genericLiterals)
+        const childAliases = this.element.collectAliases(genericLiterals)
         const prefix = this.getTypePrefix()
         const selfAlias = this.alias
             ? [`${prefix}${this.array(genericLiterals)};`]
@@ -36,6 +36,6 @@ export function array(
     type: Type,
     alias?: string,
     generic?: GenericOption
-): Type {
+): ArrayType {
     return new ArrayType(type, alias, generic)
 }

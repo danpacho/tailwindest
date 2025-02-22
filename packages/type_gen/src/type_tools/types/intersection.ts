@@ -3,7 +3,7 @@ import { toGenericTypeString } from "./to.generic.type.string"
 import { type GenericOption, Type } from "./type"
 
 export class IntersectionType extends Type {
-    private types: Array<Type>
+    public types: Array<Type>
 
     constructor(
         types: Array<Type | string>,
@@ -44,6 +44,6 @@ export function intersection(
     types: Array<Type | string>,
     alias?: string,
     generic?: GenericOption
-): Type {
+): IntersectionType {
     return new IntersectionType(types, alias, generic)
 }
