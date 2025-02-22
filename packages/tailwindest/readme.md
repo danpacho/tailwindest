@@ -6,11 +6,11 @@
 
 ## Useful features 🔮
 
--   Support **all JS-frameworks**
--   **Zero dependencies**
--   `768B`, **tiny bundle size**
--   **Support custom type**, defined in `tailwind.config.js`
--   `tailwind` **doc site link** embedded via `JSDoc`
+- Support **all JS-frameworks**
+- **Zero dependencies**
+- `768B`, **tiny bundle size**
+- **Support custom type**, defined in `tailwind.config.js`
+- `tailwind` **doc site link** embedded via `JSDoc`
 
 ## Start with docs 📖
 
