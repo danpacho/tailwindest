@@ -24,6 +24,7 @@ describe("TypeGenerator", () => {
         useArbitraryValue: true,
         useSoftVariants: true,
         useStringKindVariantsOnly: true,
+        useOptionalProperty: false,
     })
 
     it("should init", async () => {
@@ -414,7 +415,6 @@ describe("TypeGenerator", () => {
 
     it("should build types", async () => {
         await generator.buildTypes({
-            tailwindest: `${__dirname}/__mocks__/dist/tailwindest.ts`,
             tailwind: `${__dirname}/__mocks__/dist/tailwind.ts`,
         })
     })
