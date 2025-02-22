@@ -625,9 +625,13 @@ export class TailwindTypeGenerator {
     ): string | Array<string> | null {
         // Exceptional case
         const exceptionRuleToken = className.split("-")[0] ?? className
-        if (this.exceptionalRules.has(exceptionRuleToken)) {
+        if (
+            this.exceptionalRules.has(exceptionRuleToken) ||
+            this.exceptionalRules.has(className)
+        ) {
             const { property, tester } =
-                this.exceptionalRules.get(exceptionRuleToken)!
+                this.exceptionalRules.get(exceptionRuleToken) ??
+                this.exceptionalRules.get(className)!
             if (tester) {
                 const testResult = tester.test(className)
                 if (testResult) {
