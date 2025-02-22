@@ -18,6 +18,10 @@ describe("TypeGenerator", () => {
         cssAnalyzer,
         generator: schemaGenerator,
         storeRoot: `${__dirname}/__mocks__/dist/store/docs.json`,
+    }).setGenOptions({
+        useDocs: true,
+        useVariants: false,
+        useArbitraryValue: true,
     })
 
     it("should init", async () => {
