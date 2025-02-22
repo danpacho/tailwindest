@@ -868,10 +868,7 @@ export class TailwindTypeGenerator {
         return false
     }
 
-    public async buildTypes(saveRoot: {
-        tailwind: string
-        tailwindest: string
-    }) {
+    public async buildTypes(saveRoot: { tailwind: string }) {
         await this.init()
 
         const uniqueKeySet = new Set<string>(
@@ -973,31 +970,14 @@ export class TailwindTypeGenerator {
                 ]
             )
 
-            const [tailwind, tailwindest] = await Promise.all([
-                this.generateType({
-                    type: "tailwind",
-                    globalReference: { color: colorVariables },
-                    optimizationList: optimizedMapList,
-                }),
-                this.generateType({
-                    type: "tailwindest",
-                    globalReference: { color: colorVariables },
-                    optimizationList: optimizedMapList,
-                }),
-            ])
+            const tailwind = await this.generateType({
+                globalReference: { color: colorVariables },
+                optimizationList: optimizedMapList,
+            })
 
-            await Promise.all([
-                writeFile(saveRoot.tailwindest, tailwindest, {
-                    encoding: "utf-8",
-                }),
-                writeFile(saveRoot.tailwind, tailwind, {
-                    encoding: "utf-8",
-                }),
-                writeFile(
-                    `${saveRoot.tailwind}.json`,
-                    JSON.stringify(tailwindCollection, null, 4)
-                ),
-            ])
+            await writeFile(saveRoot.tailwind, tailwind, {
+                encoding: "utf-8",
+            })
         } catch (e) {
             this.$.error("build type error occurred")
             console.error(e)
@@ -1005,7 +985,6 @@ export class TailwindTypeGenerator {
 
         this.$.success("build type finished")
         this.$.log(`tailwind : ${saveRoot.tailwind}`)
-        this.$.log(`tailwindest : ${saveRoot.tailwindest}`)
     }
 
     private createOptimizableMap(
@@ -1454,7 +1433,6 @@ export class TailwindTypeGenerator {
     ): {
         referenceTypeMap: Map<string, string | t.Type>
         tailwindProperty: t.RecordType
-        tailwindestProperty: t.RecordType
     } {
         const getSubset = (
             parent: Array<string>,
@@ -1767,11 +1745,6 @@ export class TailwindTypeGenerator {
                   capitalize(propertyName, "value")
               )
 
-        const propertyValueForTailwindest = t.union(
-            [t.array(propertyValue), propertyValue],
-            capitalize(propertyName, "value", "with", "array")
-        )
-
         const addArbitraryDocs = (type: t.Type) => {
             if (
                 this.genOptions.useArbitraryValue &&
@@ -1783,10 +1756,7 @@ export class TailwindTypeGenerator {
         }
 
         if (this.genOptions.useDocs) {
-            const docInjectionTarget = [
-                propertyValue,
-                propertyValueForTailwindest,
-            ]
+            const docInjectionTarget = [propertyValue]
 
             if (foundedDocumentation) {
                 docInjectionTarget.forEach((type) => {
@@ -1848,20 +1818,8 @@ export class TailwindTypeGenerator {
             }
         )
 
-        const propertyInterfaceTailwindest = t.record(
-            capitalize("tailwindest", propertyName),
-            {
-                [`${propertyName}${PROPERTY_IDENTIFIER}`]:
-                    propertyValueForTailwindest,
-            },
-            {
-                keyword: "interface",
-            }
-        )
-
         return {
             tailwindProperty: propertyInterface,
-            tailwindestProperty: propertyInterfaceTailwindest,
             referenceTypeMap: referenceTypeMap,
         }
     }
@@ -1901,11 +1859,9 @@ export class TailwindTypeGenerator {
     }
 
     private async generateType({
-        type,
         globalReference,
         optimizationList,
     }: {
-        type: "tailwind" | "tailwindest"
         globalReference: { color: Array<string> }
         optimizationList: Array<OptimizableMap>
     }) {
@@ -1914,17 +1870,12 @@ export class TailwindTypeGenerator {
 
         const interfaceList = optimizationList.reduce<{
             tailwindInterface: Array<t.RecordType>
-            tailwindestInterface: Array<t.RecordType>
             referenceTypeMap: Array<t.Type>
         }>(
             (interfaceList, optimizationMap) => {
-                const {
-                    tailwindProperty,
-                    tailwindestProperty,
-                    referenceTypeMap,
-                } = this.generateInterface(globalReference, optimizationMap)
+                const { tailwindProperty, referenceTypeMap } =
+                    this.generateInterface(globalReference, optimizationMap)
                 interfaceList.tailwindInterface.push(tailwindProperty)
-                interfaceList.tailwindestInterface.push(tailwindestProperty)
                 interfaceList.referenceTypeMap.push(
                     ...this.extractTypeFromMap(referenceTypeMap)
                 )
@@ -1934,64 +1885,40 @@ export class TailwindTypeGenerator {
             {
                 referenceTypeMap: [],
                 tailwindInterface: [],
-                tailwindestInterface: [],
             }
         )
 
-        const tailwindVariantsGroups = t
+        const tailwindNestGroups = t
             .union(
                 this.variants.map((variant) => t.literal(variant)),
-                capitalize("tailwind", "variants", "groups")
+                capitalize("tailwind", "nest", "groups")
             )
-            .addDoc("@description", "Tailwind variants groups")
+            .addDoc("@description", "Tailwind nest groups")
             .addDoc(
                 "@see",
                 `{@link https://tailwindcss.com/docs Tailwind docs}`
             )
             .setExport(true)
 
-        let typeString: string = ""
-        if (type === "tailwind") {
-            const tailwindSchema = t
-                .record(
-                    "Tailwind",
-                    {},
-                    {
-                        keyword: "interface",
-                    }
-                )
-                .setExport(true)
-                .setExtends(interfaceList.tailwindInterface)
+        const tailwindSchema = t
+            .record(
+                "Tailwind",
+                {},
+                {
+                    keyword: "interface",
+                }
+            )
+            .setExport(true)
+            .setExtends(interfaceList.tailwindInterface)
 
-            typeString = await this.generator.generateAll([
-                ...this.extractTypeFromMap(this.globalMap),
-                ...this.extractTypeFromMap(this.variantsMap),
-                ...interfaceList.referenceTypeMap,
-                ...interfaceList.tailwindInterface,
-                tailwindSchema,
-                tailwindVariantsGroups,
-            ])
-        } else {
-            const tailwindestSchema = t
-                .record(
-                    "Tailwindest",
-                    {},
-                    {
-                        keyword: "interface",
-                    }
-                )
-                .setExport(true)
-                .setExtends(interfaceList.tailwindestInterface)
-
-            typeString = await this.generator.generateAll([
-                ...this.extractTypeFromMap(this.globalMap),
-                ...this.extractTypeFromMap(this.variantsMap),
-                ...interfaceList.referenceTypeMap,
-                ...interfaceList.tailwindestInterface,
-                tailwindestSchema,
-                tailwindVariantsGroups,
-            ])
-        }
+        const typeString = await this.generator.generateAll([
+            ...this.extractTypeFromMap(this.globalMap),
+            ...this.extractTypeFromMap(this.variantsMap),
+            ...interfaceList.referenceTypeMap,
+            ...interfaceList.tailwindInterface,
+            tailwindSchema,
+            tailwindNestGroups,
+        ])
 
         return typeString
     }
