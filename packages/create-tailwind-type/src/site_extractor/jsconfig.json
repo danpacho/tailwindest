@@ -8,6 +8,6 @@
         "noEmit": true,
         "forceConsistentCasingInFileNames": true
     },
-    "include": ["**/*.mjs"],
+    "include": ["."],
     "exclude": ["**/*.ts"]
 }
