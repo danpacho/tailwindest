@@ -21,9 +21,9 @@ describe("TypeGenerator", () => {
     }).setGenOptions({
         useDocs: true,
         useExactVariants: false,
-        useArbitraryValue: true,
+        useArbitraryValue: false,
         useSoftVariants: true,
-        useStringKindVariantsOnly: true,
+        useStringKindVariantsOnly: false,
         useOptionalProperty: false,
     })
 
