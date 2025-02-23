@@ -80,6 +80,9 @@ importers:
       boxen:
         specifier: ^8.0.1
         version: 8.0.1
+      commander:
+        specifier: ^13.1.0
+        version: 13.1.0
       jsdom:
         specifier: ^26.0.0
         version: 26.0.0
