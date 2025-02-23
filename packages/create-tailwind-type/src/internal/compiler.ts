@@ -83,7 +83,7 @@ export class TailwindCompiler {
 
     public constructor({
         cssRoot,
-        base = __dirname,
+        base,
     }: {
         /**
          * tailwind css input.css file location
@@ -91,9 +91,8 @@ export class TailwindCompiler {
         cssRoot: string
         /**
          * base root
-         * @default __dirname
          */
-        base?: string
+        base: string
     }) {
         this._cssRoot = cssRoot
         this._base = base
