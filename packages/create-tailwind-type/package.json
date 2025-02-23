@@ -9,7 +9,7 @@
         "build:fast": "tsup --no-dts",
         "format": "prettier --write \"./{src,tests}/**/*\"",
         "dev": "pnpm build:fast --sourcemap --clean=false --watch",
-        "test": "pnpm test",
+        "test": "vitest",
         "lint:ts": "tsc --noEmit",
         "prepare": "node ./src/site_extractor/build.mjs"
     },
