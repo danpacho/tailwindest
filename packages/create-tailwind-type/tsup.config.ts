@@ -6,10 +6,9 @@ export default defineConfig((options) => ({
     },
     watch: options.watch ? ["src/**/*"] : false,
     clean: false,
-    dts: true, // Generate type declarations
+    dts: true,
     outDir: "dist",
     target: "esnext",
+    format: ["esm"],
     sourcemap: false,
-    format: ["esm", "cjs"],
-    shims: true,
 }))
