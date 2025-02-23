@@ -9,20 +9,20 @@
         "build:fast": "tsup --no-dts",
         "format": "prettier --write \"./{src,tests}/**/*\"",
         "dev": "pnpm build:fast --sourcemap --clean=false --watch",
-        "test": "pnpm build",
+        "test": "pnpm test",
         "lint:ts": "tsc --noEmit",
-        "prepare": " node ./src/site_extractor/build.mjs"
+        "prepare": "node ./src/site_extractor/build.mjs"
     },
     "publishConfig": {
         "access": "public"
     },
     "bin": {
-        "create-tailwindest": "./dist/index.cjs"
+        "create-tailwind-type": "./dist/index.js"
     },
     "files": [
         "dist"
     ],
-    "main": "./dist/index.cjs",
+    "main": "./dist/index.js",
     "module": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "keywords": [],
@@ -33,6 +33,7 @@
         "@tailwindcss/node": "^4.0.8",
         "boxen": "^8.0.1",
         "commander": "^13.1.0",
+        "glob": "^11.0.1",
         "jsdom": "^26.0.0",
         "lightningcss": "^1.29.1",
         "postcss": "^8.5.3",

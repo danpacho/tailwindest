@@ -83,6 +83,9 @@ importers:
       commander:
         specifier: ^13.1.0
         version: 13.1.0
+      glob:
+        specifier: ^11.0.1
+        version: 11.0.1
       jsdom:
         specifier: ^26.0.0
         version: 26.0.0
