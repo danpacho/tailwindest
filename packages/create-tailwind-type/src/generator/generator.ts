@@ -1,3 +1,4 @@
+import { baseDir } from "../constants/dirname"
 import type {
     ClassEntry,
     TailwindCompiler,
@@ -241,7 +242,7 @@ export class TailwindTypeGenerator {
     public readonly generator: TypeSchemaGenerator
     private readonly cssAnalyzer: CSSAnalyzer
     private static storeRoot = {
-        docs: `${__dirname}/dist/store/docs.json`,
+        docs: `${baseDir}/store/docs.json`,
     } as const
     private _storeRoot: string | null
     private get storeRoot(): string {
@@ -355,7 +356,7 @@ export class TailwindTypeGenerator {
         } catch (e) {
             this._initialized = false
             this.$.error("initialization failed")
-            this.$.log(`${JSON.stringify(e, null, 4)}`)
+            console.error(e)
         }
     }
 
