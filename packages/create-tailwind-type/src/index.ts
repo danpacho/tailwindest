@@ -85,9 +85,9 @@ program
 program
     .option("--base <path>", "Base directory for tailwind files")
     .option("--filename <filename>", "Type filename", "tailwind.ts")
-    .option("--use-docs", "Enable useDocs option", false)
+    .option("--use-docs", "Enable useDocs option", true)
     .option("--use-exact-variants", "Enable exact variant generation", false)
-    .option("--use-arbitrary-value", "Enable arbitrary value generation", false)
+    .option("--use-arbitrary-value", "Enable arbitrary value generation", true)
     .option("--use-soft-variants", "Enable soft variant generation", true)
     .option(
         "--use-string-kind-variants-only",
