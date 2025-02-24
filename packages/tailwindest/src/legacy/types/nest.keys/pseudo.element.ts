@@ -1,0 +1,10 @@
+export type TailwindPseudoElementConditions =
+    | "before"
+    | "after"
+    | "placeholder"
+    | "file"
+    | "marker"
+    | "backdrop"
+    | "selection"
+    | "first-line"
+    | "first-letter"
