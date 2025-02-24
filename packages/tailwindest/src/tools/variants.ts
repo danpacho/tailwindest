@@ -79,7 +79,7 @@ export class VariantsStyler<
         const inquired = this.style(variant)
 
         if (!extraClassName) return Styler.getClassName(inquired)
-        return this.merger(...Styler.flattenObject(inquired), extraClassName)
+        return this.merger(...Styler.flattenRecord(inquired), extraClassName)
     }
 
     public compose(
