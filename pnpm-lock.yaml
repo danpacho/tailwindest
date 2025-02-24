@@ -112,7 +112,11 @@ importers:
         specifier: ^5.4.1
         version: 5.4.1
 
-  packages/tailwindest: {}
+  packages/tailwindest:
+    dependencies:
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
 
   site:
     dependencies:
