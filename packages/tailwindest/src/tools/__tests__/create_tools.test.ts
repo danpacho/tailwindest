@@ -3,7 +3,6 @@ import { PrimitiveStyler } from "../primitive"
 import { RotaryStyler } from "../rotary"
 import { VariantsStyler } from "../variants"
 import { createTools } from "../create_tools"
-import { Tailwind } from "./tailwind"
 
 describe("PrimitiveStyler", () => {
     type TestStyle = { color: string; fontSize?: string }
@@ -395,7 +394,7 @@ describe("createTools", () => {
         })
 
         it("should join style values", () => {
-            const tools = createTools<Tailwind>()
+            const tools = createTools<{}>()
             expect(
                 tools.join(
                     "bg-red-100",
