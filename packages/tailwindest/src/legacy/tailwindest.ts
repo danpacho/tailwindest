@@ -22,6 +22,7 @@ type TailwindestTypeSet<
     TailwindestExtendedNest<AllNestKeys, Tailwind, Identifier>
 
 /**
+ * @deprecated **No longer supported**
  * @description Add custom property, defined at `tailwind.config.js`
  * @see {@link https://tailwindcss.com/docs/configuration tailwind configuration}
  * @example
