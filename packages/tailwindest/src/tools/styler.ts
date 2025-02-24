@@ -1,5 +1,6 @@
-import type { NestedObject } from "../utils"
 import type { Merger } from "./merger_interface"
+
+type NestedRecord = Record<string, unknown>
 
 export abstract class Styler<Args, Out> {
     /**
@@ -35,32 +36,30 @@ export abstract class Styler<Args, Out> {
     public abstract compose(...styles: Array<Out>): unknown
 
     /**
-     * Flatten objects
-     * @param object string key object
+     * Flatten record
      */
-    public static flattenObject<FlattenTargetObject>(
+    public static flattenRecord<FlattenTargetObject>(
         object: FlattenTargetObject
     ): Array<string> {
         return Object.values(object ?? {})
             .map((value) =>
                 typeof value !== "string"
-                    ? Styler.flattenObject(value as NestedObject)
+                    ? Styler.flattenRecord(value as NestedRecord)
                     : value
             )
             .flat()
     }
 
     /**
-     * Deeply merge objects into one object
-     * @param nestedObject string key object
+     * Deep merge record into one record
      */
     public static deepMerge<MergeTargetObject>(
-        ...nestedObjects: Array<MergeTargetObject>
+        ...nestedRecordList: Array<MergeTargetObject>
     ): MergeTargetObject {
-        return nestedObjects.reduce<NestedObject>(
+        return nestedRecordList.reduce<NestedRecord>(
             (mergedObject, currentObject) => {
                 for (const [key, value] of Object.entries(
-                    currentObject as NestedObject
+                    currentObject as NestedRecord
                 )) {
                     if (mergedObject[key] === undefined) {
                         mergedObject[key] = value
@@ -81,8 +80,8 @@ export abstract class Styler<Args, Out> {
                             value !== null
                         ) {
                             mergedObject[key] = Styler.deepMerge(
-                                existing as NestedObject,
-                                value as NestedObject
+                                existing as NestedRecord,
+                                value as NestedRecord
                             )
                         }
                         // Otherwise (both are strings or mismatched types) override with new value.
@@ -99,9 +98,8 @@ export abstract class Styler<Args, Out> {
 
     /**
      * Get className from styles
-     * @param styleObject
      */
-    public static getClassName<StyleObject>(styleObject: StyleObject): string {
-        return Styler.flattenObject(styleObject as NestedObject).join(" ")
+    public static getClassName<Style>(style: Style): string {
+        return Styler.flattenRecord(style as NestedRecord).join(" ")
     }
 }
