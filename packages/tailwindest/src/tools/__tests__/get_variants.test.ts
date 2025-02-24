@@ -1,6 +1,6 @@
 import { describe, test } from "vitest"
 import { type TypeEqual, expectType } from "ts-expect"
-import { type GetVariants, createTools } from "../src"
+import { type GetVariants, createTools } from "../"
 
 const tw = createTools<{}>()
 
