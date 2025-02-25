@@ -17,7 +17,7 @@ describe("TypeGenerator", () => {
         compiler,
         cssAnalyzer,
         generator: schemaGenerator,
-        storeRoot: `${__dirname}/__mocks__/dist/store/docs.json`,
+        storeRoot: `${__dirname}/__mocks__/store/docs.json`,
     }).setGenOptions({
         useDocs: true,
         useExactVariants: false,
