@@ -1,203 +1,71 @@
 <br />
 
+## Build type-safe tailwindcss product
+
 <div align="center">
-<img src="./images/tailwindest.banner.png" width="750px" alt="tailwindest banner" />
+<img src="./images/tailwindest-banner.png" width="550px" alt="tailwindest banner" />
 </div>
 
 <br />
 
-## Write tailwind with confidence
-
-1.  **Type-safe** `tailwind`
-2.  Provide **full type definition** of `tailwind` properties
-3.  **Solid conditional styling**, inspired by `cva`
-
-## Useful features
-
--   Support **all JS-frameworks**
--   **Zero dependencies**
--   `768B`, **tiny bundle size**
--   **Support custom type**, defined in `tailwind.config.js`
--   `tailwind` **doc site link** embedded
-
-## Start with docs
-
-**[Let's dive in 🏄‍♂️](https://tailwindest.vercel.app)**
-
-<br />
-
-## Recipes
-
-### 0. Install package
+### 1. Create tailwind types
 
 ```bash
-npm i tailwindest
+npx create-tailwind-type -A # disable arbitrary values
 ```
 
-### 1. Define styling tools
+### 2. Install package
+
+```bash
+npm i tailwindest@latest
+```
+
+### 3. Create tools
 
 ```ts
-import { createTools, type Tailwindest } from "tailwindest"
+import { createTools, type CreateTailwindest } from "tailwindest"
+import type { Tailwind, TailwindNestGroups } from "./tailwind"
+import { twMerge } from "tailwind-merge"
 
-// name it whatever you want
-export const tw = createTools<Tailwindest>()
-```
-
-### 2. Use styling tools
-
-#### A. Basic style
-
-Define basic style sheet with `style`.
-
-```tsx
-const box = tw.style({
-    display: "flex",
-    alignItems: "items-center",
-    justifyContent: "justify-center",
-
-    paddingX: "px-[2.25px]",
-    paddingY: "py-1",
-    ":hover": {
-        opacity: "hover:opacity-90",
-    },
-    "@sm": {
-        paddingX: "sm:px-[4.5px]",
-        paddingY: "sm:py-2",
-    },
+export const tw = createTools<
+    CreateTailwindest<{
+        tailwind: Tailwind
+        tailwindNestGroups: TailwindNestGroups
+        groupPrefix: "$" // prefix for nest groups, [optional]
+    }>
+>({
+    merger: twMerge, // set tailwind-merge as merger, [optional]
 })
-
-const Box = ({ children }) => <div className={box.class}>{children}</div>
 ```
 
-#### B. Toggling
+## Create Tailwind Type
 
-If you want to change the style based on a **single `boolean` condition**, use `toggle`.
+Generate TypeScript definitions for your Tailwind CSS configuration.
 
-```tsx
-const themeBtn = tw.toggle({
-    truthy: {}, // 🌝 light mode
-    falsy: {}, // 🌚 dark mode
-    base: {}, // [optional] base style
-})
+<div align="center">
+<img src="./images/create-tailwind-type-banner.png" width="550px" alt="tailwindest banner" />
+</div>
 
-const ThemeBtn = ({ children }) => {
-    const [isLight, setIsLight] = useState(false)
-
-    return <button className={themeBtn.class(isLight)}>{children}</button>
-}
+```bash
+npx create-tailwind-type
 ```
 
-#### C. Various conditions
+> [!IMPORTANT]  
+> **Requires Tailwind CSS v4.0.0 or higher.**
 
-If you need to change styles based on **three or more conditions within a single category**, use `rotary`.
+### CLI Options
 
-```tsx
-import { type GetVariants } from "tailwindest"
-
-const btn = tw.rotary({
-    default: {},
-    success: {},
-    warning: {},
-    base: {}, // [optional] base style
-})
-
-interface BtnProps {
-    onClick: () => void
-    children: ReactNode
-    type?: GetVariants<typeof btn>
-}
-
-const Btn = ({ onClick, children, type = "default" }: BtnProps) => (
-    <button className={btn.class(type)} onClick={onClick}>
-        {children}
-    </button>
-)
-```
-
-#### D. [Variants](https://stitches.dev/docs/variants)
-
-```tsx
-const btn = tw.variants({
-    variants: {
-        type: {
-            default: {},
-            success: {},
-            warning: {},
-        },
-        size: {
-            sm: {},
-            md: {},
-            lg: {},
-        },
-        border: {
-            true: {},
-            false: {},
-        },
-    },
-    base: {}, // [optional] base style
-})
-
-interface BtnProps extends GetVariants<typeof btn> {
-    onClick: () => void
-    children: ReactNode
-}
-
-const Btn = ({
-    children,
-    size = "md",
-    type = "default",
-    border = true,
-    onClick,
-}: BtnProps) => (
-    <button className={btn.class({ size, type, border })} onClick={onClick}>
-        {children}
-    </button>
-)
-```
-
-#### E. Merging styles
-
-Use `mergeProps` to **merge multiple styles** and **make prop-injectable universal components**.
-
-```tsx
-const text = tw.style({
-    // text base style
-})
-
-interface TextProps {
-    color?: Tailwindest["color"]
-    fontWeight?: Tailwindest["fontWeight"]
-}
-export const UniversalText = ({
-    children,
-    ...textOptions
-}: React.PropsWithChildren<TextProps>) => (
-    <p
-        className={tw.mergeProps(
-            text.style,
-            textOptions
-            // override color and fontWeight
-        )}
-    >
-        {children}
-    </p>
-)
-
-const SomeComponent = () => (
-    <>
-        <UniversalText color="text-red-100" fontWeight="font-medium">
-            color: red-100 & fontWeight: font-medium
-        </UniversalText>
-
-        <UniversalText color="text-blue-300" fontWeight="font-bold">
-            color: blue-300 & fontWeight: font-bold
-        </UniversalText>
-    </>
-)
-```
-
-<br />
-
-## LICENSE
-
-<p style="color:green">MIT</p>
+| Option (Short) | Option (Long)                 | Description                                                                                                                                               | Default Value          |
+| -------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `-b`           | `--base <path>`               | Specifies the base directory to locate Tailwind CSS files. If omitted, the tool automatically resolves to the installed `@tailwindcss` package directory. | _None_ (auto-resolved) |
+| `-f`           | `--filename <filename>`       | Sets the output filename for the generated types.                                                                                                         | `tailwind.ts`          |
+| `-d`           | `--docs`                      | Enables documentation comments in the generated types. Use the inverse flag to disable them.                                                              | `true`                 |
+| `-D`           | `--no-docs`                   | Disables documentation comments in the generated types.                                                                                                   | N/A                    |
+| `-a`           | `--arbitrary-value`           | Allows the generation of arbitrary values in the output types. Use the inverse flag to disable this feature.                                              | `true`                 |
+| `-A`           | `--no-arbitrary-value`        | Disables arbitrary value generation.                                                                                                                      | N/A                    |
+| `-s`           | `--soft-variants`             | Enables soft variant generation. When disabled (using the inverse flag), the tool will generate exact variants instead.                                   | `true`                 |
+| `-S`           | `--no-soft-variants`          | Disables soft variant generation (resulting in exact variant generation).                                                                                 | N/A                    |
+| `-k`           | `--string-kind-variants-only` | Limits the generated types to only string kind variants.                                                                                                  | `false`                |
+| `-o`           | `--optional-property`         | Generates optional properties in the output types, which can be useful for partial configurations.                                                        | `false`                |
+| N/A            | `--version`                   | Displays the current CLI version.                                                                                                                         | N/A                    |
+| N/A            | `--help`                      | Displays help and usage information for the CLI tool.                                                                                                     | N/A                    |
