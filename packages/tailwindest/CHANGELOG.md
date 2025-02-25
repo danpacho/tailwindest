@@ -1,5 +1,12 @@
 # tailwindest
 
+## 3.0.0
+
+### Major Changes
+
+-   - Release tailwindest v3.0.0
+    - Release create-tailwind-type v1
+
 ## 2.3.6
 
 ### Patch Changes
