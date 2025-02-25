@@ -8,7 +8,38 @@ import { Logger } from "../logger"
 import type { TypeSchemaGenerator } from "../type_tools"
 import * as t from "../type_tools"
 import { CSSAnalyzer } from "./css_analyzer"
-import { readFile, writeFile } from "fs/promises"
+import { access, constants, mkdir, readFile, writeFile } from "fs/promises"
+import { dirname } from "path"
+
+async function writeIfNotExists(
+    filePath: string,
+    content: string
+): Promise<void> {
+    const dirPath: string = dirname(filePath)
+
+    try {
+        await access(dirPath, constants.F_OK)
+    } catch (err) {
+        const error = err as NodeJS.ErrnoException
+        if (error.code === "ENOENT") {
+            await mkdir(dirPath, { recursive: true })
+        } else {
+            throw error
+        }
+    }
+
+    try {
+        await writeFile(filePath, content, {
+            encoding: "utf-8",
+            flag: "wx", // "wx" flag: write only if the file doesn't exist
+        })
+    } catch (err) {
+        const error = err as NodeJS.ErrnoException
+        if (error.code !== "EEXIST") {
+            throw error
+        }
+    }
+}
 
 const capitalize = (...text: string[]): string =>
     text
@@ -981,9 +1012,7 @@ export class TailwindTypeGenerator {
                 optimizationList: optimizedMapList,
             })
 
-            await writeFile(saveRoot.tailwind, tailwind, {
-                encoding: "utf-8",
-            })
+            await writeIfNotExists(saveRoot.tailwind, tailwind)
         } catch (e) {
             this.$.error("build type error occurred")
             console.error(e)
