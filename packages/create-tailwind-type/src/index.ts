@@ -4,7 +4,6 @@ import { Command } from "commander"
 import { TailwindTypeGenerator, CSSAnalyzer } from "./generator"
 import { TailwindCompiler } from "./internal"
 import { TypeSchemaGenerator } from "./type_tools"
-
 import { existsSync, readFileSync } from "fs"
 import { join, dirname, resolve } from "path"
 import { glob } from "glob"
@@ -45,7 +44,6 @@ async function findTailwindCSSRoot(searchDir: string): Promise<string | null> {
             return filePath
         }
     }
-
     return null
 }
 
@@ -58,11 +56,9 @@ async function resolveTailwindCssDir(): Promise<string> {
         const startDir = process.cwd()
         const pattern = join(startDir, "**", "node_modules", "@tailwindcss")
         const matches = await glob(pattern, { cwd: startDir, absolute: true })
-
         if (matches.length > 0) {
             return matches[0]!
         }
-
         throw new Error(
             "Could not resolve @tailwindcss package. Please ensure it is installed or specify the --base option."
         )
@@ -73,7 +69,7 @@ function getTailwindVersion(baseDir: string): string {
     try {
         const packageJsonPath = join(baseDir, "node", "package.json")
         const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"))
-        return packageJson.version || "0.0.0" // Fallback to 0.0.0 if version is missing
+        return packageJson.version || "0.0.0"
     } catch {
         throw new Error(
             "Could not read Tailwind CSS package.json to determine version."
@@ -95,7 +91,6 @@ function isVersionSufficient(
 }
 
 import pkg from "package.json"
-
 const programVersion = pkg.version
 const logger = new Logger({ name: "create-tailwind-type" })
 
@@ -107,45 +102,43 @@ program
         "CLI tool to generate Tailwind CSS types (requires Tailwind CSS v4 or higher)"
     )
     .version(programVersion)
-    .option("-b, --base <path>", "Base directory for Tailwind files")
-    .option("-f, --filename <filename>", "Output type filename", "tailwind.ts")
-    .option("-d, --use-docs", "Generate with documentation", true)
-    .option("-D, --no-docs", "Disable documentation")
-    .option("-e, --use-exact-variants", "Use exact variant generation", false)
+
+program
     .option(
-        "-a, --use-arbitrary-value",
-        "Allow arbitrary value generation",
-        true
+        "-b, --base <path>",
+        "Base directory for Tailwind CSS files (defaults to the installed @tailwindcss package directory)."
     )
-    .option("-A, --no-arbitrary-value", "Disallow arbitrary value generation")
-    .option("-s, --use-soft-variants", "Enable soft variant generation", true)
-    .option("-S, --no-soft-variants", "Disable soft variant generation")
     .option(
-        "-k, --use-string-kind-variants-only",
-        "Use string kind variants only",
+        "-f, --filename <filename>",
+        "Output filename for the generated types.",
+        "tailwind.ts"
+    )
+    .option("-d, --docs", "Enable documentation in generated types", true)
+    .option("-D --no-docs", "Disable documentation in generated types")
+    .option("-a, --arbitrary-value", "Allow arbitrary value generation", true)
+    .option("-A, --no-arbitrary-value", "Disable arbitrary value generation")
+    .option("-s, --soft-variants", "Enable soft variant generation", true)
+    .option("-S --no-soft-variants", "Disable soft variant generation")
+    .option(
+        "-k, --string-kind-variants-only",
+        "Use only string kind variants",
         false
     )
-    .option(
-        "-o, --use-optional-property",
-        "Generate optional properties",
-        false
-    )
-    .action(async (baseOption) => {
-        const options = {
-            base: baseOption.base,
-            filename: baseOption.filename,
-            useDocs: baseOption.useDocs && !baseOption.noDocs,
-            useExactVariants: baseOption.useExactVariants,
-            useArbitraryValue:
-                baseOption.useArbitraryValue && !baseOption.noArbitraryValue,
-            useSoftVariants:
-                baseOption.useSoftVariants && !baseOption.noSoftVariants,
-            useStringKindVariantsOnly: baseOption.useStringKindVariantsOnly,
-            useOptionalProperty: baseOption.useOptionalProperty,
-        }
+    .option("-o, --optional-property", "Generate optional properties", false)
+    .action(async (opts) => {
+        console.log(opts)
+        const {
+            base,
+            filename,
+            docs,
+            arbitraryValue,
+            softVariants,
+            stringKindVariantsOnly,
+            optionalProperty,
+        } = opts
 
         logger.box(
-            `${logger.c.rgb(78, 185, 250).bold(`create-tailwind-type`)} ${logger.c.bold(`v${programVersion}`)}`,
+            `${logger.c.rgb(78, 185, 250).bold("create-tailwind-type")} ${logger.c.bold(`v${programVersion}`)}`,
             {
                 borderStyle: "round",
                 borderColor: "blue",
@@ -159,11 +152,11 @@ program
         }
 
         try {
-            const baseDir = options.base
-                ? resolve(process.cwd(), options.base)
+            const baseDir = base
+                ? resolve(process.cwd(), base)
                 : await resolveTailwindCssDir()
 
-            // Check Tailwind CSS version
+            // Check Tailwind CSS version.
             const tailwindVersion = getTailwindVersion(baseDir)
             if (!isVersionSufficient(tailwindVersion)) {
                 logger.error(
@@ -185,15 +178,15 @@ program
                 cssAnalyzer,
                 generator: schemaGenerator,
             }).setGenOptions({
-                useDocs: options.useDocs,
-                useExactVariants: options.useExactVariants,
-                useArbitraryValue: options.useArbitraryValue,
-                useSoftVariants: options.useSoftVariants,
-                useStringKindVariantsOnly: options.useStringKindVariantsOnly,
-                useOptionalProperty: options.useOptionalProperty,
+                useDocs: docs,
+                useExactVariants: !softVariants,
+                useArbitraryValue: arbitraryValue,
+                useSoftVariants: softVariants,
+                useStringKindVariantsOnly: stringKindVariantsOnly,
+                useOptionalProperty: optionalProperty,
             })
 
-            const fileRoot = `${process.cwd()}/${options.filename}`
+            const fileRoot = `${process.cwd()}/${filename}`
             await generator.buildTypes({
                 tailwind: fileRoot,
             })
