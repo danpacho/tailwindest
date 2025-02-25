@@ -17,6 +17,7 @@ async function checkFileForImport(filePath: string): Promise<boolean> {
         const kindOfTailwindV4 = [
             "@import 'tailwindcss'",
             '@import "tailwindcss"',
+            "tailwindcss",
         ] as const
         return kindOfTailwindV4.some((v4) => content.includes(v4))
     } catch {
