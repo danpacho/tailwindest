@@ -14,7 +14,11 @@ import { Logger } from "./logger"
 async function checkFileForImport(filePath: string): Promise<boolean> {
     try {
         const content = await readFile(filePath, "utf-8")
-        return content.includes('@import "tailwindcss";')
+        const kindOfTailwindV4 = [
+            "@import 'tailwindcss'",
+            '@import "tailwindcss"',
+        ] as const
+        return kindOfTailwindV4.some((v4) => content.includes(v4))
     } catch {
         return false
     }
