@@ -20,7 +20,7 @@ declare const createTools: <StyleType extends NestedObject>() => {
     rotary: <
         VariantsStylesType extends {
             [key in keyof VariantsStylesType]: StyleType
-        }
+        },
     >({
         base,
         ...styles
@@ -66,8 +66,8 @@ createTools<StyleType>()
 
 ### Generic Parameter: `StyleType`
 
--   type: generic `StyleType extends NestedObject`
--   usage: plug `Tailwindest` type and create styling tools.
+- type: generic `StyleType extends NestedObject`
+- usage: plug `Tailwindest` type and create styling tools.
 
 ### Example
 

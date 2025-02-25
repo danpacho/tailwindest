@@ -16,10 +16,10 @@ const code = tw
             borderRadius: "md:rounded",
         },
     })
-    .compose(util.amberColor.style)
+    .compose(util.amberColor.style())
 
 const Code = ({ children }: React.PropsWithChildren) => (
-    <code className={code.class}>{children}</code>
+    <code className={code.class()}>{children}</code>
 )
 
 export { Code }

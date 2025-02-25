@@ -34,8 +34,9 @@ const StackBlitz = ({
 }) => {
     return (
         <div className="flex flex-col my-6 w-full">
-            <div className={exampleTitle.class}>{label}</div>
+            <div className={exampleTitle.class()}>{label}</div>
             <iframe
+                title="stackblitz"
                 src={`https://stackblitz.com/${examplePath}/${example}?embed=1&file=${exampleEntryPoint[example]}`}
                 className="w-full h-screen rounded-b-lg border-2 border-t-0 border-teal-400/50"
             />

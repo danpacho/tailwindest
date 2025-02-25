@@ -34,20 +34,22 @@ const btn = tw.rotary({
             transformTranslateY: "active:translate-y-0.5",
         },
     },
-    fill: {
-        ...util.goldGradient.style,
-        borderColor: "border-amber-300",
-        borderWidth: "border-[0.5px]",
-        "@dark": {
-            color: "dark:text-black",
+    variants: {
+        fill: {
+            ...util.goldGradient.style,
+            borderColor: "border-amber-300",
+            borderWidth: "border-[0.5px]",
+            "@dark": {
+                color: "dark:text-black",
+            },
         },
-    },
-    outline: {
-        backgroundColor: "bg-transparent",
+        outline: {
+            backgroundColor: "bg-transparent",
 
-        "@dark": {
-            borderColor: "dark:border-amber-100/20",
-            color: "dark:text-amber-100/80",
+            "@dark": {
+                borderColor: "dark:border-amber-100/20",
+                color: "dark:text-amber-100/80",
+            },
         },
     },
 })

@@ -240,7 +240,7 @@ const codeSuggestion = tw
             pointerEvents: "pointer-events-none",
         },
     })
-    .compose(util.amberColor.style)
+    .compose(util.amberColor.style())
 
 const Suggestion = forwardRef<
     HTMLDivElement,
