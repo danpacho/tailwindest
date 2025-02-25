@@ -11,7 +11,7 @@ import prettier from "eslint-plugin-prettier"
 export default [
     {
         name: "tailwindest-files",
-        ignores: ["**/*.js", "site/*", "examples/*", "dist/*"],
+        ignores: ["**/*.mjs", "**/*.js", "site/*", "examples/*", "dist/*"],
     },
     js.configs.recommended,
     {

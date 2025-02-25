@@ -30,7 +30,7 @@ const gradientText = tw
         fontWeight: "font-bold",
         backgroundClip: "bg-clip-text",
     })
-    .compose(titleText.style, util.goldGradient.style)
+    .compose(titleText.style(), util.goldGradient.style())
 
 const MainHeader = () => {
     return (
@@ -39,11 +39,11 @@ const MainHeader = () => {
                 <div className="flex flex-col items-center justify-center gap-2">
                     <div className="flex flex-col items-start md:items-center justify-center gap-1 md:gap-2 mb-12">
                         <div className="flex gap-1.5 flex-wrap w-fit items-center">
-                            <h1 className={titleText.class}>Write</h1>
-                            <h1 className={gradientText.class}>Typesafe</h1>
+                            <h1 className={titleText.class()}>Write</h1>
+                            <h1 className={gradientText.class()}>Typesafe</h1>
                         </div>
-                        <h1 className={titleText.class}>Tailwindcss</h1>
-                        <h1 className={subtitle.class}>
+                        <h1 className={titleText.class()}>Tailwindcss</h1>
+                        <h1 className={subtitle.class()}>
                             powered by typescript
                         </h1>
                     </div>
@@ -95,7 +95,7 @@ const MainFeatures = ({
     >
 }) => {
     return (
-        <div className={featureGrid.class}>
+        <div className={featureGrid.class()}>
             {Object.entries(features).map((value) => {
                 const [featureKey, component] = value
                 const { icon, title, description, href } = component

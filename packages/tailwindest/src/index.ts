@@ -1,11 +1,9 @@
-import { createTools } from "./create.tools"
-import type { GetVariants } from "./get.variants"
-import type { Tailwindest } from "./tailwindest"
-import type { ShortTailwindest } from "./tailwindest.short"
+import { createTools, type GetVariants } from "./tools"
+import { CreateTailwindest } from "./create_tailwindest"
 
-export {
-    createTools,
-    type Tailwindest,
-    type ShortTailwindest,
-    type GetVariants,
-}
+// V2 + tailwindcss < 4.0
+export type { Tailwindest } from "./legacy/tailwindest"
+export type { ShortTailwindest } from "./legacy/tailwindest.short"
+
+// V3 + tailwindcss >= 4.0
+export { createTools, type GetVariants, type CreateTailwindest }

@@ -20,7 +20,7 @@ const underline = tw.style({
 })
 
 const Underline = ({ children }: React.PropsWithChildren) => (
-    <code className={underline.class}>{children}</code>
+    <code className={underline.class()}>{children}</code>
 )
 
 export { Underline }

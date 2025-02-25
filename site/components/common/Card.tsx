@@ -37,7 +37,7 @@ const card = tw
             padding: "sm:p-5",
         },
     })
-    .compose(cardContainer.style)
+    .compose(cardContainer.style())
 
 const cardIcon = tw.style({
     width: "w-6",
@@ -66,7 +66,7 @@ const cardIcon = tw.style({
 })
 
 const CardIcon = ({ icon }: { icon: React.ReactNode }) => (
-    <div className={cardIcon.class}>{icon}</div>
+    <div className={cardIcon.class()}>{icon}</div>
 )
 
 const CardHeader = ({
@@ -100,7 +100,7 @@ const Card = ({
 }>) => {
     return (
         <Link
-            className={twS ? tw.mergeProps(card.style, twS) : card.class}
+            className={twS ? tw.mergeProps(card.style(), twS) : card.class()}
             type="button"
             href={href}
         >

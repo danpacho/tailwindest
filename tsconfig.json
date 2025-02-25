@@ -2,10 +2,11 @@
     "compilerOptions": {
         "strict": true,
         "target": "esnext",
+        "module": "esnext",
         "lib": ["dom", "dom.iterable", "esnext"],
         "baseUrl": ".",
         "esModuleInterop": true,
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "noUncheckedIndexedAccess": true,
         "exactOptionalPropertyTypes": true,
         "forceConsistentCasingInFileNames": true,

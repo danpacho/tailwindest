@@ -111,7 +111,7 @@ const Container = ({
     useEffect(() => {
         const suggestionHeight = codeSuggestionRef.current?.offsetHeight
         if (suggestionHeight)
-            setSuggestionBlockTop(top - suggestionHeight - height / 4 ?? 0)
+            setSuggestionBlockTop(top - suggestionHeight - height / 4)
     }, [highlightedBlock])
 
     useEffect(() => {
@@ -240,7 +240,7 @@ const codeSuggestion = tw
             pointerEvents: "pointer-events-none",
         },
     })
-    .compose(util.amberColor.style)
+    .compose(util.amberColor.style())
 
 const Suggestion = forwardRef<
     HTMLDivElement,

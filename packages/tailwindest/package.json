@@ -1,6 +1,6 @@
 {
     "name": "tailwindest",
-    "version": "2.3.6",
+    "version": "3.0.0",
     "description": "typesafe, reusable tailwind",
     "homepage": "https://tailwindest.vercel.app",
     "author": "danpacho",
@@ -24,5 +24,8 @@
     "scripts": {
         "build": "tsup src/index.ts --format=cjs,esm --dts",
         "build:fast": "tsup src/index.ts --format=cjs,esm"
+    },
+    "dependencies": {
+        "clsx": "^2.1.1"
     }
 }
