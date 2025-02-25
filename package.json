@@ -40,9 +40,9 @@
     },
     "devDependencies": {
         "@changesets/cli": "^2.28.1",
-        "@typescript-eslint/eslint-plugin": "^8.24.1",
-        "@typescript-eslint/parser": "^8.24.1",
-        "@vitest/coverage-v8": "^3.0.6",
+        "@typescript-eslint/eslint-plugin": "^8.25.0",
+        "@typescript-eslint/parser": "^8.25.0",
+        "@vitest/coverage-v8": "^3.0.7",
         "chalk": "^5.4.1",
         "eslint": "^9.21.0",
         "eslint-config-prettier": "^10.0.1",
@@ -59,7 +59,7 @@
         "turbo": "^2.4.2",
         "typescript": "^5.7.3",
         "vite-tsconfig-paths": "^5.1.4",
-        "vitest": "^3.0.6"
+        "vitest": "^3.0.7"
     },
     "engines": {
         "node": ">=20"
