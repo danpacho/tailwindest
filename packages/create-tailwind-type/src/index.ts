@@ -126,7 +126,6 @@ program
     )
     .option("-o, --optional-property", "Generate optional properties", false)
     .action(async (opts) => {
-        console.log(opts)
         const {
             base,
             filename,
