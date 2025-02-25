@@ -1,5 +1,11 @@
 # create-tailwind-type
 
+## 1.0.3
+
+### Patch Changes
+
+- add single quote support for tailwind css file checking
+
 ## 1.0.2
 
 ### Patch Changes
