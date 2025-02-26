@@ -15,17 +15,48 @@ export class RotaryStyler<
         variants: Record<VariantKey, StyleType>
     }) {
         super()
-        this._variants = { ...variants, base: base }
+        this._variants = Object.entries(variants).reduce<
+            Record<VariantKey | "base", StyleType>
+        >(
+            (variants, [key, value]) => {
+                if (key === "base") {
+                    return variants
+                }
+                variants[key as VariantKey] = Styler.deepMerge<StyleType>(
+                    variants["base"],
+                    value as StyleType
+                )
+                return variants
+            },
+            { base: base } as Record<VariantKey | "base", StyleType>
+        )
         this._variantsMap = {
-            ...Object.entries(variants).reduce<Record<VariantKey, string>>(
+            ...Object.entries(this._variants).reduce<
+                Record<VariantKey | "base", string>
+            >(
                 (variantsMap, [key, value]) => {
                     variantsMap[key as VariantKey] = Styler.getClassName(value)
                     return variantsMap
                 },
-                {} as Record<VariantKey, string>
+                {} as Record<VariantKey | "base", string>
             ),
             base: Styler.getClassName(base),
         }
+    }
+
+    /**
+     * Get stylesheet
+     * @param variant variant name
+     * @param extraStyle extra stylesheet
+     */
+    public style(
+        variant?: VariantKey | "base",
+        extraStyle?: StyleType
+    ): StyleType {
+        const inquired = this._variants[variant as VariantKey]
+
+        if (!extraStyle) return inquired
+        return Styler.deepMerge(inquired, extraStyle)
     }
 
     /**
@@ -41,21 +72,6 @@ export class RotaryStyler<
 
         if (!extraClassName) return inquired
         return this.merger(inquired, extraClassName)
-    }
-
-    /**
-     * Get stylesheet
-     * @param variant variant name
-     * @param extraStyle extra stylesheet
-     */
-    public style(
-        variant?: VariantKey | "base",
-        extraStyle?: StyleType
-    ): StyleType {
-        const inquired = this._variants[variant as VariantKey | "base"]
-
-        if (!extraStyle) return inquired
-        return Styler.deepMerge(inquired, extraStyle)
     }
 
     public compose(
