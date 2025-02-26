@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.0.1
+
+### Patch Changes
+
+- Fix missing base style of rotary styler
+
 ## 3.0.0
 
 ### Major Changes
