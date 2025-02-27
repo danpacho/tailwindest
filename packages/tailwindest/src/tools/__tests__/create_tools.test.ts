@@ -157,7 +157,10 @@ describe("RotaryStyler", () => {
                 color: "gray",
                 fontSize: "12",
             })
-            expect(newStyler.style("primary")).toEqual({ color: "blue" })
+            expect(newStyler.style("primary")).toEqual({
+                color: "blue",
+                fontSize: "12",
+            })
         })
     })
 })
