@@ -53,6 +53,32 @@ npx create-tailwind-type
 > [!IMPORTANT]  
 > **Requires Tailwind CSS v4.0.0 or higher.**
 
+### Usage Examples
+
+- Use custom plugins
+
+**Should change base directory to `node_modules/tailwindcss`** for your own project.
+
+```bash
+npx create-tailwind-type -b node_modules/tailwindcss
+```
+
+- Generate exact variants
+
+**Will generate exact variants instead of soft variants.** But slowdown typescript language server, if you use it directly. (Importing subtype will be fine.)
+
+```bash
+npx create-tailwind-type -S
+```
+
+- Change output filename
+
+**Will generate types in `src/types/tailwind.d.ts` file.**
+
+```bash
+npx create-tailwind-type -f src/types/tailwind.d.ts
+```
+
 ### CLI Options
 
 | Option (Short) | Option (Long)                 | Description                                                                                                                                                | Default Value          |
