@@ -52,15 +52,27 @@ async function findTailwindCSSRoot(searchDir: string): Promise<string | null> {
     return null
 }
 
-async function resolveTailwindCssDir(): Promise<string> {
+async function resolveTailwindNodeDir(): Promise<string> {
+    const __dirname = dirname(fileURLToPath(import.meta.url))
     try {
-        const require = createRequire(import.meta.url)
-        const packageJsonPath = require.resolve("@tailwindcss/package.json")
-        return dirname(packageJsonPath)
+        const nodeModulesPath = join(
+            __dirname,
+            "..",
+            "node_modules",
+            "@tailwindcss",
+            "node"
+        )
+
+        return nodeModulesPath
     } catch {
-        const startDir = process.cwd()
-        const pattern = join(startDir, "**", "node_modules", "@tailwindcss")
-        const matches = await glob(pattern, { cwd: startDir, absolute: true })
+        const pattern = join(
+            __dirname,
+            "**",
+            "node_modules",
+            "@tailwindcss",
+            "node"
+        )
+        const matches = await glob(pattern, { cwd: __dirname, absolute: true })
         if (matches.length > 0) {
             return matches[0]!
         }
@@ -72,7 +84,7 @@ async function resolveTailwindCssDir(): Promise<string> {
 
 function getTailwindVersion(baseDir: string): string {
     try {
-        const packageJsonPath = join(baseDir, "node", "package.json")
+        const packageJsonPath = join(baseDir, "package.json")
         const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"))
         return packageJson.version || "0.0.0"
     } catch {
@@ -95,7 +107,8 @@ function isVersionSufficient(
     return patch! >= minPatch!
 }
 
-import pkg from "package.json"
+import pkg from "../package.json"
+import { fileURLToPath } from "url"
 const programVersion = pkg.version
 const logger = new Logger({ name: "create-tailwind-type" })
 
@@ -156,12 +169,12 @@ program
         }
 
         try {
-            const baseDir = base
+            const tailwindNodeDir = base
                 ? resolve(process.cwd(), base)
-                : await resolveTailwindCssDir()
+                : await resolveTailwindNodeDir()
 
             // Check Tailwind CSS version.
-            const tailwindVersion = getTailwindVersion(baseDir)
+            const tailwindVersion = getTailwindVersion(tailwindNodeDir)
             if (!isVersionSufficient(tailwindVersion)) {
                 logger.error(
                     `Tailwind CSS version ${tailwindVersion} detected. This tool requires Tailwind CSS v4.0.0 or higher. Please upgrade your Tailwind CSS installation.`
@@ -171,7 +184,7 @@ program
 
             const compiler = new TailwindCompiler({
                 cssRoot: tailwindCSSFileRoot,
-                base: baseDir,
+                base: tailwindNodeDir,
             })
 
             const cssAnalyzer = new CSSAnalyzer()
