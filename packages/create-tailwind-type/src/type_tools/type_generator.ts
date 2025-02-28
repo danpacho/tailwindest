@@ -1,4 +1,5 @@
-import prettier from "prettier"
+import prettier, { type Plugin } from "prettier"
+import * as prettierPluginJsdoc from "prettier-plugin-jsdoc"
 import { Type } from "./types/type"
 import { RecordType } from "./types/record"
 
@@ -13,7 +14,7 @@ abstract class TypeGenerator<Arg, Frame> {
             const purified = literal.trim()
             const formatted = prettier.format(purified, {
                 parser: "typescript",
-                plugins: ["prettier-plugin-jsdoc"],
+                plugins: [prettierPluginJsdoc] as unknown as Array<Plugin>,
             })
             return formatted
         } catch (error) {
