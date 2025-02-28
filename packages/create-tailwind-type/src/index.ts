@@ -53,25 +53,16 @@ async function findTailwindCSSRoot(searchDir: string): Promise<string | null> {
 }
 
 async function resolveTailwindNodeDir(): Promise<string> {
-    const __dirname = dirname(fileURLToPath(import.meta.url))
+    const nodeModules = join(
+        dirname(fileURLToPath(import.meta.url)),
+        "..",
+        ".."
+    )
     try {
-        const nodeModulesPath = join(
-            __dirname,
-            "..",
-            "node_modules",
-            "@tailwindcss",
-            "node"
-        )
-
-        return nodeModulesPath
+        const tailwindPackagePath = join(nodeModules, "@tailwindcss", "node")
+        return tailwindPackagePath
     } catch {
-        const pattern = join(
-            __dirname,
-            "**",
-            "node_modules",
-            "@tailwindcss",
-            "node"
-        )
+        const pattern = join(nodeModules, "**", "@tailwindcss", "node")
         const matches = await glob(pattern, { cwd: __dirname, absolute: true })
         if (matches.length > 0) {
             return matches[0]!
