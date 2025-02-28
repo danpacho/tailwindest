@@ -1,5 +1,11 @@
 # create-tailwind-type
 
+## 1.0.4
+
+### Patch Changes
+
+- Fix resolving error at `@tailwindcss/node`, `prettier-plugin-jsdoc`
+
 ## 1.0.3
 
 ### Patch Changes
