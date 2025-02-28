@@ -1,5 +1,11 @@
 # create-tailwind-type
 
+## 1.0.6
+
+### Patch Changes
+
+- Remove native prefix combination for custom plugin support
+
 ## 1.0.5
 
 ### Patch Changes

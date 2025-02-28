@@ -521,8 +521,7 @@ export class TailwindTypeGenerator {
     }
 
     private getPropertyNameTailwindKeyNotFounded(
-        className: string,
-        useNativeCombine: boolean
+        className: string
     ): string | null {
         const findTrierClassNames = [
             // purified -> original
@@ -572,12 +571,12 @@ export class TailwindTypeGenerator {
             )
 
             if (uniqueProperty) {
-                if (matchedVariantName && useNativeCombine) {
-                    const withTwNative = `${matchedVariantName}${capitalize(
-                        uniqueProperty
-                    )}`
-                    return withTwNative
-                }
+                // if (matchedVariantName && useNativeCombine) {
+                //     const withTwNative = `${matchedVariantName}${capitalize(
+                //         uniqueProperty
+                //     )}`
+                //     return withTwNative
+                // }
                 return uniqueProperty
             }
 
@@ -685,10 +684,8 @@ export class TailwindTypeGenerator {
             this.generateKey(className, uniqueKeySet)
 
         if (tailwindKey === null) {
-            const property = this.getPropertyNameTailwindKeyNotFounded(
-                className,
-                false
-            )
+            const property =
+                this.getPropertyNameTailwindKeyNotFounded(className)
 
             return property
         }
@@ -772,7 +769,7 @@ export class TailwindTypeGenerator {
             exactNames.length === 0 && similarNames.length === 0
 
         if (propertyNameNotFounded) {
-            return this.getPropertyNameTailwindKeyNotFounded(className, true)
+            return this.getPropertyNameTailwindKeyNotFounded(className)
         }
 
         if (exactNames.length >= 1) {
