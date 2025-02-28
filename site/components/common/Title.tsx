@@ -54,7 +54,7 @@ const Title = ({
         >
             <div className="flex flex-row gap-0 items-center justify-center">
                 <h1 className={header.class()}>Tailwind</h1>
-                <h1 className={`${gradientHeader.class} gradient`}>est</h1>
+                <h1 className={`${gradientHeader.class()} gradient`}>est</h1>
                 {children}
             </div>
         </button>

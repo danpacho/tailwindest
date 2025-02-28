@@ -36,7 +36,7 @@ const btn = tw.rotary({
     },
     variants: {
         fill: {
-            ...util.goldGradient.style,
+            ...util.goldGradient.style(),
             borderColor: "border-amber-300",
             borderWidth: "border-[0.5px]",
             "@dark": {
