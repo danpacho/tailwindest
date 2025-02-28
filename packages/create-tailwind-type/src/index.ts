@@ -8,7 +8,6 @@ import { existsSync, readFileSync } from "fs"
 import { join, dirname, resolve } from "path"
 import { glob } from "glob"
 import { readFile } from "fs/promises"
-import { createRequire } from "module"
 import { Logger } from "./logger"
 
 async function checkFileForImport(filePath: string): Promise<boolean> {
@@ -115,7 +114,7 @@ program
 program
     .option(
         "-b, --base <path>",
-        "Base directory for Tailwind CSS files (defaults to the installed @tailwindcss package directory)."
+        "Base directory for @tailwindcss/node pkg (defaults to the installed @tailwindcss/node directory)."
     )
     .option(
         "-f, --filename <filename>",
