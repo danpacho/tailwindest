@@ -438,7 +438,7 @@ describe("TailwindCompiler - Internal", () => {
         const compiled = await compiler.compileCss(tokens, { minify: false })
 
         expect(compiled).toMatchInlineSnapshot(`
-          "/*! tailwindcss v4.0.8 | MIT License | https://tailwindcss.com */
+          "/*! tailwindcss v4.0.9 | MIT License | https://tailwindcss.com */
           @layer theme, base, components, utilities;
           @layer theme {
             :root, :host {
