@@ -1,5 +1,11 @@
 # create-tailwind-type
 
+## 1.0.5
+
+### Patch Changes
+
+- Fix resolving error at `@tailwindcss/node`
+
 ## 1.0.4
 
 ### Patch Changes
