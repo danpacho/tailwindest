@@ -48,15 +48,12 @@ const box = tw.style({
     display: "flex",
     alignItems: "items-center",
     justifyContent: "justify-center",
-
-    paddingX: "px-[2.25px]",
-    paddingY: "py-1",
-    ":hover": {
+    padding: ["px-[2.25px]", "py-1"],
+    hover: {
         opacity: "hover:opacity-90",
     },
-    "@sm": {
-        paddingX: "sm:px-[4.5px]",
-        paddingY: "sm:py-2",
+    sm: {
+        padding: ["sm:px-[4.5px]", "sm:py-2"],
     },
 })
 
@@ -65,6 +62,7 @@ const Box = ({ children }) => {
 }
 
 const Box2 = ({ children }) => {
+    // pass arbitrary classnames
     return <div className={box.class("some-classnames")}>{children}</div>
 }
 ```
