@@ -32,15 +32,138 @@ export const tw = createTools<
         tailwind: Tailwind
         tailwindNestGroups: TailwindNestGroups
         groupPrefix: "$" // prefix for nest groups, [optional]
+        useArbitrary: true // use arbitrary values, [optional]
     }>
 >({
     merger: twMerge, // set tailwind-merge as merger, [optional]
 })
 ```
 
+### 4. Use tools
+
+#### Style - `tw.style(stylesheet)`
+
+```tsx
+const box = tw.style({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+
+    paddingX: "px-[2.25px]",
+    paddingY: "py-1",
+    ":hover": {
+        opacity: "hover:opacity-90",
+    },
+    "@sm": {
+        paddingX: "sm:px-[4.5px]",
+        paddingY: "sm:py-2",
+    },
+})
+
+const Box = ({ children }) => {
+    return <div className={box.class()}>{children}</div>
+}
+
+const Box2 = ({ children }) => {
+    return <div className={box.class("some-classnames")}>{children}</div>
+}
+```
+
+#### Toggle - `tw.toggle({ truthy, falsy, base })`
+
+If you want to change the style based on a **single `boolean` condition**, use `toggle`.
+
+```tsx
+const themeBtn = tw.toggle({
+    truthy: {}, // 🌝 light mode
+    falsy: {}, // 🌚 dark mode
+    base: {}, // [optional] base style
+})
+
+const ThemeBtn = ({ children }) => {
+    const [isLight, setIsLight] = useState(false)
+
+    return <button className={themeBtn.class(isLight)}>{children}</button>
+}
+```
+
+#### Rotary - `tw.rotary({ variants, base })`
+
+If you need to change styles based on **three or more conditions within a single category**, use `rotary`.
+
+```tsx
+import { type GetVariants } from "tailwindest"
+
+const btn = tw.rotary({
+    variants: {
+        default: {},
+        success: {},
+        warning: {},
+    },
+
+    base: {}, // [optional] base style
+})
+
+interface BtnProps {
+    onClick: () => void
+    children: ReactNode
+    type?: GetVariants<typeof btn>
+}
+
+const Btn = ({ onClick, children, type = "default" }: BtnProps) => (
+    <button className={btn.class(type)} onClick={onClick}>
+        {children}
+    </button>
+)
+```
+
+#### Variants - `tw.variants({ variants, base })`
+
+```tsx
+const btn = tw.variants({
+    variants: {
+        type: {
+            default: {},
+            success: {},
+            warning: {},
+        },
+        size: {
+            sm: {},
+            md: {},
+            lg: {},
+        },
+        border: {
+            sm: {},
+            md: {},
+            lg: {},
+        },
+    },
+    base: {}, // [optional] base style
+})
+
+interface BtnProps extends GetVariants<typeof btn> {
+    onClick: () => void
+    children: ReactNode
+}
+
+const Btn = ({
+    children,
+    size = "md",
+    border = "md",
+    type = "default",
+    onClick,
+}: BtnProps) => (
+    <button className={btn.class({ size, type, border })} onClick={onClick}>
+        {children}
+    </button>
+)
+```
+
+---
+
 ## Create Tailwind Type
 
-Generate TypeScript definitions for your Tailwind CSS configuration.
+Generate typescript definitions for your tailwind configuration.
 
 <div align="center">
 <img src="./images/create-tailwind-type-banner.png" width="550px" alt="tailwindest banner" />
@@ -51,11 +174,11 @@ npx create-tailwind-type
 ```
 
 > [!IMPORTANT]  
-> **Requires Tailwind CSS v4.0.0 or higher.**
+> **Requires Tailwind CSS `v4.0.0` or higher.**
 
 ### Usage Examples
 
-- Use custom plugins
+- **Use custom plugins**
 
 **Should change base directory to `node_modules/tailwindcss`** for your own project.
 
@@ -63,7 +186,7 @@ npx create-tailwind-type
 npx create-tailwind-type -b node_modules/tailwindcss
 ```
 
-- Generate exact variants
+- **Generate exact variants**
 
 **Will generate exact variants instead of soft variants.** But slowdown typescript language server, if you use it directly. (Importing subtype will be fine.)
 
@@ -71,7 +194,7 @@ npx create-tailwind-type -b node_modules/tailwindcss
 npx create-tailwind-type -S
 ```
 
-- Change output filename
+- **Change output filename**
 
 **Will generate types in `src/types/tailwind.d.ts` file.**
 
