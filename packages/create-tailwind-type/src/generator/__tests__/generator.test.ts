@@ -25,6 +25,7 @@ describe("TypeGenerator", () => {
         useSoftVariants: true,
         useStringKindVariantsOnly: false,
         useOptionalProperty: false,
+        disableVariants: true,
     })
 
     it("should init", async () => {

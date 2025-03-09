@@ -227,6 +227,11 @@ interface TailwindTypeGenerationOptions {
      * @default true
      */
     useOptionalProperty?: boolean
+    /**
+     * Disable variants typing
+     * @default false
+     */
+    disableVariants?: boolean
 }
 
 interface TailwindTypeGeneratorDeps {
@@ -330,6 +335,7 @@ export class TailwindTypeGenerator {
             useSoftVariants: opt.useSoftVariants ?? true,
             useExactVariants: opt.useExactVariants ?? false,
             useStringKindVariantsOnly: opt.useStringKindVariantsOnly ?? false,
+            disableVariants: opt.disableVariants ?? false,
         }
     }
 
@@ -1556,9 +1562,10 @@ export class TailwindTypeGenerator {
             return refTypeMap
         }, new Map<string, t.Type | string>())
 
-        const variantsLiteral = variants
-            ? this.getVariantsLiteral(variants)
-            : null
+        const variantsLiteral =
+            variants && !this.genOptions.disableVariants
+                ? this.getVariantsLiteral(variants)
+                : null
 
         const soleUnion = t.union(
             soleGroups.map((soleClass) => t.literal(soleClass))

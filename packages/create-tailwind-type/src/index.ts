@@ -133,6 +133,7 @@ program
         false
     )
     .option("-o, --optional-property", "Generate optional properties", false)
+    .option("-N, --disable-variants", "Disable variants", false)
     .action(async (opts) => {
         const {
             base,
@@ -142,6 +143,7 @@ program
             softVariants,
             stringKindVariantsOnly,
             optionalProperty,
+            disableVariants,
         } = opts
 
         logger.box(
@@ -191,6 +193,7 @@ program
                 useSoftVariants: softVariants,
                 useStringKindVariantsOnly: stringKindVariantsOnly,
                 useOptionalProperty: optionalProperty,
+                disableVariants: disableVariants,
             })
 
             const fileRoot = `${process.cwd()}/${filename}`
