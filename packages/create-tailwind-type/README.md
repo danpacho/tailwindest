@@ -51,6 +51,7 @@ npx create-tailwind-type -f src/types/tailwind.d.ts
 | `-S`           | `--no-soft-variants`          | Disables soft variant generation (resulting in exact variant generation).                                                                                  | N/A                    | `npx create-tailwind-type --no-soft-variants`                                 |
 | `-k`           | `--string-kind-variants-only` | Limits the generated types to only string kind variants.                                                                                                   | `false`                | `npx create-tailwind-type --string-kind-variants-only`                        |
 | `-o`           | `--optional-property`         | Generates optional properties in the output types, which can be useful for partial configurations.                                                         | `false`                | `npx create-tailwind-type --optional-property`                                |
+| `-N`           | `--disable-variants`          | Disable variant generation and types, can be increase performance.                                                                                         | `false`                | `npx create-tailwind-type --disable-variants`                                 |
 | N/A            | `--version`                   | Displays the current CLI version.                                                                                                                          | N/A                    | `npx create-tailwind-type --version`                                          |
 | N/A            | `--help`                      | Displays help and usage information for the CLI tool.                                                                                                      | N/A                    | `npx create-tailwind-type --help`                                             |
 
@@ -147,6 +148,17 @@ Instructs the CLI to generate optional properties within the TypeScript definiti
     ```bash
     npx create-tailwind-type --optional-property
     npx create-tailwind-type -o
+    ```
+
+### `-N, --disable-variants`
+
+Instructs the CLI to disable variant generation.
+
+- **Default:** `false`
+- **Example:**
+    ```bash
+    npx create-tailwind-type --disable-variants
+    npx create-tailwind-type -N
     ```
 
 ---
