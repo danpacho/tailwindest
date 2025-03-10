@@ -10,9 +10,15 @@
 
 ### 1. Create tailwind types
 
+> [!NOTE]
+>
+> `create-tailwind-type` will generate type definitions for your tailwind configuration.
+
 ```bash
-npx create-tailwind-type -A # disable arbitrary values
+npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
 ```
+
+This command will generate `tailwind.ts` file in the root directory.
 
 ### 2. Install package
 
@@ -27,14 +33,14 @@ import { createTools, type CreateTailwindest } from "tailwindest"
 import type { Tailwind, TailwindNestGroups } from "./tailwind"
 import { twMerge } from "tailwind-merge"
 
-export const tw = createTools<
-    CreateTailwindest<{
-        tailwind: Tailwind
-        tailwindNestGroups: TailwindNestGroups
-        groupPrefix: "$" // prefix for nest groups, [optional]
-        useArbitrary: true // use arbitrary values, [optional]
-    }>
->({
+type Tailwindest = CreateTailwindest<{
+    tailwind: Tailwind
+    tailwindNestGroups: TailwindNestGroups
+    groupPrefix: "$" // prefix for nest groups, [optional]
+    useArbitrary: true // use arbitrary values, [optional]
+}>
+
+export const tw = createTools<Tailwindest>({
     merger: twMerge, // set tailwind-merge as merger, [optional]
 })
 ```
@@ -49,10 +55,10 @@ const box = tw.style({
     alignItems: "items-center",
     justifyContent: "justify-center",
     padding: ["px-[2.25px]", "py-1"],
-    hover: {
+    $hover: {
         opacity: "hover:opacity-90",
     },
-    sm: {
+    $sm: {
         padding: ["sm:px-[4.5px]", "sm:py-2"],
     },
 })
@@ -73,8 +79,8 @@ If you want to change the style based on a **single `boolean` condition**, use `
 
 ```tsx
 const themeBtn = tw.toggle({
-    truthy: {}, // 🌝 light mode
-    falsy: {}, // 🌚 dark mode
+    truthy: {}, // › light mode
+    falsy: {}, // › dark mode
     base: {}, // [optional] base style
 })
 
@@ -94,9 +100,9 @@ import { type GetVariants } from "tailwindest"
 
 const btn = tw.rotary({
     variants: {
-        default: {},
-        success: {},
-        warning: {},
+        success: {}, // › success
+        warning: {}, // › warning
+        error: {}, // › error
     },
 
     base: {}, // [optional] base style
@@ -121,19 +127,19 @@ const Btn = ({ onClick, children, type = "default" }: BtnProps) => (
 const btn = tw.variants({
     variants: {
         type: {
-            default: {},
-            success: {},
-            warning: {},
+            default: {}, // › type.default
+            success: {}, // › type.success
+            warning: {}, // › type.warning
         },
         size: {
-            sm: {},
-            md: {},
-            lg: {},
+            sm: {}, // › size.sm
+            md: {}, // › size.md
+            lg: {}, // › size.lg
         },
         border: {
-            sm: {},
-            md: {},
-            lg: {},
+            sm: {}, // › border.sm
+            md: {}, // › border.md
+            lg: {}, // › border.lg
         },
     },
     base: {}, // [optional] base style
@@ -201,6 +207,10 @@ npx create-tailwind-type -f src/types/tailwind.d.ts
 ```
 
 ### CLI Options
+
+> [!NOTE]
+>
+> Check out for more details about the CLI options in [this documentation](./packages/create-tailwind-type/README.md).
 
 | Option (Short) | Option (Long)                 | Description                                                                                                                                                | Default Value          |
 | -------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
