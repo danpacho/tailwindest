@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.0.2
+
+### Patch Changes
+
+- Fix nullable errors
+
 ## 3.0.1
 
 ### Patch Changes
