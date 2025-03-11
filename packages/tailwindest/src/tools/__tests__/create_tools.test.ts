@@ -3,6 +3,7 @@ import { PrimitiveStyler } from "../primitive"
 import { RotaryStyler } from "../rotary"
 import { VariantsStyler } from "../variants"
 import { createTools } from "../create_tools"
+import { ToggleStyler } from "../toggle"
 
 describe("PrimitiveStyler", () => {
     type TestStyle = { color: string; fontSize?: string }
@@ -159,6 +160,91 @@ describe("RotaryStyler", () => {
             })
             expect(newStyler.style("primary")).toEqual({
                 color: "blue",
+                fontSize: "12",
+            })
+        })
+    })
+})
+
+describe("ToggleStyler", () => {
+    type TestStyle = { color: string; fontSize?: string }
+    type VariantKey = "truthy" | "falsy" | "base"
+    describe("constructor", () => {
+        it("initializes with variants and base", () => {
+            const toggle: Record<VariantKey, TestStyle> = {
+                base: { color: "base" },
+                truthy: { color: "blue" },
+                falsy: { color: "green" },
+            }
+            const styler = new ToggleStyler<TestStyle>(toggle)
+            expect(styler).toBeInstanceOf(ToggleStyler)
+        })
+    })
+
+    describe("class method", () => {
+        it("returns class name for variant", () => {
+            const toggle: Record<VariantKey, TestStyle> = {
+                base: { color: "base" },
+                truthy: { color: "blue" },
+                falsy: { color: "green" },
+            }
+            const styler = new ToggleStyler<TestStyle>(toggle)
+            expect(styler.class(true)).toBe("blue")
+        })
+
+        it("concatenates with extra class name", () => {
+            const toggle: Record<VariantKey, TestStyle> = {
+                base: { color: "base" },
+                truthy: { color: "blue" },
+                falsy: { color: "green" },
+            }
+            const styler = new ToggleStyler<TestStyle>(toggle)
+            expect(styler.class(true, "extra")).toBe("blue extra")
+        })
+    })
+
+    describe("style method", () => {
+        it("returns style for true", () => {
+            const toggle: Record<VariantKey, TestStyle> = {
+                base: { color: "base" },
+                truthy: { color: "blue" },
+                falsy: { color: "green" },
+            }
+            const styler = new ToggleStyler<TestStyle>(toggle)
+            expect(styler.style(true)).toEqual({ color: "blue" })
+        })
+
+        it("merges with extra style", () => {
+            const toggle: Record<VariantKey, TestStyle> = {
+                base: { color: "base" },
+                truthy: { color: "blue" },
+                falsy: { color: "green" },
+            }
+            const styler = new ToggleStyler<TestStyle>(toggle)
+            expect(
+                styler.style(true, { fontSize: "16", color: "green" })
+            ).toEqual({
+                color: "green",
+                fontSize: "16",
+            })
+        })
+    })
+
+    describe("compose method", () => {
+        it("creates new styler with composed base", () => {
+            const toggle: Record<VariantKey, TestStyle> = {
+                base: { color: "base" },
+                truthy: { color: "blue" },
+                falsy: { color: "green" },
+            }
+            const styler = new ToggleStyler<TestStyle>(toggle)
+            const newStyler = styler.compose({ fontSize: "12", color: "gray" })
+            expect(newStyler.style(true)).toEqual({
+                color: "blue",
+                fontSize: "12",
+            })
+            expect(newStyler.style(false)).toEqual({
+                color: "green",
                 fontSize: "12",
             })
         })
@@ -398,17 +484,16 @@ describe("createTools", () => {
 
         it("should join style values", () => {
             const tools = createTools<{}>()
-            expect(
-                tools.join(
-                    "bg-red-100",
-                    "p-2",
-                    "m-2",
-                    { cls: true },
-                    { cls2: false },
-                    { cls3: true },
-                    ["arr1", "arr2", { cls4: true }]
-                )
-            ).toBe("bg-red-100 p-2 m-2 cls cls3 arr1 arr2 cls4")
+            const join1 = tools.join(
+                "bg-red-100",
+                "p-2",
+                "m-2",
+                { cls: true },
+                { cls2: false },
+                { cls3: true },
+                ["arr1", "arr2", { cls4: true }]
+            )
+            expect(join1).toBe("bg-red-100 p-2 m-2 cls cls3 arr1 arr2 cls4")
         })
     })
 })
