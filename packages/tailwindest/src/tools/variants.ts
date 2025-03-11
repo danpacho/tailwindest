@@ -57,7 +57,8 @@ export class VariantsStyler<
 
         for (const [variantKey, subVariant] of Object.entries(variant)) {
             if (subVariant) {
-                const subStyler = this._variantStylerMap[variantKey]!
+                const subStyler = this._variantStylerMap?.[variantKey]
+                if (!subStyler) continue
                 const subStyle = subStyler.style(subVariant)
                 merged = Styler.deepMerge(merged, subStyle)
             }
