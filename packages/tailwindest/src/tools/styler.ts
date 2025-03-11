@@ -58,6 +58,8 @@ export abstract class Styler<Args, Out> {
     ): MergeTargetObject {
         return nestedRecordList.reduce<NestedRecord>(
             (mergedObject, currentObject) => {
+                if (!currentObject) return mergedObject
+
                 for (const [key, value] of Object.entries(
                     currentObject as NestedRecord
                 )) {
