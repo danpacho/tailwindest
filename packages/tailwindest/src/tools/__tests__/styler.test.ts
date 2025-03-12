@@ -73,14 +73,19 @@ describe("Styler", () => {
             expect(result).toEqual({ a: { b: "1", c: "2" } })
         })
 
-        it("concatenates arrays", () => {
+        it("overrides arrays", () => {
             const result = Styler.deepMerge({ a: ["1"] }, { a: ["2"] })
-            expect(result).toEqual({ a: ["1", "2"] })
+            expect(result).toEqual({ a: ["2"] })
         })
 
-        it("handles mixed array and non-array", () => {
+        it("override mixed array and non-array", () => {
             const result = Styler.deepMerge({ a: "1" }, { a: ["2"] })
-            expect(result).toEqual({ a: ["1", "2"] })
+            expect(result).toEqual({ a: ["2"] })
+        })
+
+        it("override mixed non-array and array", () => {
+            const result = Styler.deepMerge({ a: ["1"] }, { a: "2" })
+            expect(result).toEqual({ a: "2" })
         })
 
         it("overrides non-object values", () => {
