@@ -47,6 +47,50 @@ export const tw = createTools<Tailwindest>({
 
 ### 4. Use tools
 
+#### Def - `tw.def(classList, ...styleList)`
+
+```tsx
+const condition: boolean = true
+
+const container = tw.def(
+    // 🚀 Powered by clsx
+    [
+        // ✅ Statically typed literals
+        "flex",
+        "size-fit",
+        "flex-col",
+        "items-center",
+        "justify-center",
+        "gap-y-12",
+
+        // ✅ Arbitrary strings
+        "md:flex-row md:gap-x-7",
+        "lg:gap-x-24",
+
+        // ✅ Conditional styling
+        condition ? "p-3" : "p-1",
+
+        // ✅ Array-based styling
+        ["dark:text-white", "text-black"],
+    ],
+
+    // 🚀 Default merging behavior
+    {
+        // ✅ Record-based styling
+        backgroundColor: "bg-white",
+        dark: {
+            backgroundColor: "dark:bg-black",
+        },
+    },
+    {
+        // ✅ Support for infinite record styling
+        // Additional styles here...
+    }
+)
+
+const Box = ({ children }) => <div className={container}>{children}</div>
+```
+
 #### Style - `tw.style(stylesheet)`
 
 ```tsx

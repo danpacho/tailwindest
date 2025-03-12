@@ -70,9 +70,30 @@ interface TailwindestConfig {
      */
     groupPrefix?: string
     /**
-     * Option to enable arbitrary strings
-     *
-     * If enabled, all `${string}` can be used as valid style property
+     * Enables arbitrary strings as valid style properties if `true`.
+     */
+    useArbitrary?: true | false
+}
+
+export interface TailwindestInterface {
+    /**
+     * Tailwind
+     */
+    tailwind?: any
+    /**
+     * Tailwind Literal
+     */
+    tailwindLiteral?: any
+    /**
+     * Tailwind Nest Groups
+     */
+    tailwindNestGroup?: any
+    /**
+     * Tailwindest impl
+     */
+    tailwindest: any
+    /**
+     * Enables arbitrary strings as valid style properties if `true`.
      */
     useArbitrary?: true | false
 }
@@ -80,21 +101,54 @@ interface TailwindestConfig {
 /**
  * Creates a `tailwindest` typeset.
  *
- * @description Run `npx create-tailwind-type` to generate tailwind type defs. (supported after v4).
+ * @description Run `npx create-tailwind-type` to generate tailwind type defs.
+ * ```bash
+ * npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
+ * ```
  * @see {@link https://github.com/danpacho/tailwindest#create-tailwind-type create-tailwind-type}
  *
- * @augments {any} tailwind - Tailwind type.
- * @augments {string} tailwindNestGroups - Tailwind nest group literal type.
- * @augments {string} groupPrefix - Prefix for nest groups. Defaults to an empty string.
- * @augments {boolean} useArbitrary - Enables arbitrary strings as valid style properties if true.
+ * @example
+ * ```ts
+ * // 1. import generated types
+ * import type { Tailwind, TailwindNestGroups } from "~/tailwind.ts"
+ *
+ * // 2. create type
+ * export type Tailwindest = CreateTailwindest<{
+ *      tailwind: Tailwind
+ *      tailwindNestGroups: TailwindNestGroups
+ *      useArbitrary: true
+ *      groupPrefix: "#"
+ * }>
+ * ```
  */
-export type CreateTailwindest<Config extends TailwindestConfig> = GetNestStyle<
-    Config["groupPrefix"] extends string
-        ? `${Config["groupPrefix"]}${Config["tailwindNestGroups"]}`
-        : Config["tailwindNestGroups"],
-    Config["tailwind"],
-    Config["groupPrefix"] extends string
-        ? Config["groupPrefix"] | TAILWIND_IDENTIFIER
-        : TAILWIND_IDENTIFIER,
-    Config["useArbitrary"] extends boolean ? Config["useArbitrary"] : false
->
+export type CreateTailwindest<Config extends TailwindestConfig> = {
+    /**
+     * Tailwind
+     */
+    tailwind: Config["tailwind"]
+    /**
+     * Tailwind Literal
+     */
+    tailwindLiteral: Config["tailwind"][keyof Config["tailwind"]]
+    /**
+     * Tailwind Nest Groups
+     */
+    tailwindNestGroup: Config["tailwindNestGroups"]
+    /**
+     * Tailwindest impl
+     */
+    tailwindest: GetNestStyle<
+        Config["groupPrefix"] extends string
+            ? `${Config["groupPrefix"]}${Config["tailwindNestGroups"]}`
+            : Config["tailwindNestGroups"],
+        Config["tailwind"],
+        Config["groupPrefix"] extends string
+            ? Config["groupPrefix"] | TAILWIND_IDENTIFIER
+            : TAILWIND_IDENTIFIER,
+        Config["useArbitrary"] extends boolean ? Config["useArbitrary"] : false
+    >
+    /**
+     * Enables arbitrary strings as valid style properties if `true`.
+     */
+    useArbitrary: Config["useArbitrary"]
+}

@@ -2,7 +2,7 @@ import { describe, test } from "vitest"
 import { type TypeEqual, expectType } from "ts-expect"
 import { type GetVariants, createTools } from "../"
 
-const tw = createTools<{}>()
+const tw = createTools()
 
 const sizeRotary = tw.rotary({
     variants: {

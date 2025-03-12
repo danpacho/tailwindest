@@ -457,9 +457,12 @@ describe("createTools", () => {
                     },
                     {
                         color: "text-red-100",
+                    },
+                    {
+                        color: "text-blue-100",
                     }
                 )
-            ).toBe("text-red-100 font-bold text-base")
+            ).toBe("text-blue-100 font-bold text-base")
         })
 
         it("should mergeRecord", () => {
@@ -473,17 +476,20 @@ describe("createTools", () => {
                     },
                     {
                         color: "text-red-100",
+                    },
+                    {
+                        color: "text-blue-100",
                     }
                 )
             ).toEqual({
-                color: "text-red-100",
+                color: "text-blue-100",
                 fontWeight: "font-bold",
                 fontSize: "text-base",
             })
         })
 
         it("should join style values", () => {
-            const tools = createTools<{}>()
+            const tools = createTools()
             const join1 = tools.join(
                 "bg-red-100",
                 "p-2",
@@ -494,6 +500,66 @@ describe("createTools", () => {
                 ["arr1", "arr2", { cls4: true }]
             )
             expect(join1).toBe("bg-red-100 p-2 m-2 cls cls3 arr1 arr2 cls4")
+        })
+
+        it("should def styles", () => {
+            const tools = createTools()
+            const truthy = true
+            const def = tools.def(
+                [
+                    "bg-red-100",
+                    "p-2",
+                    "m-2",
+                    { cls: truthy },
+                    { cls2: false },
+                    { cls3: true },
+                    ["arr1", "arr2", { cls4: true }],
+                ],
+                {
+                    backgroundColor: "bg-red-100",
+                    padding: ["px-2"],
+                },
+                {
+                    backgroundColor: "bg-blue-100",
+                    padding: "p-2",
+                },
+                {
+                    hover: {
+                        backgroundColor: "hover:bg-blue-100",
+                    },
+                },
+                {
+                    "*": {
+                        "2xl": {
+                            "3xl": {
+                                "4xl": {
+                                    "@2xl": {
+                                        padding: ["**:*:2xl:3xl:4xl:@2xl:px-0"],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    "*": {
+                        "2xl": {
+                            "3xl": {
+                                "4xl": {
+                                    "@2xl": {
+                                        padding: [
+                                            "**:*:2xl:3xl:4xl:@2xl:px-1000",
+                                        ],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }
+            )
+            expect(def).toBe(
+                "bg-red-100 p-2 m-2 cls cls3 arr1 arr2 cls4 bg-blue-100 p-2 hover:bg-blue-100 **:*:2xl:3xl:4xl:@2xl:px-1000"
+            )
         })
     })
 })

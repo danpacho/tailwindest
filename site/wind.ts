@@ -7,7 +7,9 @@ export type TailwindCustom = Tailwindest<
     }
 >
 
-const tw = createTools<TailwindCustom>()
+const tw = createTools<{
+    tailwindest: TailwindCustom
+}>()
 
 type Tailwind = Required<TailwindCustom>
 

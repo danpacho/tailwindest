@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.1.0
+
+### Minor Changes
+
+- Add `def` function for flexible styling and update merging behavior(remove array concatenation process)
+
 ## 3.0.2
 
 ### Patch Changes
