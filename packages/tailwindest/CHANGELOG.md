@@ -6,6 +6,12 @@
 
 - Add `def` function for flexible styling and update merging behavior(remove array concatenation process)
 
+## 3.0.2
+
+### Patch Changes
+
+- Fix nullable errors
+
 ## 3.0.1
 
 ### Patch Changes
