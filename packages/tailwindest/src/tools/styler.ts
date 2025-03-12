@@ -67,14 +67,8 @@ export abstract class Styler<Args, Out> {
                         mergedObject[key] = value
                     } else {
                         const existing = mergedObject[key]
-                        if (Array.isArray(existing) || Array.isArray(value)) {
-                            const existingArray = Array.isArray(existing)
-                                ? existing
-                                : [existing]
-                            const valueArray = Array.isArray(value)
-                                ? value
-                                : [value]
-                            mergedObject[key] = existingArray.concat(valueArray)
+                        if (Array.isArray(value)) {
+                            mergedObject[key] = value
                         } else if (
                             typeof existing === "object" &&
                             existing !== null &&
