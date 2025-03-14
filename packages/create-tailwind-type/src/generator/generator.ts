@@ -31,7 +31,7 @@ async function writeIfNotExists(
     try {
         await writeFile(filePath, content, {
             encoding: "utf-8",
-            flag: "wx", // "wx" flag: write only if the file doesn't exist
+            flag: "w", // "w" flag: write and overwrite if the file exists
         })
     } catch (err) {
         const error = err as NodeJS.ErrnoException
