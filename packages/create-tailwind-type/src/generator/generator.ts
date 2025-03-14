@@ -644,14 +644,47 @@ export class TailwindTypeGenerator {
 
     private exceptionalRules = new Map<
         string | RegExp,
-        { property: string | Array<string>; tester?: RegExp }
+        {
+            property: string | Array<string>
+            tester?: Array<RegExp | ((text: string) => boolean)>
+        }
     >([
         ["bg-conic", { property: "backgroundImage" }],
         [
             "size",
             {
                 property: ["width", "height"],
-                tester: generateValidator("size-${string}")!,
+                tester: [generateValidator("size-${string}")!],
+            },
+        ],
+        [
+            "font",
+            {
+                property: "fontFamily",
+                tester: [
+                    (className) => {
+                        const fallbackPropertyName =
+                            this.getPropertyNameTailwindKeyNotFounded(className)
+
+                        const possible = fallbackPropertyName === "fontFamily"
+                        return possible
+                    },
+                ],
+            },
+        ],
+        [
+            "transform",
+            {
+                property: "transformBox",
+                tester: [
+                    (className) => {
+                        const fallbackPropertyName =
+                            this.getPropertyNameTailwindKeyNotFounded(className)
+
+                        const possible = fallbackPropertyName === "transformBox"
+                        return possible
+                    },
+                ],
             },
         ],
     ])
@@ -662,7 +695,8 @@ export class TailwindTypeGenerator {
         colorVarSet: Set<string>
     ): string | Array<string> | null {
         // Exceptional case
-        const exceptionRuleToken = className.split("-")[0] ?? className
+        const sanitized = sanitizeTwClass(className)
+        const exceptionRuleToken = sanitized.split("-")[0] ?? sanitized
         if (
             this.exceptionalRules.has(exceptionRuleToken) ||
             this.exceptionalRules.has(className)
@@ -670,13 +704,21 @@ export class TailwindTypeGenerator {
             const { property, tester } =
                 this.exceptionalRules.get(exceptionRuleToken) ??
                 this.exceptionalRules.get(className)!
+
             if (tester) {
-                const testResult = tester.test(className)
+                const testResult = tester.some((e) => {
+                    if (e instanceof RegExp) {
+                        return e.test(className)
+                    } else {
+                        return e(className)
+                    }
+                })
                 if (testResult) {
                     return property
                 }
+            } else {
+                return property
             }
-            return property
         }
 
         const CSS = this.ds.candidatesToCss([className])[0]
@@ -783,6 +825,11 @@ export class TailwindTypeGenerator {
         }
 
         if (similarNames.length === 1) {
+            const fallbackByCSS =
+                this.getPropertyNameTailwindKeyNotFounded(className)
+            if (fallbackByCSS === similarNames[0]) {
+                return fallbackByCSS
+            }
             return similarNames[0]!
         }
 
