@@ -1,5 +1,5 @@
 import { describe, it } from "vitest"
-import { getTailwindLCP } from "./lcp_class"
+import { getTailwindLCP } from "./lcp_class.mjs"
 import { expect } from "vitest"
 describe("LCP for tw classes", () => {
     it("Should extract LCP for tailwindcss", () => {
