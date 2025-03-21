@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.1.1
+
+### Patch Changes
+
+- Fix merge interface type compatibility issue, update join/def function merging process
+
 ## 3.1.0
 
 ### Minor Changes
