@@ -62,13 +62,8 @@ export const createTools = <Type extends TailwindestInterface>({
         : TailwindLiteral
     type StyleType = Type["tailwindest"]
 
-    const join = (...classList: ClassList<ClassLiteral>): string => {
-        const res = toClass(classList)
-        if (merger) {
-            return merger(res)
-        }
-        return res
-    }
+    const join = (...classList: ClassList<ClassLiteral>): string =>
+        merger ? toClass(merger(...classList)) : toClass(classList)
 
     const style = (stylesheet: StyleType): PrimitiveStyler<StyleType> => {
         const styler = new PrimitiveStyler<StyleType>(stylesheet)
@@ -129,13 +124,7 @@ export const createTools = <Type extends TailwindestInterface>({
     const def = (
         classList: ClassList<ClassLiteral>,
         ...styleList: Array<StyleType>
-    ): string => {
-        const res = toDef(classList, styleList, mergeProps, join)
-        if (merger) {
-            return merger(res)
-        }
-        return res
-    }
+    ): string => toDef<StyleType>(classList, styleList, mergeProps, join)
 
     return {
         /**
@@ -163,6 +152,10 @@ export const createTools = <Type extends TailwindestInterface>({
          * Join all the possible combinations into string
          * @param classList all the possible sheet format
          * @see {@link https://github.com/lukeed/clsx#readme clsx}
+         * @example
+         * ```ts
+         * const box = tw.join(...values)
+         * ```
          */
         join,
         /**
