@@ -11,6 +11,11 @@ type ClassValue<Literal extends string = string> =
     | boolean
     | undefined
 type ClassDictionary = Record<string, any>
+
+/**
+ * @interface
+ * Default supported class list
+ */
 export type ClassList<Literal extends string = string> = ClassValue<Literal>[]
 
 export function toClass<Literal extends string = string>(
