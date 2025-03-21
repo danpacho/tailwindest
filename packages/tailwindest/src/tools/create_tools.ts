@@ -166,19 +166,20 @@ export const createTools = <Type extends TailwindestInterface>({
          */
         join,
         /**
-         * Create `rotary` styler
+         * Create primitive style
          * @example
          * ```tsx
-         * const btn = tw.rotary({
-         *      variants: {
-         *          default: {},
-         *          success: {},
-         *          warning: {},
+         * const box = tw.style({
+         *      display: "flex",
+         *      alignItems: "items-center",
+         *      padding: ["px-2", "py-[2.25px]"],
+         *      hover: {
+         *          opacity: "hover:opacity-90"
          *      },
-         *      base: {},   // [optional] base style
+         *      sm: {
+         *          padding: ["px-1", "py-[1.25px]"],
+         *      }
          * })
-         *
-         * const warningBtn = btn.class("warning")
          * ```
          */
         style,
