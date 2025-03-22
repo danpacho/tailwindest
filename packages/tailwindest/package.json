@@ -1,6 +1,6 @@
 {
     "name": "tailwindest",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "description": "typesafe, reusable tailwind",
     "homepage": "https://tailwindest.vercel.app",
     "author": "danpacho",
@@ -27,5 +27,8 @@
     },
     "dependencies": {
         "clsx": "^2.1.1"
+    },
+    "devDependencies": {
+        "tailwind-merge": "latest"
     }
 }

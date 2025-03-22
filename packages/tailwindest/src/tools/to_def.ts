@@ -1,12 +1,12 @@
 import type { ClassList } from "./to_class"
 
-export function toDef<StyleType, Literal extends string = string>(
-    classList: ClassList<Literal>,
+export function toDef<StyleType>(
+    classList: ClassList<string>,
     styleList: Array<StyleType>,
     styleMerger: (...styles: Array<StyleType>) => string,
-    join: (...classList: ClassList<Literal>) => string
+    join: (...classList: ClassList<string>) => string
 ): string {
     const classLiteral = join(...classList)
     const styleLiteral = styleMerger(...styleList)
-    return join([classLiteral, styleLiteral])
+    return join(classLiteral, styleLiteral)
 }

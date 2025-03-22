@@ -11,7 +11,7 @@
         "url": "https://github.com/danpacho/tailwindest"
     },
     "type": "module",
-    "packageManager": "pnpm@10.4.1",
+    "packageManager": "pnpm@10.6.5",
     "scripts": {
         "dev": "turbo run dev",
         "build": "turbo run build",
@@ -31,7 +31,7 @@
         "eslint": "eslint packages/**/**/*.ts",
         "eslint:fix": "eslint packages/**/**/*.ts --fix",
         "pkg:init": "pnpm test:ci && changeset",
-        "pkg:version": "changeset version",
+        "pkg:version": "pnpm build && changeset version",
         "pkg:publish": "changeset publish",
         "pre-commit": "lint-staged",
         "prepare": "husky install"
