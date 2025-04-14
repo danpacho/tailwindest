@@ -1,5 +1,11 @@
 # create-tailwind-type
 
+## 1.0.9
+
+### Patch Changes
+
+- Support filter color-variant
+
 ## 1.0.8
 
 ### Patch Changes
