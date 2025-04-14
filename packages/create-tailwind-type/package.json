@@ -1,6 +1,6 @@
 {
     "name": "create-tailwind-type",
-    "version": "1.0.7",
+    "version": "1.0.9",
     "description": "Type generator for tailwindcss",
     "type": "module",
     "sideEffects": false,
@@ -30,7 +30,7 @@
     "author": "danpacho",
     "license": "MIT",
     "dependencies": {
-        "@tailwindcss/node": "^4.0.9",
+        "@tailwindcss/node": "^4.1.3",
         "boxen": "^8.0.1",
         "chalk": "^5.4.1",
         "commander": "^13.1.0",
@@ -39,7 +39,7 @@
         "postcss": "^8.5.3",
         "prettier": "^3.5.2",
         "prettier-plugin-jsdoc": "^1.3.2",
-        "tailwindcss": "^4.0.9"
+        "tailwindcss": "^4.1.3"
     },
     "devDependencies": {
         "@types/jsdom": "^21.1.7",
