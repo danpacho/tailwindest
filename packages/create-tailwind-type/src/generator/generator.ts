@@ -687,6 +687,13 @@ export class TailwindTypeGenerator {
                 ],
             },
         ],
+        [
+            "drop",
+            {
+                property: "filter",
+                tester: [generateValidator("drop-shadow-${string}")!],
+            },
+        ],
     ])
 
     private getPropertyName(
