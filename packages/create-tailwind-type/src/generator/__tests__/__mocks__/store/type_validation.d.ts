@@ -49,7 +49,7 @@ const b: Tailwind = {
     end: "-end-0",
     fieldSizing: "field-sizing-content",
     fill: "fill-amber-100",
-    filter: "blur-2xl",
+    filter: "drop-shadow-amber-400",
     flex: "flex-auto",
     flexBasis: "basis-0",
     flexDirection: "flex-col",
