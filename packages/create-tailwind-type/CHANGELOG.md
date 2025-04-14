@@ -1,5 +1,11 @@
 # create-tailwind-type
 
+## 1.0.8
+
+### Patch Changes
+
+- Support tailwindcss `v4.1.x`
+
 ## 1.0.7
 
 ### Patch Changes
