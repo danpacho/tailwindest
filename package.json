@@ -11,7 +11,7 @@
         "url": "https://github.com/danpacho/tailwindest"
     },
     "type": "module",
-    "packageManager": "pnpm@10.6.5",
+    "packageManager": "pnpm@10.8.1",
     "scripts": {
         "dev": "turbo run dev",
         "build": "turbo run build",
