@@ -1,4 +1,7 @@
+import { Tailwind } from "../dist/tailwind"
+
 const b: Tailwind = {
+    // v4.0.x
     backgroundBlendMode: "bg-blend-color",
     padding: "p-0",
     appearance: "appearance-auto",
@@ -152,4 +155,17 @@ const b: Tailwind = {
     willChange: "will-change-auto",
     wordBreak: "break-all",
     zIndex: "z-auto",
+
+    // v4.1.x
+    maskClip: "mask-clip-border",
+    maskComposite: "mask-add",
+    maskImage: "-mask-b-from-0",
+    maskMode: "mask-alpha",
+    maskOrigin: "mask-origin-border",
+    maskPosition: "mask-bottom",
+    maskRepeat: "mask-no-repeat",
+    maskSize: "mask-auto",
+    maskType: "mask-type-alpha",
+    overflowWrap: "break-words",
+    textShadow: "text-shadow-2xs",
 }
