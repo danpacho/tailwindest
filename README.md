@@ -29,18 +29,28 @@ npm i tailwindest@latest
 ### 3. Create tools
 
 ```ts
-import { createTools, type CreateTailwindest } from "tailwindest"
+import {
+    createTools,
+    type CreateTailwindest,
+    type CreateTailwindLiteral,
+} from "tailwindest"
+
 import type { Tailwind, TailwindNestGroups } from "./tailwind"
 import { twMerge } from "tailwind-merge"
 
-type Tailwindest = CreateTailwindest<{
+export type Tailwindest = CreateTailwindest<{
     tailwind: Tailwind
     tailwindNestGroups: TailwindNestGroups
     groupPrefix: "$" // prefix for nest groups, [optional]
-    useArbitrary: true // use arbitrary values, [optional]
+    useArbitrary: true // enable arbitrary values, [optional]
 }>
+export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
 
-export const tw = createTools<Tailwindest>({
+export const tw = createTools<{
+    tailwindest: Tailwindest
+    tailwindLiteral: TailwindLiteral
+    useArbitrary: true // enable arbitrary values, [optional]
+}>({
     merger: twMerge, // set tailwind-merge as merger, [optional]
 })
 ```
