@@ -47,8 +47,14 @@ interface ToolOptions {
  *      groupPrefix: "#"
  * }>
  *
+ * export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
+ *
  * // 3. create tools
- * export const tw = createTools<Tailwindest>({
+ * export const tw = createTools<{
+ *      tailwindest: Tailwindest
+ *      tailwindLiteral: TailwindLiteral
+ *      useArbitrary: true  // enable arbitrary strings
+ * >({
  *      merger: twMerge // set tailwind-merge as merger, [optional]
  * })
  * ```
@@ -56,56 +62,29 @@ interface ToolOptions {
 export const createTools = <Type extends TailwindestInterface>({
     merger,
 }: ToolOptions = {}) => {
-    type TailwindLiteral = Type["tailwindLiteral"]
-    type ClassLiteral = Type["useArbitrary"] extends true
-        ? TailwindLiteral | (string & {})
-        : TailwindLiteral
     type StyleType = Type["tailwindest"]
+    type ClassLiteral = Type["useArbitrary"] extends true
+        ? Type["tailwindLiteral"] | (`${string}` & {})
+        : Type["tailwindLiteral"]
 
-    const join = (...classList: ClassList<ClassLiteral>): string =>
-        merger ? toClass(merger(...classList)) : toClass(classList)
+    const style = (stylesheet: StyleType) =>
+        new PrimitiveStyler<StyleType>(stylesheet).setMerger(merger)
 
-    const style = (stylesheet: StyleType): PrimitiveStyler<StyleType> => {
-        const styler = new PrimitiveStyler<StyleType>(stylesheet)
-        if (merger) {
-            styler.setMerger(merger)
-        }
-        return styler
-    }
-
-    const toggle = (
-        toggleVariants: ToggleVariants<StyleType>
-    ): ToggleStyler<StyleType> => {
-        const styler = new ToggleStyler<StyleType>(toggleVariants)
-        if (merger) {
-            styler.setMerger(merger)
-        }
-        return styler
-    }
+    const toggle = (toggleVariants: ToggleVariants<StyleType>) =>
+        new ToggleStyler<StyleType>(toggleVariants).setMerger(merger)
 
     const rotary = <VRecord extends Record<string, StyleType>>(params: {
         base?: StyleType
         variants: VRecord
-    }): RotaryStyler<StyleType, Stringify<keyof VRecord>> => {
-        const styler = new RotaryStyler<StyleType, Stringify<keyof VRecord>>(
-            params
+    }) =>
+        new RotaryStyler<StyleType, Stringify<keyof VRecord>>(params).setMerger(
+            merger
         )
-        if (merger) {
-            styler.setMerger(merger)
-        }
-        return styler
-    }
 
     const variants = <VMap extends VariantsRecord<StyleType>>(params: {
         base?: StyleType
         variants: VMap
-    }): VariantsStyler<StyleType, VMap> => {
-        const styler = new VariantsStyler<StyleType, VMap>(params)
-        if (merger) {
-            styler.setMerger(merger)
-        }
-        return styler
-    }
+    }) => new VariantsStyler<StyleType, VMap>(params).setMerger(merger)
 
     const mergeRecord = (...overrideRecord: Array<StyleType>): StyleType =>
         overrideRecord.reduce<StyleType>(
@@ -120,6 +99,9 @@ export const createTools = <Type extends TailwindestInterface>({
         }
         return res
     }
+
+    const join = (...classList: ClassList<ClassLiteral>): string =>
+        merger ? toClass(merger(...classList)) : toClass(classList)
 
     const def = (
         classList: ClassList<ClassLiteral>,
