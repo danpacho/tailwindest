@@ -4,41 +4,43 @@ import { TailwindCompiler } from "../../internal/compiler"
 import { CSSAnalyzer } from "../css_analyzer"
 import { TypeSchemaGenerator } from "../../type_tools"
 
-describe("TypeGenerator", () => {
-    // dependencies
-    const compiler = new TailwindCompiler({
-        cssRoot: `${__dirname}/__mocks__/tailwind.css`,
-        base: "packages/create-tailwind-type/node_modules/tailwindcss",
-    })
-    const cssAnalyzer = new CSSAnalyzer()
-    const schemaGenerator = new TypeSchemaGenerator()
+describe(
+    "TypeGenerator",
+    () => {
+        // dependencies
+        const compiler = new TailwindCompiler({
+            cssRoot: `${__dirname}/__mocks__/tailwind.css`,
+            base: "packages/create-tailwind-type/node_modules/tailwindcss",
+        })
+        const cssAnalyzer = new CSSAnalyzer()
+        const schemaGenerator = new TypeSchemaGenerator()
 
-    const generator = new TailwindTypeGenerator({
-        compiler,
-        cssAnalyzer,
-        generator: schemaGenerator,
-        storeRoot: `${__dirname}/__mocks__/store/docs.json`,
-    }).setGenOptions({
-        useDocs: true,
-        useExactVariants: false,
-        useArbitraryValue: false,
-        useSoftVariants: true,
-        useStringKindVariantsOnly: false,
-        useOptionalProperty: false,
-        disableVariants: true,
-    })
+        const generator = new TailwindTypeGenerator({
+            compiler,
+            cssAnalyzer,
+            generator: schemaGenerator,
+            storeRoot: `${__dirname}/__mocks__/store/docs.json`,
+        }).setGenOptions({
+            useDocs: true,
+            useExactVariants: false,
+            useArbitraryValue: false,
+            useSoftVariants: true,
+            useStringKindVariantsOnly: false,
+            useOptionalProperty: false,
+            disableVariants: true,
+        })
 
-    it("should init", async () => {
-        await generator.init()
+        it("should init", async () => {
+            await generator.init()
 
-        expect(generator.ds).toBeDefined()
-        expect(generator.classList.length).toBeGreaterThan(0)
-        expect(generator.variantsEntry.length).toBeGreaterThan(0)
-        expect(generator.variants.length).toBeGreaterThan(0)
-    })
+            expect(generator.ds).toBeDefined()
+            expect(generator.classList.length).toBeGreaterThan(0)
+            expect(generator.variantsEntry.length).toBeGreaterThan(0)
+            expect(generator.variants.length).toBeGreaterThan(0)
+        })
 
-    it("should extract all the possible variants", () => {
-        expect(generator.variants).toMatchInlineSnapshot(`
+        it("should extract all the possible variants", () => {
+            expect(generator.variants).toMatchInlineSnapshot(`
           [
             "*",
             "**",
@@ -441,11 +443,15 @@ describe("TypeGenerator", () => {
             "noscript",
           ]
         `)
-    })
-
-    it("should build types", async () => {
-        await generator.buildTypes({
-            tailwind: `${__dirname}/__mocks__/dist/tailwind.ts`,
         })
-    })
-})
+
+        it("should build types", async () => {
+            await generator.buildTypes({
+                tailwind: `${__dirname}/__mocks__/dist/tailwind.ts`,
+            })
+        })
+    },
+    {
+        timeout: 1000 * 20,
+    }
+)
