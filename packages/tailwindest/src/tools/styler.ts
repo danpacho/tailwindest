@@ -15,8 +15,10 @@ export abstract class Styler<Args, Out> {
      * const tw = createTools<Tailwindest>({ merger: twMerge })
      * ```
      */
-    public setMerger(merger: Merger): void {
+    public setMerger(merger: Merger | undefined) {
+        if (!merger) return this
         this._merger = merger
+        return this
     }
     private _merger: Merger | null = null
     public get merger(): Merger {
