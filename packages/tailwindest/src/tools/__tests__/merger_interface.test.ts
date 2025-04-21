@@ -1,4 +1,3 @@
-import { expectType, TypeEqual } from "ts-expect"
 import { describe, expect, it } from "vitest"
 import { twMerge } from "tailwind-merge"
 import { Merger } from "../merger_interface"
@@ -9,13 +8,13 @@ import { ClassList } from "../to_class"
 describe("Merger interface", () => {
     it("1. tailwind-merge", () => {
         const merger: Merger = twMerge
-        const t = createTools<
-            CreateTailwindest<{
+        const t = createTools<{
+            tailwindest: CreateTailwindest<{
                 tailwind: Record<string, any>
                 tailwindNestGroups: ""
                 useArbitrary: true
             }>
-        >({
+        }>({
             merger: merger,
         })
 
@@ -47,13 +46,13 @@ describe("Merger interface", () => {
             return res
         }
 
-        const t = createTools<
-            CreateTailwindest<{
+        const t = createTools<{
+            tailwindest: CreateTailwindest<{
                 tailwind: Record<string, any>
                 tailwindNestGroups: ""
                 useArbitrary: true
             }>
-        >({
+        }>({
             merger: customMerger,
         })
 

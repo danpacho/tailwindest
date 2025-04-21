@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.2.0
+
+### Minor Changes
+
+- Fix TS7056, TS4094 error for .d.ts building, update tailwindest interface for `createTools` generic param
+
 ## 3.1.1
 
 ### Patch Changes

@@ -1,5 +1,4 @@
 import { createTools, type GetVariants } from "./tools"
-import { CreateTailwindest } from "./create_tailwindest"
 
 // Merger public interfaces
 export type { Merger as TailwindestMerger } from "./tools/merger_interface"
@@ -10,4 +9,18 @@ export type { Tailwindest } from "./legacy/tailwindest"
 export type { ShortTailwindest } from "./legacy/tailwindest.short"
 
 // V3 + tailwindcss >= 4.0
-export { createTools, type GetVariants, type CreateTailwindest }
+export type {
+    CreateTailwindest,
+    CreateTailwindLiteral,
+} from "./create_tailwindest"
+
+// Export styler interfaces
+export type {
+    Styler,
+    PrimitiveStyler,
+    RotaryStyler,
+    ToggleStyler,
+    VariantsStyler,
+} from "./tools"
+
+export { createTools, type GetVariants }
