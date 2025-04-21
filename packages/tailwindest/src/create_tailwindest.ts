@@ -77,19 +77,11 @@ interface TailwindestConfig {
 
 export interface TailwindestInterface {
     /**
-     * Tailwind
-     */
-    tailwind?: any
-    /**
-     * Tailwind Literal
+     * Tailwind literal typeset
      */
     tailwindLiteral?: any
     /**
-     * Tailwind Nest Groups
-     */
-    tailwindNestGroup?: any
-    /**
-     * Tailwindest impl
+     * Tailwindest typeset
      */
     tailwindest: any
     /**
@@ -99,7 +91,7 @@ export interface TailwindestInterface {
 }
 
 /**
- * Creates a `tailwindest` typeset.
+ * Create tailwindest typeset
  *
  * @description Run `npx create-tailwind-type` to generate tailwind type defs.
  * ```bash
@@ -121,34 +113,33 @@ export interface TailwindestInterface {
  * }>
  * ```
  */
-export type CreateTailwindest<Config extends TailwindestConfig> = {
-    /**
-     * Tailwind
-     */
-    tailwind: Config["tailwind"]
-    /**
-     * Tailwind Literal
-     */
-    tailwindLiteral: Config["tailwind"][keyof Config["tailwind"]]
-    /**
-     * Tailwind Nest Groups
-     */
-    tailwindNestGroup: Config["tailwindNestGroups"]
-    /**
-     * Tailwindest impl
-     */
-    tailwindest: GetNestStyle<
-        Config["groupPrefix"] extends string
-            ? `${Config["groupPrefix"]}${Config["tailwindNestGroups"]}`
-            : Config["tailwindNestGroups"],
-        Config["tailwind"],
-        Config["groupPrefix"] extends string
-            ? Config["groupPrefix"] | TAILWIND_IDENTIFIER
-            : TAILWIND_IDENTIFIER,
-        Config["useArbitrary"] extends boolean ? Config["useArbitrary"] : false
-    >
-    /**
-     * Enables arbitrary strings as valid style properties if `true`.
-     */
-    useArbitrary: Config["useArbitrary"]
-}
+export type CreateTailwindest<Config extends TailwindestConfig> = GetNestStyle<
+    Config["groupPrefix"] extends string
+        ? `${Config["groupPrefix"]}${Config["tailwindNestGroups"]}`
+        : Config["tailwindNestGroups"],
+    Config["tailwind"],
+    Config["groupPrefix"] extends string
+        ? Config["groupPrefix"] | TAILWIND_IDENTIFIER
+        : TAILWIND_IDENTIFIER,
+    Config["useArbitrary"] extends boolean ? Config["useArbitrary"] : false
+>
+
+/**
+ * Create tailwind literal typeset
+ *
+ * @description Run `npx create-tailwind-type` to generate tailwind type defs.
+ * ```bash
+ * npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
+ * ```
+ * @see {@link https://github.com/danpacho/tailwindest#create-tailwind-type create-tailwind-type}
+ *
+ * @example
+ * ```ts
+ * // 1. import generated types
+ * import type { Tailwind, TailwindNestGroups } from "~/tailwind.ts"
+ *
+ * // 2. create type
+ * export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
+ * ```
+ */
+export type CreateTailwindLiteral<Tailwind> = Tailwind[keyof Tailwind]
