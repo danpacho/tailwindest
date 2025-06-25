@@ -111,8 +111,17 @@ export const createTools = <Type extends TailwindestInterface>({
         return res
     }
 
-    const join = (...classList: ClassList<ClassLiteral>): string =>
-        merger ? merger(...toClass(classList).split(" ")) : toClass(classList)
+    const join = (...classList: ClassList<ClassLiteral>): string => {
+        if (merger) {
+            const classListStr = toClass(classList)
+            const tokens = classListStr
+                .split(" ")
+                .filter((e) => e.length > 0)
+                .map((e) => e.trim())
+            return merger(...tokens)
+        }
+        return toClass(classList)
+    }
 
     const def = (
         classList: ClassList<ClassLiteral>,

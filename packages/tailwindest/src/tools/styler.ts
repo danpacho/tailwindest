@@ -33,6 +33,7 @@ export abstract class Styler<Args, Out, Literal extends string = string> {
                 Array.isArray(token) ? token : token.split(" ")
             )
             .filter((token) => token && token.length > 0)
+            .map((token) => token.trim())
 
         return this._merger
             ? this._merger(...tokens)
