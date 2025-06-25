@@ -88,6 +88,10 @@ export interface TailwindestInterface {
      * Enables arbitrary strings as valid style properties if `true`.
      */
     useArbitrary?: true | false
+    /**
+     * Use typed class literal strings for extra classes
+     */
+    useTypedClassLiteral?: true | false
 }
 
 /**
@@ -109,7 +113,8 @@ export interface TailwindestInterface {
  *      tailwind: Tailwind
  *      tailwindNestGroups: TailwindNestGroups
  *      useArbitrary: true
- *      groupPrefix: "#"
+ *      useTypedClassLiteral: true
+ *      groupPrefix: "#" // optional
  * }>
  * ```
  */

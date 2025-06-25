@@ -1,7 +1,7 @@
 import { clsx } from "clsx"
 
 // Type definition from <clsx> copyright >> https://github.com/lukeed/clsx
-type ClassValue<Literal extends string = string> =
+type ClassValue<Literal> =
     | ClassList<Literal>
     | ClassDictionary
     | Literal
@@ -16,10 +16,8 @@ type ClassDictionary = Record<string, any>
  * @interface
  * Default supported class list
  */
-export type ClassList<Literal extends string = string> = ClassValue<Literal>[]
+export type ClassList<Literal = any> = ClassValue<Literal>[]
 
-export function toClass<Literal extends string = string>(
-    ...classList: ClassList<Literal>
-): string {
+export function toClass<Literal>(...classList: ClassList<Literal>): string {
     return clsx(classList)
 }

@@ -6,7 +6,5 @@ export function toDef<StyleType>(
     styleMerger: (...styles: Array<StyleType>) => string,
     join: (...classList: ClassList<string>) => string
 ): string {
-    const classLiteral = join(...classList)
-    const styleLiteral = styleMerger(...styleList)
-    return join(classLiteral, styleLiteral)
+    return join(...classList, styleMerger(...styleList))
 }

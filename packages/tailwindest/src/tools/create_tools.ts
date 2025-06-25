@@ -54,6 +54,7 @@ interface ToolOptions {
  *      tailwindest: Tailwindest
  *      tailwindLiteral: TailwindLiteral
  *      useArbitrary: true  // enable arbitrary strings
+ *      useTypedClassLiteral: true // enable typed class literal
  * >({
  *      merger: twMerge // set tailwind-merge as merger, [optional]
  * })
@@ -66,25 +67,35 @@ export const createTools = <Type extends TailwindestInterface>({
     type ClassLiteral = Type["useArbitrary"] extends true
         ? Type["tailwindLiteral"] | (`${string}` & {})
         : Type["tailwindLiteral"]
+    type StyleLiteral = Type["useTypedClassLiteral"] extends true
+        ? ClassLiteral
+        : string
 
     const style = (stylesheet: StyleType) =>
-        new PrimitiveStyler<StyleType>(stylesheet).setMerger(merger)
+        new PrimitiveStyler<StyleType, StyleLiteral>(stylesheet).setMerger(
+            merger
+        )
 
     const toggle = (toggleVariants: ToggleVariants<StyleType>) =>
-        new ToggleStyler<StyleType>(toggleVariants).setMerger(merger)
+        new ToggleStyler<StyleType, StyleLiteral>(toggleVariants).setMerger(
+            merger
+        )
 
     const rotary = <VRecord extends Record<string, StyleType>>(params: {
         base?: StyleType
         variants: VRecord
     }) =>
-        new RotaryStyler<StyleType, Stringify<keyof VRecord>>(params).setMerger(
-            merger
-        )
+        new RotaryStyler<StyleType, Stringify<keyof VRecord>, StyleLiteral>(
+            params
+        ).setMerger(merger)
 
     const variants = <VMap extends VariantsRecord<StyleType>>(params: {
         base?: StyleType
         variants: VMap
-    }) => new VariantsStyler<StyleType, VMap>(params).setMerger(merger)
+    }) =>
+        new VariantsStyler<StyleType, VMap, StyleLiteral>(params).setMerger(
+            merger
+        )
 
     const mergeRecord = (...overrideRecord: Array<StyleType>): StyleType =>
         overrideRecord.reduce<StyleType>(
@@ -100,8 +111,17 @@ export const createTools = <Type extends TailwindestInterface>({
         return res
     }
 
-    const join = (...classList: ClassList<ClassLiteral>): string =>
-        merger ? toClass(merger(...classList)) : toClass(classList)
+    const join = (...classList: ClassList<ClassLiteral>): string => {
+        const base = toClass(...classList)
+        if (merger) {
+            const tokens = base
+                .split(" ")
+                .filter((e) => e.length > 0)
+                .map((e) => e.trim())
+            return merger(...tokens)
+        }
+        return base
+    }
 
     const def = (
         classList: ClassList<ClassLiteral>,
@@ -111,6 +131,9 @@ export const createTools = <Type extends TailwindestInterface>({
     return {
         /**
          * Define style
+         *
+         * `styleList` has higher priority than `classList`
+         *
          * @see {@link https://github.com/lukeed/clsx#readme clsx}
          * @param classList join target styles
          * @param styleList define styles in a record structure way

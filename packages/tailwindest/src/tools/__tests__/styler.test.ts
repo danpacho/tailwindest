@@ -1,11 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { Styler } from "../styler" // Adjust path as needed
-import type { Merger } from "../merger_interface"
+import type { AdditionalClassTokens, Merger } from "../merger_interface"
 
 // Mock implementation of Styler for testing abstract methods
 class TestStyler extends Styler<string, Record<string, unknown>> {
-    public class(key: string, extraClassName?: string): string {
-        return this.merger(key, extraClassName || "")
+    public class(
+        key: string,
+        ...extraClassNames: AdditionalClassTokens<string>
+    ): string {
+        return this.merge(key, ...extraClassNames)
     }
 
     public style(key: string, extraStyle?: Record<string, unknown>): unknown {
@@ -21,7 +24,9 @@ describe("Styler", () => {
     describe("merger", () => {
         it("uses default merger when none set", () => {
             const styler = new TestStyler()
-            expect(styler.merger("a", "b")).toBe("a b")
+            expect(styler.merge("a", "b", ["d e f", "g", "h"], "i")).toBe(
+                "a b d e f g h i"
+            )
         })
 
         it("uses custom merger when set", () => {
@@ -30,7 +35,7 @@ describe("Styler", () => {
                 classes.join("-")
             )
             styler.setMerger(customMerger)
-            expect(styler.merger("a", "b")).toBe("a-b")
+            expect(styler.merge("a", "b")).toBe("a-b")
             expect(customMerger).toHaveBeenCalledWith("a", "b")
         })
     })

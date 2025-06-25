@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
-import { twMerge } from "tailwind-merge"
-import { Merger } from "../merger_interface"
 import { createTools } from "../create_tools"
-import { CreateTailwindest } from "../../create_tailwindest"
-import { ClassList } from "../to_class"
+import type { Merger } from "../merger_interface"
+import type { CreateTailwindest } from "../../create_tailwindest"
+
+import { twMerge } from "tailwind-merge"
 
 describe("Merger interface", () => {
     it("1. tailwind-merge", () => {
@@ -25,25 +25,23 @@ describe("Merger interface", () => {
             ["bg-red-100", "bg-red-200", "p-2"],
             {
                 backgroundColor: "bg-red-300",
+                border: ["border-t-4"],
+            },
+            {
+                border: "border-2",
             }
         )
-        expect(argumentOrderHasPriority).toBe("p-2 bg-red-300")
+        expect(argumentOrderHasPriority).toBe("p-2 bg-red-300 border-2")
+        const style = t.style({
+            backgroundColor: "bg-red-100",
+        })
+
+        expect(style.class("bg-red-200", "p-2")).toBe("bg-red-200 p-2")
     })
     it("2. custom-merger", () => {
-        const customMerger: Merger<ClassList> = (...args) => {
-            const res = args
-                .map((e) => {
-                    if (typeof e === "string") {
-                        return e
-                    }
-                    if (Array.isArray(e)) {
-                        return customMerger(...e)
-                    }
-                    throw new Error("Invalid merging value")
-                })
-                .filter(Boolean)
-                .join(" with ")
-            return res
+        const customMerger: Merger = (...args) => {
+            const uniqueToken = Array.from(new Set(args))
+            return uniqueToken.join(" with ")
         }
 
         const t = createTools<{
@@ -59,11 +57,14 @@ describe("Merger interface", () => {
         const style1 = t.def([["bg-red-100", "bg-red-200"], "p-2"])
         expect(style1).toBe("bg-red-100 with bg-red-200 with p-2")
 
-        const style2 = t.def(["bg-red-100", "bg-red-200", "p-2"], {
-            backgroundColor: "bg-red-300",
-        })
+        const style2 = t.def(
+            ["bg-red-100", "ONCE", "ONCE", "ONCE", "bg-red-200", "p-2"],
+            {
+                backgroundColor: "bg-red-300",
+            }
+        )
         expect(style2).toBe(
-            "bg-red-100 with bg-red-200 with p-2 with bg-red-300"
+            "bg-red-100 with ONCE with bg-red-200 with p-2 with bg-red-300"
         )
     })
 })
