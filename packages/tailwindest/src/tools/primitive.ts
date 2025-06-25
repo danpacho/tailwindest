@@ -32,7 +32,7 @@ export class PrimitiveStyler<
      */
     public style(...extraStyles: Array<StyleType>): StyleType {
         const inquired = this._style
-        if (!extraStyles) return inquired
+        if (extraStyles.length === 0) return inquired
         return Styler.deepMerge(inquired, ...extraStyles)
     }
 
