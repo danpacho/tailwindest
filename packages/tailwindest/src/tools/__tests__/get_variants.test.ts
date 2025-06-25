@@ -87,7 +87,7 @@ describe("GetVariants - rotary", () => {
 describe("GetVariants - style", () => {
     test("infer never", () => {
         const baseWind = tw.style({})
-        expectType<TypeEqual<GetVariants<typeof baseWind>, string | undefined>>(
+        expectType<TypeEqual<GetVariants<typeof baseWind>, string | string[]>>(
             true
         )
     })
