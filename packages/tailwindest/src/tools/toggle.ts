@@ -43,7 +43,7 @@ export class ToggleStyler<
         ...extraClassNames: AdditionalClassTokens<StyleLiteral>
     ): string {
         const inquired = this._rotary.class(condition ? "T" : "F")
-        if (!extraClassNames) return inquired
+        if (extraClassNames.length === 0) return inquired
         return this.merge(inquired as StyleLiteral, ...extraClassNames)
     }
 
