@@ -1,8 +1,7 @@
-import type { Merger } from "./merger_interface"
+import type { AdditionalClassTokens, Merger } from "./merger_interface"
 
 type NestedRecord = Record<string, unknown>
-
-export abstract class Styler<Args, Out> {
+export abstract class Styler<Args, Out, Literal extends string = string> {
     /**
      * Merge tailwind className strings
      * @param merger tailwind property merger
@@ -21,14 +20,30 @@ export abstract class Styler<Args, Out> {
         return this
     }
     private _merger: Merger | null = null
-    public get merger(): Merger {
-        const defaultMerger: Merger = (...classList) =>
-            classList.join(" ").trim()
-        return this._merger ?? defaultMerger
+    private static _defaultMerger: Merger = (...classList) =>
+        classList.join(" ").trim()
+    /**
+     * Merge className tokens into one className string.
+     * @param classList list of className strings or arrays of className strings
+     * @returns Merged className string
+     */
+    public merge(...classList: AdditionalClassTokens<Literal>): string {
+        const tokens = classList
+            .flatMap((token) =>
+                Array.isArray(token) ? token : token.split(" ")
+            )
+            .filter((token) => token && token.length > 0)
+
+        return this._merger
+            ? this._merger(...tokens)
+            : Styler._defaultMerger(...tokens)
     }
 
-    public abstract class(key: Args, extraClassName?: string): string
-    public abstract style(key: Args, extraStyle?: Out): unknown
+    public abstract class(
+        key: Args,
+        ...classList: AdditionalClassTokens<Literal>
+    ): string
+    public abstract style(key: Args, ...extraStyle: Array<Out>): unknown
 
     /**
      * Compose styles and return new stylesheet
