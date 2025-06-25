@@ -131,6 +131,9 @@ export const createTools = <Type extends TailwindestInterface>({
     return {
         /**
          * Define style
+         *
+         * `styleList` has higher priority than `classList`
+         *
          * @see {@link https://github.com/lukeed/clsx#readme clsx}
          * @param classList join target styles
          * @param styleList define styles in a record structure way
