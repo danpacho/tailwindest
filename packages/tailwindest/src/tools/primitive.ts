@@ -22,7 +22,7 @@ export class PrimitiveStyler<
         ...extraClassList: AdditionalClassTokens<StyleLiteral>
     ): string {
         const inquired = this._class
-        if (!extraClassList) return inquired
+        if (extraClassList.length === 0) return inquired
         return this.merge(inquired as StyleLiteral, ...extraClassList)
     }
 
