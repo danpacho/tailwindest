@@ -26,7 +26,13 @@ describe("PrimitiveStyler", () => {
         it("concatenates with extra class name", () => {
             const style: TestStyle = { color: "green" }
             const styler = new PrimitiveStyler<TestStyle>(style)
-            expect(styler.class("extra")).toBe("green extra")
+            expect(
+                styler.class(
+                    "extra1 extra2 extra3",
+                    ["extra4 extra5", "extra6"],
+                    "extra7"
+                )
+            ).toBe("green extra1 extra2 extra3 extra4 extra5 extra6 extra7")
         })
     })
 
@@ -144,7 +150,7 @@ describe("RotaryStyler", () => {
 
     describe("compose method", () => {
         it("creates new styler with composed base", () => {
-            const base: TestStyle = { color: "gray" }
+            const base: TestStyle = { color: "gray", fontSize: "14" }
             const variants: Record<VariantKey, TestStyle> = {
                 primary: { color: "blue" },
                 secondary: { color: "green" },
@@ -153,14 +159,14 @@ describe("RotaryStyler", () => {
                 base,
                 variants,
             })
-            const newStyler = styler.compose({ fontSize: "12", color: "gray" })
+            const newStyler = styler.compose({ color: "gray", fontSize: "200" })
             expect(newStyler.style("base")).toEqual({
                 color: "gray",
-                fontSize: "12",
+                fontSize: "200",
             })
             expect(newStyler.style("primary")).toEqual({
                 color: "blue",
-                fontSize: "12",
+                fontSize: "200",
             })
         })
     })
