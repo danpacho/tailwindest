@@ -66,7 +66,7 @@ export class VariantsStyler<
             }
         }
 
-        if (!extraStyles) return merged
+        if (extraStyles.length === 0) return merged
         return Styler.deepMerge(merged, ...extraStyles)
     }
 
