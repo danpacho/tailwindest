@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.2.1
+
+### Patch Changes
+
+- Fix `rotary.compose` base stylesheet overriding process, support multiple extra classes
+
 ## 3.2.0
 
 ### Minor Changes
