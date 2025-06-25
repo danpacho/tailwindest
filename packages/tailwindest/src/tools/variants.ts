@@ -81,7 +81,7 @@ export class VariantsStyler<
     ): string {
         const inquired = this.style(variant)
         const className = Styler.getClassName(inquired)
-        if (!extraClassName) return className
+        if (extraClassName.length === 0) return className
         return this.merge(className as StyleLiteral, ...extraClassName)
     }
 
