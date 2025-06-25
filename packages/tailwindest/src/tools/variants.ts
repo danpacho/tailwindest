@@ -1,5 +1,6 @@
 import { Styler } from "./styler"
 import { RotaryStyler } from "./rotary"
+import type { AdditionalClassTokens } from "./merger_interface"
 
 export type VariantsRecord<StyleType> = Record<
     string,
@@ -20,7 +21,8 @@ type VariantStylerMap<
 export class VariantsStyler<
     StyleType,
     const VMap extends VariantsRecord<StyleType>,
-> extends Styler<VariantOptions<VMap>, StyleType> {
+    StyleLiteral extends string = string,
+> extends Styler<VariantOptions<VMap>, StyleType, StyleLiteral> {
     private _base: StyleType
     private _variantsMap: VMap
     private _variantStylerMap: VariantStylerMap<StyleType, keyof VMap>
@@ -51,7 +53,7 @@ export class VariantsStyler<
      */
     public style(
         variant: VariantOptions<VMap>,
-        extraStyle?: StyleType
+        ...extraStyles: Array<StyleType>
     ): StyleType {
         let merged = this._base
 
@@ -64,8 +66,8 @@ export class VariantsStyler<
             }
         }
 
-        if (!extraStyle) return merged
-        return Styler.deepMerge(merged, extraStyle)
+        if (!extraStyles) return merged
+        return Styler.deepMerge(merged, ...extraStyles)
     }
 
     /**
@@ -75,12 +77,12 @@ export class VariantsStyler<
      */
     public class(
         variant: VariantOptions<VMap>,
-        extraClassName?: string
+        ...extraClassName: AdditionalClassTokens<StyleLiteral>
     ): string {
         const inquired = this.style(variant)
-
-        if (!extraClassName) return Styler.getClassName(inquired)
-        return this.merger(...Styler.flattenRecord(inquired), extraClassName)
+        const className = Styler.getClassName(inquired)
+        if (!extraClassName) return className
+        return this.merge(className as StyleLiteral, ...extraClassName)
     }
 
     public compose(
