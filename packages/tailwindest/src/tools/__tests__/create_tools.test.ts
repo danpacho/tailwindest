@@ -243,15 +243,21 @@ describe("ToggleStyler", () => {
                 truthy: { color: "blue" },
                 falsy: { color: "green" },
             }
+            const other = new PrimitiveStyler<TestStyle>({
+                color: "OTHER",
+                fontSize: "OTHER",
+            })
             const styler = new ToggleStyler<TestStyle>(toggle)
-            const newStyler = styler.compose({ fontSize: "12", color: "gray" })
+            const newStyler = styler
+                .compose({ fontSize: "12", color: "gray" })
+                .compose(other.style())
             expect(newStyler.style(true)).toEqual({
                 color: "blue",
-                fontSize: "12",
+                fontSize: "OTHER",
             })
             expect(newStyler.style(false)).toEqual({
                 color: "green",
-                fontSize: "12",
+                fontSize: "OTHER",
             })
         })
     })
