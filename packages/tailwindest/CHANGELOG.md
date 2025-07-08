@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.2.2
+
+### Patch Changes
+
+- Fix rotary.compose method invalid overriding error
+
 ## 3.2.1
 
 ### Patch Changes
