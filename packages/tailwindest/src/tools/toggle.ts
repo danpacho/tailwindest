@@ -22,8 +22,13 @@ export class ToggleStyler<
     StyleLiteral extends string = string,
 > extends Styler<boolean, StyleType, StyleLiteral> {
     private _rotary: RotaryStyler<StyleType, "T" | "F", StyleLiteral>
+    private _T: StyleType
+    private _F: StyleType
+
     public constructor(toggle: ToggleVariants<StyleType>) {
         super()
+        this._T = toggle.truthy
+        this._F = toggle.falsy
         this._rotary = new RotaryStyler<StyleType, "T" | "F", StyleLiteral>({
             base: toggle.base,
             variants: {
@@ -65,8 +70,8 @@ export class ToggleStyler<
         )
         return new ToggleStyler({
             base: mergedBase,
-            truthy: this._rotary.style("T"),
-            falsy: this._rotary.style("F"),
+            truthy: this._T,
+            falsy: this._F,
         })
     }
 }
