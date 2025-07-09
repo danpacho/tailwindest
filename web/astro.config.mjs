@@ -2,14 +2,13 @@
 import { defineConfig } from "astro/config"
 import starlight from "@astrojs/starlight"
 import starlightThemeNova from "starlight-theme-nova"
-import starlightThemeObsidian from "starlight-theme-obsidian"
 import tailwindcss from "@tailwindcss/vite"
 import react from "@astrojs/react"
 import vercel from "@astrojs/vercel"
 
 // https://astro.build/config
 export default defineConfig({
-    output: "server",
+    output: "static",
     site: "https://tailwindest.vercel.app",
     adapter: vercel({
         webAnalytics: {
