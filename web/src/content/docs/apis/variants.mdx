@@ -1,0 +1,127 @@
+---
+title: variants
+description: API Reference for variants.
+---
+
+## Briefly
+
+Core style generator `function` to handle complex combinations of categorized variants.
+
+## 1. Type Definition
+
+```ts
+;<VMap extends VariantsRecord<StyleType>>(params: {
+    base?: StyleType
+    variants: VMap
+}) => VariantsStyler<StyleType, VMap, StyleLiteral>
+```
+
+A `VariantsStyler` instance has the following methods:
+
+- `class(options, ...extraClassList)`: Returns the `className` string.
+- `style(options, ...extraStyles)`: Returns the style object.
+- `compose(...styles)`: Returns a new, composed `VariantsStyler` instance.
+
+## 2. Spec
+
+### Usage
+
+```ts
+tw.variants({
+    base: baseStyle, // optional
+    variants: {
+        category1: {
+            variant1: style1,
+            variant2: style2,
+        },
+        category2: {
+            variantA: styleA,
+            variantB: styleB,
+        },
+    },
+})
+```
+
+### Parameter: `variants`
+
+- type: `Record<string, Record<string, Tailwindest>>`
+- usage: Define a nested object where top-level keys are variant categories (e.g., "size", "color") and nested keys are the specific variants.
+
+### Parameter: `base` (optional)
+
+- type: `Tailwindest`
+- usage: A base style that is merged into every variant combination.
+
+### Example
+
+Define a `variants` styler for a button with different types and sizes.
+
+```ts
+const button = tw.variants({
+    base: {
+        display: "flex",
+        fontWeight: "font-semibold",
+    },
+    variants: {
+        type: {
+            primary: { backgroundColor: "bg-blue-500", color: "text-white" },
+            secondary: {
+                backgroundColor: "bg-gray-200",
+                color: "text-gray-800",
+            },
+        },
+        size: {
+            sm: { padding: "p-1", fontSize: "text-sm" },
+            md: { padding: "p-2", fontSize: "text-base" },
+        },
+    },
+})
+```
+
+## 3. Returns
+
+### `class()`
+
+#### Briefly
+
+**Returns `className` `string`** for the specified combination of variants.
+
+#### Usage
+
+```ts
+const primarySmButton = button.class({ type: "primary", size: "sm" })
+// "display-flex font-semibold bg-blue-500 text-white p-1 text-sm"
+
+const secondaryMdButton = button.class({ type: "secondary", size: "md" })
+// "display-flex font-semibold bg-gray-200 text-gray-800 p-2 text-base"
+```
+
+### `style()`
+
+#### Briefly
+
+**Returns the merged `styleSheet` `object`** for the specified variant combination.
+
+#### Usage
+
+```ts
+const primarySmStyle = button.style({ type: "primary", size: "sm" })
+/*
+{
+    display: "flex",
+    fontWeight: "font-semibold",
+    backgroundColor: "bg-blue-500",
+    color: "text-white",
+    padding: "p-1",
+    fontSize: "text-sm"
+}
+*/
+```
+
+### `compose()`
+
+#### Briefly
+
+Composes additional styles into the **`base`** style and returns a new `VariantsStyler` instance.
+
+**The functionality of compose is same as [style's compose](/apis/style/#compose).**

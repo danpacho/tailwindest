@@ -1,0 +1,95 @@
+---
+title: mergeRecord
+description: API Reference for mergeRecord.
+---
+
+## Briefly
+
+**Use this if you want to merge `styleSheet` objects into a single `styleSheet` object.** `mergeRecord` is useful when you need to dynamically override styles, for example, based on component props. It deeply merges style objects from left to right.
+
+:::note
+Unlike [`tw.mergeProps`](/apis/mergeprops), this function returns a style **object**, not a `className` string. It is the underlying utility used by many other `tailwindest` functions.
+:::
+
+## 1. Type definition
+
+```ts
+;(...overrideRecord: Array<StyleType>) => StyleType
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+tw.mergeRecord(baseStyle, overrideStyle1, overrideStyle2)
+```
+
+### Parameters
+
+- **`...overrideRecord`**: A rest parameter for any number of `tailwindest` style objects. They are deeply merged from left to right, with properties from later objects overwriting earlier ones.
+
+### Example
+
+#### Basic Overriding
+
+You can override specific properties by passing multiple objects. The last object's values take precedence.
+
+```ts
+import { tw } from "~/tw"
+
+const finalStyle = tw.mergeRecord(
+    {
+        color: "text-gray-950",
+        fontWeight: "font-bold",
+        fontSize: "text-base",
+    },
+    {
+        color: "text-red-100",
+    },
+    {
+        color: "text-blue-100", // This one wins
+    }
+)
+
+// Resulting object:
+// {
+//   color: "text-blue-100",
+//   fontWeight: "font-bold",
+//   fontSize: "text-base",
+// }
+```
+
+#### Deep Merging Nested Objects
+
+The merge is deep, meaning nested objects (like variants) are merged recursively.
+
+```ts
+import { tw } from "~/tw"
+
+const baseStyle = {
+    padding: "p-2",
+    hover: {
+        backgroundColor: "hover:bg-gray-100",
+        color: "hover:text-black",
+    },
+}
+
+const overrideStyle = {
+    hover: {
+        // This overrides the hover background color
+        backgroundColor: "hover:bg-blue-500",
+    },
+}
+
+const merged = tw.mergeRecord(baseStyle, overrideStyle)
+
+// Resulting object:
+// {
+//   padding: "p-2",
+//   hover 9: {
+//     backgroundColor: "hover:bg-blue-500", // from overrideStyle
+//     color: "hover:text-black",          // from baseStyle
+//   },
+// }
+```

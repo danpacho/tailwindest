@@ -1,0 +1,109 @@
+---
+title: style
+description: API Reference for style.
+---
+
+## Briefly
+
+`tw.style()` is the most basic style generator. It takes a single style object and creates a reusable styler instance.
+
+## 1. Type Definition
+
+```ts
+;(stylesheet: StyleType) => PrimitiveStyler<StyleType, StyleLiteral>
+```
+
+A `PrimitiveStyler` instance has the following methods:
+
+- `class(...extraClassList)`: Returns the `className` string.
+- `style(...extraStyles)`: Returns the style object.
+- `compose(...styles)`: Returns a new, composed `PrimitiveStyler` instance.
+
+## 2. Spec
+
+### Usage
+
+```ts
+const boxStyle = tw.style({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+})
+```
+
+### Parameter: `stylesheet`
+
+- type: `Tailwindest`
+- usage: A style object that conforms to the `Tailwindest` type you defined.
+
+## 3. Returns
+
+### `class()`
+
+#### Briefly
+
+Returns the generated `className` as a `string`.
+
+#### Usage
+
+```ts
+const className = boxStyle.class()
+// "flex items-center justify-center"
+
+// You can also pass extra classes to be merged.
+const classNameWithExtra = boxStyle.class("p-4", "bg-red-100")
+// "flex items-center justify-center p-4 bg-red-100"
+```
+
+### `style()`
+
+#### Briefly
+
+Returns the original style `object`.
+
+#### Usage
+
+```ts
+const styleObject = boxStyle.style()
+/*
+{
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+}
+*/
+
+// You can also pass extra style objects to be merged.
+const mergedStyle = boxStyle.style({ padding: "p-4" })
+/*
+{
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    padding: "p-4"
+}
+*/
+```
+
+### `compose()`
+
+#### Briefly
+
+Merges the **current style** with one or more other style objects to create a **new** `PrimitiveStyler` instance.
+
+> The original styler is not modified.
+>
+> The **base style sheet** is overrided, and new instance is created. So don't have to worry about the original style being modified.
+
+#### Usage
+
+```ts
+const base = tw.style({ padding: "p-2", color: "text-black" })
+const composed = base.compose(
+    { backgroundColor: "bg-blue-100" },
+    { padding: "p-4" } // This will override the base padding
+)
+
+const finalClass = composed.class()
+// "text-black bg-blue-100 p-4"
+```

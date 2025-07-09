@@ -1,0 +1,132 @@
+---
+title: Customize
+description: How to customize tailwindest.
+---
+
+With `tailwindest` v3, customization is simpler and more powerful. All your custom styles are defined in your `tailwind.css` file, and `create-tailwind-type` will generate the corresponding types.
+
+## The Workflow
+
+1.  **Modify `tailwind.css`**: Update your custom themes, colors, spacing, variants, etc., in your Tailwind configuration file.
+2.  **Run `create-tailwind-type`**: Execute `npx create-tailwind-type` in your terminal.
+3.  **Use your custom styles**: The generator updates your `tailwind.ts` file, and your custom styles become available with full type safety in your `tw` tools.
+
+There's no need to manually define custom types with generics anymore!
+
+## Example: Adding Custom Colors
+
+Let's say you want to add custom brand colors to your project.
+
+1.  **Update `tailwind.css`**:
+
+    ```css filename="tailwind.css"
+    @import "tailwindcss";
+
+    /* Custom colors */
+    @theme {
+        --color-primary: #371a1a;
+        --color-secondary: #682f2f;
+    }
+    ```
+
+2.  **Generate types**:
+
+    ```bash
+    npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
+    ```
+
+3.  **Use the custom colors**:
+
+    Your `tw` tools are now aware of these new colors.
+
+    ```ts filename="components/Button.ts"
+    import { tw } from "~/tw"
+
+    const button = tw.style({
+        // --> Autocompletes to `bg-primary` and `bg-secondary`
+        backgroundColor: "bg-primary",
+
+        hover: {
+            // --> Also works with variants
+            backgroundColor: "hover:bg-secondary",
+        },
+    })
+    ```
+
+## Example: Custom Spacing and Screens
+
+1.  **Update `tailwind.css`**:
+
+    ```css filename="tailwind.css"
+    @import "tailwindcss";
+
+    # Adding plugins
+    @plugin 'tailwindcss-motion';
+    @plugin "@tailwindcss/typography";
+    @plugin 'tailwind-scrollbar';
+
+    # Adding variants
+    @custom-variant dark (&:where(.dark, .dark *));
+    @custom-variant pointer (&:hover, &:focus-visible);
+
+    # Adding custom properties
+    @theme {
+        --color-primary-light: #f8f8f8;
+        --color-primary-dark: #151515;
+        --color-secondary-light: #c4c4c4;
+        --color-secondary-dark: #3b3b3b;
+        --color-logo-red: #ff2f2f;
+        --color-logo-blue: #4132e8;
+
+        --font-platypi: "Platypi", "Nanum", "sans-serif";
+        --font-nanum: "Nanum", "Platypi", "sans-serif";
+
+        --animate-spin-ping: spin-ping 1s ease-in-out infinite;
+        @keyframes spin-ping {
+            0% {
+                transform: rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: rotate(180deg);
+                opacity: 0;
+            }
+            100% {
+                transform: rotate(360deg);
+                opacity: 1;
+            }
+        }
+        # Write your own tailwindcss configuration using css
+    }
+    ```
+
+2.  **Generate types**:
+
+    ```bash
+    npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
+    ```
+
+3.  **Use the custom values**:
+
+    ```ts filename="components/Layout.ts"
+    import { tw } from "~/tw"
+
+    const layout = tw.style({
+        animation: "spin-ping", // <-- `spin-ping` is fully-typed
+        fontFamily: "Platypi", // <-- `Platypi` is fully-typed
+        fontFamily: "Nanum", // <-- `Nanum` is fully-typed
+
+        // <-- custom property is fully-typed
+        color: 'text-primary-right',
+        backgroundColor: 'bg-primary-right',
+
+        // <-- custom plugins are fully-typed
+        custom: ['motion-appear-sm',] // <-- unknown property name, cause complex CSS combination.
+
+        // <-- custom variants are fully-typed
+        pointer: {
+            color: 'pointer:text-primary-right',
+            backgroundColor: 'pointer:bg-primary-right',
+        }
+    })
+    ```

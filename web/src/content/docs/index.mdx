@@ -1,0 +1,45 @@
+---
+title: Tailwindest
+description: Build Typesafe Tailwindcss Product
+template: splash
+editUrl: false
+hero:
+    tagline: A lightweight and fast className generation library only for tailwindcss. With type safety, maintainable class names, and maximized reusable style designs, you can make more robust products.
+    image:
+        file: ../../assets/logo.png
+    actions:
+        - text: Get Started
+          link: /start/introduction/
+          icon: right-arrow
+          variant: primary
+        - text: View on GitHub
+          link: https://github.com/danpacho/tailwindest
+          icon: external
+          variant: minimal
+---
+
+import { Card, CardGrid, Icon, Callout } from "@astrojs/starlight/components"
+
+## Features
+
+<CardGrid stagger>
+    <Card title="First Class Type Safety" icon="approve-check-circle">
+        The best type safety solution for `tailwindcss`. Generate your own type
+        definition using [`create-tailwind-type`](/create-tailwind-type)
+    </Card>
+    <Card title="Fully Customizable" icon="setting">
+        [`create-tailwind-type`](/create-tailwind-type) will automatically
+        generates your own specific configuration based type definition files.
+    </Card>
+    <Card title="Variants based" icon="puzzle">
+        Use `variants` based modern conditional styling approaches such as
+        `stitches` and `cva`.
+    </Card>
+    <Card title="Performant" icon="star">
+        All operation is optimized and styles are cached by default. It is fast.
+    </Card>
+    <Card title="Maximized Reusability" icon="rocket">
+        Reuse all design primitives and styles by declaring stylesheet as
+        reusable variable format.
+    </Card>
+</CardGrid>

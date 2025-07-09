@@ -1,0 +1,49 @@
+---
+title: join
+description: API Reference for join.
+---
+
+## Briefly
+
+`tw.join` is a utility function that works just like `clsx` or `classnames`. It takes any number of class name arguments and joins them together into a single string.
+
+If you've configured a `merger` (like `tailwind-merge`) in `createTools`, `tw.join` will also use it to deduplicate and resolve conflicting classes.
+
+## 1. Type definition
+
+```ts
+;(...classList: ClassList<ClassLiteral>) => string
+```
+
+## 2. Spec
+
+### Parameters
+
+- **`...classList`**: A rest parameter that accepts any number of class values. This can include strings, arrays of strings, and objects with boolean values for conditional classes.
+
+### Example
+
+```tsx
+import { tw } from "./tw"
+
+const isActive = true
+const hasError = false
+
+const buttonClass = tw.join(
+    "px-4",
+    "py-2",
+    "font-bold",
+    "rounded",
+    {
+        "bg-blue-500 text-white": isActive,
+        "bg-gray-300": !isActive,
+        "border-red-500": hasError,
+    },
+    ["focus:outline-none", "focus:ring-2"]
+)
+
+// Result (if isActive is true and hasError is false):
+// "px-4 py-2 font-bold rounded bg-blue-500 text-white focus:outline-none focus:ring-2"
+
+const Button = () => <button className={buttonClass}>Click me</button>
+```
