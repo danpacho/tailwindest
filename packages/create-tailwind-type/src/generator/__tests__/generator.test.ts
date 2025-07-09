@@ -11,6 +11,7 @@ describe(
         const compiler = new TailwindCompiler({
             cssRoot: `${__dirname}/__mocks__/tailwind.css`,
             base: "packages/create-tailwind-type/node_modules/tailwindcss",
+            // base: "node_modules/tailwindcss",
         })
         const cssAnalyzer = new CSSAnalyzer()
         const schemaGenerator = new TypeSchemaGenerator()
