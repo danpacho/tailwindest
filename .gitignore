@@ -4,6 +4,7 @@
 # Build
 dist
 .turbo
+.vercel
 
 # Build by scripts
 $store$

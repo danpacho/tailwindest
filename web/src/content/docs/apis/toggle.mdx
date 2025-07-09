@@ -1,0 +1,96 @@
+---
+title: toggle
+description: API Reference for toggle.
+---
+
+## Briefly
+
+Core style generator `function` to handle toggle conditions.
+
+## 1. Type definition
+
+```ts
+;(toggleVariants: { truthy: StyleType; falsy: StyleType; base?: StyleType }) =>
+    ToggleStyler<StyleType, StyleLiteral>
+```
+
+A `ToggleStyler` instance has the following methods:
+
+- `class(condition: boolean, ...extraClassList)`: Returns the `className` string.
+- `style(condition: boolean, ...extraStyles)`: Returns the style object.
+- `compose(...styles)`: Returns a new, composed `ToggleStyler` instance.
+
+## 2. Spec
+
+### Usage
+
+```ts
+tw.toggle({
+    base: baseStyle,
+    truthy: truthyStyle,
+    falsy: falsyStyle,
+})
+```
+
+### Parameter: `base` (optional)
+
+- type: `Tailwindest`
+- usage: common style for `true` and `false` condition
+
+### Parameter: `truthy`
+
+- type: `Tailwindest`
+- usage: if condition is `true`, it will applied.
+
+### Parameter: `falsy`
+
+- type: `Tailwindest`
+- usage: if condition is `false`, it will applied.
+
+## 3. Returns
+
+### `class()`
+
+#### Briefly
+
+**Returns `className` `string`** based on the boolean condition.
+
+#### Usage
+
+```ts
+const themeBtn = tw.toggle({
+    base: { padding: "p-2" },
+    truthy: { backgroundColor: "bg-black" },
+    falsy: { backgroundColor: "bg-white" },
+})
+
+const lightMode = themeBtn.class(false) // "p-2 bg-white"
+const darkMode = themeBtn.class(true) // "p-2 bg-black"
+```
+
+### `style()`
+
+#### Briefly
+
+**Returns input `styleSheet` `object`** based on the boolean condition.
+
+#### Usage
+
+```ts
+const themeBtn = tw.toggle({
+    base: { padding: "p-2" },
+    truthy: { backgroundColor: "bg-black" },
+    falsy: { backgroundColor: "bg-white" },
+})
+
+const lightStyle = themeBtn.style(false) // { padding: "p-2", backgroundColor: "bg-white" }
+const darkStyle = themeBtn.style(true) // { padding: "p-2", backgroundColor: "bg-black" }
+```
+
+### `compose()`
+
+#### Briefly
+
+Compose additional styles into the **`base`** style and returns a new `ToggleStyler` instance.
+
+**The functionality of compose is same as [style's compose](/apis/style/#compose).**

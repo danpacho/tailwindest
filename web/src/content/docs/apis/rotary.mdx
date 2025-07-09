@@ -1,0 +1,110 @@
+---
+title: rotary
+description: API Reference for rotary.
+---
+
+## Briefly
+
+Core style generator `function` to handle various conditions within a single category.
+
+## 1. Type Definition
+
+```ts
+;<VRecord extends Record<string, StyleType>>(params: {
+    base?: StyleType
+    variants: VRecord
+}) => RotaryStyler<StyleType, Stringify<keyof VRecord>, StyleLiteral>
+```
+
+A `RotaryStyler` instance has the following methods:
+
+- `class(variant, ...extraClassList)`: Returns the `className` string.
+- `style(variant, ...extraStyles)`: Returns the style object.
+- `compose(...styles)`: Returns a new, composed `RotaryStyler` instance.
+
+## 2. Spec
+
+### Usage
+
+```ts
+tw.rotary({
+    base: baseStyle, // optional
+    variants: {
+        variant1: style1,
+        variant2: style2,
+    },
+})
+```
+
+### Parameter: `variants`
+
+- type: `Record<string, Tailwindest>`
+- usage: Define a style object for each variant.
+
+### Parameter: `base` (optional)
+
+- type: `Tailwindest`
+- usage: A base style that is merged into every variant.
+
+### Example
+
+Define a `rotary` styler for different button types.
+
+```ts
+const button = tw.rotary({
+    base: {
+        padding: "p-2",
+        borderRadius: "rounded",
+    },
+    variants: {
+        success: {
+            backgroundColor: "bg-green-100",
+        },
+        warning: {
+            backgroundColor: "bg-red-100",
+        },
+    },
+})
+```
+
+## 3. Returns
+
+### `class()`
+
+#### Briefly
+
+**Returns `className` `string`** for the specified variant.
+
+#### Usage
+
+```ts
+const successButton = button.class("success")
+// "p-2 rounded bg-green-100"
+
+const warningButton = button.class("warning")
+// "p-2 rounded bg-red-100"
+```
+
+### `style()`
+
+#### Briefly
+
+**Returns the merged `styleSheet` `object`** for the specified variant.
+
+#### Usage
+
+```ts
+const successStyle = button.style("success")
+// { padding: "p-2", borderRadius: "rounded", backgroundColor: "bg-green-100" }
+
+const warningStyle = button.style("warning")
+// { padding: "p-2", borderRadius: "rounded", backgroundColor: "bg-red-100" }
+```
+
+### `compose()`
+
+#### Briefly
+
+Composes additional styles into the **`base`** style and returns a new `RotaryStyler` instance.
+
+**The functionality of compose is same as [style's compose](/apis/style/#compose).**

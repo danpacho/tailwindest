@@ -1,0 +1,66 @@
+---
+title: createTools
+description: API Reference for createTools.
+---
+
+## Briefly
+
+`createTools` is the main factory function in `tailwindest`. You call it to create a set of styling utilities (`tw` object) that are typed according to your project's specific Tailwind CSS configuration.
+
+## 1. Type definition
+
+```ts
+import type { Merger } from "tailwindest"
+
+interface ToolOptions {
+    merger?: Merger
+}
+
+export const createTools = <Type extends TailwindestInterface>({
+    merger,
+}: ToolOptions = {}) => {
+    // ... returns tools
+}
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+import { createTools } from "tailwindest"
+import { twMerge } from "tailwind-merge" // example merger
+
+const tw = createTools<{
+    tailwindest: MyTailwindest
+    tailwindLiteral: MyTailwindLiteral
+    // ... other options
+}>({
+    merger: twMerge,
+})
+```
+
+### Generic Parameter: `Type`
+
+- **`Type`**: A generic parameter that extends `TailwindestInterface`. This is where you plug in your generated types to make the tools type-safe.
+- **`Type.tailwindest`**: Your main style type, created with `CreateTailwindest`.
+- **`Type.tailwindLiteral`**: A literal union of all your classes, created with `CreateTailwindLiteral`.
+- **`Type.useArbitrary`**: Set to `true` to allow arbitrary values.
+- **`Type.useTypedClassLiteral`**: Set to `true` to type `classList` arguments with `TailwindLiteral`.
+
+### Options Parameter: `ToolOptions`
+
+- **`merger`** (optional): A function to merge and deduplicate class names. It's highly recommended to use a library like `tailwind-merge` for this to correctly handle conflicting Tailwind CSS utilities.
+
+### Return Value
+
+`createTools` returns an object (commonly named `tw`) with the following methods:
+
+- [`def`](/apis/def): Combine `clsx`-like class lists with record-based styles.
+- [`join`](/apis/join): A `clsx`-like utility to join class names.
+- [`style`](/apis/style): Create a basic, non-variant style object.
+- [`toggle`](/apis/toggle): Create styles for boolean (on/off) states.
+- [`rotary`](/apis/rotary): Create styles for a single set of variants (e.g., sizes or colors).
+- [`variants`](/apis/variants): Create styles for multiple, combinable sets of variants.
+- [`mergeProps`](/apis/mergeprops): Merges multiple style objects into a single class string.
+- [`mergeRecord`](/apis/mergerecord): Merges multiple style objects into a single style object.

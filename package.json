@@ -19,6 +19,7 @@
         "lint": "turbo run lint",
         "clean": "turbo run clean",
         "test": "FORCE_COLOR=1 vitest",
+        "web": "pnpm run --filter=web",
         "test:watch": "FORCE_COLOR=1 vitest --watch -u",
         "test:coverage": "FORCE_COLOR=1 vitest run --coverage",
         "test:ci": "pnpm ts:typecheck && pnpm prettier && pnpm eslint:fix && pnpm build && pnpm test:coverage",

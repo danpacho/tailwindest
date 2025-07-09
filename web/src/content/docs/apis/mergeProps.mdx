@@ -1,0 +1,75 @@
+---
+title: mergeProps
+description: API Reference for mergeProps.
+---
+
+## Briefly
+
+**Use this if you want to merge `styleSheet` objects into a single `className` string.** `mergeProps` is useful when you need to dynamically override styles, for example, based on component props.
+
+:::note
+`tw.mergeProps` is an alias for `Styler.getClassName(tw.mergeRecord(...styles))`. It first deeply merges the objects, then converts the result to a class string. If a `merger` is configured, it will be used to deduplicate classes.
+:::
+
+## 1. Type definition
+
+```ts
+;(...overrideStyles: Array<StyleType>) => string
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+tw.mergeProps(baseStyle, overrideStyle1, overrideStyle2)
+```
+
+### Parameters
+
+- **`...overrideStyles`**: A rest parameter for any number of `tailwindest` style objects. They are merged from left to right, with properties from later objects overwriting earlier ones.
+
+### Example
+
+Applying a dynamic `fontSize` received from a `Text` component's props.
+
+```tsx
+import { tw } from "~/tw"
+import type { Tailwindest } from "~/tw"
+
+const textStyle = tw.style({
+    color: "text-black",
+    fontSize: "text-base",
+    fontWeight: "font-medium",
+})
+
+interface TextProps {
+    children: React.ReactNode
+    size?: Tailwindest["fontSize"]
+}
+
+const Text = ({ children, size }: TextProps) => (
+    <p
+        className={tw.mergeProps(
+            textStyle.style(),
+            { fontSize: size } // This object will override the fontSize from textStyle
+        )}
+    >
+        {children}
+    </p>
+)
+```
+
+Now, `Text` can adjust its `fontSize` via the `size` prop, and it will correctly override the base style.
+
+```tsx
+import { Text } from "./text"
+
+const SomeComponent = () => (
+    <>
+        <Text size="text-9xl">Wow Heading 1</Text>
+        <Text size="text-7xl">Wow Heading 2</Text>
+        <Text>Wow Text (default size)</Text>
+    </>
+)
+```

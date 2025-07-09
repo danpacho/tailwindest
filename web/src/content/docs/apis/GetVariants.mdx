@@ -1,0 +1,114 @@
+---
+title: GetVariants
+description: API Reference for GetVariants.
+---
+
+## Briefly
+
+**Get the variants type** from an instance of a `tw.rotary` or `tw.variants` styler.
+
+## 1. Type definition
+
+```ts
+import type { Styler } from "tailwindest"
+
+export type GetVariants<StylerInstance extends Styler<any, any, any>> =
+    StylerInstance extends Styler<infer Arg, any, any>
+        ? Arg extends never
+            ? never
+            : Exclude<Parameters<StylerInstance["class"]>[0], "base">
+        : never
+```
+
+## 2. Spec
+
+### Usage
+
+```ts
+type InferredVariants = GetVariants<typeof stylerInstance>
+```
+
+### Generic Parameter: `stylerInstance`
+
+- type: An instance of a `tailwindest` styler, i.e., the return value of `tw.rotary(...)` or `tw.variants(...)`.
+- usage: The styler instance from which to extract variant types.
+
+### 3. Example
+
+#### Extract `rotary` variants
+
+1.  Make a `rotary` styler:
+
+    ```ts
+    const button = tw.rotary({
+        variants: {
+            default: {},
+            warning: {},
+            success: {},
+        },
+    })
+    ```
+
+2.  Extract the variants type:
+
+    ```ts
+    import type { GetVariants } from "tailwindest"
+
+    type ButtonVariants = GetVariants<typeof button>
+
+    // Result:
+    // type ButtonVariants = "default" | "warning" | "success"
+    ```
+
+#### Extract `variants` variants
+
+1.  Make a `variants` styler:
+
+    ```ts
+    const button = tw.variants({
+        variants: {
+            type: {
+                default: {},
+                warning: {},
+                success: {},
+            },
+            size: {
+                sm: {},
+                md: {},
+                lg: {},
+            },
+        },
+    })
+    ```
+
+2.  Extract the variants type:
+
+    ```ts
+    import type { GetVariants } from "tailwindest"
+
+    type ButtonVariants = GetVariants<typeof button>
+
+    // Result:
+    // type ButtonVariants = {
+    //     type?: "default" | "warning" | "success";
+    //     size?: "sm" | "md" | "lg";
+    // }
+    ```
+
+3.  Use the extracted type for component props:
+
+    ```tsx
+    interface ButtonProps extends GetVariants<typeof button> {
+        children: React.ReactNode
+    }
+
+    const Button = (props: ButtonProps) => {
+        const { children, ...variantOptions } = props
+
+        return (
+            <button className={button.class(variantOptions)}>
+                {props.children}
+            </button>
+        )
+    }
+    ```

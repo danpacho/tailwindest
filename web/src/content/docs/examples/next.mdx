@@ -1,0 +1,53 @@
+---
+title: Next.js
+description: How to use tailwindest with Next.js.
+---
+
+:::note
+[Next](https://nextjs.org) project created with
+[`create-next-app`](https://www.npmjs.com/package/create-next-app).
+:::
+
+## Setup
+
+1.  Create a new Next.js app with `create-next-app`:
+
+    ```bash
+    npx create-next-app@latest next
+    ```
+
+2.  Add Tailwind CSS to your Next.js app:
+
+    ```bash
+    npm install tailwindcss@latest postcss@latest autoprefixer@latest
+    ```
+
+3.  Initialize Tailwind CSS in your project:
+
+    ```bash
+    npx tailwindcss init -p
+    ```
+
+4.  Create a `styles/globals.css` file with the following content:
+
+    ```css
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+    ```
+
+5.  Import the `globals.css` file in your `app/layout.tsx`:
+
+    ```js
+    import "../styles/globals.css"
+
+    //...
+    ```
+
+6.  Follow the main [Setup guide](../setup) to install `tailwindest` and generate your `tw.ts` file.
+
+There you go! You have successfully set up Tailwind CSS in your Next.js app.
+
+:::note
+StackBlitz example is not available at the moment.
+:::

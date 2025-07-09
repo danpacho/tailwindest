@@ -1,0 +1,166 @@
+---
+title: create-tailwind-type
+description: Documentation for the create-tailwind-type CLI tool.
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components"
+
+### What is `create-tailwind-type`?
+
+`create-tailwind-type` is a CLI tool that generates TypeScript definitions from your `tailwind.config.js` file. This allows you to use all of your project's Tailwind CSS classes and variants with full type-safety.
+
+### Installation
+
+```bash /create-tailwind-type/
+npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
+```
+
+:::danger[Requires Tailwind CSS v4.0.0 or higher.]
+:::
+
+---
+
+### Usage Examples
+
+<CardGrid>
+    <Card title="Use custom plugins">
+        You might need to change the base directory to
+        `node_modules/tailwindcss` for your own project. ```bash npx
+        create-tailwind-type -b node_modules/tailwindcss ```
+    </Card>
+    <Card title="Generate exact variants">
+        This will generate exact variants instead of soft variants. This can
+        slowdown the TypeScript language server if you use it directly.
+        Importing subtypes will be fine. ```bash npx create-tailwind-type -S ```
+    </Card>
+    <Card title="Change output filename">
+        This will generate types in the `src/types/tailwind.d.ts` file. ```bash
+        npx create-tailwind-type -f src/types/tailwind.d.ts ```
+    </Card>
+</CardGrid>
+
+---
+
+## CLI Options
+
+| Option (Short) | Option (Long)                 | Description                                                                                                                                                | Default Value          |
+| :------------- | :---------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- |
+| `-b`           | `--base <path>`               | Specifies the base directory for @tailwindcss/node package. If omitted, the tool automatically resolves to the installed `@tailwindcss` package directory. | _None_ (auto-resolved) |
+| `-f`           | `--filename <filename>`       | Sets the output filename for the generated types.                                                                                                          | `tailwind.ts`          |
+| `-d`           | `--docs`                      | Enables documentation comments in the generated types. Use the inverse flag to disable them.                                                               | `true`                 |
+| `-D`           | `--no-docs`                   | Disables documentation comments in the generated types.                                                                                                    | N/A                    |
+| `-a`           | `--arbitrary-value`           | Allows the generation of arbitrary values in the output types. Use the inverse flag to disable this feature.                                               | `true`                 |
+| `-A`           | `--no-arbitrary-value`        | Disables arbitrary value generation.                                                                                                                       | N/A                    |
+| `-s`           | `--soft-variants`             | Enables soft variant generation. When disabled (using the inverse flag), the tool will generate exact variants instead.                                    | `true`                 |
+| `-S`           | `--no-soft-variants`          | Disables soft variant generation (resulting in exact variant generation).                                                                                  | N/A                    |
+| `-k`           | `--string-kind-variants-only` | Limits the generated types to only string kind variants.                                                                                                   | `false`                |
+| `-o`           | `--optional-property`         | Generates optional properties in the output types, which can be useful for partial configurations.                                                         | `false`                |
+| `-N`           | `--disable-variants`          | Disable variant generation and types, can be increase performance.                                                                                         | `false`                |
+| N/A            | `--version`                   | Displays the current CLI version.                                                                                                                          | N/A                    |
+| N/A            | `--help`                      | Displays help and usage information for the CLI tool.                                                                                                      | N/A                    |
+
+---
+
+## Detailed Option Descriptions
+
+### `-b, --base <path>`
+
+Specifies a custom base directory for locating Tailwind CSS files.
+
+- **Default:** Automatically resolves to the installed `@tailwindcss` package directory.
+- **Example:**
+    ```bash
+    npx create-tailwind-type -b ./custom
+    ```
+
+### `-f, --filename <filename>`
+
+Determines the output filename for the generated TypeScript types.
+
+- **Default:** `tailwind.ts`
+- **Example:**
+    ```bash
+    npx create-tailwind-type -f customTypes.ts
+    ```
+
+### `-d, --docs` / `--no-docs`
+
+Controls whether documentation comments are included in the generated types.
+
+- **Default:** Enabled (`true`)
+- **Examples:**
+    - To enable (or use the default):
+        ```bash
+        npx create-tailwind-type --docs
+        ```
+    - To disable:
+        ```bash
+        npx create-tailwind-type --no-docs
+        ```
+
+### `-a, --arbitrary-value` / `-A, --no-arbitrary-value`
+
+Toggles support for arbitrary value generation in the output types.
+
+- **Default:** Enabled (`true`)
+- **Examples:**
+    - To enable (or use the default):
+        ```bash
+        npx create-tailwind-type --arbitrary-value
+        npx create-tailwind-type -a
+        ```
+    - To disable:
+        ```bash
+        npx create-tailwind-type --no-arbitrary-value
+        npx create-tailwind-type -A
+        ```
+
+### `-s, --soft-variants` / `-S, --no-soft-variants`
+
+Manages soft variant generation. Disabling this option will instead produce exact variant types.
+
+- **Default:** Enabled (`true`)
+- **Examples:**
+    - To enable soft variants (default behavior):
+        ```bash
+        npx create-tailwind-type --soft-variants
+        npx create-tailwind-type -s
+        ```
+    - To disable soft variants (and generate exact variants):
+        ```bash
+        npx create-tailwind-type --no-soft-variants
+        npx create-tailwind-type -S
+        ```
+
+### `-k, --string-kind-variants-only`
+
+Limits the generated types to only string kind variants, which might be preferred in certain setups.
+
+- **Default:** `false`
+- **Example:**
+    ```bash
+    npx create-tailwind-type --string-kind-variants-only
+    npx create-tailwind-type -k
+    ```
+
+### `-o, --optional-property`
+
+Instructs the CLI to generate optional properties within the TypeScript definitions.
+
+- **Default:** `false`
+- **Example:**
+    ```bash
+    npx create-tailwind-type --optional-property
+    npx create-tailwind-type -o
+    ```
+
+### `-N, --disable-variants`
+
+Instructs the CLI to disable variant generation.
+
+- **Default:** `false`
+- **Example:**
+    ```bash
+    npx create-tailwind-type --disable-variants
+    npx create-tailwind-type -N
+    ```

@@ -1,0 +1,80 @@
+---
+title: Setup
+description: How to set up tailwindest in your project.
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components"
+
+## 1. Install packages
+
+Install `tailwindest` for core functionalities, and `create-tailwind-type` to generate types from your `tailwind.config.js`.
+
+<Tabs>
+    <TabItem label="npm">```bash npm i tailwindest ```</TabItem>
+    <TabItem label="yarn">```bash yarn add tailwindest ```</TabItem>
+    <TabItem label="pnpm">```bash pnpm add tailwindest ```</TabItem>
+</Tabs>
+
+## 2. Generate Tailwind types
+
+Run the following command to generate a `tailwind.ts` file in your project root. This file will contain all the necessary types based on your `tailwind.css`.
+
+```bash
+npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
+```
+
+:::caution
+Currently, `create-tailwind-type` only supports `tailwindcss@v4>=`.
+:::
+
+:::note
+You can customize the output path and other options. Check out the [`create-tailwind-type` documentation](/create-tailwind-type) for more details.
+:::
+
+## 3. Create styling tools
+
+Create a `tw.ts` (or `tw.js`) file to define your `tailwindest` tools.
+
+```ts filename="tw.ts"
+import {
+    createTools,
+    type CreateTailwindest,
+    type CreateTailwindLiteral,
+} from "tailwindest"
+import type { Tailwind, TailwindNestGroups } from "./tailwind" // Adjust path if needed
+
+// Create the main Tailwindest type
+export type Tailwindest = CreateTailwindest<{
+    tailwind: Tailwind
+    tailwindNestGroups: TailwindNestGroups
+
+    // Optional: customize prefix for screen/variant groups
+
+    // groupPrefix: "$" <-- prefix for group variants
+    // useArbitrary: true <-- enable arbitrary values, type-hinting is available for this option
+}>
+
+// Create a literal type for all possible Tailwind classes
+export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
+
+// Create the tools
+export const tw = createTools<{
+    tailwindest: Tailwindest
+    tailwindLiteral: TailwindLiteral
+    // useArbitrary: true
+    // useTypedLiteral: true <-- enables typed literal classes at tw.style().class(...typed literals)
+}>({
+    // Optional: if you use tailwind-merge
+    merger: twMerge, // <-- tailwind-merge as classname merger
+})
+```
+
+<br />
+
+:::tip
+For JavaScript projects, you can use JSDoc to get type support. The setup is similar, just with type annotations in comments.
+:::
+
+<br />
+
+Now you're all set! You can import `tw` from `tw.ts` and start creating typed styles.

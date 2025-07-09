@@ -1,0 +1,209 @@
+---
+title: Conditional styling
+description: How to do conditional styling with tailwindest.
+---
+
+Use `toggle`, `rotary`, `variants` functions for easy conditional styling.
+
+1.  `toggle`: change the style by **a `boolean` condition**
+2.  `rotary`: change the style by **some conditions**
+3.  `variants`: complex **combination of categorized conditions**
+
+![conditional styling design philosophies](/images/cond.png)
+
+## Toggle switch - `toggle`
+
+The `toggle` function is used to **change the style** by a **single `boolean` condition**. You should define a style for each of the `true` and `false` conditions and optionally define a common style for `true` and `false` conditions.
+
+### Mind concept
+
+![conditional styling - toggle](/images/toggle.png)
+
+### Implementation - `toggle`
+
+Define `themeBtn` style, using `toggle`.
+
+```ts /toggle/ /truthy/ /falsy/ /base/
+const themeBtn = tw.toggle({
+    base: {
+        // Base styles
+    },
+    truthy: {
+        backgroundColor: "bg-black",
+    },
+    falsy: {
+        backgroundColor: "bg-white",
+    },
+})
+```
+
+Use it in component.
+
+```tsx /isDarkMode/ /themeBtn/
+const ThemeBtn = () => {
+    const [isDarkMode, setIsDarkMode] = useState(false)
+
+    return (
+        <button className={themeBtn.class(isDarkMode)}>
+            {isDarkMode ? "light" : "dark"}
+        </button>
+    )
+}
+```
+
+## Rotary switch - `rotary`
+
+### Mind concept - `type`
+
+![conditional styling - type](/images/rotary.png)
+
+### Implementation
+
+Define button with `type`, `"default" | "success" | "error" | "pending"` variations.
+
+```tsx /default/ /success/ /error/ /pending/
+const button = tw.rotary({
+    base: {
+        // define common style for button type
+    },
+    default: {
+        borderColor: "border-neutral-100",
+    },
+    error: {
+        borderColor: "border-red-400",
+    },
+    pending: {
+        borderColor: "border-yellow-400",
+    },
+    success: {
+        borderColor: "border-green-400",
+    },
+})
+```
+
+### Usage
+
+Use it in component.
+
+:::note
+Use [**default
+parameter**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Default_parameters),
+to set default variant value
+:::
+
+```tsx /type/ /"default"/ /GetVariants/
+import { type GetVariants } from "tailwindest"
+
+const Button = ({
+    children,
+    onClick,
+    type = "default",
+}: React.PropsWithChildren<{
+    type?: GetVariants<typeof button>
+    onClick: () => void
+}>) => {
+    return (
+        <button onClick={onClick} className={button.class(type)}>
+            {children}
+        </button>
+    )
+}
+```
+
+## Combination of categorized conditions - `variants`
+
+### Mind concept - `type` & `size`
+
+![conditional styling - total](/images/variants.png)
+
+### Implementation
+
+Define complex variants with `variants`
+
+```ts /variants/ /type/ /size/ /default/ /error/ /pending/ /success/ /sm/ /md/ /lg/
+const button = tw.variants({
+    base: {
+        // Define base styles
+    },
+
+    variants: {
+        type: {
+            default: {
+                borderColor: "border-neutral-100",
+            },
+            error: {
+                borderColor: "border-red-400",
+            },
+            pending: {
+                borderColor: "border-yellow-400",
+            },
+            success: {
+                borderColor: "border-green-400",
+            },
+        },
+        size: {
+            sm: {
+                fontSize: "text-sm",
+            },
+            md: {
+                fontSize: "text-base",
+            },
+            lg: {
+                fontSize: "text-lg",
+            },
+        },
+    },
+})
+```
+
+### Usage
+
+Use it in component.
+
+:::note
+Use [**default
+parameter**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Default_parameters),
+to set default variant option
+:::
+
+```tsx /GetVariants/ /button/ /size/ /type/ /"md"/ /"default"/
+import { type GetVariants } from "tailwindest"
+
+interface ButtonProps extends GetVariants<typeof button> {
+    children: ReactNode
+    onClick: () => void
+}
+
+const Button = ({
+    children,
+    onClick,
+    size = "md",
+    type = "default",
+}: ButtonProps) => {
+    return (
+        <button
+            onClick={onClick}
+            className={button.class({
+                type,
+                size,
+            })}
+        >
+            {children}
+        </button>
+    )
+}
+```
+
+Use universal button.
+
+```tsx /size/ /type/ /"lg"/ /"success"/
+const SomeComponent = () => {
+    return (
+        <div>
+            <Button size="lg" type="success" light onClick={welcome}>
+                Succeeded
+            </Button>
+        </div>
+    )
+}
+```

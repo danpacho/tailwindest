@@ -1,0 +1,65 @@
+---
+title: def
+description: API Reference for def.
+---
+
+## Briefly
+
+`tw.def` is a powerful utility that combines the flexibility of `clsx` for conditional classes with `tailwindest`'s record-based styling. It merges class lists and style objects into a single, deduplicated class name string.
+
+## 1. Type definition
+
+```ts
+;(classList: ClassList<ClassLiteral>, ...styleList: Array<StyleType>) => string
+```
+
+## 2. Spec
+
+### Parameters
+
+- **`classList`**: An array of class values, similar to `clsx`. It can contain strings, arrays, and objects for conditional classes. If you've configured `tailwindLiteral` in `createTools`, this will be strongly typed.
+- **`...styleList`**: A rest parameter for any number of `tailwindest` style objects. These are merged together and then merged with the result of `classList`.
+
+:::note
+Styles from `styleList` (record-based) will override styles from
+`classList`. When multiple `styleList` objects are provided, the last one
+has the highest priority.
+:::
+
+### Example
+
+```tsx
+import { tw } from "./tw"
+
+const condition = true
+
+const buttonClasses = tw.def(
+    // 1. A clsx-like array for class names
+    [
+        "font-semibold",
+        "border",
+        "rounded",
+        condition ? "text-white" : "text-black",
+    ],
+    // 2. A base style object
+    {
+        padding: "p-2",
+        backgroundColor: "bg-blue-500",
+        ":hover": {
+            backgroundColor: "hover:bg-blue-700",
+        },
+    },
+    // 3. An override style object
+    {
+        // This will override the padding from the object above
+        padding: "p-4",
+        // This will override the text color from the classList
+        color: "text-neutral-100",
+    }
+)
+
+// Resulting className (if merger like tw-merge is used):
+// "font-semibold border rounded p-4 bg-blue-500 hover:bg-blue-700 text-neutral-100"
+
+const Button = () => <button className={buttonClasses}>Click me</button>
+```

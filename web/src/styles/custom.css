@@ -1,0 +1,24 @@
+:root {
+    --sl-color-accent-low: white;
+    --sl-color-accent: #ff7500;
+    --sl-color-accent-high: #ff7500;
+}
+
+/* Target the hero image on the splash page */
+.hero img {
+    width: 275px;
+    height: 275px;
+    object-fit: contain;
+}
+
+/* Mediaquery for mobile page */
+@media (max-width: 768px) {
+    .hero img {
+        width: 125px;
+        height: 125px;
+    }
+}
+
+.nova-site-title span {
+    font-weight: 700;
+}
