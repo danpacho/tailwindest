@@ -8,13 +8,17 @@ description: The benefits of using tailwindest.
 Bringing a type system to Tailwind was the overarching goal of this project.
 Let's take a look at how you can benefit from type stability with tailwindest.
 
-### Get type definition of `tailwind`
+### 1.1 Get full type definition of `tailwind`
 
 ```ts
-type TailwindClass = Tailwindest[keyof Tailwindest]
+// 1. import generated types
+import type { Tailwind, TailwindNestGroups } from "~/tailwind.ts"
+
+// 2. create type
+export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
 ```
 
-### Infinite nest condition
+### 1.2 Autocompleted nest condition
 
 `typescript`'s recursive type computation allows you to write infinite Nested Break conditions.
 
@@ -45,60 +49,45 @@ const autocompleted = tw.style({
 })
 ```
 
-## 2. Great Readability
+## 2. Flexibility
 
-Design an **intuitive, primitive, familiar API** is essential process.
-Final conclusion is going back to the most primitive form, as if we were writing down pure `CSS`. And this led to the conclusion that the CSS in JS form is the best fit.
+### 2.1 CSS-in-JS like syntax
 
-:::note
-Most of the `tailwindcss` **properties name is based on pure `CSS`
-properties,** except `tailwind`'s sole utility properties like `mx-1`.
-:::
+Use pure `css` based properties to write styles.
 
 ```ts
-const box = tw.style({
+const easyToRead = tw.style({
     display: "flex",
     flexDirection: "flex-row",
     alignItems: "items-center",
     justifyContent: "justify-center",
     gap: "gap-2",
-
-    margin: "mx-2",
+    padding: "p-2",
+    margin: "m-2",
 })
 ```
 
-### Colocate nest conditions
+### 2.2 Normal CSS writings
 
-In pure `tailwind`, you should write nest conditions like this.
-
-```ts
-const smConditions =
-    "sm:flex sm:items-center sm:justify-center sm:p-2 sm:m-2 sm:border sm:rounded-sm"
-```
-
-As you can see, the `sm:` expression is repeated. But in tailwindest, you can colocate nest conditions in one `object`.
+Also there is helpers for writing classnames easily([`tw.def`]()).
 
 ```ts
-const easyToRead = tw.style({
-    sm: {
-        display: "sm:flex",
-        alignItems: "sm:items-center",
-        justifyContent: "sm:justify-center",
-
-        padding: "sm:p-2",
-        margin: "sm:m-2",
-
-        borderWidth: "sm:border",
-        borderRadius: "sm:rounded-sm",
-    },
-})
+const easyToRes = tw.def([
+    "flex",
+    "flex-row",
+    "items-center",
+    "justify-center",
+    "gap-2",
+    "p-2",
+    "m-2",
+])
 ```
 
 ## 3. Reusability
 
 tailwindest handles `string`. That means, we can reuse all the elements of function.
 
-### Reuse all elements
+### 3.1 Reuse all objects
 
 ```ts
 const box = tw.style({

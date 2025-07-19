@@ -7,7 +7,7 @@ import { Tabs, TabItem } from "@astrojs/starlight/components"
 
 ## 1. Install packages
 
-Install `tailwindest` for core functionalities, and `create-tailwind-type` to generate types from your `tailwind.config.js`.
+Install `tailwindest` for core functionalities, and `create-tailwind-type` to generate types from your `tailwind.css`.
 
 <Tabs>
     <TabItem label="npm">```bash npm i tailwindest ```</TabItem>
@@ -19,13 +19,13 @@ Install `tailwindest` for core functionalities, and `create-tailwind-type` to ge
 
 Run the following command to generate a `tailwind.ts` file in your project root. This file will contain all the necessary types based on your `tailwind.css`.
 
+:::danger
+Currently, `create-tailwind-type` only supports `tailwindcss@v4>=`.
+:::
+
 ```bash
 npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
 ```
-
-:::caution
-Currently, `create-tailwind-type` only supports `tailwindcss@v4>=`.
-:::
 
 :::note
 You can customize the output path and other options. Check out the [`create-tailwind-type` documentation](/create-tailwind-type) for more details.
@@ -41,7 +41,10 @@ import {
     type CreateTailwindest,
     type CreateTailwindLiteral,
 } from "tailwindest"
+
 import type { Tailwind, TailwindNestGroups } from "./tailwind" // Adjust path if needed
+
+import { twMerge } from "tailwind-merge"
 
 // Create the main Tailwindest type
 export type Tailwindest = CreateTailwindest<{
@@ -69,11 +72,20 @@ export const tw = createTools<{
 })
 ```
 
-<br />
+## 4. Exclude generated types from your `tailwind.css`
 
-:::tip
-For JavaScript projects, you can use JSDoc to get type support. The setup is similar, just with type annotations in comments.
+:::danger
+Make sure to exclude the generated `tailwind.ts` from your `tailwind.css` file to **prevent all-css from being included in the generated CSS.**
 :::
+
+```css filename="tailwind.css"
+@import "tailwindcss";
+/* IMPORTANT */
+/* Specify not-include generated type definitions */
+@source not "tailwind.ts";
+
+/* Your Tailwind CSS styles here */
+```
 
 <br />
 

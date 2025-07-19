@@ -13,24 +13,17 @@ Tailwindest is a lightweight and fast **className generation library** only for 
 With type safety, maintainable class names, and maximized reusable style designs,
 you can make more robust products.
 
-## Classname generator
+## Why not use tailwindcss directly?
 
-The fact that tailwindest is a `string` generator gives it the following advantages.
+Tailwindest builds on top of tailwindcss to provide a more robust styling solution. It introduces a type-safe API for defining styles, making it easier to work with complex designs.
 
-1.  **Tiny bundle size, 768B**
-2.  **Independency of framework and environment**
-3.  **Zero compile steps**
+## Define re-usable styles
+
+With Tailwindest, you can define reusable styles that can be easily applied across your components. This helps to maintain consistency and reduces duplication in your code.
 
 ## Elegant conditional styling
 
-The easiest way to understand conditional styling is to **think of switches**.
-We're surrounded by them all the time: we turn lights on and off, and our beloved keyboards are all switches. **Conditional styling can also be thought of as a type of switch** (albeit a physical one).
-
-### Toggle switch
-
-The simplest switch is a `toggle`, which can only express two states: on/off. Let's use this concept in programming.
-You need to create a button that supports dark/light mode, i.e and **its style should change depending on the value of a boolean variable called `isDarkMode`**.
-It's like a light switch: pressing it (on = `true`) turns it on (light mode), pressing the other side (off = `false`) turns it off (dark mode).
+### 1. Toggle
 
 ![toggle concept](/images/toggle.png)
 
@@ -50,10 +43,7 @@ const ThemeBtn = ({ children }) => {
 }
 ```
 
-### Rotary switch
-
-But in the real world, we can't express everything with a toggle switch, so we need to create a switch that's a step more complex: a rotary switch. If you've ever used a microwave oven, it's easy to understand! From steps 1, 2 to 10, we can fine-tune the time and intensity we want with a rotary switch.
-So, for example, if we want to present a UI with 4 states: default, success, failure and pending, we can import the concept of a rotary switch: if it's success, we can associate a style for success, if it's failure, we can associate a style for failure, and so on.
+### 2. Rotary
 
 ![rotary concept](/images/rotary.png)
 
@@ -79,16 +69,9 @@ const Button = ({
 }
 ```
 
-### Combination of rotary, variants
+### 3. Variants
 
-However, there may be times when we need a few more states. In other words, we may need to **create multiple rotary switches** to represent more complex states.
-This is where the `variants` comes in.
-
-`variants` are **combinations of rotary switches** - think of the **microwave at home**. You'll notice that it has a few rotary switches, such as **time** and an **intensity**.
-
-<div class="w-full md:w-2/3 mt-4">![microwave](/images/microwave.png)</div>
-
-Similarly, with variants, you first create a category of switches for each of the criteria you need to adjust, and then just combine them.
+`variants` are **combinations of rotary switches**
 
 ![variants concept](/images/variants.png)
 
@@ -117,7 +100,7 @@ interface BtnProps extends GetVariants<typeof btn> {
 }
 const Btn = ({ children, type = "default", size = "md" }) => (
     <button
-        className={btn.class()({
+        className={btn.class({
             type,
             size,
         })}
@@ -127,14 +110,13 @@ const Btn = ({ children, type = "default", size = "md" }) => (
 )
 ```
 
-## Pros and cons
+## What is pros and cons?
 
 ### Pros
 
-1.  **Type-safety**
-2.  **Readability**
-3.  **Reusability**
-4.  **Maintainability**
+1.  **Type Safety**
+2.  **Reusability**
+3.  **Maintainability**
 
 ### Cons
 
@@ -143,19 +125,16 @@ const Btn = ({ children, type = "default", size = "md" }) => (
 
 ### Conclusion
 
+:::note
+
+1.  **Short `className`**: `inline-class`
+2.  **Complex & Reusable `className`**: tailwindest
+
+    :::
+
 The great thing about tailwind is that **it makes it quick and easy to get your product** done. But it introduces new problems: **readability** and **maintainability**.
 In contrast, tailwindest can't get your product done any faster than regular tailwind. It **specializes in designing products that are easy to refactor and robust style**.
 
 Now just combine the best of both worlds
 
-:::note
-if your `className` is too long to maintain, write it with tailwindest, but
-if it's short and easy to read, write an inline `className`.
-:::
-
 If you apply tailwindest in the right circumstances, you can build a much more robust product with tailwind.
-
-## Real world adaptation
-
-1.  **Short `className`**: `inline-class`
-2.  **Complex & Reusable `className`**: tailwindest
