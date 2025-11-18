@@ -34,7 +34,7 @@
         "boxen": "^8.0.1",
         "chalk": "^5.4.1",
         "commander": "^13.1.0",
-        "glob": "^11.0.1",
+        "glob": "^11.1.0",
         "lightningcss": "^1.29.1",
         "postcss": "^8.5.3",
         "prettier": "^3.5.2",
