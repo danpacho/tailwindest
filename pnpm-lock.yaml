@@ -72,6 +72,25 @@ importers:
         specifier: ^3.0.8
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.6.0)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/compiler:
+    dependencies:
+      create-tailwind-type:
+        specifier: workspace:*
+        version: link:../create-tailwind-type
+      ts-morph:
+        specifier: ^24.0.0
+        version: 24.0.0
+    devDependencies:
+      tsup:
+        specifier: ^8.2.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.12)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@25.6.0)(jsdom@26.1.0)(lightningcss@1.32.0)
+
   packages/create-tailwind-type:
     dependencies:
       '@tailwindcss/node':

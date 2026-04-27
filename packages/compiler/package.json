@@ -1,0 +1,22 @@
+{
+    "name": "@tailwindest/compiler",
+    "version": "0.0.1",
+    "description": "Zero-runtime CSS-in-JS compiler for tailwindest",
+    "type": "module",
+    "main": "dist/index.mjs",
+    "types": "dist/index.d.mts",
+    "scripts": {
+        "build": "tsup",
+        "test": "vitest run",
+        "dev": "tsup --watch"
+    },
+    "dependencies": {
+        "ts-morph": "^24.0.0",
+        "create-tailwind-type": "workspace:*"
+    },
+    "devDependencies": {
+        "tsup": "^8.2.0",
+        "typescript": "^5.5.0",
+        "vitest": "^2.0.0"
+    }
+}
