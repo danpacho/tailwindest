@@ -8,7 +8,13 @@ import { Project, ScriptTarget } from "ts-morph"
 import { TokenAnalyzerImpl } from "./analyzer/token_analyzer"
 import { createContext } from "./context/transformer_context"
 import { TransformerRegistry } from "./registry/transformer_registry"
-import { CvaWalker, CnWalker, ClassNameWalker } from "./walkers"
+import {
+    CvaWalker,
+    CnWalker,
+    ClassNameWalker,
+    type CnWalkerConfig,
+    type ClassNameWalkerConfig,
+} from "./walkers"
 import type { CSSPropertyResolver } from "create-tailwind-type"
 import type { TransformResult, Diagnostic } from "./types"
 
@@ -21,6 +27,10 @@ export interface TransformOptions {
      * @default ["cva", "cn", "classname"]
      */
     walkers?: Array<"cva" | "cn" | "classname">
+    /**
+     * Global configuration for the transformer.
+     */
+    config?: CnWalkerConfig & ClassNameWalkerConfig
 }
 
 export interface TransformOutput {
@@ -55,12 +65,12 @@ export async function transform(
 
     const selectedWalkers = options.walkers ?? ["cva", "cn", "classname"]
     if (selectedWalkers.includes("cva")) registry.register(new CvaWalker())
-    if (selectedWalkers.includes("cn")) registry.register(new CnWalker())
+    if (selectedWalkers.includes("cn"))
+        registry.register(new CnWalker(options.config))
     if (selectedWalkers.includes("classname"))
-        registry.register(new ClassNameWalker())
+        registry.register(new ClassNameWalker(options.config))
 
     const results = registry.transform(sourceFile, context)
-    context.imports.applyTo(sourceFile)
 
     const code = sourceFile.getFullText()
 

@@ -1,12 +1,24 @@
 import { Node } from "ts-morph"
 import type { TransformerContext } from "../context"
 import type { TransformResult } from "../types"
-import type { ClassTransformerWalker } from "./walker_interface"
+import { ClassTransformerWalker } from "./walker_interface"
 import { objectToString } from "./utils/object_to_string"
+import { getEnclosingComponentName, getTagName } from "./utils/naming"
+
+export interface ClassNameWalkerConfig {
+    /**
+     * Minimum number of resolved CSS properties required to generate a style object.
+     * If the number of properties is below this threshold, raw strings will be used via `tw.join`.
+     * @default 0
+     */
+    objectThreshold?: number
+}
 
 export class ClassNameWalker implements ClassTransformerWalker {
     public readonly priority = 30
     public readonly name = "ClassNameWalker"
+
+    constructor(private readonly config: ClassNameWalkerConfig = {}) {}
 
     public canWalk(node: Node): boolean {
         if (!Node.isJsxAttribute(node)) return false
@@ -91,7 +103,23 @@ export class ClassNameWalker implements ClassTransformerWalker {
             }
         }
 
-        const twCall = `${context.tailwindestIdentifier}.style(${objectToString(staticObj, 4)}).class()`
+        const propertyCount = Object.keys(staticObj).length
+        const threshold = this.config.objectThreshold ?? 0
+
+        let twCall = ""
+        if (propertyCount >= threshold) {
+            const componentName = getEnclosingComponentName(node)
+            const tagName = getTagName(node)
+            const constantName = context.styles.getOrRegister(
+                staticObj,
+                node,
+                componentName,
+                tagName
+            )
+            twCall = `${constantName}.class()`
+        } else {
+            twCall = `${context.tailwindestIdentifier}.join("${classString}")`
+        }
         const finalReplacement = `className={${twCall}}`
 
         const original = node.getText()

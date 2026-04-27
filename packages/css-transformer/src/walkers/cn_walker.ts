@@ -1,12 +1,24 @@
 import { Node } from "ts-morph"
 import type { TransformerContext } from "../context"
 import type { TransformResult } from "../types"
-import type { ClassTransformerWalker } from "./walker_interface"
+import { ClassTransformerWalker } from "./walker_interface"
 import { objectToString } from "./utils/object_to_string"
+import { getEnclosingComponentName, getTagName } from "./utils/naming"
+
+export interface CnWalkerConfig {
+    /**
+     * Minimum number of resolved CSS properties required to generate a style object.
+     * If the number of properties is below this threshold, raw strings will be used via `tw.join`.
+     * @default 0
+     */
+    objectThreshold?: number
+}
 
 export class CnWalker implements ClassTransformerWalker {
     public readonly priority = 20
     public readonly name = "CnWalker"
+
+    constructor(private readonly config: CnWalkerConfig = {}) {}
 
     public canWalk(node: Node): boolean {
         if (!Node.isCallExpression(node)) return false
@@ -65,20 +77,46 @@ export class CnWalker implements ClassTransformerWalker {
             staticObj = context.analyzer.buildObjectTree(tokens)
         }
 
-        const hasStatic = Object.keys(staticObj).length > 0
+        const propertyCount = Object.keys(staticObj).length
+        const threshold = this.config.objectThreshold ?? 0
+        const hasStatic = propertyCount > 0
         const hasDynamic = dynamicArgs.length > 0
 
         let finalReplacement = ""
 
         if (hasStatic && hasDynamic) {
-            finalReplacement = `${context.tailwindestIdentifier}.def([${dynamicArgs.join(", ")}], ${objectToString(staticObj, 4)})`
+            if (propertyCount >= threshold) {
+                const componentName = getEnclosingComponentName(node)
+                const tagName = getTagName(node)
+                const constantName = context.styles.getOrRegister(
+                    staticObj,
+                    node,
+                    componentName,
+                    tagName
+                )
+                finalReplacement = `${constantName}.class(${dynamicArgs.join(", ")})`
+            } else {
+                const combinedStatic = staticClassNames.join(" ")
+                finalReplacement = `${context.tailwindestIdentifier}.join("${combinedStatic}", ${dynamicArgs.join(", ")})`
+            }
         } else if (hasStatic && !hasDynamic) {
-            finalReplacement = `${context.tailwindestIdentifier}.style(${objectToString(staticObj, 4)}).class()`
+            if (propertyCount >= threshold) {
+                const componentName = getEnclosingComponentName(node)
+                const tagName = getTagName(node)
+                const constantName = context.styles.getOrRegister(
+                    staticObj,
+                    node,
+                    componentName,
+                    tagName
+                )
+                finalReplacement = `${constantName}.class()`
+            } else {
+                finalReplacement = `${context.tailwindestIdentifier}.join("${staticClassNames.join(" ")}")`
+            }
         } else if (!hasStatic && hasDynamic) {
             finalReplacement = `${context.tailwindestIdentifier}.join(${dynamicArgs.join(", ")})`
         } else {
-            // Nothing resolved (e.g., static but no resolvable tokens, though analyzer keeps unresolved as is)
-            // But if we got here and nothing is there, fallback to empty string
+            // Nothing resolved
             finalReplacement = `""`
         }
 
