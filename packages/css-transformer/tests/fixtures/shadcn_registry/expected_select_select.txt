@@ -11,53 +11,61 @@ const SelectGroup = SelectPrimitive.Group
 
 const SelectValue = SelectPrimitive.Value
 
+
+const selectTriggerSelectPrimitiveTrigger = tw.style({
+    display: "flex",
+    height: "h-9",
+    width: "w-full",
+    alignItems: "items-center",
+    justifyContent: "justify-between",
+    whiteSpace: "whitespace-nowrap",
+    borderRadius: "rounded-md",
+    borderWidth: ["border", "border-input"],
+    backgroundColor: "bg-transparent",
+    padding: ["px-3", "py-2"],
+    fontSize: "text-sm",
+    boxShadow: ["shadow-sm", "ring-offset-background"],
+    "data-[placeholder]": {
+        color: "data-[placeholder]:text-muted-foreground",
+    },
+    focus: {
+        outlineStyle: "focus:outline-none",
+        boxShadow: ["focus:ring-1", "focus:ring-ring"],
+    },
+    disabled: {
+        cursor: "disabled:cursor-not-allowed",
+        opacity: "disabled:opacity-50",
+    },
+    "[&>span]": {
+        lineClamp: "[&>span]:line-clamp-1",
+    },
+});
+
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={tw.def([className], {
-        display: "flex",
-        height: "h-9",
-        width: "w-full",
-        alignItems: "items-center",
-        justifyContent: "justify-between",
-        whiteSpace: "whitespace-nowrap",
-        borderRadius: "rounded-md",
-        borderWidth: ["border", "border-input"],
-        backgroundColor: "bg-transparent",
-        padding: ["px-3", "py-2"],
-        fontSize: "text-sm",
-        boxShadow: ["shadow-sm", "ring-offset-background"],
-        "data-[placeholder]": {
-            color: "data-[placeholder]:text-muted-foreground",
-        },
-        focus: {
-            outlineStyle: "focus:outline-none",
-            boxShadow: ["focus:ring-1", "focus:ring-ring"],
-        },
-        disabled: {
-            cursor: "disabled:cursor-not-allowed",
-            opacity: "disabled:opacity-50",
-        },
-        "[&>span]": {
-            lineClamp: "[&>span]:line-clamp-1",
-        },
-    })}
+    className={selectTriggerSelectPrimitiveTrigger.class(className)}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className={tw.style({
-                height: "h-4",
-                width: "w-4",
-                opacity: "opacity-50",
-            }).class()} />
+      <ChevronDown className={tw.join("h-4 w-4 opacity-50")} />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
+
+
+const selectScrollDownButtonSelectPrimitiveScrollDownButton = tw.style({
+    display: "flex",
+    cursor: "cursor-default",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    padding: "py-1",
+});
 
 const SelectScrollUpButton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
@@ -65,19 +73,10 @@ const SelectScrollUpButton = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.ScrollUpButton
     ref={ref}
-    className={tw.def([className], {
-        display: "flex",
-        cursor: "cursor-default",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-        padding: "py-1",
-    })}
+    className={selectScrollDownButtonSelectPrimitiveScrollDownButton.class(className)}
     {...props}
   >
-    <ChevronUp className={tw.style({
-            height: "h-4",
-            width: "w-4",
-        }).class()} />
+    <ChevronUp className={tw.join("h-4 w-4")} />
   </SelectPrimitive.ScrollUpButton>
 ))
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
@@ -88,23 +87,29 @@ const SelectScrollDownButton = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.ScrollDownButton
     ref={ref}
-    className={tw.def([className], {
-        display: "flex",
-        cursor: "cursor-default",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-        padding: "py-1",
-    })}
+    className={selectScrollDownButtonSelectPrimitiveScrollDownButton.class(className)}
     {...props}
   >
-    <ChevronDown className={tw.style({
-            height: "h-4",
-            width: "w-4",
-        }).class()} />
+    <ChevronDown className={tw.join("h-4 w-4")} />
   </SelectPrimitive.ScrollDownButton>
 ))
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName
+
+
+const selectContentSelectPrimitiveContent = tw.style({
+    position: "relative",
+    zIndex: "z-50",
+    maxHeight: "max-h-[--radix-select-content-available-height]",
+    minWidth: "min-w-[8rem]",
+    overflow: ["overflow-y-auto", "overflow-x-hidden"],
+    borderRadius: "rounded-md",
+    borderWidth: "border",
+    backgroundColor: "bg-popover",
+    color: "text-popover-foreground",
+    boxShadow: "shadow-md",
+    transformOrigin: "origin-[--radix-select-content-transform-origin]",
+});
 
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
@@ -113,29 +118,15 @@ const SelectContent = React.forwardRef<
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
-      className={tw.def([position === "popper" &&
-                "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className], {
-          position: "relative",
-          zIndex: "z-50",
-          maxHeight: "max-h-[--radix-select-content-available-height]",
-          minWidth: "min-w-[8rem]",
-          overflow: ["overflow-y-auto", "overflow-x-hidden"],
-          borderRadius: "rounded-md",
-          borderWidth: "border",
-          backgroundColor: "bg-popover",
-          color: "text-popover-foreground",
-          boxShadow: "shadow-md",
-          transformOrigin: "origin-[--radix-select-content-transform-origin]",
-      })}
+      className={selectContentSelectPrimitiveContent.class(position === "popper" &&
+                "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className)}
       position={position}
       {...props}
     >
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
-        className={tw.def([position === "popper" &&
-                            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"], {
-                    padding: "p-1",
-                })}
+        className={tw.join("p-1", position === "popper" &&
+                            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]")}
       >
         {children}
       </SelectPrimitive.Viewport>
@@ -151,15 +142,43 @@ const SelectLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={tw.def([className], {
-        padding: ["px-2", "py-1.5"],
-        fontSize: "text-sm",
-        fontWeight: "font-semibold",
-    })}
+    className={tw.join("px-2 py-1.5 text-sm font-semibold", className)}
     {...props}
   />
 ))
 SelectLabel.displayName = SelectPrimitive.Label.displayName
+
+
+const selectItemSpan = tw.style({
+    position: "absolute",
+    right: "right-2",
+    display: "flex",
+    height: "h-3.5",
+    width: "w-3.5",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+});
+
+const selectItemSelectPrimitiveItem = tw.style({
+    position: "relative",
+    display: "flex",
+    width: "w-full",
+    cursor: "cursor-default",
+    userSelect: "select-none",
+    alignItems: "items-center",
+    borderRadius: "rounded-sm",
+    padding: ["py-1.5", "pl-2", "pr-8"],
+    fontSize: "text-sm",
+    outlineStyle: "outline-none",
+    focus: {
+        backgroundColor: "focus:bg-accent",
+        color: "focus:text-accent-foreground",
+    },
+    "data-[disabled]": {
+        pointerEvents: "data-[disabled]:pointer-events-none",
+        opacity: "data-[disabled]:opacity-50",
+    },
+});
 
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
@@ -167,42 +186,12 @@ const SelectItem = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
-    className={tw.def([className], {
-        position: "relative",
-        display: "flex",
-        width: "w-full",
-        cursor: "cursor-default",
-        userSelect: "select-none",
-        alignItems: "items-center",
-        borderRadius: "rounded-sm",
-        padding: ["py-1.5", "pl-2", "pr-8"],
-        fontSize: "text-sm",
-        outlineStyle: "outline-none",
-        focus: {
-            backgroundColor: "focus:bg-accent",
-            color: "focus:text-accent-foreground",
-        },
-        "data-[disabled]": {
-            pointerEvents: "data-[disabled]:pointer-events-none",
-            opacity: "data-[disabled]:opacity-50",
-        },
-    })}
+    className={selectItemSelectPrimitiveItem.class(className)}
     {...props}
   >
-    <span className={tw.style({
-            position: "absolute",
-            right: "right-2",
-            display: "flex",
-            height: "h-3.5",
-            width: "w-3.5",
-            alignItems: "items-center",
-            justifyContent: "justify-center",
-        }).class()}>
+    <span className={selectItemSpan.class()}>
       <SelectPrimitive.ItemIndicator>
-        <Check className={tw.style({
-                    height: "h-4",
-                    width: "w-4",
-                }).class()} />
+        <Check className={tw.join("h-4 w-4")} />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -216,11 +205,7 @@ const SelectSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Separator
     ref={ref}
-    className={tw.def([className], {
-        margin: ["-mx-1", "my-1"],
-        height: "h-px",
-        backgroundColor: "bg-muted",
-    })}
+    className={tw.join("-mx-1 my-1 h-px bg-muted", className)}
     {...props}
   />
 ))

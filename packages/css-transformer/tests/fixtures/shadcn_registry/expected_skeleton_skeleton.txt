@@ -6,11 +6,7 @@ function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={tw.def([className], {
-              animation: "animate-pulse",
-              borderRadius: "rounded-md",
-              backgroundColor: "bg-primary/10",
-          })}
+      className={tw.join("animate-pulse rounded-md bg-primary/10", className)}
       {...props}
     />
   )

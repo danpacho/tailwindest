@@ -17,6 +17,30 @@ const DropdownMenuSub = DropdownMenuPrimitive.Sub
 
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
 
+
+const dropdownMenuSubTriggerDropdownMenuPrimitiveSubTrigger = tw.style({
+    display: "flex",
+    cursor: "cursor-default",
+    userSelect: "select-none",
+    alignItems: "items-center",
+    gap: "gap-2",
+    borderRadius: "rounded-sm",
+    padding: ["px-2", "py-1.5"],
+    fontSize: "text-sm",
+    outlineStyle: "outline-none",
+    focus: {
+        backgroundColor: "focus:bg-accent",
+    },
+    "data-[state=open]": {
+        backgroundColor: "data-[state=open]:bg-accent",
+    },
+    "[&_svg]": {
+        pointerEvents: "[&_svg]:pointer-events-none",
+        width: "[&_svg]:size-4",
+        flexShrink: "[&_svg]:shrink-0",
+    },
+});
+
 const DropdownMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
@@ -25,38 +49,29 @@ const DropdownMenuSubTrigger = React.forwardRef<
 >(({ className, inset, children, ...props }, ref) => (
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
-    className={tw.def([inset && "pl-8", className], {
-        display: "flex",
-        cursor: "cursor-default",
-        userSelect: "select-none",
-        alignItems: "items-center",
-        gap: "gap-2",
-        borderRadius: "rounded-sm",
-        padding: ["px-2", "py-1.5"],
-        fontSize: "text-sm",
-        outlineStyle: "outline-none",
-        focus: {
-            backgroundColor: "focus:bg-accent",
-        },
-        "data-[state=open]": {
-            backgroundColor: "data-[state=open]:bg-accent",
-        },
-        "[&_svg]": {
-            pointerEvents: "[&_svg]:pointer-events-none",
-            width: "[&_svg]:size-4",
-            flexShrink: "[&_svg]:shrink-0",
-        },
-    })}
+    className={dropdownMenuSubTriggerDropdownMenuPrimitiveSubTrigger.class(inset && "pl-8", className)}
     {...props}
   >
     {children}
-    <ChevronRight className={tw.style({
-            margin: "ml-auto",
-        }).class()} />
+    <ChevronRight className={tw.join("ml-auto")} />
   </DropdownMenuPrimitive.SubTrigger>
 ))
 DropdownMenuSubTrigger.displayName =
   DropdownMenuPrimitive.SubTrigger.displayName
+
+
+const dropdownMenuSubContentDropdownMenuPrimitiveSubContent = tw.style({
+    zIndex: "z-50",
+    minWidth: "min-w-[8rem]",
+    overflow: "overflow-hidden",
+    borderRadius: "rounded-md",
+    borderWidth: "border",
+    backgroundColor: "bg-popover",
+    padding: "p-1",
+    color: "text-popover-foreground",
+    boxShadow: "shadow-lg",
+    transformOrigin: "origin-[--radix-dropdown-menu-content-transform-origin]",
+});
 
 const DropdownMenuSubContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
@@ -64,23 +79,27 @@ const DropdownMenuSubContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.SubContent
     ref={ref}
-    className={tw.def([className], {
-        zIndex: "z-50",
-        minWidth: "min-w-[8rem]",
-        overflow: "overflow-hidden",
-        borderRadius: "rounded-md",
-        borderWidth: "border",
-        backgroundColor: "bg-popover",
-        padding: "p-1",
-        color: "text-popover-foreground",
-        boxShadow: "shadow-lg",
-        transformOrigin: "origin-[--radix-dropdown-menu-content-transform-origin]",
-    })}
+    className={dropdownMenuSubContentDropdownMenuPrimitiveSubContent.class(className)}
     {...props}
   />
 ))
 DropdownMenuSubContent.displayName =
   DropdownMenuPrimitive.SubContent.displayName
+
+
+const dropdownMenuContentDropdownMenuPrimitiveContent = tw.style({
+    zIndex: "z-50",
+    maxHeight: "max-h-[var(--radix-dropdown-menu-content-available-height)]",
+    minWidth: "min-w-[8rem]",
+    overflow: ["overflow-y-auto", "overflow-x-hidden"],
+    borderRadius: "rounded-md",
+    borderWidth: "border",
+    backgroundColor: "bg-popover",
+    padding: "p-1",
+    color: "text-popover-foreground",
+    boxShadow: "shadow-md",
+    transformOrigin: "origin-[--radix-dropdown-menu-content-transform-origin]",
+});
 
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
@@ -90,24 +109,39 @@ const DropdownMenuContent = React.forwardRef<
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
-      className={tw.def([className], {
-          zIndex: "z-50",
-          maxHeight: "max-h-[var(--radix-dropdown-menu-content-available-height)]",
-          minWidth: "min-w-[8rem]",
-          overflow: ["overflow-y-auto", "overflow-x-hidden"],
-          borderRadius: "rounded-md",
-          borderWidth: "border",
-          backgroundColor: "bg-popover",
-          padding: "p-1",
-          color: "text-popover-foreground",
-          boxShadow: "shadow-md",
-          transformOrigin: "origin-[--radix-dropdown-menu-content-transform-origin]",
-      })}
+      className={dropdownMenuContentDropdownMenuPrimitiveContent.class(className)}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>
 ))
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
+
+
+const dropdownMenuItemDropdownMenuPrimitiveItem = tw.style({
+    position: "relative",
+    display: "flex",
+    cursor: "cursor-default",
+    userSelect: "select-none",
+    alignItems: "items-center",
+    gap: "gap-2",
+    borderRadius: "rounded-sm",
+    padding: ["px-2", "py-1.5"],
+    fontSize: "text-sm",
+    outlineStyle: "outline-none",
+    transitionProperty: "transition-colors",
+    focus: {
+        backgroundColor: "focus:bg-accent",
+        color: "focus:text-accent-foreground",
+    },
+    "data-[disabled]": {
+        pointerEvents: "data-[disabled]:pointer-events-none",
+        opacity: "data-[disabled]:opacity-50",
+    },
+    "[&>svg]": {
+        width: "[&>svg]:size-4",
+        flexShrink: "[&>svg]:shrink-0",
+    },
+});
 
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
@@ -117,35 +151,43 @@ const DropdownMenuItem = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
     ref={ref}
-    className={tw.def([inset && "pl-8", className], {
-        position: "relative",
-        display: "flex",
-        cursor: "cursor-default",
-        userSelect: "select-none",
-        alignItems: "items-center",
-        gap: "gap-2",
-        borderRadius: "rounded-sm",
-        padding: ["px-2", "py-1.5"],
-        fontSize: "text-sm",
-        outlineStyle: "outline-none",
-        transitionProperty: "transition-colors",
-        focus: {
-            backgroundColor: "focus:bg-accent",
-            color: "focus:text-accent-foreground",
-        },
-        "data-[disabled]": {
-            pointerEvents: "data-[disabled]:pointer-events-none",
-            opacity: "data-[disabled]:opacity-50",
-        },
-        "[&>svg]": {
-            width: "[&>svg]:size-4",
-            flexShrink: "[&>svg]:shrink-0",
-        },
-    })}
+    className={dropdownMenuItemDropdownMenuPrimitiveItem.class(inset && "pl-8", className)}
     {...props}
   />
 ))
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
+
+
+const dropdownMenuRadioItemSpan = tw.style({
+    position: "absolute",
+    left: "left-2",
+    display: "flex",
+    height: "h-3.5",
+    width: "w-3.5",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+});
+
+const dropdownMenuRadioItemDropdownMenuPrimitiveRadioItem = tw.style({
+    position: "relative",
+    display: "flex",
+    cursor: "cursor-default",
+    userSelect: "select-none",
+    alignItems: "items-center",
+    borderRadius: "rounded-sm",
+    padding: ["py-1.5", "pl-8", "pr-2"],
+    fontSize: "text-sm",
+    outlineStyle: "outline-none",
+    transitionProperty: "transition-colors",
+    focus: {
+        backgroundColor: "focus:bg-accent",
+        color: "focus:text-accent-foreground",
+    },
+    "data-[disabled]": {
+        pointerEvents: "data-[disabled]:pointer-events-none",
+        opacity: "data-[disabled]:opacity-50",
+    },
+});
 
 const DropdownMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
@@ -153,43 +195,13 @@ const DropdownMenuCheckboxItem = React.forwardRef<
 >(({ className, children, checked, ...props }, ref) => (
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
-    className={tw.def([className], {
-        position: "relative",
-        display: "flex",
-        cursor: "cursor-default",
-        userSelect: "select-none",
-        alignItems: "items-center",
-        borderRadius: "rounded-sm",
-        padding: ["py-1.5", "pl-8", "pr-2"],
-        fontSize: "text-sm",
-        outlineStyle: "outline-none",
-        transitionProperty: "transition-colors",
-        focus: {
-            backgroundColor: "focus:bg-accent",
-            color: "focus:text-accent-foreground",
-        },
-        "data-[disabled]": {
-            pointerEvents: "data-[disabled]:pointer-events-none",
-            opacity: "data-[disabled]:opacity-50",
-        },
-    })}
+    className={dropdownMenuRadioItemDropdownMenuPrimitiveRadioItem.class(className)}
     checked={checked}
     {...props}
   >
-    <span className={tw.style({
-            position: "absolute",
-            left: "left-2",
-            display: "flex",
-            height: "h-3.5",
-            width: "w-3.5",
-            alignItems: "items-center",
-            justifyContent: "justify-center",
-        }).class()}>
+    <span className={dropdownMenuRadioItemSpan.class()}>
       <DropdownMenuPrimitive.ItemIndicator>
-        <Check className={tw.style({
-                    height: "h-4",
-                    width: "w-4",
-                }).class()} />
+        <Check className={tw.join("h-4 w-4")} />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -204,43 +216,12 @@ const DropdownMenuRadioItem = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
-    className={tw.def([className], {
-        position: "relative",
-        display: "flex",
-        cursor: "cursor-default",
-        userSelect: "select-none",
-        alignItems: "items-center",
-        borderRadius: "rounded-sm",
-        padding: ["py-1.5", "pl-8", "pr-2"],
-        fontSize: "text-sm",
-        outlineStyle: "outline-none",
-        transitionProperty: "transition-colors",
-        focus: {
-            backgroundColor: "focus:bg-accent",
-            color: "focus:text-accent-foreground",
-        },
-        "data-[disabled]": {
-            pointerEvents: "data-[disabled]:pointer-events-none",
-            opacity: "data-[disabled]:opacity-50",
-        },
-    })}
+    className={dropdownMenuRadioItemDropdownMenuPrimitiveRadioItem.class(className)}
     {...props}
   >
-    <span className={tw.style({
-            position: "absolute",
-            left: "left-2",
-            display: "flex",
-            height: "h-3.5",
-            width: "w-3.5",
-            alignItems: "items-center",
-            justifyContent: "justify-center",
-        }).class()}>
+    <span className={dropdownMenuRadioItemSpan.class()}>
       <DropdownMenuPrimitive.ItemIndicator>
-        <Circle className={tw.style({
-                    height: "h-2",
-                    width: "w-2",
-                    fill: "fill-current",
-                }).class()} />
+        <Circle className={tw.join("h-2 w-2 fill-current")} />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -256,11 +237,7 @@ const DropdownMenuLabel = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <DropdownMenuPrimitive.Label
     ref={ref}
-    className={tw.def([inset && "pl-8", className], {
-        padding: ["px-2", "py-1.5"],
-        fontSize: "text-sm",
-        fontWeight: "font-semibold",
-    })}
+    className={tw.join("px-2 py-1.5 text-sm font-semibold", inset && "pl-8", className)}
     {...props}
   />
 ))
@@ -272,11 +249,7 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    className={tw.def([className], {
-        margin: ["-mx-1", "my-1"],
-        height: "h-px",
-        backgroundColor: "bg-muted",
-    })}
+    className={tw.join("-mx-1 my-1 h-px bg-muted", className)}
     {...props}
   />
 ))
@@ -288,12 +261,7 @@ const DropdownMenuShortcut = ({
 }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
-      className={tw.def([className], {
-              margin: "ml-auto",
-              fontSize: "text-xs",
-              letterSpacing: "tracking-widest",
-              opacity: "opacity-60",
-          })}
+      className={tw.join("ml-auto text-xs tracking-widest opacity-60", className)}
       {...props}
     />
   )

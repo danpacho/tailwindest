@@ -19,16 +19,56 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
-    className={tw.def([className], {
-        position: "fixed",
-        inset: "inset-0",
-        zIndex: "z-50",
-        backgroundColor: "bg-black/80",
-    })}
+    className={tw.join("fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className)}
     {...props}
   />
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+
+
+const dialogContentDialogPrimitiveClose = tw.style({
+    position: "absolute",
+    right: "right-4",
+    top: "top-4",
+    borderRadius: "rounded-sm",
+    opacity: "opacity-70",
+    boxShadow: "ring-offset-background",
+    transitionProperty: "transition-opacity",
+    hover: {
+        opacity: "hover:opacity-100",
+    },
+    focus: {
+        outlineStyle: "focus:outline-none",
+        boxShadow: ["focus:ring-2", "focus:ring-ring", "focus:ring-offset-2"],
+    },
+    disabled: {
+        pointerEvents: "disabled:pointer-events-none",
+    },
+    "data-[state=open]": {
+        backgroundColor: "data-[state=open]:bg-accent",
+        color: "data-[state=open]:text-muted-foreground",
+    },
+});
+
+const dialogContentDialogPrimitiveContent = tw.style({
+    position: "fixed",
+    left: "left-[50%]",
+    top: "top-[50%]",
+    zIndex: "z-50",
+    display: "grid",
+    width: "w-full",
+    maxWidth: "max-w-lg",
+    translate: ["translate-x-[-50%]", "translate-y-[-50%]"],
+    gap: "gap-4",
+    borderWidth: "border",
+    backgroundColor: "bg-background",
+    padding: "p-6",
+    boxShadow: "shadow-lg",
+    transitionDuration: "duration-200",
+    sm: {
+        borderRadius: "sm:rounded-lg",
+    },
+});
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
@@ -38,78 +78,36 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      className={tw.def([className], {
-          position: "fixed",
-          left: "left-[50%]",
-          top: "top-[50%]",
-          zIndex: "z-50",
-          display: "grid",
-          width: "w-full",
-          maxWidth: "max-w-lg",
-          translate: ["translate-x-[-50%]", "translate-y-[-50%]"],
-          gap: "gap-4",
-          borderWidth: "border",
-          backgroundColor: "bg-background",
-          padding: "p-6",
-          boxShadow: "shadow-lg",
-          transitionDuration: "duration-200",
-          sm: {
-              borderRadius: "sm:rounded-lg",
-          },
-      })}
+      className={dialogContentDialogPrimitiveContent.class(className)}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className={tw.style({
-                position: "absolute",
-                right: "right-4",
-                top: "top-4",
-                borderRadius: "rounded-sm",
-                opacity: "opacity-70",
-                boxShadow: "ring-offset-background",
-                transitionProperty: "transition-opacity",
-                hover: {
-                    opacity: "hover:opacity-100",
-                },
-                focus: {
-                    outlineStyle: "focus:outline-none",
-                    boxShadow: ["focus:ring-2", "focus:ring-ring", "focus:ring-offset-2"],
-                },
-                disabled: {
-                    pointerEvents: "disabled:pointer-events-none",
-                },
-                "data-[state=open]": {
-                    backgroundColor: "data-[state=open]:bg-accent",
-                    color: "data-[state=open]:text-muted-foreground",
-                },
-            }).class()}>
-        <X className={tw.style({
-                    height: "h-4",
-                    width: "w-4",
-                }).class()} />
-        <span className={tw.style({
-                    display: "sr-only",
-                }).class()}>Close</span>
+      <DialogPrimitive.Close className={dialogContentDialogPrimitiveClose.class()}>
+        <X className={tw.join("h-4 w-4")} />
+        <span className={tw.join("sr-only")}>Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
+
+const dialogHeaderDiv = tw.style({
+    display: "flex",
+    flexDirection: "flex-col",
+    margin: "space-y-1.5",
+    textAlign: "text-center",
+    sm: {
+        textAlign: "sm:text-left",
+    },
+});
+
 const DialogHeader = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={tw.def([className], {
-            display: "flex",
-            flexDirection: "flex-col",
-            margin: "space-y-1.5",
-            textAlign: "text-center",
-            sm: {
-                textAlign: "sm:text-left",
-            },
-        })}
+    className={dialogHeaderDiv.class(className)}
     {...props}
   />
 )
@@ -120,15 +118,7 @@ const DialogFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={tw.def([className], {
-            display: "flex",
-            flexDirection: "flex-col-reverse",
-            sm: {
-                flexDirection: "sm:flex-row",
-                justifyContent: "sm:justify-end",
-                margin: "sm:space-x-2",
-            },
-        })}
+    className={tw.join("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}
     {...props}
   />
 )
@@ -140,12 +130,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={tw.def([className], {
-        fontSize: "text-lg",
-        fontWeight: "font-semibold",
-        lineHeight: "leading-none",
-        letterSpacing: "tracking-tight",
-    })}
+    className={tw.join("text-lg font-semibold leading-none tracking-tight", className)}
     {...props}
   />
 ))
@@ -157,10 +142,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={tw.def([className], {
-        fontSize: "text-sm",
-        color: "text-muted-foreground",
-    })}
+    className={tw.join("text-sm text-muted-foreground", className)}
     {...props}
   />
 ))

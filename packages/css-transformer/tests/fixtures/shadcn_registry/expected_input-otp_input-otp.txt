@@ -11,19 +11,8 @@ const InputOTP = React.forwardRef<
 >(({ className, containerClassName, ...props }, ref) => (
   <OTPInput
     ref={ref}
-    containerClassName={tw.def([containerClassName], {
-        display: "flex",
-        alignItems: "items-center",
-        gap: "gap-2",
-        "has-[:disabled]": {
-            opacity: "has-[:disabled]:opacity-50",
-        },
-    })}
-    className={tw.def([className], {
-        disabled: {
-            cursor: "disabled:cursor-not-allowed",
-        },
-    })}
+    containerClassName={tw.join("flex items-center gap-2 has-[:disabled]:opacity-50", containerClassName)}
+    className={tw.join("disabled:cursor-not-allowed", className)}
     {...props}
   />
 ))
@@ -33,12 +22,39 @@ const InputOTPGroup = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentPropsWithoutRef<"div">
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={tw.def([className], {
-        display: "flex",
-        alignItems: "items-center",
-    })} {...props} />
+  <div ref={ref} className={tw.join("flex items-center", className)} {...props} />
 ))
 InputOTPGroup.displayName = "InputOTPGroup"
+
+
+const inputOTPSlotDiv = tw.style({
+    pointerEvents: "pointer-events-none",
+    position: "absolute",
+    inset: "inset-0",
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+});
+
+const inputOTPSlotDiv2 = tw.style({
+    position: "relative",
+    display: "flex",
+    height: "h-9",
+    width: "w-9",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    borderWidth: ["border-y", "border-r", "border-input"],
+    fontSize: "text-sm",
+    boxShadow: "shadow-sm",
+    transitionProperty: "transition-all",
+    first: {
+        borderRadius: "first:rounded-l-md",
+        borderWidth: "first:border-l",
+    },
+    last: {
+        borderRadius: "last:rounded-r-md",
+    },
+});
 
 const InputOTPSlot = React.forwardRef<
   React.ElementRef<"div">,
@@ -50,43 +66,13 @@ const InputOTPSlot = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={tw.def([isActive && "z-10 ring-1 ring-ring", className], {
-          position: "relative",
-          display: "flex",
-          height: "h-9",
-          width: "w-9",
-          alignItems: "items-center",
-          justifyContent: "justify-center",
-          borderWidth: ["border-y", "border-r", "border-input"],
-          fontSize: "text-sm",
-          boxShadow: "shadow-sm",
-          transitionProperty: "transition-all",
-          first: {
-              borderRadius: "first:rounded-l-md",
-              borderWidth: "first:border-l",
-          },
-          last: {
-              borderRadius: "last:rounded-r-md",
-          },
-      })}
+      className={inputOTPSlotDiv2.class(isActive && "z-10 ring-1 ring-ring", className)}
       {...props}
     >
       {char}
       {hasFakeCaret && (
-        <div className={tw.style({
-                  pointerEvents: "pointer-events-none",
-                  position: "absolute",
-                  inset: "inset-0",
-                  display: "flex",
-                  alignItems: "items-center",
-                  justifyContent: "justify-center",
-              }).class()}>
-          <div className={tw.style({
-                      height: "h-4",
-                      width: "w-px",
-                      backgroundColor: "bg-foreground",
-                      transitionDuration: "duration-1000",
-                  }).class()} />
+        <div className={inputOTPSlotDiv.class()}>
+          <div className={tw.join("h-4 w-px animate-caret-blink bg-foreground duration-1000")} />
         </div>
       )}
     </div>

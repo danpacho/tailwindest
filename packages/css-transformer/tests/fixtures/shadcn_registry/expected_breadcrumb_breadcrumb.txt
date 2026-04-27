@@ -11,24 +11,27 @@ const Breadcrumb = React.forwardRef<
 >(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />)
 Breadcrumb.displayName = "Breadcrumb"
 
+
+const breadcrumbListOl = tw.style({
+    display: "flex",
+    flexWrap: "flex-wrap",
+    alignItems: "items-center",
+    gap: "gap-1.5",
+    overflowWrap: "break-words",
+    fontSize: "text-sm",
+    color: "text-muted-foreground",
+    sm: {
+        gap: "sm:gap-2.5",
+    },
+});
+
 const BreadcrumbList = React.forwardRef<
   HTMLOListElement,
   React.ComponentPropsWithoutRef<"ol">
 >(({ className, ...props }, ref) => (
   <ol
     ref={ref}
-    className={tw.def([className], {
-        display: "flex",
-        flexWrap: "flex-wrap",
-        alignItems: "items-center",
-        gap: "gap-1.5",
-        overflowWrap: "break-words",
-        fontSize: "text-sm",
-        color: "text-muted-foreground",
-        sm: {
-            gap: "sm:gap-2.5",
-        },
-    })}
+    className={breadcrumbListOl.class(className)}
     {...props}
   />
 ))
@@ -40,11 +43,7 @@ const BreadcrumbItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <li
     ref={ref}
-    className={tw.def([className], {
-        display: "inline-flex",
-        alignItems: "items-center",
-        gap: "gap-1.5",
-    })}
+    className={tw.join("inline-flex items-center gap-1.5", className)}
     {...props}
   />
 ))
@@ -61,12 +60,7 @@ const BreadcrumbLink = React.forwardRef<
   return (
     <Comp
       ref={ref}
-      className={tw.def([className], {
-          transitionProperty: "transition-colors",
-          hover: {
-              color: "hover:text-foreground",
-          },
-      })}
+      className={tw.join("transition-colors hover:text-foreground", className)}
       {...props}
     />
   )
@@ -82,10 +76,7 @@ const BreadcrumbPage = React.forwardRef<
     role="link"
     aria-disabled="true"
     aria-current="page"
-    className={tw.def([className], {
-        fontWeight: "font-normal",
-        color: "text-foreground",
-    })}
+    className={tw.join("font-normal text-foreground", className)}
     {...props}
   />
 ))
@@ -99,18 +90,22 @@ const BreadcrumbSeparator = ({
   <li
     role="presentation"
     aria-hidden="true"
-    className={tw.def([className], {
-        "[&>svg]": {
-            width: "[&>svg]:w-3.5",
-            height: "[&>svg]:h-3.5",
-        },
-    })}
+    className={tw.join("[&>svg]:w-3.5 [&>svg]:h-3.5", className)}
     {...props}
   >
     {children ?? <ChevronRight />}
   </li>
 )
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator"
+
+
+const breadcrumbEllipsisSpan = tw.style({
+    display: "flex",
+    height: "h-9",
+    width: "w-9",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+});
 
 const BreadcrumbEllipsis = ({
   className,
@@ -119,22 +114,11 @@ const BreadcrumbEllipsis = ({
   <span
     role="presentation"
     aria-hidden="true"
-    className={tw.def([className], {
-        display: "flex",
-        height: "h-9",
-        width: "w-9",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-    })}
+    className={breadcrumbEllipsisSpan.class(className)}
     {...props}
   >
-    <MoreHorizontal className={tw.style({
-            height: "h-4",
-            width: "w-4",
-        }).class()} />
-    <span className={tw.style({
-            display: "sr-only",
-        }).class()}>More</span>
+    <MoreHorizontal className={tw.join("h-4 w-4")} />
+    <span className={tw.join("sr-only")}>More</span>
   </span>
 )
 BreadcrumbEllipsis.displayName = "BreadcrumbElipssis"

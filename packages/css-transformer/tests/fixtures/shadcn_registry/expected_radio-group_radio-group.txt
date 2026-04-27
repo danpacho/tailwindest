@@ -11,16 +11,34 @@ const RadioGroup = React.forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <RadioGroupPrimitive.Root
-      className={tw.def([className], {
-              display: "grid",
-              gap: "gap-2",
-          })}
+      className={tw.join("grid gap-2", className)}
       {...props}
       ref={ref}
     />
   )
 })
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
+
+
+const radioGroupItemRadioGroupPrimitiveItem = tw.style({
+    aspectRatio: "aspect-square",
+    height: "h-4",
+    width: "w-4",
+    borderRadius: "rounded-full",
+    borderWidth: ["border", "border-primary"],
+    color: "text-primary",
+    boxShadow: "shadow",
+    focus: {
+        outlineStyle: "focus:outline-none",
+    },
+    "focus-visible": {
+        boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring"],
+    },
+    disabled: {
+        cursor: "disabled:cursor-not-allowed",
+        opacity: "disabled:opacity-50",
+    },
+});
 
 const RadioGroupItem = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Item>,
@@ -29,37 +47,11 @@ const RadioGroupItem = React.forwardRef<
   return (
     <RadioGroupPrimitive.Item
       ref={ref}
-      className={tw.def([className], {
-          aspectRatio: "aspect-square",
-          height: "h-4",
-          width: "w-4",
-          borderRadius: "rounded-full",
-          borderWidth: ["border", "border-primary"],
-          color: "text-primary",
-          boxShadow: "shadow",
-          focus: {
-              outlineStyle: "focus:outline-none",
-          },
-          "focus-visible": {
-              boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring"],
-          },
-          disabled: {
-              cursor: "disabled:cursor-not-allowed",
-              opacity: "disabled:opacity-50",
-          },
-      })}
+      className={radioGroupItemRadioGroupPrimitiveItem.class(className)}
       {...props}
     >
-      <RadioGroupPrimitive.Indicator className={tw.style({
-              display: "flex",
-              alignItems: "items-center",
-              justifyContent: "justify-center",
-          }).class()}>
-        <Circle className={tw.style({
-                  height: "h-3.5",
-                  width: "w-3.5",
-                  fill: "fill-primary",
-              }).class()} />
+      <RadioGroupPrimitive.Indicator className={tw.join("flex items-center justify-center")}>
+        <Circle className={tw.join("h-3.5 w-3.5 fill-primary")} />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   )

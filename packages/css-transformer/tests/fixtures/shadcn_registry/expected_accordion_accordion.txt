@@ -13,50 +13,51 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={tw.def([className], {
-        borderWidth: "border-b",
-    })}
+    className={tw.join("border-b", className)}
     {...props}
   />
 ))
 AccordionItem.displayName = "AccordionItem"
 
+
+const accordionTriggerChevronDown = tw.style({
+    height: "h-4",
+    width: "w-4",
+    flexShrink: "shrink-0",
+    color: "text-muted-foreground",
+    transitionProperty: "transition-transform",
+    transitionDuration: "duration-200",
+});
+
+const accordionTriggerAccordionPrimitiveTrigger = tw.style({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-between",
+    padding: "py-4",
+    fontSize: "text-sm",
+    fontWeight: "font-medium",
+    transitionProperty: "transition-all",
+    hover: {
+        textDecorationLine: "hover:underline",
+    },
+    textAlign: "text-left",
+    "[&[data-state=open]>svg]": {
+        rotate: "[&[data-state=open]>svg]:rotate-180",
+    },
+});
+
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header className={tw.style({
-        display: "flex",
-    }).class()}>
+  <AccordionPrimitive.Header className={tw.join("flex")}>
     <AccordionPrimitive.Trigger
       ref={ref}
-      className={tw.def([className], {
-          display: "flex",
-          alignItems: "items-center",
-          justifyContent: "justify-between",
-          padding: "py-4",
-          fontSize: "text-sm",
-          fontWeight: "font-medium",
-          transitionProperty: "transition-all",
-          hover: {
-              textDecorationLine: "hover:underline",
-          },
-          textAlign: "text-left",
-          "[&[data-state=open]>svg]": {
-              rotate: "[&[data-state=open]>svg]:rotate-180",
-          },
-      })}
+      className={accordionTriggerAccordionPrimitiveTrigger.class(className)}
       {...props}
     >
       {children}
-      <ChevronDown className={tw.style({
-                height: "h-4",
-                width: "w-4",
-                flexShrink: "shrink-0",
-                color: "text-muted-foreground",
-                transitionProperty: "transition-transform",
-                transitionDuration: "duration-200",
-            }).class()} />
+      <ChevronDown className={accordionTriggerChevronDown.class()} />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ))
@@ -68,15 +69,10 @@ const AccordionContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <AccordionPrimitive.Content
     ref={ref}
-    className={tw.style({
-            overflow: "overflow-hidden",
-            fontSize: "text-sm",
-        }).class()}
+    className={tw.join("overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down")}
     {...props}
   >
-    <div className={tw.def([className], {
-            padding: ["pb-4", "pt-0"],
-        })}>{children}</div>
+    <div className={tw.join("pb-4 pt-0", className)}>{children}</div>
   </AccordionPrimitive.Content>
 ))
 AccordionContent.displayName = AccordionPrimitive.Content.displayName

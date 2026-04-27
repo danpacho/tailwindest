@@ -146,11 +146,7 @@ const SidebarProvider = React.forwardRef<
                 ...style,
               } as React.CSSProperties
             }
-            className={tw.def([className], {
-                display: "flex",
-                minHeight: "min-h-svh",
-                width: "w-full",
-            })}
+            className={tw.join("group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar", className)}
             ref={ref}
             {...props}
           >
@@ -162,6 +158,49 @@ const SidebarProvider = React.forwardRef<
   }
 )
 SidebarProvider.displayName = "SidebarProvider"
+
+
+const sidebarDiv = tw.style({
+    display: "flex",
+    height: "h-full",
+    width: "w-full",
+    flexDirection: "flex-col",
+    "group-data-[variant=floating]": {
+        borderRadius: "group-data-[variant=floating]:rounded-lg",
+        borderWidth: "group-data-[variant=floating]:border",
+        boxShadow: "group-data-[variant=floating]:shadow",
+    },
+});
+
+const sidebarDiv2 = tw.style({
+    position: "fixed",
+    inset: "inset-y-0",
+    zIndex: "z-10",
+    display: "hidden",
+    height: "h-svh",
+    width: "w-[--sidebar-width]",
+    transitionProperty: "transition-[left,right,width]",
+    transitionDuration: "duration-200",
+    transitionTimingFunction: "ease-linear",
+    md: {
+        display: "md:flex",
+    },
+});
+
+const sidebarDiv3 = tw.style({
+    position: "relative",
+    width: "w-[--sidebar-width]",
+    backgroundColor: "bg-transparent",
+    transitionProperty: "transition-[width]",
+    transitionDuration: "duration-200",
+    transitionTimingFunction: "ease-linear",
+    "group-data-[collapsible=offcanvas]": {
+        width: "group-data-[collapsible=offcanvas]:w-0",
+    },
+    "group-data-[side=right]": {
+        rotate: "group-data-[side=right]:rotate-180",
+    },
+});
 
 const Sidebar = React.forwardRef<
   HTMLDivElement,
@@ -187,12 +226,7 @@ const Sidebar = React.forwardRef<
     if (collapsible === "none") {
       return (
         <div
-          className={tw.def([className], {
-                  display: "flex",
-                  height: "h-full",
-                  width: "w-[--sidebar-width]",
-                  flexDirection: "flex-col",
-              })}
+          className={tw.join("flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground", className)}
           ref={ref}
           {...props}
         >
@@ -207,13 +241,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className={tw.style({
-                      width: "w-[--sidebar-width]",
-                      padding: "p-0",
-                      "[&>button]": {
-                          display: "[&>button]:hidden",
-                      },
-                  }).class()}
+            className={tw.join("w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden")}
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -221,18 +249,11 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
-            <SheetHeader className={tw.style({
-                      display: "sr-only",
-                  }).class()}>
+            <SheetHeader className={tw.join("sr-only")}>
               <SheetTitle>Sidebar</SheetTitle>
               <SheetDescription>Displays the mobile sidebar.</SheetDescription>
             </SheetHeader>
-            <div className={tw.style({
-                      display: "flex",
-                      height: "h-full",
-                      width: "w-full",
-                      flexDirection: "flex-col",
-                  }).class()}>{children}</div>
+            <div className={tw.join("flex h-full w-full flex-col")}>{children}</div>
           </SheetContent>
         </Sheet>
       )
@@ -241,12 +262,7 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className={tw.style({
-                display: "hidden",
-                md: {
-                    display: "md:block",
-                },
-            }).class()}
+        className={tw.join("group peer hidden text-sidebar-foreground md:block")}
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -254,57 +270,21 @@ const Sidebar = React.forwardRef<
       >
         {/* This is what handles the sidebar gap on desktop */}
         <div
-          className={tw.def([variant === "floating" || variant === "inset"
+          className={sidebarDiv3.class(variant === "floating" || variant === "inset"
                               ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]"
-                              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]"], {
-                    position: "relative",
-                    width: "w-[--sidebar-width]",
-                    backgroundColor: "bg-transparent",
-                    transitionProperty: "transition-[width]",
-                    transitionDuration: "duration-200",
-                    transitionTimingFunction: "ease-linear",
-                    "group-data-[collapsible=offcanvas]": {
-                        width: "group-data-[collapsible=offcanvas]:w-0",
-                    },
-                    "group-data-[side=right]": {
-                        rotate: "group-data-[side=right]:rotate-180",
-                    },
-                })}
+                              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]")}
         />
         <div
-          className={tw.def([side === "left"
+          className={sidebarDiv2.class(side === "left"
                               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
                               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]", variant === "floating" || variant === "inset"
                               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
-                              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l", className], {
-                    position: "fixed",
-                    inset: "inset-y-0",
-                    zIndex: "z-10",
-                    display: "hidden",
-                    height: "h-svh",
-                    width: "w-[--sidebar-width]",
-                    transitionProperty: "transition-[left,right,width]",
-                    transitionDuration: "duration-200",
-                    transitionTimingFunction: "ease-linear",
-                    md: {
-                        display: "md:flex",
-                    },
-                })}
+                              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l", className)}
           {...props}
         >
           <div
             data-sidebar="sidebar"
-            className={tw.style({
-                        display: "flex",
-                        height: "h-full",
-                        width: "w-full",
-                        flexDirection: "flex-col",
-                        "group-data-[variant=floating]": {
-                            borderRadius: "group-data-[variant=floating]:rounded-lg",
-                            borderWidth: "group-data-[variant=floating]:border",
-                            boxShadow: "group-data-[variant=floating]:shadow",
-                        },
-                    }).class()}
+            className={sidebarDiv.class()}
           >
             {children}
           </div>
@@ -327,10 +307,7 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={tw.def([className], {
-          height: "h-7",
-          width: "w-7",
-      })}
+      className={tw.join("h-7 w-7", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
@@ -338,13 +315,62 @@ const SidebarTrigger = React.forwardRef<
       {...props}
     >
       <PanelLeft />
-      <span className={tw.style({
-              display: "sr-only",
-          }).class()}>Toggle Sidebar</span>
+      <span className={tw.join("sr-only")}>Toggle Sidebar</span>
     </Button>
   )
 })
 SidebarTrigger.displayName = "SidebarTrigger"
+
+
+const sidebarRailButton = tw.style({
+    position: "absolute",
+    inset: "inset-y-0",
+    zIndex: "z-20",
+    display: "hidden",
+    width: "w-4",
+    translate: "-translate-x-1/2",
+    transitionProperty: "transition-all",
+    transitionTimingFunction: "ease-linear",
+    after: {
+        position: "after:absolute",
+        inset: "after:inset-y-0",
+        left: "after:left-1/2",
+        width: "after:w-[2px]",
+    },
+    "group-data-[side=left]": {
+        right: "group-data-[side=left]:-right-4",
+    },
+    "group-data-[side=right]": {
+        left: "group-data-[side=right]:left-0",
+    },
+    sm: {
+        display: "sm:flex",
+    },
+    "[[data-side=left]_&]": {
+        cursor: "[[data-side=left]_&]:cursor-w-resize",
+    },
+    "[[data-side=right]_&]": {
+        cursor: "[[data-side=right]_&]:cursor-e-resize",
+    },
+    "[[data-side=left][data-state=collapsed]_&]": {
+        cursor: "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize",
+    },
+    "[[data-side=right][data-state=collapsed]_&]": {
+        cursor: "[[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
+    },
+    "group-data-[collapsible=offcanvas]": {
+        translate: "group-data-[collapsible=offcanvas]:translate-x-0",
+        after: {
+            left: "group-data-[collapsible=offcanvas]:after:left-full",
+        },
+    },
+    "[[data-side=left][data-collapsible=offcanvas]_&]": {
+        right: "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
+    },
+    "[[data-side=right][data-collapsible=offcanvas]_&]": {
+        left: "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
+    },
+});
 
 const SidebarRail = React.forwardRef<
   HTMLButtonElement,
@@ -360,60 +386,33 @@ const SidebarRail = React.forwardRef<
       tabIndex={-1}
       onClick={toggleSidebar}
       title="Toggle Sidebar"
-      className={tw.def([className], {
-          position: "absolute",
-          inset: "inset-y-0",
-          zIndex: "z-20",
-          display: "hidden",
-          width: "w-4",
-          translate: "-translate-x-1/2",
-          transitionProperty: "transition-all",
-          transitionTimingFunction: "ease-linear",
-          after: {
-              position: "after:absolute",
-              inset: "after:inset-y-0",
-              left: "after:left-1/2",
-              width: "after:w-[2px]",
-          },
-          "group-data-[side=left]": {
-              right: "group-data-[side=left]:-right-4",
-          },
-          "group-data-[side=right]": {
-              left: "group-data-[side=right]:left-0",
-          },
-          sm: {
-              display: "sm:flex",
-          },
-          "[[data-side=left]_&]": {
-              cursor: "[[data-side=left]_&]:cursor-w-resize",
-          },
-          "[[data-side=right]_&]": {
-              cursor: "[[data-side=right]_&]:cursor-e-resize",
-          },
-          "[[data-side=left][data-state=collapsed]_&]": {
-              cursor: "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize",
-          },
-          "[[data-side=right][data-state=collapsed]_&]": {
-              cursor: "[[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
-          },
-          "group-data-[collapsible=offcanvas]": {
-              translate: "group-data-[collapsible=offcanvas]:translate-x-0",
-              after: {
-                  left: "group-data-[collapsible=offcanvas]:after:left-full",
-              },
-          },
-          "[[data-side=left][data-collapsible=offcanvas]_&]": {
-              right: "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
-          },
-          "[[data-side=right][data-collapsible=offcanvas]_&]": {
-              left: "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
-          },
-      })}
+      className={sidebarRailButton.class(className)}
       {...props}
     />
   )
 })
 SidebarRail.displayName = "SidebarRail"
+
+
+const sidebarInsetMain = tw.style({
+    position: "relative",
+    display: "flex",
+    width: "w-full",
+    flexDirection: "flex-col",
+    backgroundColor: "bg-background",
+    md: {
+        "peer-data-[variant=inset]": {
+            margin: ["md:peer-data-[variant=inset]:m-2", "md:peer-data-[variant=inset]:ml-0"],
+            borderRadius: "md:peer-data-[variant=inset]:rounded-xl",
+            boxShadow: "md:peer-data-[variant=inset]:shadow",
+        },
+        "peer-data-[state=collapsed]": {
+            "peer-data-[variant=inset]": {
+                margin: "md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2",
+            },
+        },
+    },
+});
 
 const SidebarInset = React.forwardRef<
   HTMLDivElement,
@@ -422,30 +421,23 @@ const SidebarInset = React.forwardRef<
   return (
     <main
       ref={ref}
-      className={tw.def([className], {
-          position: "relative",
-          display: "flex",
-          width: "w-full",
-          flexDirection: "flex-col",
-          backgroundColor: "bg-background",
-          md: {
-              "peer-data-[variant=inset]": {
-                  margin: ["md:peer-data-[variant=inset]:m-2", "md:peer-data-[variant=inset]:ml-0"],
-                  borderRadius: "md:peer-data-[variant=inset]:rounded-xl",
-                  boxShadow: "md:peer-data-[variant=inset]:shadow",
-              },
-              "peer-data-[state=collapsed]": {
-                  "peer-data-[variant=inset]": {
-                      margin: "md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2",
-                  },
-              },
-          },
-      })}
+      className={sidebarInsetMain.class(className)}
       {...props}
     />
   )
 })
 SidebarInset.displayName = "SidebarInset"
+
+
+const sidebarInputInput = tw.style({
+    height: "h-8",
+    width: "w-full",
+    backgroundColor: "bg-background",
+    boxShadow: "shadow-none",
+    "focus-visible": {
+        boxShadow: "focus-visible:ring-2",
+    },
+});
 
 const SidebarInput = React.forwardRef<
   React.ElementRef<typeof Input>,
@@ -455,15 +447,7 @@ const SidebarInput = React.forwardRef<
     <Input
       ref={ref}
       data-sidebar="input"
-      className={tw.def([className], {
-          height: "h-8",
-          width: "w-full",
-          backgroundColor: "bg-background",
-          boxShadow: "shadow-none",
-          "focus-visible": {
-              boxShadow: "focus-visible:ring-2",
-          },
-      })}
+      className={sidebarInputInput.class(className)}
       {...props}
     />
   )
@@ -478,12 +462,7 @@ const SidebarHeader = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="header"
-      className={tw.def([className], {
-          display: "flex",
-          flexDirection: "flex-col",
-          gap: "gap-2",
-          padding: "p-2",
-      })}
+      className={tw.join("flex flex-col gap-2 p-2", className)}
       {...props}
     />
   )
@@ -498,12 +477,7 @@ const SidebarFooter = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="footer"
-      className={tw.def([className], {
-          display: "flex",
-          flexDirection: "flex-col",
-          gap: "gap-2",
-          padding: "p-2",
-      })}
+      className={tw.join("flex flex-col gap-2 p-2", className)}
       {...props}
     />
   )
@@ -518,15 +492,24 @@ const SidebarSeparator = React.forwardRef<
     <Separator
       ref={ref}
       data-sidebar="separator"
-      className={tw.def([className], {
-          margin: "mx-2",
-          width: "w-auto",
-      })}
+      className={tw.join("mx-2 w-auto bg-sidebar-border", className)}
       {...props}
     />
   )
 })
 SidebarSeparator.displayName = "SidebarSeparator"
+
+
+const sidebarContentDiv = tw.style({
+    display: "flex",
+    minHeight: "min-h-0",
+    flexDirection: "flex-col",
+    gap: "gap-2",
+    overflow: "overflow-auto",
+    "group-data-[collapsible=icon]": {
+        overflow: "group-data-[collapsible=icon]:overflow-hidden",
+    },
+});
 
 const SidebarContent = React.forwardRef<
   HTMLDivElement,
@@ -536,21 +519,22 @@ const SidebarContent = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="content"
-      className={tw.def([className], {
-          display: "flex",
-          minHeight: "min-h-0",
-          flexDirection: "flex-col",
-          gap: "gap-2",
-          overflow: "overflow-auto",
-          "group-data-[collapsible=icon]": {
-              overflow: "group-data-[collapsible=icon]:overflow-hidden",
-          },
-      })}
+      className={sidebarContentDiv.class(className)}
       {...props}
     />
   )
 })
 SidebarContent.displayName = "SidebarContent"
+
+
+const sidebarGroupDiv = tw.style({
+    position: "relative",
+    display: "flex",
+    width: "w-full",
+    minWidth: "min-w-0",
+    flexDirection: "flex-col",
+    padding: "p-2",
+});
 
 const SidebarGroup = React.forwardRef<
   HTMLDivElement,
@@ -560,19 +544,39 @@ const SidebarGroup = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="group"
-      className={tw.def([className], {
-          position: "relative",
-          display: "flex",
-          width: "w-full",
-          minWidth: "min-w-0",
-          flexDirection: "flex-col",
-          padding: "p-2",
-      })}
+      className={sidebarGroupDiv.class(className)}
       {...props}
     />
   )
 })
 SidebarGroup.displayName = "SidebarGroup"
+
+
+const sidebarGroupLabelComp = tw.style({
+    display: "flex",
+    height: "h-8",
+    flexShrink: "shrink-0",
+    alignItems: "items-center",
+    borderRadius: "rounded-md",
+    padding: "px-2",
+    fontSize: "text-xs",
+    fontWeight: "font-medium",
+    outlineStyle: "outline-none",
+    transitionProperty: "transition-[margin,opacity]",
+    transitionDuration: "duration-200",
+    transitionTimingFunction: "ease-linear",
+    "focus-visible": {
+        boxShadow: "focus-visible:ring-2",
+    },
+    "[&>svg]": {
+        width: "[&>svg]:size-4",
+        flexShrink: "[&>svg]:shrink-0",
+    },
+    "group-data-[collapsible=icon]": {
+        margin: "group-data-[collapsible=icon]:-mt-8",
+        opacity: "group-data-[collapsible=icon]:opacity-0",
+    },
+});
 
 const SidebarGroupLabel = React.forwardRef<
   HTMLDivElement,
@@ -584,36 +588,45 @@ const SidebarGroupLabel = React.forwardRef<
     <Comp
       ref={ref}
       data-sidebar="group-label"
-      className={tw.def([className], {
-          display: "flex",
-          height: "h-8",
-          flexShrink: "shrink-0",
-          alignItems: "items-center",
-          borderRadius: "rounded-md",
-          padding: "px-2",
-          fontSize: "text-xs",
-          fontWeight: "font-medium",
-          outlineStyle: "outline-none",
-          transitionProperty: "transition-[margin,opacity]",
-          transitionDuration: "duration-200",
-          transitionTimingFunction: "ease-linear",
-          "focus-visible": {
-              boxShadow: "focus-visible:ring-2",
-          },
-          "[&>svg]": {
-              width: "[&>svg]:size-4",
-              flexShrink: "[&>svg]:shrink-0",
-          },
-          "group-data-[collapsible=icon]": {
-              margin: "group-data-[collapsible=icon]:-mt-8",
-              opacity: "group-data-[collapsible=icon]:opacity-0",
-          },
-      })}
+      className={sidebarGroupLabelComp.class(className)}
       {...props}
     />
   )
 })
 SidebarGroupLabel.displayName = "SidebarGroupLabel"
+
+
+const sidebarGroupActionComp = tw.style({
+    position: "absolute",
+    right: "right-3",
+    top: "top-3.5",
+    display: "flex",
+    aspectRatio: "aspect-square",
+    width: "w-5",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    borderRadius: "rounded-md",
+    padding: "p-0",
+    outlineStyle: "outline-none",
+    transitionProperty: "transition-transform",
+    "focus-visible": {
+        boxShadow: "focus-visible:ring-2",
+    },
+    "[&>svg]": {
+        width: "[&>svg]:size-4",
+        flexShrink: "[&>svg]:shrink-0",
+    },
+    after: {
+        position: "after:absolute",
+        inset: "after:-inset-2",
+        md: {
+            display: "after:md:hidden",
+        },
+    },
+    "group-data-[collapsible=icon]": {
+        display: "group-data-[collapsible=icon]:hidden",
+    },
+});
 
 const SidebarGroupAction = React.forwardRef<
   HTMLButtonElement,
@@ -625,37 +638,7 @@ const SidebarGroupAction = React.forwardRef<
     <Comp
       ref={ref}
       data-sidebar="group-action"
-      className={tw.def([className], {
-          position: "absolute",
-          right: "right-3",
-          top: "top-3.5",
-          display: "flex",
-          aspectRatio: "aspect-square",
-          width: "w-5",
-          alignItems: "items-center",
-          justifyContent: "justify-center",
-          borderRadius: "rounded-md",
-          padding: "p-0",
-          outlineStyle: "outline-none",
-          transitionProperty: "transition-transform",
-          "focus-visible": {
-              boxShadow: "focus-visible:ring-2",
-          },
-          "[&>svg]": {
-              width: "[&>svg]:size-4",
-              flexShrink: "[&>svg]:shrink-0",
-          },
-          after: {
-              position: "after:absolute",
-              inset: "after:-inset-2",
-              md: {
-                  display: "after:md:hidden",
-              },
-          },
-          "group-data-[collapsible=icon]": {
-              display: "group-data-[collapsible=icon]:hidden",
-          },
-      })}
+      className={sidebarGroupActionComp.class(className)}
       {...props}
     />
   )
@@ -669,14 +652,20 @@ const SidebarGroupContent = React.forwardRef<
   <div
     ref={ref}
     data-sidebar="group-content"
-    className={tw.def([className], {
-        width: "w-full",
-        fontSize: "text-sm",
-    })}
+    className={tw.join("w-full text-sm", className)}
     {...props}
   />
 ))
 SidebarGroupContent.displayName = "SidebarGroupContent"
+
+
+const sidebarMenuUl = tw.style({
+    display: "flex",
+    width: "w-full",
+    minWidth: "min-w-0",
+    flexDirection: "flex-col",
+    gap: "gap-1",
+});
 
 const SidebarMenu = React.forwardRef<
   HTMLUListElement,
@@ -685,13 +674,7 @@ const SidebarMenu = React.forwardRef<
   <ul
     ref={ref}
     data-sidebar="menu"
-    className={tw.def([className], {
-        display: "flex",
-        width: "w-full",
-        minWidth: "min-w-0",
-        flexDirection: "flex-col",
-        gap: "gap-1",
-    })}
+    className={sidebarMenuUl.class(className)}
     {...props}
   />
 ))
@@ -704,9 +687,7 @@ const SidebarMenuItem = React.forwardRef<
   <li
     ref={ref}
     data-sidebar="menu-item"
-    className={tw.def([className], {
-        position: "relative",
-    })}
+    className={tw.join("group/menu-item relative", className)}
     {...props}
   />
 ))
@@ -850,6 +831,48 @@ const SidebarMenuButton = React.forwardRef<
 )
 SidebarMenuButton.displayName = "SidebarMenuButton"
 
+
+const sidebarMenuActionComp = tw.style({
+    position: "absolute",
+    right: "right-1",
+    top: "top-1.5",
+    display: "flex",
+    aspectRatio: "aspect-square",
+    width: "w-5",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    borderRadius: "rounded-md",
+    padding: "p-0",
+    outlineStyle: "outline-none",
+    transitionProperty: "transition-transform",
+    "focus-visible": {
+        boxShadow: "focus-visible:ring-2",
+    },
+    "[&>svg]": {
+        width: "[&>svg]:size-4",
+        flexShrink: "[&>svg]:shrink-0",
+    },
+    after: {
+        position: "after:absolute",
+        inset: "after:-inset-2",
+        md: {
+            display: "after:md:hidden",
+        },
+    },
+    "peer-data-[size=sm]/menu-button": {
+        top: "peer-data-[size=sm]/menu-button:top-1",
+    },
+    "peer-data-[size=default]/menu-button": {
+        top: "peer-data-[size=default]/menu-button:top-1.5",
+    },
+    "peer-data-[size=lg]/menu-button": {
+        top: "peer-data-[size=lg]/menu-button:top-2.5",
+    },
+    "group-data-[collapsible=icon]": {
+        display: "group-data-[collapsible=icon]:hidden",
+    },
+});
+
 const SidebarMenuAction = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> & {
@@ -863,52 +886,43 @@ const SidebarMenuAction = React.forwardRef<
     <Comp
       ref={ref}
       data-sidebar="menu-action"
-      className={tw.def([showOnHover &&
-                "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0", className], {
-          position: "absolute",
-          right: "right-1",
-          top: "top-1.5",
-          display: "flex",
-          aspectRatio: "aspect-square",
-          width: "w-5",
-          alignItems: "items-center",
-          justifyContent: "justify-center",
-          borderRadius: "rounded-md",
-          padding: "p-0",
-          outlineStyle: "outline-none",
-          transitionProperty: "transition-transform",
-          "focus-visible": {
-              boxShadow: "focus-visible:ring-2",
-          },
-          "[&>svg]": {
-              width: "[&>svg]:size-4",
-              flexShrink: "[&>svg]:shrink-0",
-          },
-          after: {
-              position: "after:absolute",
-              inset: "after:-inset-2",
-              md: {
-                  display: "after:md:hidden",
-              },
-          },
-          "peer-data-[size=sm]/menu-button": {
-              top: "peer-data-[size=sm]/menu-button:top-1",
-          },
-          "peer-data-[size=default]/menu-button": {
-              top: "peer-data-[size=default]/menu-button:top-1.5",
-          },
-          "peer-data-[size=lg]/menu-button": {
-              top: "peer-data-[size=lg]/menu-button:top-2.5",
-          },
-          "group-data-[collapsible=icon]": {
-              display: "group-data-[collapsible=icon]:hidden",
-          },
-      })}
+      className={sidebarMenuActionComp.class(showOnHover &&
+                "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0", className)}
       {...props}
     />
   )
 })
 SidebarMenuAction.displayName = "SidebarMenuAction"
+
+
+const sidebarMenuBadgeDiv = tw.style({
+    pointerEvents: "pointer-events-none",
+    position: "absolute",
+    right: "right-1",
+    display: "flex",
+    height: "h-5",
+    minWidth: "min-w-5",
+    userSelect: "select-none",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    borderRadius: "rounded-md",
+    padding: "px-1",
+    fontSize: "text-xs",
+    fontWeight: "font-medium",
+    fontVariantNumeric: "tabular-nums",
+    "peer-data-[size=sm]/menu-button": {
+        top: "peer-data-[size=sm]/menu-button:top-1",
+    },
+    "peer-data-[size=default]/menu-button": {
+        top: "peer-data-[size=default]/menu-button:top-1.5",
+    },
+    "peer-data-[size=lg]/menu-button": {
+        top: "peer-data-[size=lg]/menu-button:top-2.5",
+    },
+    "group-data-[collapsible=icon]": {
+        display: "group-data-[collapsible=icon]:hidden",
+    },
+});
 
 const SidebarMenuBadge = React.forwardRef<
   HTMLDivElement,
@@ -917,38 +931,21 @@ const SidebarMenuBadge = React.forwardRef<
   <div
     ref={ref}
     data-sidebar="menu-badge"
-    className={tw.def([className], {
-        pointerEvents: "pointer-events-none",
-        position: "absolute",
-        right: "right-1",
-        display: "flex",
-        height: "h-5",
-        minWidth: "min-w-5",
-        userSelect: "select-none",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-        borderRadius: "rounded-md",
-        padding: "px-1",
-        fontSize: "text-xs",
-        fontWeight: "font-medium",
-        fontVariantNumeric: "tabular-nums",
-        "peer-data-[size=sm]/menu-button": {
-            top: "peer-data-[size=sm]/menu-button:top-1",
-        },
-        "peer-data-[size=default]/menu-button": {
-            top: "peer-data-[size=default]/menu-button:top-1.5",
-        },
-        "peer-data-[size=lg]/menu-button": {
-            top: "peer-data-[size=lg]/menu-button:top-2.5",
-        },
-        "group-data-[collapsible=icon]": {
-            display: "group-data-[collapsible=icon]:hidden",
-        },
-    })}
+    className={sidebarMenuBadgeDiv.class(className)}
     {...props}
   />
 ))
 SidebarMenuBadge.displayName = "SidebarMenuBadge"
+
+
+const sidebarMenuSkeletonDiv = tw.style({
+    display: "flex",
+    height: "h-8",
+    alignItems: "items-center",
+    gap: "gap-2",
+    borderRadius: "rounded-md",
+    padding: "px-2",
+});
 
 const SidebarMenuSkeleton = React.forwardRef<
   HTMLDivElement,
@@ -965,30 +962,17 @@ const SidebarMenuSkeleton = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="menu-skeleton"
-      className={tw.def([className], {
-          display: "flex",
-          height: "h-8",
-          alignItems: "items-center",
-          gap: "gap-2",
-          borderRadius: "rounded-md",
-          padding: "px-2",
-      })}
+      className={sidebarMenuSkeletonDiv.class(className)}
       {...props}
     >
       {showIcon && (
         <Skeleton
-          className={tw.style({
-                      width: "size-4",
-                      borderRadius: "rounded-md",
-                  }).class()}
+          className={tw.join("size-4 rounded-md")}
           data-sidebar="menu-skeleton-icon"
         />
       )}
       <Skeleton
-        className={tw.style({
-                  height: "h-4",
-                  maxWidth: "max-w-[--skeleton-width]",
-              }).class()}
+        className={tw.join("h-4 max-w-[--skeleton-width] flex-1")}
         data-sidebar="menu-skeleton-text"
         style={
           {
@@ -1001,6 +985,21 @@ const SidebarMenuSkeleton = React.forwardRef<
 })
 SidebarMenuSkeleton.displayName = "SidebarMenuSkeleton"
 
+
+const sidebarMenuSubUl = tw.style({
+    margin: "mx-3.5",
+    display: "flex",
+    minWidth: "min-w-0",
+    translate: "translate-x-px",
+    flexDirection: "flex-col",
+    gap: "gap-1",
+    borderWidth: "border-l",
+    padding: ["px-2.5", "py-0.5"],
+    "group-data-[collapsible=icon]": {
+        display: "group-data-[collapsible=icon]:hidden",
+    },
+});
+
 const SidebarMenuSub = React.forwardRef<
   HTMLUListElement,
   React.ComponentProps<"ul">
@@ -1008,19 +1007,7 @@ const SidebarMenuSub = React.forwardRef<
   <ul
     ref={ref}
     data-sidebar="menu-sub"
-    className={tw.def([className], {
-        margin: "mx-3.5",
-        display: "flex",
-        minWidth: "min-w-0",
-        translate: "translate-x-px",
-        flexDirection: "flex-col",
-        gap: "gap-1",
-        borderWidth: "border-l",
-        padding: ["px-2.5", "py-0.5"],
-        "group-data-[collapsible=icon]": {
-            display: "group-data-[collapsible=icon]:hidden",
-        },
-    })}
+    className={sidebarMenuSubUl.class(className)}
     {...props}
   />
 ))
@@ -1031,6 +1018,41 @@ const SidebarMenuSubItem = React.forwardRef<
   React.ComponentProps<"li">
 >(({ ...props }, ref) => <li ref={ref} {...props} />)
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem"
+
+
+const sidebarMenuSubButtonComp = tw.style({
+    display: "flex",
+    height: "h-7",
+    minWidth: "min-w-0",
+    translate: "-translate-x-px",
+    alignItems: "items-center",
+    gap: "gap-2",
+    overflow: "overflow-hidden",
+    borderRadius: "rounded-md",
+    padding: "px-2",
+    outlineStyle: "outline-none",
+    "focus-visible": {
+        boxShadow: "focus-visible:ring-2",
+    },
+    disabled: {
+        pointerEvents: "disabled:pointer-events-none",
+        opacity: "disabled:opacity-50",
+    },
+    "aria-disabled": {
+        pointerEvents: "aria-disabled:pointer-events-none",
+        opacity: "aria-disabled:opacity-50",
+    },
+    "[&>span:last-child]": {
+        textOverflow: "[&>span:last-child]:truncate",
+    },
+    "[&>svg]": {
+        width: "[&>svg]:size-4",
+        flexShrink: "[&>svg]:shrink-0",
+    },
+    "group-data-[collapsible=icon]": {
+        display: "group-data-[collapsible=icon]:hidden",
+    },
+});
 
 const SidebarMenuSubButton = React.forwardRef<
   HTMLAnchorElement,
@@ -1048,39 +1070,7 @@ const SidebarMenuSubButton = React.forwardRef<
       data-sidebar="menu-sub-button"
       data-size={size}
       data-active={isActive}
-      className={tw.def([size === "sm" && "text-xs", size === "md" && "text-sm", className], {
-          display: "flex",
-          height: "h-7",
-          minWidth: "min-w-0",
-          translate: "-translate-x-px",
-          alignItems: "items-center",
-          gap: "gap-2",
-          overflow: "overflow-hidden",
-          borderRadius: "rounded-md",
-          padding: "px-2",
-          outlineStyle: "outline-none",
-          "focus-visible": {
-              boxShadow: "focus-visible:ring-2",
-          },
-          disabled: {
-              pointerEvents: "disabled:pointer-events-none",
-              opacity: "disabled:opacity-50",
-          },
-          "aria-disabled": {
-              pointerEvents: "aria-disabled:pointer-events-none",
-              opacity: "aria-disabled:opacity-50",
-          },
-          "[&>span:last-child]": {
-              textOverflow: "[&>span:last-child]:truncate",
-          },
-          "[&>svg]": {
-              width: "[&>svg]:size-4",
-              flexShrink: "[&>svg]:shrink-0",
-          },
-          "group-data-[collapsible=icon]": {
-              display: "group-data-[collapsible=icon]:hidden",
-          },
-      })}
+      className={sidebarMenuSubButtonComp.class(size === "sm" && "text-xs", size === "md" && "text-sm", className)}
       {...props}
     />
   )

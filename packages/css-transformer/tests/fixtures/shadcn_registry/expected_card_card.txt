@@ -1,19 +1,21 @@
 import * as React from "react"
 import { tw } from "~/tw";
 
+const cardDiv = tw.style({
+    borderRadius: "rounded-xl",
+    borderWidth: "border",
+    backgroundColor: "bg-card",
+    color: "text-card-foreground",
+    boxShadow: "shadow",
+});
+
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={tw.def([className], {
-        borderRadius: "rounded-xl",
-        borderWidth: "border",
-        backgroundColor: "bg-card",
-        color: "text-card-foreground",
-        boxShadow: "shadow",
-    })}
+    className={cardDiv.class(className)}
     {...props}
   />
 ))
@@ -25,12 +27,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={tw.def([className], {
-        display: "flex",
-        flexDirection: "flex-col",
-        margin: "space-y-1.5",
-        padding: "p-6",
-    })}
+    className={tw.join("flex flex-col space-y-1.5 p-6", className)}
     {...props}
   />
 ))
@@ -42,11 +39,7 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={tw.def([className], {
-        fontWeight: "font-semibold",
-        lineHeight: "leading-none",
-        letterSpacing: "tracking-tight",
-    })}
+    className={tw.join("font-semibold leading-none tracking-tight", className)}
     {...props}
   />
 ))
@@ -58,10 +51,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={tw.def([className], {
-        fontSize: "text-sm",
-        color: "text-muted-foreground",
-    })}
+    className={tw.join("text-sm text-muted-foreground", className)}
     {...props}
   />
 ))
@@ -71,9 +61,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={tw.def([className], {
-        padding: ["p-6", "pt-0"],
-    })} {...props} />
+  <div ref={ref} className={tw.join("p-6 pt-0", className)} {...props} />
 ))
 CardContent.displayName = "CardContent"
 
@@ -83,11 +71,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={tw.def([className], {
-        display: "flex",
-        alignItems: "items-center",
-        padding: ["p-6", "pt-0"],
-    })}
+    className={tw.join("flex items-center p-6 pt-0", className)}
     {...props}
   />
 ))

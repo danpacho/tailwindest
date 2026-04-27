@@ -17,6 +17,26 @@ const ContextMenuSub = ContextMenuPrimitive.Sub
 
 const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup
 
+
+const contextMenuSubTriggerContextMenuPrimitiveSubTrigger = tw.style({
+    display: "flex",
+    cursor: "cursor-default",
+    userSelect: "select-none",
+    alignItems: "items-center",
+    borderRadius: "rounded-sm",
+    padding: ["px-2", "py-1.5"],
+    fontSize: "text-sm",
+    outlineStyle: "outline-none",
+    focus: {
+        backgroundColor: "focus:bg-accent",
+        color: "focus:text-accent-foreground",
+    },
+    "data-[state=open]": {
+        backgroundColor: "data-[state=open]:bg-accent",
+        color: "data-[state=open]:text-accent-foreground",
+    },
+});
+
 const ContextMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger> & {
@@ -25,35 +45,28 @@ const ContextMenuSubTrigger = React.forwardRef<
 >(({ className, inset, children, ...props }, ref) => (
   <ContextMenuPrimitive.SubTrigger
     ref={ref}
-    className={tw.def([inset && "pl-8", className], {
-        display: "flex",
-        cursor: "cursor-default",
-        userSelect: "select-none",
-        alignItems: "items-center",
-        borderRadius: "rounded-sm",
-        padding: ["px-2", "py-1.5"],
-        fontSize: "text-sm",
-        outlineStyle: "outline-none",
-        focus: {
-            backgroundColor: "focus:bg-accent",
-            color: "focus:text-accent-foreground",
-        },
-        "data-[state=open]": {
-            backgroundColor: "data-[state=open]:bg-accent",
-            color: "data-[state=open]:text-accent-foreground",
-        },
-    })}
+    className={contextMenuSubTriggerContextMenuPrimitiveSubTrigger.class(inset && "pl-8", className)}
     {...props}
   >
     {children}
-    <ChevronRight className={tw.style({
-            margin: "ml-auto",
-            height: "h-4",
-            width: "w-4",
-        }).class()} />
+    <ChevronRight className={tw.join("ml-auto h-4 w-4")} />
   </ContextMenuPrimitive.SubTrigger>
 ))
 ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName
+
+
+const contextMenuSubContentContextMenuPrimitiveSubContent = tw.style({
+    zIndex: "z-50",
+    minWidth: "min-w-[8rem]",
+    overflow: "overflow-hidden",
+    borderRadius: "rounded-md",
+    borderWidth: "border",
+    backgroundColor: "bg-popover",
+    padding: "p-1",
+    color: "text-popover-foreground",
+    boxShadow: "shadow-lg",
+    transformOrigin: "origin-[--radix-context-menu-content-transform-origin]",
+});
 
 const ContextMenuSubContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.SubContent>,
@@ -61,22 +74,26 @@ const ContextMenuSubContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ContextMenuPrimitive.SubContent
     ref={ref}
-    className={tw.def([className], {
-        zIndex: "z-50",
-        minWidth: "min-w-[8rem]",
-        overflow: "overflow-hidden",
-        borderRadius: "rounded-md",
-        borderWidth: "border",
-        backgroundColor: "bg-popover",
-        padding: "p-1",
-        color: "text-popover-foreground",
-        boxShadow: "shadow-lg",
-        transformOrigin: "origin-[--radix-context-menu-content-transform-origin]",
-    })}
+    className={contextMenuSubContentContextMenuPrimitiveSubContent.class(className)}
     {...props}
   />
 ))
 ContextMenuSubContent.displayName = ContextMenuPrimitive.SubContent.displayName
+
+
+const contextMenuContentContextMenuPrimitiveContent = tw.style({
+    zIndex: "z-50",
+    maxHeight: "max-h-[--radix-context-menu-content-available-height]",
+    minWidth: "min-w-[8rem]",
+    overflow: ["overflow-y-auto", "overflow-x-hidden"],
+    borderRadius: "rounded-md",
+    borderWidth: "border",
+    backgroundColor: "bg-popover",
+    padding: "p-1",
+    color: "text-popover-foreground",
+    boxShadow: "shadow-md",
+    transformOrigin: "origin-[--radix-context-menu-content-transform-origin]",
+});
 
 const ContextMenuContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Content>,
@@ -85,24 +102,33 @@ const ContextMenuContent = React.forwardRef<
   <ContextMenuPrimitive.Portal>
     <ContextMenuPrimitive.Content
       ref={ref}
-      className={tw.def([className], {
-          zIndex: "z-50",
-          maxHeight: "max-h-[--radix-context-menu-content-available-height]",
-          minWidth: "min-w-[8rem]",
-          overflow: ["overflow-y-auto", "overflow-x-hidden"],
-          borderRadius: "rounded-md",
-          borderWidth: "border",
-          backgroundColor: "bg-popover",
-          padding: "p-1",
-          color: "text-popover-foreground",
-          boxShadow: "shadow-md",
-          transformOrigin: "origin-[--radix-context-menu-content-transform-origin]",
-      })}
+      className={contextMenuContentContextMenuPrimitiveContent.class(className)}
       {...props}
     />
   </ContextMenuPrimitive.Portal>
 ))
 ContextMenuContent.displayName = ContextMenuPrimitive.Content.displayName
+
+
+const contextMenuItemContextMenuPrimitiveItem = tw.style({
+    position: "relative",
+    display: "flex",
+    cursor: "cursor-default",
+    userSelect: "select-none",
+    alignItems: "items-center",
+    borderRadius: "rounded-sm",
+    padding: ["px-2", "py-1.5"],
+    fontSize: "text-sm",
+    outlineStyle: "outline-none",
+    focus: {
+        backgroundColor: "focus:bg-accent",
+        color: "focus:text-accent-foreground",
+    },
+    "data-[disabled]": {
+        pointerEvents: "data-[disabled]:pointer-events-none",
+        opacity: "data-[disabled]:opacity-50",
+    },
+});
 
 const ContextMenuItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Item>,
@@ -112,29 +138,42 @@ const ContextMenuItem = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.Item
     ref={ref}
-    className={tw.def([inset && "pl-8", className], {
-        position: "relative",
-        display: "flex",
-        cursor: "cursor-default",
-        userSelect: "select-none",
-        alignItems: "items-center",
-        borderRadius: "rounded-sm",
-        padding: ["px-2", "py-1.5"],
-        fontSize: "text-sm",
-        outlineStyle: "outline-none",
-        focus: {
-            backgroundColor: "focus:bg-accent",
-            color: "focus:text-accent-foreground",
-        },
-        "data-[disabled]": {
-            pointerEvents: "data-[disabled]:pointer-events-none",
-            opacity: "data-[disabled]:opacity-50",
-        },
-    })}
+    className={contextMenuItemContextMenuPrimitiveItem.class(inset && "pl-8", className)}
     {...props}
   />
 ))
 ContextMenuItem.displayName = ContextMenuPrimitive.Item.displayName
+
+
+const contextMenuRadioItemSpan = tw.style({
+    position: "absolute",
+    left: "left-2",
+    display: "flex",
+    height: "h-3.5",
+    width: "w-3.5",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+});
+
+const contextMenuRadioItemContextMenuPrimitiveRadioItem = tw.style({
+    position: "relative",
+    display: "flex",
+    cursor: "cursor-default",
+    userSelect: "select-none",
+    alignItems: "items-center",
+    borderRadius: "rounded-sm",
+    padding: ["py-1.5", "pl-8", "pr-2"],
+    fontSize: "text-sm",
+    outlineStyle: "outline-none",
+    focus: {
+        backgroundColor: "focus:bg-accent",
+        color: "focus:text-accent-foreground",
+    },
+    "data-[disabled]": {
+        pointerEvents: "data-[disabled]:pointer-events-none",
+        opacity: "data-[disabled]:opacity-50",
+    },
+});
 
 const ContextMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.CheckboxItem>,
@@ -142,42 +181,13 @@ const ContextMenuCheckboxItem = React.forwardRef<
 >(({ className, children, checked, ...props }, ref) => (
   <ContextMenuPrimitive.CheckboxItem
     ref={ref}
-    className={tw.def([className], {
-        position: "relative",
-        display: "flex",
-        cursor: "cursor-default",
-        userSelect: "select-none",
-        alignItems: "items-center",
-        borderRadius: "rounded-sm",
-        padding: ["py-1.5", "pl-8", "pr-2"],
-        fontSize: "text-sm",
-        outlineStyle: "outline-none",
-        focus: {
-            backgroundColor: "focus:bg-accent",
-            color: "focus:text-accent-foreground",
-        },
-        "data-[disabled]": {
-            pointerEvents: "data-[disabled]:pointer-events-none",
-            opacity: "data-[disabled]:opacity-50",
-        },
-    })}
+    className={contextMenuRadioItemContextMenuPrimitiveRadioItem.class(className)}
     checked={checked}
     {...props}
   >
-    <span className={tw.style({
-            position: "absolute",
-            left: "left-2",
-            display: "flex",
-            height: "h-3.5",
-            width: "w-3.5",
-            alignItems: "items-center",
-            justifyContent: "justify-center",
-        }).class()}>
+    <span className={contextMenuRadioItemSpan.class()}>
       <ContextMenuPrimitive.ItemIndicator>
-        <Check className={tw.style({
-                    height: "h-4",
-                    width: "w-4",
-                }).class()} />
+        <Check className={tw.join("h-4 w-4")} />
       </ContextMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -192,42 +202,12 @@ const ContextMenuRadioItem = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <ContextMenuPrimitive.RadioItem
     ref={ref}
-    className={tw.def([className], {
-        position: "relative",
-        display: "flex",
-        cursor: "cursor-default",
-        userSelect: "select-none",
-        alignItems: "items-center",
-        borderRadius: "rounded-sm",
-        padding: ["py-1.5", "pl-8", "pr-2"],
-        fontSize: "text-sm",
-        outlineStyle: "outline-none",
-        focus: {
-            backgroundColor: "focus:bg-accent",
-            color: "focus:text-accent-foreground",
-        },
-        "data-[disabled]": {
-            pointerEvents: "data-[disabled]:pointer-events-none",
-            opacity: "data-[disabled]:opacity-50",
-        },
-    })}
+    className={contextMenuRadioItemContextMenuPrimitiveRadioItem.class(className)}
     {...props}
   >
-    <span className={tw.style({
-            position: "absolute",
-            left: "left-2",
-            display: "flex",
-            height: "h-3.5",
-            width: "w-3.5",
-            alignItems: "items-center",
-            justifyContent: "justify-center",
-        }).class()}>
+    <span className={contextMenuRadioItemSpan.class()}>
       <ContextMenuPrimitive.ItemIndicator>
-        <Circle className={tw.style({
-                    height: "h-4",
-                    width: "w-4",
-                    fill: "fill-current",
-                }).class()} />
+        <Circle className={tw.join("h-4 w-4 fill-current")} />
       </ContextMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -243,12 +223,7 @@ const ContextMenuLabel = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.Label
     ref={ref}
-    className={tw.def([inset && "pl-8", className], {
-        padding: ["px-2", "py-1.5"],
-        fontSize: "text-sm",
-        fontWeight: "font-semibold",
-        color: "text-foreground",
-    })}
+    className={tw.join("px-2 py-1.5 text-sm font-semibold text-foreground", inset && "pl-8", className)}
     {...props}
   />
 ))
@@ -260,11 +235,7 @@ const ContextMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ContextMenuPrimitive.Separator
     ref={ref}
-    className={tw.def([className], {
-        margin: ["-mx-1", "my-1"],
-        height: "h-px",
-        backgroundColor: "bg-border",
-    })}
+    className={tw.join("-mx-1 my-1 h-px bg-border", className)}
     {...props}
   />
 ))
@@ -276,12 +247,7 @@ const ContextMenuShortcut = ({
 }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
-      className={tw.def([className], {
-              margin: "ml-auto",
-              fontSize: "text-xs",
-              letterSpacing: "tracking-widest",
-              color: "text-muted-foreground",
-          })}
+      className={tw.join("ml-auto text-xs tracking-widest text-muted-foreground", className)}
       {...props}
     />
   )

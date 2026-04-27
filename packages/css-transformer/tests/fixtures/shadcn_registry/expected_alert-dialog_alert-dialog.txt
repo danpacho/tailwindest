@@ -16,17 +16,33 @@ const AlertDialogOverlay = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Overlay
-    className={tw.def([className], {
-            position: "fixed",
-            inset: "inset-0",
-            zIndex: "z-50",
-            backgroundColor: "bg-black/80",
-        })}
+    className={tw.join("fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className)}
     {...props}
     ref={ref}
   />
 ))
 AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
+
+
+const alertDialogContentAlertDialogPrimitiveContent = tw.style({
+    position: "fixed",
+    left: "left-[50%]",
+    top: "top-[50%]",
+    zIndex: "z-50",
+    display: "grid",
+    width: "w-full",
+    maxWidth: "max-w-lg",
+    translate: ["translate-x-[-50%]", "translate-y-[-50%]"],
+    gap: "gap-4",
+    borderWidth: "border",
+    backgroundColor: "bg-background",
+    padding: "p-6",
+    boxShadow: "shadow-lg",
+    transitionDuration: "duration-200",
+    sm: {
+        borderRadius: "sm:rounded-lg",
+    },
+});
 
 const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
@@ -36,45 +52,30 @@ const AlertDialogContent = React.forwardRef<
     <AlertDialogOverlay />
     <AlertDialogPrimitive.Content
       ref={ref}
-      className={tw.def([className], {
-          position: "fixed",
-          left: "left-[50%]",
-          top: "top-[50%]",
-          zIndex: "z-50",
-          display: "grid",
-          width: "w-full",
-          maxWidth: "max-w-lg",
-          translate: ["translate-x-[-50%]", "translate-y-[-50%]"],
-          gap: "gap-4",
-          borderWidth: "border",
-          backgroundColor: "bg-background",
-          padding: "p-6",
-          boxShadow: "shadow-lg",
-          transitionDuration: "duration-200",
-          sm: {
-              borderRadius: "sm:rounded-lg",
-          },
-      })}
+      className={alertDialogContentAlertDialogPrimitiveContent.class(className)}
       {...props}
     />
   </AlertDialogPortal>
 ))
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
 
+
+const alertDialogHeaderDiv = tw.style({
+    display: "flex",
+    flexDirection: "flex-col",
+    margin: "space-y-2",
+    textAlign: "text-center",
+    sm: {
+        textAlign: "sm:text-left",
+    },
+});
+
 const AlertDialogHeader = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={tw.def([className], {
-            display: "flex",
-            flexDirection: "flex-col",
-            margin: "space-y-2",
-            textAlign: "text-center",
-            sm: {
-                textAlign: "sm:text-left",
-            },
-        })}
+    className={alertDialogHeaderDiv.class(className)}
     {...props}
   />
 )
@@ -85,15 +86,7 @@ const AlertDialogFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={tw.def([className], {
-            display: "flex",
-            flexDirection: "flex-col-reverse",
-            sm: {
-                flexDirection: "sm:flex-row",
-                justifyContent: "sm:justify-end",
-                margin: "sm:space-x-2",
-            },
-        })}
+    className={tw.join("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}
     {...props}
   />
 )
@@ -105,10 +98,7 @@ const AlertDialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Title
     ref={ref}
-    className={tw.def([className], {
-        fontSize: "text-lg",
-        fontWeight: "font-semibold",
-    })}
+    className={tw.join("text-lg font-semibold", className)}
     {...props}
   />
 ))
@@ -120,10 +110,7 @@ const AlertDialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Description
     ref={ref}
-    className={tw.def([className], {
-        fontSize: "text-sm",
-        color: "text-muted-foreground",
-    })}
+    className={tw.join("text-sm text-muted-foreground", className)}
     {...props}
   />
 ))
@@ -148,12 +135,7 @@ const AlertDialogCancel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Cancel
     ref={ref}
-    className={tw.def([buttonVariants({ variant: "outline" }), className], {
-        margin: "mt-2",
-        sm: {
-            margin: "sm:mt-0",
-        },
-    })}
+    className={tw.join("mt-2 sm:mt-0", buttonVariants({ variant: "outline" }), className)}
     {...props}
   />
 ))

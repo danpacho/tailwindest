@@ -3,20 +3,22 @@ import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
 import { ChevronDown } from "lucide-react"
 import { tw } from "~/tw";
 
+const navigationMenuNavigationMenuPrimitiveRoot = tw.style({
+    position: "relative",
+    zIndex: "z-10",
+    display: "flex",
+    maxWidth: "max-w-max",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+});
+
 const NavigationMenu = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Root
     ref={ref}
-    className={tw.def([className], {
-        position: "relative",
-        zIndex: "z-10",
-        display: "flex",
-        maxWidth: "max-w-max",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-    })}
+    className={navigationMenuNavigationMenuPrimitiveRoot.class(className)}
     {...props}
   >
     {children}
@@ -25,19 +27,22 @@ const NavigationMenu = React.forwardRef<
 ))
 NavigationMenu.displayName = NavigationMenuPrimitive.Root.displayName
 
+
+const navigationMenuListNavigationMenuPrimitiveList = tw.style({
+    display: "flex",
+    listStyleType: "list-none",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    margin: "space-x-1",
+});
+
 const NavigationMenuList = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.List>
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.List
     ref={ref}
-    className={tw.def([className], {
-        display: "flex",
-        listStyleType: "list-none",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-        margin: "space-x-1",
-    })}
+    className={navigationMenuListNavigationMenuPrimitiveList.class(className)}
     {...props}
   />
 ))
@@ -84,6 +89,20 @@ const navigationMenuTriggerStyle = tw.variants({
     },
 })
 
+
+const navigationMenuTriggerChevronDown = tw.style({
+    position: "relative",
+    top: "top-[1px]",
+    margin: "ml-1",
+    height: "h-3",
+    width: "w-3",
+    transitionProperty: "transition",
+    transitionDuration: "duration-300",
+    "group-data-[state=open]": {
+        rotate: "group-data-[state=open]:rotate-180",
+    },
+});
+
 const NavigationMenuTrigger = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Trigger>
@@ -95,18 +114,7 @@ const NavigationMenuTrigger = React.forwardRef<
   >
     {children}{" "}
     <ChevronDown
-      className={tw.style({
-                position: "relative",
-                top: "top-[1px]",
-                margin: "ml-1",
-                height: "h-3",
-                width: "w-3",
-                transitionProperty: "transition",
-                transitionDuration: "duration-300",
-                "group-data-[state=open]": {
-                    rotate: "group-data-[state=open]:rotate-180",
-                },
-            }).class()}
+      className={navigationMenuTriggerChevronDown.class()}
       aria-hidden="true"
     />
   </NavigationMenuPrimitive.Trigger>
@@ -119,15 +127,7 @@ const NavigationMenuContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.Content
     ref={ref}
-    className={tw.def([className], {
-        left: "left-0",
-        top: "top-0",
-        width: "w-full",
-        md: {
-            position: "md:absolute",
-            width: "md:w-auto",
-        },
-    })}
+    className={tw.join("left-0 top-0 w-full data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 md:absolute md:w-auto ", className)}
     {...props}
   />
 ))
@@ -135,33 +135,38 @@ NavigationMenuContent.displayName = NavigationMenuPrimitive.Content.displayName
 
 const NavigationMenuLink = NavigationMenuPrimitive.Link
 
+
+const navigationMenuViewportNavigationMenuPrimitiveViewport = tw.style({
+    position: "relative",
+    margin: "mt-1.5",
+    height: "h-[var(--radix-navigation-menu-viewport-height)]",
+    width: "w-full",
+    overflow: "overflow-hidden",
+    borderRadius: "rounded-md",
+    borderWidth: "border",
+    backgroundColor: "bg-popover",
+    color: "text-popover-foreground",
+    boxShadow: "shadow",
+    md: {
+        width: "md:w-[var(--radix-navigation-menu-viewport-width)]",
+    },
+});
+
+const navigationMenuViewportDiv = tw.style({
+    position: "absolute",
+    left: "left-0",
+    top: "top-full",
+    display: "flex",
+    justifyContent: "justify-center",
+});
+
 const NavigationMenuViewport = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Viewport>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
 >(({ className, ...props }, ref) => (
-  <div className={tw.style({
-        position: "absolute",
-        left: "left-0",
-        top: "top-full",
-        display: "flex",
-        justifyContent: "justify-center",
-    }).class()}>
+  <div className={navigationMenuViewportDiv.class()}>
     <NavigationMenuPrimitive.Viewport
-      className={tw.def([className], {
-                position: "relative",
-                margin: "mt-1.5",
-                height: "h-[var(--radix-navigation-menu-viewport-height)]",
-                width: "w-full",
-                overflow: "overflow-hidden",
-                borderRadius: "rounded-md",
-                borderWidth: "border",
-                backgroundColor: "bg-popover",
-                color: "text-popover-foreground",
-                boxShadow: "shadow",
-                md: {
-                    width: "md:w-[var(--radix-navigation-menu-viewport-width)]",
-                },
-            })}
+      className={navigationMenuViewportNavigationMenuPrimitiveViewport.class(className)}
       ref={ref}
       {...props}
     />
@@ -170,33 +175,38 @@ const NavigationMenuViewport = React.forwardRef<
 NavigationMenuViewport.displayName =
   NavigationMenuPrimitive.Viewport.displayName
 
+
+const navigationMenuIndicatorDiv = tw.style({
+    position: "relative",
+    top: "top-[60%]",
+    height: "h-2",
+    width: "w-2",
+    rotate: "rotate-45",
+    borderRadius: "rounded-tl-sm",
+    backgroundColor: "bg-border",
+    boxShadow: "shadow-md",
+});
+
+const navigationMenuIndicatorNavigationMenuPrimitiveIndicator = tw.style({
+    top: "top-full",
+    zIndex: "z-[1]",
+    display: "flex",
+    height: "h-1.5",
+    alignItems: "items-end",
+    justifyContent: "justify-center",
+    overflow: "overflow-hidden",
+});
+
 const NavigationMenuIndicator = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Indicator>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Indicator>
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.Indicator
     ref={ref}
-    className={tw.def([className], {
-        top: "top-full",
-        zIndex: "z-[1]",
-        display: "flex",
-        height: "h-1.5",
-        alignItems: "items-end",
-        justifyContent: "justify-center",
-        overflow: "overflow-hidden",
-    })}
+    className={navigationMenuIndicatorNavigationMenuPrimitiveIndicator.class(className)}
     {...props}
   >
-    <div className={tw.style({
-            position: "relative",
-            top: "top-[60%]",
-            height: "h-2",
-            width: "w-2",
-            rotate: "rotate-45",
-            borderRadius: "rounded-tl-sm",
-            backgroundColor: "bg-border",
-            boxShadow: "shadow-md",
-        }).class()} />
+    <div className={navigationMenuIndicatorDiv.class()} />
   </NavigationMenuPrimitive.Indicator>
 ))
 NavigationMenuIndicator.displayName =

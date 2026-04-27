@@ -4,58 +4,62 @@ import * as React from "react"
 import * as SwitchPrimitives from "@radix-ui/react-switch"
 import { tw } from "~/tw";
 
+const switchSwitchPrimitivesThumb = tw.style({
+    pointerEvents: "pointer-events-none",
+    display: "block",
+    height: "h-4",
+    width: "w-4",
+    borderRadius: "rounded-full",
+    backgroundColor: "bg-background",
+    boxShadow: ["shadow-lg", "ring-0"],
+    transitionProperty: "transition-transform",
+    "data-[state=checked]": {
+        translate: "data-[state=checked]:translate-x-4",
+    },
+    "data-[state=unchecked]": {
+        translate: "data-[state=unchecked]:translate-x-0",
+    },
+});
+
+const switchSwitchPrimitivesRoot = tw.style({
+    display: "inline-flex",
+    height: "h-5",
+    width: "w-9",
+    flexShrink: "shrink-0",
+    cursor: "cursor-pointer",
+    alignItems: "items-center",
+    borderRadius: "rounded-full",
+    borderWidth: "border-2",
+    borderColor: "border-transparent",
+    boxShadow: "shadow-sm",
+    transitionProperty: "transition-colors",
+    "focus-visible": {
+        outlineStyle: "focus-visible:outline-none",
+        boxShadow: ["focus-visible:ring-2", "focus-visible:ring-ring", "focus-visible:ring-offset-2", "focus-visible:ring-offset-background"],
+    },
+    disabled: {
+        cursor: "disabled:cursor-not-allowed",
+        opacity: "disabled:opacity-50",
+    },
+    "data-[state=checked]": {
+        backgroundColor: "data-[state=checked]:bg-primary",
+    },
+    "data-[state=unchecked]": {
+        backgroundColor: "data-[state=unchecked]:bg-input",
+    },
+});
+
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
 >(({ className, ...props }, ref) => (
   <SwitchPrimitives.Root
-    className={tw.def([className], {
-            display: "inline-flex",
-            height: "h-5",
-            width: "w-9",
-            flexShrink: "shrink-0",
-            cursor: "cursor-pointer",
-            alignItems: "items-center",
-            borderRadius: "rounded-full",
-            borderWidth: "border-2",
-            borderColor: "border-transparent",
-            boxShadow: "shadow-sm",
-            transitionProperty: "transition-colors",
-            "focus-visible": {
-                outlineStyle: "focus-visible:outline-none",
-                boxShadow: ["focus-visible:ring-2", "focus-visible:ring-ring", "focus-visible:ring-offset-2", "focus-visible:ring-offset-background"],
-            },
-            disabled: {
-                cursor: "disabled:cursor-not-allowed",
-                opacity: "disabled:opacity-50",
-            },
-            "data-[state=checked]": {
-                backgroundColor: "data-[state=checked]:bg-primary",
-            },
-            "data-[state=unchecked]": {
-                backgroundColor: "data-[state=unchecked]:bg-input",
-            },
-        })}
+    className={switchSwitchPrimitivesRoot.class(className)}
     {...props}
     ref={ref}
   >
     <SwitchPrimitives.Thumb
-      className={tw.style({
-                pointerEvents: "pointer-events-none",
-                display: "block",
-                height: "h-4",
-                width: "w-4",
-                borderRadius: "rounded-full",
-                backgroundColor: "bg-background",
-                boxShadow: ["shadow-lg", "ring-0"],
-                transitionProperty: "transition-transform",
-                "data-[state=checked]": {
-                    translate: "data-[state=checked]:translate-x-4",
-                },
-                "data-[state=unchecked]": {
-                    translate: "data-[state=unchecked]:translate-x-0",
-                },
-            }).class()}
+      className={switchSwitchPrimitivesThumb.class()}
     />
   </SwitchPrimitives.Root>
 ))

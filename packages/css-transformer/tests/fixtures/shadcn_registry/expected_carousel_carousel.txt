@@ -136,9 +136,7 @@ const Carousel = React.forwardRef<
         <div
           ref={ref}
           onKeyDownCapture={handleKeyDown}
-          className={tw.def([className], {
-              position: "relative",
-          })}
+          className={tw.join("relative", className)}
           role="region"
           aria-roledescription="carousel"
           {...props}
@@ -158,14 +156,10 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className={tw.style({
-          overflow: "overflow-hidden",
-      }).class()}>
+    <div ref={carouselRef} className={tw.join("overflow-hidden")}>
       <div
         ref={ref}
-        className={tw.def([orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className], {
-            display: "flex",
-        })}
+        className={tw.join("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className)}
         {...props}
       />
     </div>
@@ -184,12 +178,7 @@ const CarouselItem = React.forwardRef<
       ref={ref}
       role="group"
       aria-roledescription="slide"
-      className={tw.def([orientation === "horizontal" ? "pl-4" : "pt-4", className], {
-          minWidth: "min-w-0",
-          flexShrink: "shrink-0",
-          flexGrow: "grow-0",
-          flexBasis: "basis-full",
-      })}
+      className={tw.join("min-w-0 shrink-0 grow-0 basis-full", orientation === "horizontal" ? "pl-4" : "pt-4", className)}
       {...props}
     />
   )
@@ -207,25 +196,15 @@ const CarouselPrevious = React.forwardRef<
       ref={ref}
       variant={variant}
       size={size}
-      className={tw.def([orientation === "horizontal"
+      className={tw.join("absolute  h-8 w-8 rounded-full", orientation === "horizontal"
                 ? "-left-12 top-1/2 -translate-y-1/2"
-                : "-top-12 left-1/2 -translate-x-1/2 rotate-90", className], {
-          position: "absolute",
-          height: "h-8",
-          width: "w-8",
-          borderRadius: "rounded-full",
-      })}
+                : "-top-12 left-1/2 -translate-x-1/2 rotate-90", className)}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >
-      <ArrowLeft className={tw.style({
-              height: "h-4",
-              width: "w-4",
-          }).class()} />
-      <span className={tw.style({
-              display: "sr-only",
-          }).class()}>Previous slide</span>
+      <ArrowLeft className={tw.join("h-4 w-4")} />
+      <span className={tw.join("sr-only")}>Previous slide</span>
     </Button>
   )
 })
@@ -242,25 +221,15 @@ const CarouselNext = React.forwardRef<
       ref={ref}
       variant={variant}
       size={size}
-      className={tw.def([orientation === "horizontal"
+      className={tw.join("absolute h-8 w-8 rounded-full", orientation === "horizontal"
                 ? "-right-12 top-1/2 -translate-y-1/2"
-                : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90", className], {
-          position: "absolute",
-          height: "h-8",
-          width: "w-8",
-          borderRadius: "rounded-full",
-      })}
+                : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90", className)}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}
     >
-      <ArrowRight className={tw.style({
-              height: "h-4",
-              width: "w-4",
-          }).class()} />
-      <span className={tw.style({
-              display: "sr-only",
-          }).class()}>Next slide</span>
+      <ArrowRight className={tw.join("h-4 w-4")} />
+      <span className={tw.join("sr-only")}>Next slide</span>
     </Button>
   )
 })

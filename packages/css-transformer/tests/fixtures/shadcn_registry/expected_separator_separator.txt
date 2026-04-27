@@ -16,10 +16,7 @@ const Separator = React.forwardRef<
       ref={ref}
       decorative={decorative}
       orientation={orientation}
-      className={tw.def([orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]", className], {
-          flexShrink: "shrink-0",
-          backgroundColor: "bg-border",
-      })}
+      className={tw.join("shrink-0 bg-border", orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]", className)}
       {...props}
     />
   )

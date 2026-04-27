@@ -6,26 +6,56 @@ import { tw } from "~/tw";
 
 const Tabs = TabsPrimitive.Root
 
+
+const tabsListTabsPrimitiveList = tw.style({
+    display: "inline-flex",
+    height: "h-9",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    borderRadius: "rounded-lg",
+    backgroundColor: "bg-muted",
+    padding: "p-1",
+    color: "text-muted-foreground",
+});
+
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={tw.def([className], {
-        display: "inline-flex",
-        height: "h-9",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-        borderRadius: "rounded-lg",
-        backgroundColor: "bg-muted",
-        padding: "p-1",
-        color: "text-muted-foreground",
-    })}
+    className={tabsListTabsPrimitiveList.class(className)}
     {...props}
   />
 ))
 TabsList.displayName = TabsPrimitive.List.displayName
+
+
+const tabsTriggerTabsPrimitiveTrigger = tw.style({
+    display: "inline-flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    whiteSpace: "whitespace-nowrap",
+    borderRadius: "rounded-md",
+    padding: ["px-3", "py-1"],
+    fontSize: "text-sm",
+    fontWeight: "font-medium",
+    boxShadow: "ring-offset-background",
+    transitionProperty: "transition-all",
+    "focus-visible": {
+        outlineStyle: "focus-visible:outline-none",
+        boxShadow: ["focus-visible:ring-2", "focus-visible:ring-ring", "focus-visible:ring-offset-2"],
+    },
+    disabled: {
+        pointerEvents: "disabled:pointer-events-none",
+        opacity: "disabled:opacity-50",
+    },
+    "data-[state=active]": {
+        backgroundColor: "data-[state=active]:bg-background",
+        color: "data-[state=active]:text-foreground",
+        boxShadow: "data-[state=active]:shadow",
+    },
+});
 
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
@@ -33,31 +63,7 @@ const TabsTrigger = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
-    className={tw.def([className], {
-        display: "inline-flex",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-        whiteSpace: "whitespace-nowrap",
-        borderRadius: "rounded-md",
-        padding: ["px-3", "py-1"],
-        fontSize: "text-sm",
-        fontWeight: "font-medium",
-        boxShadow: "ring-offset-background",
-        transitionProperty: "transition-all",
-        "focus-visible": {
-            outlineStyle: "focus-visible:outline-none",
-            boxShadow: ["focus-visible:ring-2", "focus-visible:ring-ring", "focus-visible:ring-offset-2"],
-        },
-        disabled: {
-            pointerEvents: "disabled:pointer-events-none",
-            opacity: "disabled:opacity-50",
-        },
-        "data-[state=active]": {
-            backgroundColor: "data-[state=active]:bg-background",
-            color: "data-[state=active]:text-foreground",
-            boxShadow: "data-[state=active]:shadow",
-        },
-    })}
+    className={tabsTriggerTabsPrimitiveTrigger.class(className)}
     {...props}
   />
 ))
@@ -69,14 +75,7 @@ const TabsContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
-    className={tw.def([className], {
-        margin: "mt-2",
-        boxShadow: "ring-offset-background",
-        "focus-visible": {
-            outlineStyle: "focus-visible:outline-none",
-            boxShadow: ["focus-visible:ring-2", "focus-visible:ring-ring", "focus-visible:ring-offset-2"],
-        },
-    })}
+    className={tw.join("mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", className)}
     {...props}
   />
 ))

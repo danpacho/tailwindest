@@ -8,6 +8,20 @@ const HoverCard = HoverCardPrimitive.Root
 
 const HoverCardTrigger = HoverCardPrimitive.Trigger
 
+
+const hoverCardContentHoverCardPrimitiveContent = tw.style({
+    zIndex: "z-50",
+    width: "w-64",
+    borderRadius: "rounded-md",
+    borderWidth: "border",
+    backgroundColor: "bg-popover",
+    padding: "p-4",
+    color: "text-popover-foreground",
+    boxShadow: "shadow-md",
+    outlineStyle: "outline-none",
+    transformOrigin: "origin-[--radix-hover-card-content-transform-origin]",
+});
+
 const HoverCardContent = React.forwardRef<
   React.ElementRef<typeof HoverCardPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Content>
@@ -16,18 +30,7 @@ const HoverCardContent = React.forwardRef<
     ref={ref}
     align={align}
     sideOffset={sideOffset}
-    className={tw.def([className], {
-        zIndex: "z-50",
-        width: "w-64",
-        borderRadius: "rounded-md",
-        borderWidth: "border",
-        backgroundColor: "bg-popover",
-        padding: "p-4",
-        color: "text-popover-foreground",
-        boxShadow: "shadow-md",
-        outlineStyle: "outline-none",
-        transformOrigin: "origin-[--radix-hover-card-content-transform-origin]",
-    })}
+    className={hoverCardContentHoverCardPrimitiveContent.class(className)}
     {...props}
   />
 ))

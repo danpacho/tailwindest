@@ -72,8 +72,8 @@ describe("Shadcn Registry E2E Tests", async () => {
     const registry = new TransformerRegistry()
 
     registry.register(new CvaWalker())
-    registry.register(new CnWalker())
-    registry.register(new ClassNameWalker())
+    registry.register(new CnWalker({ objectThreshold: 5 }))
+    registry.register(new ClassNameWalker({ objectThreshold: 5 }))
 
     // Only test on input files
     const inputFiles = files.filter(

@@ -10,6 +10,18 @@ const Tooltip = TooltipPrimitive.Root
 
 const TooltipTrigger = TooltipPrimitive.Trigger
 
+
+const tooltipContentTooltipPrimitiveContent = tw.style({
+    zIndex: "z-50",
+    overflow: "overflow-hidden",
+    borderRadius: "rounded-md",
+    backgroundColor: "bg-primary",
+    padding: ["px-3", "py-1.5"],
+    fontSize: "text-xs",
+    color: "text-primary-foreground",
+    transformOrigin: "origin-[--radix-tooltip-content-transform-origin]",
+});
+
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
@@ -18,16 +30,7 @@ const TooltipContent = React.forwardRef<
     <TooltipPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
-      className={tw.def([className], {
-          zIndex: "z-50",
-          overflow: "overflow-hidden",
-          borderRadius: "rounded-md",
-          backgroundColor: "bg-primary",
-          padding: ["px-3", "py-1.5"],
-          fontSize: "text-xs",
-          color: "text-primary-foreground",
-          transformOrigin: "origin-[--radix-tooltip-content-transform-origin]",
-      })}
+      className={tooltipContentTooltipPrimitiveContent.class(className)}
       {...props}
     />
   </TooltipPrimitive.Portal>

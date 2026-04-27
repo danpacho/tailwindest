@@ -13,14 +13,18 @@ const btn = tw.variants({
     },
 });
 
+const mixedSpan = tw.style({
+    fontSize: "text-sm",
+});
+
+const mixedDiv = tw.style({
+    padding: "p-4",
+});
+
 export function Mixed({ isActive }: { isActive: boolean }) {
     return (
-        <div className={tw.style({
-            padding: "p-4",
-        }).class()}>
-            <span className={tw.def([isActive && "text-white"], {
-                fontSize: "text-sm",
-            })}>
+        <div className={mixedDiv.class()}>
+            <span className={mixedSpan.class(isActive && "text-white")}>
                 Text
             </span>
         </div>

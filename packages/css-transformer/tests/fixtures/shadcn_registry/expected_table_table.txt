@@ -5,18 +5,10 @@ const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className={tw.style({
-        position: "relative",
-        width: "w-full",
-        overflow: "overflow-auto",
-    }).class()}>
+  <div className={tw.join("relative w-full overflow-auto")}>
     <table
       ref={ref}
-      className={tw.def([className], {
-          width: "w-full",
-          captionSide: "caption-bottom",
-          fontSize: "text-sm",
-      })}
+      className={tw.join("w-full caption-bottom text-sm", className)}
       {...props}
     />
   </div>
@@ -27,11 +19,7 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={tw.def([className], {
-        "[&_tr]": {
-            borderWidth: "[&_tr]:border-b",
-        },
-    })} {...props} />
+  <thead ref={ref} className={tw.join("[&_tr]:border-b", className)} {...props} />
 ))
 TableHeader.displayName = "TableHeader"
 
@@ -41,11 +29,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={tw.def([className], {
-        "[&_tr:last-child]": {
-            borderWidth: "[&_tr:last-child]:border-0",
-        },
-    })}
+    className={tw.join("[&_tr:last-child]:border-0", className)}
     {...props}
   />
 ))
@@ -57,16 +41,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={tw.def([className], {
-        borderWidth: "border-t",
-        backgroundColor: "bg-muted/50",
-        fontWeight: "font-medium",
-        "[&>tr]": {
-            last: {
-                borderWidth: "[&>tr]:last:border-b-0",
-            },
-        },
-    })}
+    className={tw.join("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", className)}
     {...props}
   />
 ))
@@ -78,20 +53,27 @@ const TableRow = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tr
     ref={ref}
-    className={tw.def([className], {
-        borderWidth: "border-b",
-        transitionProperty: "transition-colors",
-        hover: {
-            backgroundColor: "hover:bg-muted/50",
-        },
-        "data-[state=selected]": {
-            backgroundColor: "data-[state=selected]:bg-muted",
-        },
-    })}
+    className={tw.join("border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted", className)}
     {...props}
   />
 ))
 TableRow.displayName = "TableRow"
+
+
+const tableHeadTh = tw.style({
+    height: "h-10",
+    padding: "px-2",
+    textAlign: "text-left",
+    verticalAlign: "align-middle",
+    fontWeight: "font-medium",
+    color: "text-muted-foreground",
+    "[&:has([role=checkbox])]": {
+        padding: "[&:has([role=checkbox])]:pr-0",
+    },
+    "[&>[role=checkbox]]": {
+        translate: "[&>[role=checkbox]]:translate-y-[2px]",
+    },
+});
 
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
@@ -99,20 +81,7 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <th
     ref={ref}
-    className={tw.def([className], {
-        height: "h-10",
-        padding: "px-2",
-        textAlign: "text-left",
-        verticalAlign: "align-middle",
-        fontWeight: "font-medium",
-        color: "text-muted-foreground",
-        "[&:has([role=checkbox])]": {
-            padding: "[&:has([role=checkbox])]:pr-0",
-        },
-        "[&>[role=checkbox]]": {
-            translate: "[&>[role=checkbox]]:translate-y-[2px]",
-        },
-    })}
+    className={tableHeadTh.class(className)}
     {...props}
   />
 ))
@@ -124,16 +93,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={tw.def([className], {
-        padding: "p-2",
-        verticalAlign: "align-middle",
-        "[&:has([role=checkbox])]": {
-            padding: "[&:has([role=checkbox])]:pr-0",
-        },
-        "[&>[role=checkbox]]": {
-            translate: "[&>[role=checkbox]]:translate-y-[2px]",
-        },
-    })}
+    className={tw.join("p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", className)}
     {...props}
   />
 ))
@@ -145,11 +105,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={tw.def([className], {
-        margin: "mt-4",
-        fontSize: "text-sm",
-        color: "text-muted-foreground",
-    })}
+    className={tw.join("mt-4 text-sm text-muted-foreground", className)}
     {...props}
   />
 ))

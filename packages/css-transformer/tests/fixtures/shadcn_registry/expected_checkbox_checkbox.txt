@@ -5,47 +5,42 @@ import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { Check } from "lucide-react"
 import { tw } from "~/tw";
 
+const checkboxCheckboxPrimitiveRoot = tw.style({
+    display: "grid",
+    placeContent: "place-content-center",
+    height: "h-4",
+    width: "w-4",
+    flexShrink: "shrink-0",
+    borderRadius: "rounded-sm",
+    borderWidth: ["border", "border-primary"],
+    boxShadow: "shadow",
+    "focus-visible": {
+        outlineStyle: "focus-visible:outline-none",
+        boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring"],
+    },
+    disabled: {
+        cursor: "disabled:cursor-not-allowed",
+        opacity: "disabled:opacity-50",
+    },
+    "data-[state=checked]": {
+        backgroundColor: "data-[state=checked]:bg-primary",
+        color: "data-[state=checked]:text-primary-foreground",
+    },
+});
+
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
 >(({ className, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
-    className={tw.def([className], {
-        display: "grid",
-        placeContent: "place-content-center",
-        height: "h-4",
-        width: "w-4",
-        flexShrink: "shrink-0",
-        borderRadius: "rounded-sm",
-        borderWidth: ["border", "border-primary"],
-        boxShadow: "shadow",
-        "focus-visible": {
-            outlineStyle: "focus-visible:outline-none",
-            boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring"],
-        },
-        disabled: {
-            cursor: "disabled:cursor-not-allowed",
-            opacity: "disabled:opacity-50",
-        },
-        "data-[state=checked]": {
-            backgroundColor: "data-[state=checked]:bg-primary",
-            color: "data-[state=checked]:text-primary-foreground",
-        },
-    })}
+    className={checkboxCheckboxPrimitiveRoot.class(className)}
     {...props}
   >
     <CheckboxPrimitive.Indicator
-      className={tw.style({
-                display: "grid",
-                placeContent: "place-content-center",
-                color: "text-current",
-            }).class()}
+      className={tw.join("grid place-content-center text-current")}
     >
-      <Check className={tw.style({
-                height: "h-4",
-                width: "w-4",
-            }).class()} />
+      <Check className={tw.join("h-4 w-4")} />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ))
