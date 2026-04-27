@@ -2,6 +2,7 @@ import { Node, Project, ScriptTarget } from "ts-morph"
 import { describe, expect, it, vi } from "vitest"
 import type { TransformerContext } from "../../src/context"
 import { ImportCollector } from "../../src/context/import_collector"
+import { StyleManager } from "../../src/context/style_manager"
 import { TransformerRegistry } from "../../src/registry/transformer_registry"
 import type { ClassTransformerWalker } from "../../src/walkers/walker_interface"
 
@@ -19,6 +20,7 @@ describe("TransformerRegistry", () => {
             tailwindestIdentifier: "tw",
             tailwindestModulePath: "~/tw",
             imports: new ImportCollector(),
+            styles: new StyleManager(),
             diagnostics: [],
         }
     }

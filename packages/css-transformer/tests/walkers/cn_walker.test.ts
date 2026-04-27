@@ -40,10 +40,7 @@ describe("CnWalker", () => {
         walker.walk(callExpr, context)
         const text = sourceFile.getFullText()
 
-        expect(text).toContain(`tw.style({`)
-        expect(text).toContain(`display: "flex"`)
-        expect(text).toContain(`fontSize: "text-sm"`)
-        expect(text).toContain(`}).class()`)
+        expect(text).toContain(`globalDiv.class()`)
     })
 
     it("should transform dynamic only cn call", () => {
@@ -77,10 +74,50 @@ describe("CnWalker", () => {
 
         // "flex" and "p-4" are static. The rest are dynamic.
         expect(text).toContain(
-            `tw.def([isActive && "text-sm", props.className], {`
+            `globalDiv.class(isActive && "text-sm", props.className)`
         )
-        expect(text).toContain(`display: "flex"`)
-        expect(text).toContain(`padding: "p-4"`)
+    })
+
+    it("should respect objectThreshold config", () => {
+        const { sourceFile } = setup(`const a = cn("flex text-sm")`)
+        const callExpr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.CallExpression
+        )!
+
+        // Set threshold to 3. Current call has 2 properties (display, fontSize).
+        const context = createContext({ analyzer })
+        const walker = new CnWalker({ objectThreshold: 3 })
+
+        walker.walk(callExpr, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(`tw.join("flex text-sm")`)
+        expect(text).not.toContain(`tw.style`)
+    })
+
+    it("should extract complex styles into constants", () => {
+        const { sourceFile } = setup(`
+            export function MyComponent() {
+                return <div className={cn("flex text-sm p-4")} />
+            }
+        `)
+        const callExpr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.CallExpression
+        )!
+
+        // Set threshold to 2. Current has 3 properties (display, fontSize, padding).
+        const context = createContext({ analyzer })
+        const walker = new CnWalker({ objectThreshold: 2 })
+
+        walker.walk(callExpr, context)
+
+        // Manual post-process simulation for test
+        const extracted = context.styles.getStyles()
+        expect(extracted).toHaveLength(1)
+        expect(extracted[0]![0]).toBe("myComponentDiv")
+
+        const text = sourceFile.getFullText()
+        expect(text).toContain(`className={myComponentDiv.class()}`)
     })
 
     it("should support clsx and classNames", () => {

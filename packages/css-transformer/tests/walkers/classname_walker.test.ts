@@ -44,10 +44,7 @@ describe("ClassNameWalker", () => {
         walker.walk(attr, context)
         const text = sourceFile.getFullText()
 
-        expect(text).toContain(`className={tw.style({`)
-        expect(text).toContain(`display: "flex"`)
-        expect(text).toContain(`fontSize: "text-sm"`)
-        expect(text).toContain(`}).class()}`)
+        expect(text).toContain(`className={globalDiv.class()}`)
     })
 
     it("should transform jsx expression with string literal className", () => {
@@ -63,9 +60,26 @@ describe("ClassNameWalker", () => {
         walker.walk(attr, context)
 
         const text = sourceFile.getFullText()
-        expect(text).toContain(`className={tw.style({`)
-        expect(text).toContain(`display: "flex"`)
-        expect(text).toContain(`}).class()}`)
+        expect(text).toContain(`className={globalDiv.class()}`)
+    })
+
+    it("should respect objectThreshold config", () => {
+        const { sourceFile } = setup(
+            `const a = <div className="flex text-sm" />`
+        )
+        const attr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.JsxAttribute
+        )!
+
+        // Set threshold to 3. Current has 2 properties (display, fontSize).
+        const context = createContext({ analyzer })
+        const walker = new ClassNameWalker({ objectThreshold: 3 })
+
+        walker.walk(attr, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(`className={tw.join("flex text-sm")}`)
+        expect(text).not.toContain(`tw.style`)
     })
 
     it("should not transform empty className", () => {
