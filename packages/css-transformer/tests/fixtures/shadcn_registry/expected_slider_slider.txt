@@ -1,0 +1,60 @@
+"use client"
+
+import * as React from "react"
+import * as SliderPrimitive from "@radix-ui/react-slider"
+import { tw } from "~/tw";
+
+const Slider = React.forwardRef<
+  React.ElementRef<typeof SliderPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <SliderPrimitive.Root
+    ref={ref}
+    className={tw.def([className], {
+        position: "relative",
+        display: "flex",
+        width: "w-full",
+        touchAction: "touch-none",
+        userSelect: "select-none",
+        alignItems: "items-center",
+    })}
+    {...props}
+  >
+    <SliderPrimitive.Track className={tw.style({
+            position: "relative",
+            height: "h-1.5",
+            width: "w-full",
+            flexGrow: "grow",
+            overflow: "overflow-hidden",
+            borderRadius: "rounded-full",
+            backgroundColor: "bg-primary/20",
+        }).class()}>
+      <SliderPrimitive.Range className={tw.style({
+                position: "absolute",
+                height: "h-full",
+                backgroundColor: "bg-primary",
+            }).class()} />
+    </SliderPrimitive.Track>
+    <SliderPrimitive.Thumb className={tw.style({
+            display: "block",
+            height: "h-4",
+            width: "w-4",
+            borderRadius: "rounded-full",
+            borderWidth: ["border", "border-primary/50"],
+            backgroundColor: "bg-background",
+            boxShadow: "shadow",
+            transitionProperty: "transition-colors",
+            "focus-visible": {
+                outlineStyle: "focus-visible:outline-none",
+                boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring"],
+            },
+            disabled: {
+                pointerEvents: "disabled:pointer-events-none",
+                opacity: "disabled:opacity-50",
+            },
+        }).class()} />
+  </SliderPrimitive.Root>
+))
+Slider.displayName = SliderPrimitive.Root.displayName
+
+export { Slider }

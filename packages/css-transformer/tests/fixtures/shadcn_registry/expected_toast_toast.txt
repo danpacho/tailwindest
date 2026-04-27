@@ -1,0 +1,244 @@
+"use client"
+
+import * as React from "react"
+import * as ToastPrimitives from "@radix-ui/react-toast"
+import { type VariantProps } from "class-variance-authority"
+import { X } from "lucide-react"
+import { tw } from "~/tw";
+
+const ToastProvider = ToastPrimitives.Provider
+
+const ToastViewport = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Viewport>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Viewport
+    ref={ref}
+    className={tw.def([className], {
+        position: "fixed",
+        top: "top-0",
+        zIndex: "z-[100]",
+        display: "flex",
+        maxHeight: "max-h-screen",
+        width: "w-full",
+        flexDirection: "flex-col-reverse",
+        padding: "p-4",
+        sm: {
+            bottom: "sm:bottom-0",
+            right: "sm:right-0",
+            top: "sm:top-auto",
+            flexDirection: "sm:flex-col",
+        },
+        md: {
+            maxWidth: "md:max-w-[420px]",
+        },
+    })}
+    {...props}
+  />
+))
+ToastViewport.displayName = ToastPrimitives.Viewport.displayName
+
+const toastVariants = /**
+ * @defaultVariants {
+      variant: "default",
+    }
+ */
+tw.variants({
+    base: {
+        pointerEvents: "pointer-events-auto",
+        position: "relative",
+        display: "flex",
+        width: "w-full",
+        alignItems: "items-center",
+        justifyContent: "justify-between",
+        margin: "space-x-2",
+        overflow: "overflow-hidden",
+        borderRadius: "rounded-md",
+        borderWidth: "border",
+        padding: ["p-4", "pr-6"],
+        boxShadow: "shadow-lg",
+        transitionProperty: "transition-all",
+        "data-[swipe=cancel]": {
+            translate: "data-[swipe=cancel]:translate-x-0",
+        },
+        "data-[swipe=end]": {
+            translate: "data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)]",
+        },
+        "data-[swipe=move]": {
+            translate: "data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)]",
+            transitionProperty: "data-[swipe=move]:transition-none",
+        },
+    },
+    variants: {
+        variant: {
+            default: {
+                borderWidth: "border",
+                backgroundColor: "bg-background",
+                color: "text-foreground",
+            },
+            destructive: {
+                borderWidth: "border-destructive",
+                backgroundColor: "bg-destructive",
+                color: "text-destructive-foreground",
+            },
+        },
+    },
+})
+
+const Toast = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Root>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
+    VariantProps<typeof toastVariants>
+>(({ className, variant, ...props }, ref) => {
+  return (
+    <ToastPrimitives.Root
+      ref={ref}
+      className={tw.join(toastVariants({ variant }), className)}
+      {...props}
+    />
+  )
+})
+Toast.displayName = ToastPrimitives.Root.displayName
+
+const ToastAction = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Action>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Action
+    ref={ref}
+    className={tw.def([className], {
+        display: "inline-flex",
+        height: "h-8",
+        flexShrink: "shrink-0",
+        alignItems: "items-center",
+        justifyContent: "justify-center",
+        borderRadius: "rounded-md",
+        borderWidth: "border",
+        backgroundColor: "bg-transparent",
+        padding: "px-3",
+        fontSize: "text-sm",
+        fontWeight: "font-medium",
+        transitionProperty: "transition-colors",
+        hover: {
+            backgroundColor: "hover:bg-secondary",
+        },
+        focus: {
+            outlineStyle: "focus:outline-none",
+            boxShadow: ["focus:ring-1", "focus:ring-ring"],
+        },
+        disabled: {
+            pointerEvents: "disabled:pointer-events-none",
+            opacity: "disabled:opacity-50",
+        },
+        "group-[.destructive]": {
+            borderWidth: "group-[.destructive]:border-muted/40",
+            hover: {
+                borderWidth: "group-[.destructive]:hover:border-destructive/30",
+                backgroundColor: "group-[.destructive]:hover:bg-destructive",
+                color: "group-[.destructive]:hover:text-destructive-foreground",
+            },
+            focus: {
+                boxShadow: "group-[.destructive]:focus:ring-destructive",
+            },
+        },
+    })}
+    {...props}
+  />
+))
+ToastAction.displayName = ToastPrimitives.Action.displayName
+
+const ToastClose = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Close>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Close
+    ref={ref}
+    className={tw.def([className], {
+        position: "absolute",
+        right: "right-1",
+        top: "top-1",
+        borderRadius: "rounded-md",
+        padding: "p-1",
+        color: "text-foreground/50",
+        opacity: "opacity-0",
+        transitionProperty: "transition-opacity",
+        hover: {
+            color: "hover:text-foreground",
+        },
+        focus: {
+            opacity: "focus:opacity-100",
+            outlineStyle: "focus:outline-none",
+            boxShadow: "focus:ring-1",
+        },
+        "group-hover": {
+            opacity: "group-hover:opacity-100",
+        },
+        "group-[.destructive]": {
+            color: "group-[.destructive]:text-red-300",
+            hover: {
+                color: "group-[.destructive]:hover:text-red-50",
+            },
+            focus: {
+                boxShadow: ["group-[.destructive]:focus:ring-red-400", "group-[.destructive]:focus:ring-offset-red-600"],
+            },
+        },
+    })}
+    toast-close=""
+    {...props}
+  >
+    <X className={tw.style({
+            height: "h-4",
+            width: "w-4",
+        }).class()} />
+  </ToastPrimitives.Close>
+))
+ToastClose.displayName = ToastPrimitives.Close.displayName
+
+const ToastTitle = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Title>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Title
+    ref={ref}
+    className={tw.def([className], {
+        fontSize: "text-sm",
+        fontWeight: "font-semibold",
+        "[&+div]": {
+            fontSize: "[&+div]:text-xs",
+        },
+    })}
+    {...props}
+  />
+))
+ToastTitle.displayName = ToastPrimitives.Title.displayName
+
+const ToastDescription = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Description>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Description
+    ref={ref}
+    className={tw.def([className], {
+        fontSize: "text-sm",
+        opacity: "opacity-90",
+    })}
+    {...props}
+  />
+))
+ToastDescription.displayName = ToastPrimitives.Description.displayName
+
+type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
+
+type ToastActionElement = React.ReactElement<typeof ToastAction>
+
+export {
+  type ToastProps,
+  type ToastActionElement,
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  ToastAction,
+}

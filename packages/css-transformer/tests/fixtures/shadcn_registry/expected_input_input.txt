@@ -1,0 +1,50 @@
+import * as React from "react"
+import { tw } from "~/tw";
+
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={tw.def([className], {
+            display: "flex",
+            height: "h-9",
+            width: "w-full",
+            borderRadius: "rounded-md",
+            borderWidth: ["border", "border-input"],
+            backgroundColor: "bg-transparent",
+            padding: ["px-3", "py-1"],
+            fontSize: "text-base",
+            boxShadow: "shadow-sm",
+            transitionProperty: "transition-colors",
+            file: {
+                borderWidth: "file:border-0",
+                backgroundColor: "file:bg-transparent",
+                fontSize: "file:text-sm",
+                fontWeight: "file:font-medium",
+                color: "file:text-foreground",
+            },
+            placeholder: {
+                color: "placeholder:text-muted-foreground",
+            },
+            "focus-visible": {
+                outlineStyle: "focus-visible:outline-none",
+                boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring"],
+            },
+            disabled: {
+                cursor: "disabled:cursor-not-allowed",
+                opacity: "disabled:opacity-50",
+            },
+            md: {
+                fontSize: "md:text-sm",
+            },
+        })}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Input.displayName = "Input"
+
+export { Input }

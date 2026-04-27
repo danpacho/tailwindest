@@ -1,0 +1,130 @@
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { type VariantProps } from "class-variance-authority"
+import { tw } from "~/tw";
+
+const buttonVariants = /**
+ * @defaultVariants {
+      variant: "default",
+      size: "default",
+    }
+ */
+tw.variants({
+    base: {
+        display: "inline-flex",
+        alignItems: "items-center",
+        justifyContent: "justify-center",
+        gap: "gap-2",
+        whiteSpace: "whitespace-nowrap",
+        borderRadius: "rounded-md",
+        fontSize: "text-sm",
+        fontWeight: "font-medium",
+        transitionProperty: "transition-colors",
+        "focus-visible": {
+            outlineStyle: "focus-visible:outline-none",
+            boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring"],
+        },
+        disabled: {
+            pointerEvents: "disabled:pointer-events-none",
+            opacity: "disabled:opacity-50",
+        },
+        "[&_svg]": {
+            pointerEvents: "[&_svg]:pointer-events-none",
+            width: "[&_svg]:size-4",
+            flexShrink: "[&_svg]:shrink-0",
+        },
+    },
+    variants: {
+        variant: {
+            default: {
+                backgroundColor: "bg-primary",
+                color: "text-primary-foreground",
+                boxShadow: "shadow",
+                hover: {
+                    backgroundColor: "hover:bg-primary/90",
+                },
+            },
+            destructive: {
+                backgroundColor: "bg-destructive",
+                color: "text-destructive-foreground",
+                boxShadow: "shadow-sm",
+                hover: {
+                    backgroundColor: "hover:bg-destructive/90",
+                },
+            },
+            outline: {
+                borderWidth: ["border", "border-input"],
+                backgroundColor: "bg-background",
+                boxShadow: "shadow-sm",
+                hover: {
+                    backgroundColor: "hover:bg-accent",
+                    color: "hover:text-accent-foreground",
+                },
+            },
+            secondary: {
+                backgroundColor: "bg-secondary",
+                color: "text-secondary-foreground",
+                boxShadow: "shadow-sm",
+                hover: {
+                    backgroundColor: "hover:bg-secondary/80",
+                },
+            },
+            ghost: {
+                hover: {
+                    backgroundColor: "hover:bg-accent",
+                    color: "hover:text-accent-foreground",
+                },
+            },
+            link: {
+                color: "text-primary",
+                textUnderlineOffset: "underline-offset-4",
+                hover: {
+                    textDecorationLine: "hover:underline",
+                },
+            },
+        },
+        size: {
+            default: {
+                height: "h-9",
+                padding: ["px-4", "py-2"],
+            },
+            sm: {
+                height: "h-8",
+                borderRadius: "rounded-md",
+                padding: "px-3",
+                fontSize: "text-xs",
+            },
+            lg: {
+                height: "h-10",
+                borderRadius: "rounded-md",
+                padding: "px-8",
+            },
+            icon: {
+                height: "h-9",
+                width: "w-9",
+            },
+        },
+    },
+})
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
+    return (
+      <Comp
+        className={tw.join(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Button.displayName = "Button"
+
+export { Button, buttonVariants }

@@ -1,0 +1,174 @@
+"use client"
+
+import * as React from "react"
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
+import { buttonVariants } from "@/registry/new-york/ui/button"
+import { tw } from "~/tw";
+
+const AlertDialog = AlertDialogPrimitive.Root
+
+const AlertDialogTrigger = AlertDialogPrimitive.Trigger
+
+const AlertDialogPortal = AlertDialogPrimitive.Portal
+
+const AlertDialogOverlay = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Overlay
+    className={tw.def([className], {
+            position: "fixed",
+            inset: "inset-0",
+            zIndex: "z-50",
+            backgroundColor: "bg-black/80",
+        })}
+    {...props}
+    ref={ref}
+  />
+))
+AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
+
+const AlertDialogContent = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPortal>
+    <AlertDialogOverlay />
+    <AlertDialogPrimitive.Content
+      ref={ref}
+      className={tw.def([className], {
+          position: "fixed",
+          left: "left-[50%]",
+          top: "top-[50%]",
+          zIndex: "z-50",
+          display: "grid",
+          width: "w-full",
+          maxWidth: "max-w-lg",
+          translate: ["translate-x-[-50%]", "translate-y-[-50%]"],
+          gap: "gap-4",
+          borderWidth: "border",
+          backgroundColor: "bg-background",
+          padding: "p-6",
+          boxShadow: "shadow-lg",
+          transitionDuration: "duration-200",
+          sm: {
+              borderRadius: "sm:rounded-lg",
+          },
+      })}
+      {...props}
+    />
+  </AlertDialogPortal>
+))
+AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
+
+const AlertDialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={tw.def([className], {
+            display: "flex",
+            flexDirection: "flex-col",
+            margin: "space-y-2",
+            textAlign: "text-center",
+            sm: {
+                textAlign: "sm:text-left",
+            },
+        })}
+    {...props}
+  />
+)
+AlertDialogHeader.displayName = "AlertDialogHeader"
+
+const AlertDialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={tw.def([className], {
+            display: "flex",
+            flexDirection: "flex-col-reverse",
+            sm: {
+                flexDirection: "sm:flex-row",
+                justifyContent: "sm:justify-end",
+                margin: "sm:space-x-2",
+            },
+        })}
+    {...props}
+  />
+)
+AlertDialogFooter.displayName = "AlertDialogFooter"
+
+const AlertDialogTitle = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Title
+    ref={ref}
+    className={tw.def([className], {
+        fontSize: "text-lg",
+        fontWeight: "font-semibold",
+    })}
+    {...props}
+  />
+))
+AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName
+
+const AlertDialogDescription = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Description
+    ref={ref}
+    className={tw.def([className], {
+        fontSize: "text-sm",
+        color: "text-muted-foreground",
+    })}
+    {...props}
+  />
+))
+AlertDialogDescription.displayName =
+  AlertDialogPrimitive.Description.displayName
+
+const AlertDialogAction = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Action>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Action
+    ref={ref}
+    className={tw.join(buttonVariants(), className)}
+    {...props}
+  />
+))
+AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName
+
+const AlertDialogCancel = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Cancel
+    ref={ref}
+    className={tw.def([buttonVariants({ variant: "outline" }), className], {
+        margin: "mt-2",
+        sm: {
+            margin: "sm:mt-0",
+        },
+    })}
+    {...props}
+  />
+))
+AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
+
+export {
+  AlertDialog,
+  AlertDialogPortal,
+  AlertDialogOverlay,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+}

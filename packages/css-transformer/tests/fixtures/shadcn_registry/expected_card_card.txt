@@ -1,0 +1,96 @@
+import * as React from "react"
+import { tw } from "~/tw";
+
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={tw.def([className], {
+        borderRadius: "rounded-xl",
+        borderWidth: "border",
+        backgroundColor: "bg-card",
+        color: "text-card-foreground",
+        boxShadow: "shadow",
+    })}
+    {...props}
+  />
+))
+Card.displayName = "Card"
+
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={tw.def([className], {
+        display: "flex",
+        flexDirection: "flex-col",
+        margin: "space-y-1.5",
+        padding: "p-6",
+    })}
+    {...props}
+  />
+))
+CardHeader.displayName = "CardHeader"
+
+const CardTitle = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={tw.def([className], {
+        fontWeight: "font-semibold",
+        lineHeight: "leading-none",
+        letterSpacing: "tracking-tight",
+    })}
+    {...props}
+  />
+))
+CardTitle.displayName = "CardTitle"
+
+const CardDescription = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={tw.def([className], {
+        fontSize: "text-sm",
+        color: "text-muted-foreground",
+    })}
+    {...props}
+  />
+))
+CardDescription.displayName = "CardDescription"
+
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={tw.def([className], {
+        padding: ["p-6", "pt-0"],
+    })} {...props} />
+))
+CardContent.displayName = "CardContent"
+
+const CardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={tw.def([className], {
+        display: "flex",
+        alignItems: "items-center",
+        padding: ["p-6", "pt-0"],
+    })}
+    {...props}
+  />
+))
+CardFooter.displayName = "CardFooter"
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }

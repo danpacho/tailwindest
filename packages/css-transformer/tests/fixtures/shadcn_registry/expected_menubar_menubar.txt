@@ -1,0 +1,383 @@
+"use client"
+
+import * as React from "react"
+import * as MenubarPrimitive from "@radix-ui/react-menubar"
+import { Check, ChevronRight, Circle } from "lucide-react"
+import { tw } from "~/tw";
+
+function MenubarMenu({
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.Menu>) {
+  return <MenubarPrimitive.Menu {...props} />
+}
+
+function MenubarGroup({
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.Group>) {
+  return <MenubarPrimitive.Group {...props} />
+}
+
+function MenubarPortal({
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.Portal>) {
+  return <MenubarPrimitive.Portal {...props} />
+}
+
+function MenubarRadioGroup({
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.RadioGroup>) {
+  return <MenubarPrimitive.RadioGroup {...props} />
+}
+
+function MenubarSub({
+  ...props
+}: React.ComponentProps<typeof MenubarPrimitive.Sub>) {
+  return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />
+}
+
+const Menubar = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <MenubarPrimitive.Root
+    ref={ref}
+    className={tw.def([className], {
+        display: "flex",
+        height: "h-9",
+        alignItems: "items-center",
+        margin: "space-x-1",
+        borderRadius: "rounded-md",
+        borderWidth: "border",
+        backgroundColor: "bg-background",
+        padding: "p-1",
+        boxShadow: "shadow-sm",
+    })}
+    {...props}
+  />
+))
+Menubar.displayName = MenubarPrimitive.Root.displayName
+
+const MenubarTrigger = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+  <MenubarPrimitive.Trigger
+    ref={ref}
+    className={tw.def([className], {
+        display: "flex",
+        cursor: "cursor-default",
+        userSelect: "select-none",
+        alignItems: "items-center",
+        borderRadius: "rounded-sm",
+        padding: ["px-3", "py-1"],
+        fontSize: "text-sm",
+        fontWeight: "font-medium",
+        outlineStyle: "outline-none",
+        focus: {
+            backgroundColor: "focus:bg-accent",
+            color: "focus:text-accent-foreground",
+        },
+        "data-[state=open]": {
+            backgroundColor: "data-[state=open]:bg-accent",
+            color: "data-[state=open]:text-accent-foreground",
+        },
+    })}
+    {...props}
+  />
+))
+MenubarTrigger.displayName = MenubarPrimitive.Trigger.displayName
+
+const MenubarSubTrigger = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.SubTrigger>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.SubTrigger> & {
+    inset?: boolean
+  }
+>(({ className, inset, children, ...props }, ref) => (
+  <MenubarPrimitive.SubTrigger
+    ref={ref}
+    className={tw.def([inset && "pl-8", className], {
+        display: "flex",
+        cursor: "cursor-default",
+        userSelect: "select-none",
+        alignItems: "items-center",
+        borderRadius: "rounded-sm",
+        padding: ["px-2", "py-1.5"],
+        fontSize: "text-sm",
+        outlineStyle: "outline-none",
+        focus: {
+            backgroundColor: "focus:bg-accent",
+            color: "focus:text-accent-foreground",
+        },
+        "data-[state=open]": {
+            backgroundColor: "data-[state=open]:bg-accent",
+            color: "data-[state=open]:text-accent-foreground",
+        },
+    })}
+    {...props}
+  >
+    {children}
+    <ChevronRight className={tw.style({
+            margin: "ml-auto",
+            height: "h-4",
+            width: "w-4",
+        }).class()} />
+  </MenubarPrimitive.SubTrigger>
+))
+MenubarSubTrigger.displayName = MenubarPrimitive.SubTrigger.displayName
+
+const MenubarSubContent = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.SubContent>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.SubContent>
+>(({ className, ...props }, ref) => (
+  <MenubarPrimitive.SubContent
+    ref={ref}
+    className={tw.def([className], {
+        zIndex: "z-50",
+        minWidth: "min-w-[8rem]",
+        overflow: "overflow-hidden",
+        borderRadius: "rounded-md",
+        borderWidth: "border",
+        backgroundColor: "bg-popover",
+        padding: "p-1",
+        color: "text-popover-foreground",
+        boxShadow: "shadow-lg",
+        transformOrigin: "origin-[--radix-menubar-content-transform-origin]",
+    })}
+    {...props}
+  />
+))
+MenubarSubContent.displayName = MenubarPrimitive.SubContent.displayName
+
+const MenubarContent = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Content>
+>(
+  (
+    { className, align = "start", alignOffset = -4, sideOffset = 8, ...props },
+    ref
+  ) => (
+    <MenubarPrimitive.Portal>
+      <MenubarPrimitive.Content
+        ref={ref}
+        align={align}
+        alignOffset={alignOffset}
+        sideOffset={sideOffset}
+        className={tw.def([className], {
+            zIndex: "z-50",
+            minWidth: "min-w-[12rem]",
+            overflow: "overflow-hidden",
+            borderRadius: "rounded-md",
+            borderWidth: "border",
+            backgroundColor: "bg-popover",
+            padding: "p-1",
+            color: "text-popover-foreground",
+            boxShadow: "shadow-md",
+            transformOrigin: "origin-[--radix-menubar-content-transform-origin]",
+        })}
+        {...props}
+      />
+    </MenubarPrimitive.Portal>
+  )
+)
+MenubarContent.displayName = MenubarPrimitive.Content.displayName
+
+const MenubarItem = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Item> & {
+    inset?: boolean
+  }
+>(({ className, inset, ...props }, ref) => (
+  <MenubarPrimitive.Item
+    ref={ref}
+    className={tw.def([inset && "pl-8", className], {
+        position: "relative",
+        display: "flex",
+        cursor: "cursor-default",
+        userSelect: "select-none",
+        alignItems: "items-center",
+        borderRadius: "rounded-sm",
+        padding: ["px-2", "py-1.5"],
+        fontSize: "text-sm",
+        outlineStyle: "outline-none",
+        focus: {
+            backgroundColor: "focus:bg-accent",
+            color: "focus:text-accent-foreground",
+        },
+        "data-[disabled]": {
+            pointerEvents: "data-[disabled]:pointer-events-none",
+            opacity: "data-[disabled]:opacity-50",
+        },
+    })}
+    {...props}
+  />
+))
+MenubarItem.displayName = MenubarPrimitive.Item.displayName
+
+const MenubarCheckboxItem = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.CheckboxItem>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.CheckboxItem>
+>(({ className, children, checked, ...props }, ref) => (
+  <MenubarPrimitive.CheckboxItem
+    ref={ref}
+    className={tw.def([className], {
+        position: "relative",
+        display: "flex",
+        cursor: "cursor-default",
+        userSelect: "select-none",
+        alignItems: "items-center",
+        borderRadius: "rounded-sm",
+        padding: ["py-1.5", "pl-8", "pr-2"],
+        fontSize: "text-sm",
+        outlineStyle: "outline-none",
+        focus: {
+            backgroundColor: "focus:bg-accent",
+            color: "focus:text-accent-foreground",
+        },
+        "data-[disabled]": {
+            pointerEvents: "data-[disabled]:pointer-events-none",
+            opacity: "data-[disabled]:opacity-50",
+        },
+    })}
+    checked={checked}
+    {...props}
+  >
+    <span className={tw.style({
+            position: "absolute",
+            left: "left-2",
+            display: "flex",
+            height: "h-3.5",
+            width: "w-3.5",
+            alignItems: "items-center",
+            justifyContent: "justify-center",
+        }).class()}>
+      <MenubarPrimitive.ItemIndicator>
+        <Check className={tw.style({
+                    height: "h-4",
+                    width: "w-4",
+                }).class()} />
+      </MenubarPrimitive.ItemIndicator>
+    </span>
+    {children}
+  </MenubarPrimitive.CheckboxItem>
+))
+MenubarCheckboxItem.displayName = MenubarPrimitive.CheckboxItem.displayName
+
+const MenubarRadioItem = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.RadioItem>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.RadioItem>
+>(({ className, children, ...props }, ref) => (
+  <MenubarPrimitive.RadioItem
+    ref={ref}
+    className={tw.def([className], {
+        position: "relative",
+        display: "flex",
+        cursor: "cursor-default",
+        userSelect: "select-none",
+        alignItems: "items-center",
+        borderRadius: "rounded-sm",
+        padding: ["py-1.5", "pl-8", "pr-2"],
+        fontSize: "text-sm",
+        outlineStyle: "outline-none",
+        focus: {
+            backgroundColor: "focus:bg-accent",
+            color: "focus:text-accent-foreground",
+        },
+        "data-[disabled]": {
+            pointerEvents: "data-[disabled]:pointer-events-none",
+            opacity: "data-[disabled]:opacity-50",
+        },
+    })}
+    {...props}
+  >
+    <span className={tw.style({
+            position: "absolute",
+            left: "left-2",
+            display: "flex",
+            height: "h-3.5",
+            width: "w-3.5",
+            alignItems: "items-center",
+            justifyContent: "justify-center",
+        }).class()}>
+      <MenubarPrimitive.ItemIndicator>
+        <Circle className={tw.style({
+                    height: "h-4",
+                    width: "w-4",
+                    fill: "fill-current",
+                }).class()} />
+      </MenubarPrimitive.ItemIndicator>
+    </span>
+    {children}
+  </MenubarPrimitive.RadioItem>
+))
+MenubarRadioItem.displayName = MenubarPrimitive.RadioItem.displayName
+
+const MenubarLabel = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Label> & {
+    inset?: boolean
+  }
+>(({ className, inset, ...props }, ref) => (
+  <MenubarPrimitive.Label
+    ref={ref}
+    className={tw.def([inset && "pl-8", className], {
+        padding: ["px-2", "py-1.5"],
+        fontSize: "text-sm",
+        fontWeight: "font-semibold",
+    })}
+    {...props}
+  />
+))
+MenubarLabel.displayName = MenubarPrimitive.Label.displayName
+
+const MenubarSeparator = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <MenubarPrimitive.Separator
+    ref={ref}
+    className={tw.def([className], {
+        margin: ["-mx-1", "my-1"],
+        height: "h-px",
+        backgroundColor: "bg-muted",
+    })}
+    {...props}
+  />
+))
+MenubarSeparator.displayName = MenubarPrimitive.Separator.displayName
+
+const MenubarShortcut = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement>) => {
+  return (
+    <span
+      className={tw.def([className], {
+              margin: "ml-auto",
+              fontSize: "text-xs",
+              letterSpacing: "tracking-widest",
+              color: "text-muted-foreground",
+          })}
+      {...props}
+    />
+  )
+}
+MenubarShortcut.displayname = "MenubarShortcut"
+
+export {
+  Menubar,
+  MenubarMenu,
+  MenubarTrigger,
+  MenubarContent,
+  MenubarItem,
+  MenubarSeparator,
+  MenubarLabel,
+  MenubarCheckboxItem,
+  MenubarRadioGroup,
+  MenubarRadioItem,
+  MenubarPortal,
+  MenubarSubContent,
+  MenubarSubTrigger,
+  MenubarGroup,
+  MenubarSub,
+  MenubarShortcut,
+}

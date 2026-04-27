@@ -1,0 +1,146 @@
+import * as React from "react"
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
+import { ButtonProps, buttonVariants } from "@/registry/new-york/ui/button"
+import { tw } from "~/tw";
+
+const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
+  <nav
+    role="navigation"
+    aria-label="pagination"
+    className={tw.def([className], {
+        margin: "mx-auto",
+        display: "flex",
+        width: "w-full",
+        justifyContent: "justify-center",
+    })}
+    {...props}
+  />
+)
+Pagination.displayName = "Pagination"
+
+const PaginationContent = React.forwardRef<
+  HTMLUListElement,
+  React.ComponentProps<"ul">
+>(({ className, ...props }, ref) => (
+  <ul
+    ref={ref}
+    className={tw.def([className], {
+        display: "flex",
+        flexDirection: "flex-row",
+        alignItems: "items-center",
+        gap: "gap-1",
+    })}
+    {...props}
+  />
+))
+PaginationContent.displayName = "PaginationContent"
+
+const PaginationItem = React.forwardRef<
+  HTMLLIElement,
+  React.ComponentProps<"li">
+>(({ className, ...props }, ref) => (
+  <li ref={ref} className={tw.join(className)} {...props} />
+))
+PaginationItem.displayName = "PaginationItem"
+
+type PaginationLinkProps = {
+  isActive?: boolean
+} & Pick<ButtonProps, "size"> &
+  React.ComponentProps<"a">
+
+const PaginationLink = ({
+  className,
+  isActive,
+  size = "icon",
+  ...props
+}: PaginationLinkProps) => (
+  <a
+    aria-current={isActive ? "page" : undefined}
+    className={tw.join(buttonVariants({
+            variant: isActive ? "outline" : "ghost",
+            size,
+          }), className)}
+    {...props}
+  />
+)
+PaginationLink.displayName = "PaginationLink"
+
+const PaginationPrevious = ({
+  className,
+  ...props
+}: React.ComponentProps<typeof PaginationLink>) => (
+  <PaginationLink
+    aria-label="Go to previous page"
+    size="default"
+    className={tw.def([className], {
+        gap: "gap-1",
+        padding: "pl-2.5",
+    })}
+    {...props}
+  >
+    <ChevronLeft className={tw.style({
+            height: "h-4",
+            width: "w-4",
+        }).class()} />
+    <span>Previous</span>
+  </PaginationLink>
+)
+PaginationPrevious.displayName = "PaginationPrevious"
+
+const PaginationNext = ({
+  className,
+  ...props
+}: React.ComponentProps<typeof PaginationLink>) => (
+  <PaginationLink
+    aria-label="Go to next page"
+    size="default"
+    className={tw.def([className], {
+        gap: "gap-1",
+        padding: "pr-2.5",
+    })}
+    {...props}
+  >
+    <span>Next</span>
+    <ChevronRight className={tw.style({
+            height: "h-4",
+            width: "w-4",
+        }).class()} />
+  </PaginationLink>
+)
+PaginationNext.displayName = "PaginationNext"
+
+const PaginationEllipsis = ({
+  className,
+  ...props
+}: React.ComponentProps<"span">) => (
+  <span
+    aria-hidden
+    className={tw.def([className], {
+        display: "flex",
+        height: "h-9",
+        width: "w-9",
+        alignItems: "items-center",
+        justifyContent: "justify-center",
+    })}
+    {...props}
+  >
+    <MoreHorizontal className={tw.style({
+            height: "h-4",
+            width: "w-4",
+        }).class()} />
+    <span className={tw.style({
+            display: "sr-only",
+        }).class()}>More pages</span>
+  </span>
+)
+PaginationEllipsis.displayName = "PaginationEllipsis"
+
+export {
+  Pagination,
+  PaginationContent,
+  PaginationLink,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+}

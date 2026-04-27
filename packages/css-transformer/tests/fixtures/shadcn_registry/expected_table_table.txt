@@ -1,0 +1,167 @@
+import * as React from "react"
+import { tw } from "~/tw";
+
+const Table = React.forwardRef<
+  HTMLTableElement,
+  React.HTMLAttributes<HTMLTableElement>
+>(({ className, ...props }, ref) => (
+  <div className={tw.style({
+        position: "relative",
+        width: "w-full",
+        overflow: "overflow-auto",
+    }).class()}>
+    <table
+      ref={ref}
+      className={tw.def([className], {
+          width: "w-full",
+          captionSide: "caption-bottom",
+          fontSize: "text-sm",
+      })}
+      {...props}
+    />
+  </div>
+))
+Table.displayName = "Table"
+
+const TableHeader = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <thead ref={ref} className={tw.def([className], {
+        "[&_tr]": {
+            borderWidth: "[&_tr]:border-b",
+        },
+    })} {...props} />
+))
+TableHeader.displayName = "TableHeader"
+
+const TableBody = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <tbody
+    ref={ref}
+    className={tw.def([className], {
+        "[&_tr:last-child]": {
+            borderWidth: "[&_tr:last-child]:border-0",
+        },
+    })}
+    {...props}
+  />
+))
+TableBody.displayName = "TableBody"
+
+const TableFooter = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <tfoot
+    ref={ref}
+    className={tw.def([className], {
+        borderWidth: "border-t",
+        backgroundColor: "bg-muted/50",
+        fontWeight: "font-medium",
+        "[&>tr]": {
+            last: {
+                borderWidth: "[&>tr]:last:border-b-0",
+            },
+        },
+    })}
+    {...props}
+  />
+))
+TableFooter.displayName = "TableFooter"
+
+const TableRow = React.forwardRef<
+  HTMLTableRowElement,
+  React.HTMLAttributes<HTMLTableRowElement>
+>(({ className, ...props }, ref) => (
+  <tr
+    ref={ref}
+    className={tw.def([className], {
+        borderWidth: "border-b",
+        transitionProperty: "transition-colors",
+        hover: {
+            backgroundColor: "hover:bg-muted/50",
+        },
+        "data-[state=selected]": {
+            backgroundColor: "data-[state=selected]:bg-muted",
+        },
+    })}
+    {...props}
+  />
+))
+TableRow.displayName = "TableRow"
+
+const TableHead = React.forwardRef<
+  HTMLTableCellElement,
+  React.ThHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+  <th
+    ref={ref}
+    className={tw.def([className], {
+        height: "h-10",
+        padding: "px-2",
+        textAlign: "text-left",
+        verticalAlign: "align-middle",
+        fontWeight: "font-medium",
+        color: "text-muted-foreground",
+        "[&:has([role=checkbox])]": {
+            padding: "[&:has([role=checkbox])]:pr-0",
+        },
+        "[&>[role=checkbox]]": {
+            translate: "[&>[role=checkbox]]:translate-y-[2px]",
+        },
+    })}
+    {...props}
+  />
+))
+TableHead.displayName = "TableHead"
+
+const TableCell = React.forwardRef<
+  HTMLTableCellElement,
+  React.TdHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+  <td
+    ref={ref}
+    className={tw.def([className], {
+        padding: "p-2",
+        verticalAlign: "align-middle",
+        "[&:has([role=checkbox])]": {
+            padding: "[&:has([role=checkbox])]:pr-0",
+        },
+        "[&>[role=checkbox]]": {
+            translate: "[&>[role=checkbox]]:translate-y-[2px]",
+        },
+    })}
+    {...props}
+  />
+))
+TableCell.displayName = "TableCell"
+
+const TableCaption = React.forwardRef<
+  HTMLTableCaptionElement,
+  React.HTMLAttributes<HTMLTableCaptionElement>
+>(({ className, ...props }, ref) => (
+  <caption
+    ref={ref}
+    className={tw.def([className], {
+        margin: "mt-4",
+        fontSize: "text-sm",
+        color: "text-muted-foreground",
+    })}
+    {...props}
+  />
+))
+TableCaption.displayName = "TableCaption"
+
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+}

@@ -1,0 +1,70 @@
+import * as React from "react"
+import { type VariantProps } from "class-variance-authority"
+import { tw } from "~/tw";
+
+const badgeVariants = /**
+ * @defaultVariants {
+      variant: "default",
+    }
+ */
+tw.variants({
+    base: {
+        display: "inline-flex",
+        alignItems: "items-center",
+        borderRadius: "rounded-md",
+        borderWidth: "border",
+        padding: ["px-2.5", "py-0.5"],
+        fontSize: "text-xs",
+        fontWeight: "font-semibold",
+        transitionProperty: "transition-colors",
+        focus: {
+            outlineStyle: "focus:outline-none",
+            boxShadow: ["focus:ring-2", "focus:ring-ring", "focus:ring-offset-2"],
+        },
+    },
+    variants: {
+        variant: {
+            default: {
+                borderColor: "border-transparent",
+                backgroundColor: "bg-primary",
+                color: "text-primary-foreground",
+                boxShadow: "shadow",
+                hover: {
+                    backgroundColor: "hover:bg-primary/80",
+                },
+            },
+            secondary: {
+                borderColor: "border-transparent",
+                backgroundColor: "bg-secondary",
+                color: "text-secondary-foreground",
+                hover: {
+                    backgroundColor: "hover:bg-secondary/80",
+                },
+            },
+            destructive: {
+                borderColor: "border-transparent",
+                backgroundColor: "bg-destructive",
+                color: "text-destructive-foreground",
+                boxShadow: "shadow",
+                hover: {
+                    backgroundColor: "hover:bg-destructive/80",
+                },
+            },
+            outline: {
+                color: "text-foreground",
+            },
+        },
+    },
+})
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={tw.join(badgeVariants({ variant }), className)} {...props} />
+  )
+}
+
+export { Badge, badgeVariants }

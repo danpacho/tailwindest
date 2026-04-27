@@ -1,0 +1,98 @@
+import * as React from "react"
+import { type VariantProps } from "class-variance-authority"
+import { tw } from "~/tw";
+
+const alertVariants = /**
+ * @defaultVariants {
+      variant: "default",
+    }
+ */
+tw.variants({
+    base: {
+        position: "relative",
+        width: "w-full",
+        borderRadius: "rounded-lg",
+        borderWidth: "border",
+        padding: ["px-4", "py-3"],
+        fontSize: "text-sm",
+        "[&>svg+div]": {
+            translate: "[&>svg+div]:translate-y-[-3px]",
+        },
+        "[&>svg]": {
+            position: "[&>svg]:absolute",
+            left: "[&>svg]:left-4",
+            top: "[&>svg]:top-4",
+            color: "[&>svg]:text-foreground",
+        },
+        "[&>svg~*]": {
+            padding: "[&>svg~*]:pl-7",
+        },
+    },
+    variants: {
+        variant: {
+            default: {
+                backgroundColor: "bg-background",
+                color: "text-foreground",
+            },
+            destructive: {
+                borderWidth: "border-destructive/50",
+                color: "text-destructive",
+                dark: {
+                    borderWidth: "dark:border-destructive",
+                },
+                "[&>svg]": {
+                    color: "[&>svg]:text-destructive",
+                },
+            },
+        },
+    },
+})
+
+const Alert = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
+>(({ className, variant, ...props }, ref) => (
+  <div
+    ref={ref}
+    role="alert"
+    className={tw.join(alertVariants({ variant }), className)}
+    {...props}
+  />
+))
+Alert.displayName = "Alert"
+
+const AlertTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h5
+    ref={ref}
+    className={tw.def([className], {
+        margin: "mb-1",
+        fontWeight: "font-medium",
+        lineHeight: "leading-none",
+        letterSpacing: "tracking-tight",
+    })}
+    {...props}
+  />
+))
+AlertTitle.displayName = "AlertTitle"
+
+const AlertDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={tw.def([className], {
+        fontSize: "text-sm",
+        "[&_p]": {
+            lineHeight: "[&_p]:leading-relaxed",
+        },
+    })}
+    {...props}
+  />
+))
+AlertDescription.displayName = "AlertDescription"
+
+export { Alert, AlertTitle, AlertDescription }

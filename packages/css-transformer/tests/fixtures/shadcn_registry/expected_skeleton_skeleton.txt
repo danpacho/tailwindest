@@ -1,0 +1,19 @@
+import { tw } from "~/tw";
+
+function Skeleton({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={tw.def([className], {
+              animation: "animate-pulse",
+              borderRadius: "rounded-md",
+              backgroundColor: "bg-primary/10",
+          })}
+      {...props}
+    />
+  )
+}
+
+export { Skeleton }

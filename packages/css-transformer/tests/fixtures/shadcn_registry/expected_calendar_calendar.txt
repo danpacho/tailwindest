@@ -1,0 +1,340 @@
+"use client"
+
+import * as React from "react"
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react"
+import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
+import { Button, buttonVariants } from "@/registry/new-york/ui/button"
+import { tw } from "~/tw";
+
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  captionLayout = "label",
+  buttonVariant = "ghost",
+  formatters,
+  components,
+  ...props
+}: React.ComponentProps<typeof DayPicker> & {
+  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
+}) {
+  const defaultClassNames = getDefaultClassNames()
+
+  return (
+    <DayPicker
+      showOutsideDays={showOutsideDays}
+      className={tw.def([String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`, String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`, className], {
+          backgroundColor: "bg-background",
+          padding: "p-3",
+          "[[data-slot=card-content]_&]": {
+              backgroundColor: "[[data-slot=card-content]_&]:bg-transparent",
+          },
+          "[[data-slot=popover-content]_&]": {
+              backgroundColor: "[[data-slot=popover-content]_&]:bg-transparent",
+          },
+      })}
+      captionLayout={captionLayout}
+      formatters={{
+        formatMonthDropdown: (date) =>
+          date.toLocaleString("default", { month: "short" }),
+        ...formatters,
+      }}
+      classNames={{
+        root: tw.def([defaultClassNames.root], {
+              width: "w-fit",
+          }),
+        months: tw.def([defaultClassNames.months], {
+            position: "relative",
+            display: "flex",
+            flexDirection: "flex-col",
+            gap: "gap-4",
+            md: {
+                flexDirection: "md:flex-row",
+            },
+        }),
+        month: tw.def([defaultClassNames.month], {
+            display: "flex",
+            width: "w-full",
+            flexDirection: "flex-col",
+            gap: "gap-4",
+        }),
+        nav: tw.def([defaultClassNames.nav], {
+            position: "absolute",
+            inset: "inset-x-0",
+            top: "top-0",
+            display: "flex",
+            width: "w-full",
+            alignItems: "items-center",
+            justifyContent: "justify-between",
+            gap: "gap-1",
+        }),
+        button_previous: tw.def([buttonVariants({ variant: buttonVariant }), defaultClassNames.button_previous], {
+            height: "h-[--cell-size]",
+            width: "w-[--cell-size]",
+            userSelect: "select-none",
+            padding: "p-0",
+            "aria-disabled": {
+                opacity: "aria-disabled:opacity-50",
+            },
+        }),
+        button_next: tw.def([buttonVariants({ variant: buttonVariant }), defaultClassNames.button_next], {
+            height: "h-[--cell-size]",
+            width: "w-[--cell-size]",
+            userSelect: "select-none",
+            padding: "p-0",
+            "aria-disabled": {
+                opacity: "aria-disabled:opacity-50",
+            },
+        }),
+        month_caption: tw.def([defaultClassNames.month_caption], {
+            display: "flex",
+            height: "h-[--cell-size]",
+            width: "w-full",
+            alignItems: "items-center",
+            justifyContent: "justify-center",
+            padding: "px-[--cell-size]",
+        }),
+        dropdowns: tw.def([defaultClassNames.dropdowns], {
+            display: "flex",
+            height: "h-[--cell-size]",
+            width: "w-full",
+            alignItems: "items-center",
+            justifyContent: "justify-center",
+            gap: "gap-1.5",
+            fontSize: "text-sm",
+            fontWeight: "font-medium",
+        }),
+        dropdown_root: tw.def([defaultClassNames.dropdown_root], {
+            "has-focus": {
+                borderWidth: "has-focus:border-ring",
+                boxShadow: ["has-focus:ring-ring/50", "has-focus:ring-[3px]"],
+            },
+            borderWidth: ["border-input", "border"],
+            boxShadow: "shadow-xs",
+            position: "relative",
+            borderRadius: "rounded-md",
+        }),
+        dropdown: tw.def([defaultClassNames.dropdown], {
+            backgroundColor: "bg-popover",
+            position: "absolute",
+            inset: "inset-0",
+            opacity: "opacity-0",
+        }),
+        caption_label: tw.def([captionLayout === "label"
+                    ? "text-sm"
+                    : "[&>svg]:text-muted-foreground flex h-8 items-center gap-1 rounded-md pl-2 pr-1 text-sm [&>svg]:size-3.5", defaultClassNames.caption_label], {
+            userSelect: "select-none",
+            fontWeight: "font-medium",
+        }),
+        table: "w-full border-collapse",
+        weekdays: tw.def([defaultClassNames.weekdays], {
+            display: "flex",
+        }),
+        weekday: tw.def([defaultClassNames.weekday], {
+            color: "text-muted-foreground",
+            userSelect: "select-none",
+            borderRadius: "rounded-md",
+            fontSize: "text-[0.8rem]",
+            fontWeight: "font-normal",
+        }),
+        week: tw.def([defaultClassNames.week], {
+            margin: "mt-2",
+            display: "flex",
+            width: "w-full",
+        }),
+        week_number_header: tw.def([defaultClassNames.week_number_header], {
+            width: "w-[--cell-size]",
+            userSelect: "select-none",
+        }),
+        week_number: tw.def([defaultClassNames.week_number], {
+            color: "text-muted-foreground",
+            userSelect: "select-none",
+            fontSize: "text-[0.8rem]",
+        }),
+        day: tw.def([defaultClassNames.day], {
+            position: "relative",
+            aspectRatio: "aspect-square",
+            height: "h-full",
+            width: "w-full",
+            userSelect: "select-none",
+            padding: "p-0",
+            textAlign: "text-center",
+            "[&:first-child[data-selected=true]_button]": {
+                borderRadius: "[&:first-child[data-selected=true]_button]:rounded-l-md",
+            },
+            "[&:last-child[data-selected=true]_button]": {
+                borderRadius: "[&:last-child[data-selected=true]_button]:rounded-r-md",
+            },
+        }),
+        range_start: tw.def([defaultClassNames.range_start], {
+            backgroundColor: "bg-accent",
+            borderRadius: "rounded-l-md",
+        }),
+        range_middle: tw.def([defaultClassNames.range_middle], {
+            borderRadius: "rounded-none",
+        }),
+        range_end: tw.def([defaultClassNames.range_end], {
+            backgroundColor: "bg-accent",
+            borderRadius: "rounded-r-md",
+        }),
+        today: tw.def([defaultClassNames.today], {
+            backgroundColor: "bg-accent",
+            color: "text-accent-foreground",
+            borderRadius: "rounded-md",
+            "data-[selected=true]": {
+                borderRadius: "data-[selected=true]:rounded-none",
+            },
+        }),
+        outside: tw.def([defaultClassNames.outside], {
+            color: "text-muted-foreground",
+            "aria-selected": {
+                color: "aria-selected:text-muted-foreground",
+            },
+        }),
+        disabled: tw.def([defaultClassNames.disabled], {
+            color: "text-muted-foreground",
+            opacity: "opacity-50",
+        }),
+        hidden: tw.def([defaultClassNames.hidden], {
+            visibility: "invisible",
+        }),
+        ...classNames,
+      }}
+      components={{
+        Root: ({ className, rootRef, ...props }) => {
+          return (
+            <div
+              data-slot="calendar"
+              ref={rootRef}
+              className={tw.join(className)}
+              {...props}
+            />
+          )
+        },
+        Chevron: ({ className, orientation, ...props }) => {
+          if (orientation === "left") {
+            return (
+              <ChevronLeftIcon className={tw.def([className], {
+                    width: "size-4",
+                })} {...props} />
+            )
+          }
+
+          if (orientation === "right") {
+            return (
+              <ChevronRightIcon
+                className={tw.def([className], {
+                        width: "size-4",
+                    })}
+                {...props}
+              />
+            )
+          }
+
+          return (
+            <ChevronDownIcon className={tw.def([className], {
+                  width: "size-4",
+              })} {...props} />
+          )
+        },
+        DayButton: CalendarDayButton,
+        WeekNumber: ({ children, ...props }) => {
+          return (
+            <td {...props}>
+              <div className={tw.style({
+                      display: "flex",
+                      width: "size-[--cell-size]",
+                      alignItems: "items-center",
+                      justifyContent: "justify-center",
+                      textAlign: "text-center",
+                  }).class()}>
+                {children}
+              </div>
+            </td>
+          )
+        },
+        ...components,
+      }}
+      {...props}
+    />
+  )
+}
+
+function CalendarDayButton({
+  className,
+  day,
+  modifiers,
+  ...props
+}: React.ComponentProps<typeof DayButton>) {
+  const defaultClassNames = getDefaultClassNames()
+
+  const ref = React.useRef<HTMLButtonElement>(null)
+  React.useEffect(() => {
+    if (modifiers.focused) ref.current?.focus()
+  }, [modifiers.focused])
+
+  return (
+    <Button
+      ref={ref}
+      variant="ghost"
+      size="icon"
+      data-day={day.date.toLocaleDateString()}
+      data-selected-single={
+        modifiers.selected &&
+        !modifiers.range_start &&
+        !modifiers.range_end &&
+        !modifiers.range_middle
+      }
+      data-range-start={modifiers.range_start}
+      data-range-end={modifiers.range_end}
+      data-range-middle={modifiers.range_middle}
+      className={tw.def([defaultClassNames.day, className], {
+          "data-[selected-single=true]": {
+              backgroundColor: "data-[selected-single=true]:bg-primary",
+              color: "data-[selected-single=true]:text-primary-foreground",
+          },
+          "data-[range-middle=true]": {
+              backgroundColor: "data-[range-middle=true]:bg-accent",
+              color: "data-[range-middle=true]:text-accent-foreground",
+              borderRadius: "data-[range-middle=true]:rounded-none",
+          },
+          "data-[range-start=true]": {
+              backgroundColor: "data-[range-start=true]:bg-primary",
+              color: "data-[range-start=true]:text-primary-foreground",
+              borderRadius: "data-[range-start=true]:rounded-md",
+          },
+          "data-[range-end=true]": {
+              backgroundColor: "data-[range-end=true]:bg-primary",
+              color: "data-[range-end=true]:text-primary-foreground",
+              borderRadius: "data-[range-end=true]:rounded-md",
+          },
+          "group-data-[focused=true]/day": {
+              borderWidth: "group-data-[focused=true]/day:border-ring",
+              boxShadow: ["group-data-[focused=true]/day:ring-ring/50", "group-data-[focused=true]/day:ring-[3px]"],
+              position: "group-data-[focused=true]/day:relative",
+              zIndex: "group-data-[focused=true]/day:z-10",
+          },
+          display: "flex",
+          aspectRatio: "aspect-square",
+          height: "h-auto",
+          width: "w-full",
+          minWidth: "min-w-[--cell-size]",
+          flexDirection: "flex-col",
+          gap: "gap-1",
+          fontWeight: "font-normal",
+          lineHeight: "leading-none",
+          "[&>span]": {
+              fontSize: "[&>span]:text-xs",
+              opacity: "[&>span]:opacity-70",
+          },
+      })}
+      {...props}
+    />
+  )
+}
+
+export { Calendar, CalendarDayButton }
