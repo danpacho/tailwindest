@@ -38,11 +38,11 @@ describe("Shadcn Registry E2E Tests", async () => {
 
     // Initialize Real Generator
     const compiler = new TailwindCompiler({
-        cssRoot: path.join(
+        cssRoot: path.resolve(
             __dirname,
             "../../../create-tailwind-type/src/generator/__tests__/__mocks__/tailwind.css"
         ),
-        base: "node_modules/tailwindcss",
+        base: path.resolve(__dirname, "../../../../node_modules/tailwindcss"),
     })
     const cssAnalyzer = new CSSAnalyzer()
     const schemaGenerator = new TypeSchemaGenerator()

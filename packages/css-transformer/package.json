@@ -15,17 +15,17 @@
         "fixture:download": "tsx scripts/download_shadcn.ts"
     },
     "dependencies": {
-        "ts-morph": "^24.0.0",
-        "commander": "^12.0.0",
         "@clack/prompts": "^1.2.0",
+        "commander": "^12.0.0",
+        "create-tailwind-type": "workspace:*",
         "picocolors": "^1.1.0",
-        "create-tailwind-type": "workspace:*"
+        "ts-morph": "^24.0.0"
     },
-    "peerDependencies": {},
     "devDependencies": {
-        "vitest": "^2.0.0",
-        "typescript": "^5.5.0",
+        "prettier": "^3.5.3",
         "tsup": "^8.2.0",
-        "prettier": "^3.5.3"
+        "tsx": "^4.21.0",
+        "typescript": "^5.5.0",
+        "vitest": "^2.0.0"
     }
 }
