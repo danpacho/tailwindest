@@ -73,6 +73,12 @@ interface TailwindestConfig {
      * Enables arbitrary strings as valid style properties if `true`.
      */
     useArbitrary?: true | false
+    /**
+     * Enables arbitrary variants (e.g. `data-[...]`, `aria-[...]`) if `true`.
+     * Applied as a single top-level intersection — zero recursion cost.
+     * @default false
+     */
+    useArbitraryVariant?: true | false
 }
 
 export interface TailwindestInterface {
@@ -118,7 +124,7 @@ export interface TailwindestInterface {
  * }>
  * ```
  */
-export type CreateTailwindest<Config extends TailwindestConfig> = GetNestStyle<
+type _BaseNestStyle<Config extends TailwindestConfig> = GetNestStyle<
     Config["groupPrefix"] extends string
         ? `${Config["groupPrefix"]}${Config["tailwindNestGroups"]}`
         : Config["tailwindNestGroups"],
@@ -128,6 +134,29 @@ export type CreateTailwindest<Config extends TailwindestConfig> = GetNestStyle<
         : TAILWIND_IDENTIFIER,
     Config["useArbitrary"] extends boolean ? Config["useArbitrary"] : false
 >
+
+/**
+ * Template literal index signature `${string}[${string}]` matches ONLY keys
+ * that contain brackets — the Tailwind arbitrary variant pattern:
+ *   O "`data-[state=active]`", "`[&_svg]`", "`aria-[expanded=true]`"
+ *   X "backgroundColor", "hover", "dark"  (no brackets → unaffected)
+ *
+ * This preserves exact type inference for all known properties in Base,
+ * while allowing arbitrary variant keys with proper nested style type hints.
+ * Applied once at the output level — zero recursion cost.
+ */
+type _WithArbitraryVariant<
+    Base,
+    Enable extends true | false,
+> = Enable extends true
+    ? Base & { [K: `${string}[${string}]`]: Base | undefined }
+    : Base
+
+export type CreateTailwindest<Config extends TailwindestConfig> =
+    _WithArbitraryVariant<
+        _BaseNestStyle<Config>,
+        Config["useArbitraryVariant"] extends true ? true : false
+    >
 
 /**
  * Create tailwind literal typeset
