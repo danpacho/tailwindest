@@ -3,6 +3,7 @@ import type {
     ClassEntry,
     TailwindCompiler,
     VariantEntry,
+    DesignSystem,
 } from "../internal/compiler"
 import { Logger } from "../logger"
 import type { TypeSchemaGenerator } from "../type_tools"
@@ -128,6 +129,11 @@ interface TailwindTypeGenerationOptions {
      * @default false
      */
     disableVariants?: boolean
+    /**
+     * Supports arbitrary variants (e.g. data-[...], aria-[...])
+     * @default false
+     */
+    useArbitraryVariant?: boolean
 }
 
 interface TailwindTypeGeneratorDeps {
@@ -140,13 +146,10 @@ interface TailwindTypeGeneratorOptions extends TailwindTypeGenerationOptions {
 }
 
 interface TailwindTypeGeneratorConstructor
-    extends TailwindTypeGeneratorDeps,
-        TailwindTypeGeneratorOptions {}
+    extends TailwindTypeGeneratorDeps, TailwindTypeGeneratorOptions {}
 export class TailwindTypeGenerator {
-    private _ds: Awaited<
-        ReturnType<(typeof this.compiler)["getDesignSystem"]>
-    > | null = null
-    public get ds() {
+    private _ds: DesignSystem | null = null
+    public get ds(): DesignSystem {
         if (!this._ds)
             throw new Error("Design system is not created, call init first")
         return this._ds
@@ -208,6 +211,7 @@ export class TailwindTypeGenerator {
         useStringKindVariantsOnly: false,
         // optional
         useOptionalProperty: true,
+        useArbitraryVariant: false,
     }
     public setGenOptions(newOptions: TailwindTypeGenerationOptions): this {
         if (newOptions.useExactVariants === newOptions.useSoftVariants) {
@@ -232,6 +236,7 @@ export class TailwindTypeGenerator {
             useExactVariants: opt.useExactVariants ?? false,
             useStringKindVariantsOnly: opt.useStringKindVariantsOnly ?? false,
             disableVariants: opt.disableVariants ?? false,
+            useArbitraryVariant: opt.useArbitraryVariant ?? false,
         }
     }
 

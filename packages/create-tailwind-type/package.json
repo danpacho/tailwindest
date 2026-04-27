@@ -17,7 +17,7 @@
         "access": "public"
     },
     "bin": {
-        "create-tailwind-type": "./dist/index.js"
+        "create-tailwind-type": "./dist/cli.js"
     },
     "files": [
         "dist"

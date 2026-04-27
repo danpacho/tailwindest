@@ -45,6 +45,10 @@ export interface VariantEntry {
     hasDash: boolean
     selectors: (options: SelectorOptions) => string[]
 }
+/**
+ * Tailwind Design system
+ */
+export type DesignSystem = Awaited<ReturnType<typeof loadDesignSystem>>
 
 type CompilerOptionCustom = Omit<CompileOptions, "base" | "onDependency"> & {
     minify?: boolean
@@ -135,7 +139,7 @@ export class TailwindCompiler {
      * @param css `input.css` root path
      * @returns design system
      */
-    public async getDesignSystem() {
+    public async getDesignSystem(): Promise<DesignSystem> {
         await this.init()
 
         return await loadDesignSystem(this._rawCSS!, { base: this._base! })
