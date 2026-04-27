@@ -25,8 +25,8 @@
         "test:ci": "pnpm ts:typecheck && pnpm prettier && pnpm eslint:fix && pnpm build && pnpm test:coverage",
         "ts:typecheck": "tsc --noEmit",
         "ts:performance": "rimraf ts-perf && tsc --noEmit --generateTrace ts-perf",
-        "reset": "pnpm clean && pnpm -r --parallel exec rimraf node_modules dist && rimraf node_modules dist",
-        "reset:dist": "pnpm -r --parallel exec rimraf dist",
+        "reset": "npx rimraf node_modules dist .turbo \"packages/*/node_modules\" \"packages/*/dist\" \"web/node_modules\" \"web/dist\"",
+        "reset:dist": "npx rimraf dist \"packages/*/dist\" \"web/dist\"",
         "prettier": "prettier 'packages/**/*.{ts,js,md}' --check",
         "prettier:fix": "prettier 'packages/**/*.{ts,js,md}' --write",
         "eslint": "eslint packages/**/**/*.ts",
@@ -62,11 +62,5 @@
     },
     "engines": {
         "node": ">=20"
-    },
-    "pnpm": {
-        "onlyBuiltDependencies": [
-            "esbuild",
-            "sharp"
-        ]
     }
 }

@@ -11,7 +11,8 @@
         "exactOptionalPropertyTypes": true,
         "forceConsistentCasingInFileNames": true,
         "noEmit": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "jsx": "react-jsx"
     },
     "include": ["packages"],
     "exclude": ["node_modules", "dist", "site", "examples"]
