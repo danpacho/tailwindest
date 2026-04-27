@@ -1,0 +1,96 @@
+---
+title: CSS Transformer CLI
+description: Automate your migration to Tailwindest with the CSS Transformer CLI.
+---
+
+# CSS Transformer CLI
+
+The **CSS Transformer CLI** is a powerful tool designed to automate the conversion of standard Tailwind CSS class strings into type-safe **Tailwindest** objects. It helps you migrate existing codebases or clean up large class strings into structured, maintainable styles.
+
+## Installation
+
+You can run the transformer directly using `npx`:
+
+```bash
+npx @tailwindest/css-transformer <target> [options]
+```
+
+Or install it globally:
+
+```bash
+npm install -g @tailwindest/css-transformer
+```
+
+## Basic Usage
+
+To transform a specific file or directory:
+
+```bash
+# Transform a single file
+npx @tailwindest/css-transformer src/components/Button.tsx
+
+# Transform an entire directory
+npx @tailwindest/css-transformer src/pages --recursive
+```
+
+## Features
+
+### ✨ Zero-Config Migration
+The CLI intelligently searches for your `tailwindest` definition file (e.g., `tailwind.ts`) to automatically determine your **namespace identifier** and **import path**. You don't have to manually configure them for every run.
+
+### 🚀 Smart Auto-Import
+When transforming files, the CLI detects if the necessary `tailwindest` import is present. If missing, it automatically inserts the correct `import` statement at the top of your file.
+
+### 🛡️ Source-Safe Transformation
+Using advanced AST (Abstract Syntax Tree) traversal, the transformer ensures that your code logic remains untouched. It only modifies the class strings it confidently identifies.
+
+### 🎨 Type-Safe Output
+The generated objects are perfectly compatible with `tailwindest`, providing full autocomplete and type validation for your newly transformed styles.
+
+## Options
+
+| Option | Alias | Type | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `--recursive` | `-r` | `boolean` | `false` | Recursively transform files in subdirectories. |
+| `--dry-run` | `-d` | `boolean` | `false` | Preview changes without modifying files. |
+| `--exclude` | `-e` | `string[]` | `[]` | List of patterns or directories to exclude. |
+| `--config` | `-c` | `string` | `null` | Path to a custom transformer configuration file. |
+| `--version` | `-V` | - | - | Output the version number. |
+| `--help` | `-h` | - | - | Display help for command. |
+
+## Why use CSS Transformer?
+
+1. **Efficiency**: Converting hundreds of classes manually is error-prone and slow. The CLI does it in seconds.
+2. **Consistency**: Ensure all team members follow the same `Tailwindest` object structure across the project.
+3. **Legacy Support**: Easily move from traditional Tailwind to the type-safe world of Tailwindest without rewriting everything from scratch.
+
+---
+
+## Example Transformation
+
+**Before:**
+```tsx
+const className = "flex items-center justify-center p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+```
+
+**After:**
+```tsx
+const style = tw.style({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    padding: "p-4",
+    backgroundColor: "bg-blue-500",
+    hover: {
+      backgroundColor: "hover:bg-blue-600"
+    },
+    color: "text-white",
+    borderRadius: "rounded-lg",
+    transitionProperty: "transition-colors"
+})
+```
+
+---
+
+> [!TIP]
+> Always run with `--dry-run` first to verify the transformation results before applying them to your source code.
