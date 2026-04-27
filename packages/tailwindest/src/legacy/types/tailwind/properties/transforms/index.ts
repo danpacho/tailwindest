@@ -56,7 +56,9 @@ export interface TailwindTransforms<
         translate: ""
         transformOrigin: ""
     },
-> extends TailwindHardwareAccelerationType,
+>
+    extends
+        TailwindHardwareAccelerationType,
         TailwindRotateType<TransformsPlug["rotate"]>,
         TailwindSkewType<
             ToPlugin<TailwindSkewVariants, TransformsPlug["skew"]>

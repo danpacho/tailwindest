@@ -19,6 +19,8 @@ export interface TailwindSvg<
         stroke: ""
         strokeWidth: ""
     },
-> extends TailwindStrokeWidthType<SvgPlug["strokeWidth"]>,
+>
+    extends
+        TailwindStrokeWidthType<SvgPlug["strokeWidth"]>,
         TailwindStrokeType<TailwindColor, SvgPlug["stroke"]>,
         TailwindFillType<TailwindColor, SvgPlug["fill"]> {}

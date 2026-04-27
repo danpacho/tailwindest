@@ -65,7 +65,9 @@ export interface TailwindFont<
         listStyleImage: ""
         hyphens: ""
     },
-> extends TailwindTextWrapType,
+>
+    extends
+        TailwindTextWrapType,
         TailwindTextAlignType,
         TailwindTextOverflowType,
         TailwindTextTransformType,

@@ -34,7 +34,9 @@ export interface TailwindLayout<
         aspectRatio: ""
         objectPosition: ""
     },
-> extends TailwindBoxDecorationBreakType,
+>
+    extends
+        TailwindBoxDecorationBreakType,
         TailwindBoxSizingType,
         TailwindBreakType,
         TailwindClearType,

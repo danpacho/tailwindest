@@ -31,7 +31,9 @@ export interface TailwindSizing<
         maxHeight: ""
         minHeight: ""
     },
-> extends TailwindSizeType<TailwindSpacing, SizingPlug["size"]>,
+>
+    extends
+        TailwindSizeType<TailwindSpacing, SizingPlug["size"]>,
         // height
         TailwindHeightType<TailwindSpacing, SizingPlug["height"]>,
         TailwindMinHeightType<TailwindSpacing, SizingPlug["minHeight"]>,

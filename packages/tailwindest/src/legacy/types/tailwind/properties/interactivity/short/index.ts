@@ -33,7 +33,9 @@ export interface ShortTailwindInteractivity<
         scrollMargin: ""
         scrollPadding: ""
     },
-> extends TailwindResizeType,
+>
+    extends
+        TailwindResizeType,
         TailwindUserSelectType,
         TailwindAppearanceType,
         TailwindTouchActionType,

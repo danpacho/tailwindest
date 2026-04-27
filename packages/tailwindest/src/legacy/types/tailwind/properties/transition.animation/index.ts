@@ -57,7 +57,9 @@ export interface TailwindTransitionAnimation<
         transitionProperty: ""
         transitionTimingFunction: ""
     },
-> extends TailwindAnimationType<TransitionAnimationPlug["animation"]>,
+>
+    extends
+        TailwindAnimationType<TransitionAnimationPlug["animation"]>,
         TailwindTransitionType<
             | ToPluginWithTitle<
                   "transition",

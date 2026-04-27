@@ -55,7 +55,9 @@ export interface TailwindFlexGridCommon<
         gap: ""
         order: ""
     },
-> extends TailwindAlignSelfType,
+>
+    extends
+        TailwindAlignSelfType,
         TailwindAlignItemsType,
         TailwindAlignContentType,
         TailwindJustifyContentType,
@@ -79,7 +81,9 @@ export interface TailwindFlex<
         flexGrow: ""
         flexShrink: ""
     },
-> extends TailwindFlexWrapType,
+>
+    extends
+        TailwindFlexWrapType,
         TailwindFlexDirectionType,
         TailwindFlexType<FlexPlug["flex"]>,
         TailwindFlexGrowType<FlexPlug["flexGrow"]>,
@@ -112,7 +116,9 @@ export interface TailwindGrid<
         gridTemplateColumns: ""
         gridTemplateRows: ""
     },
-> extends TailwindGridAutoFlowType,
+>
+    extends
+        TailwindGridAutoFlowType,
         TailwindGridPlaceSelfType,
         TailwindGridPlaceItemsType,
         TailwindGridJustifySelfType,
@@ -130,6 +136,4 @@ export interface TailwindGrid<
         TailwindGridTemplateColumnsType<GridPlug["gridTemplateColumns"]> {}
 
 export interface TailwindFlexGridPlug
-    extends TailwindFlexGridCommonPlug,
-        TailwindFlexPlug,
-        TailwindGridPlug {}
+    extends TailwindFlexGridCommonPlug, TailwindFlexPlug, TailwindGridPlug {}

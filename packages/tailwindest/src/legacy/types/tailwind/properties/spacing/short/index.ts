@@ -14,7 +14,9 @@ export interface ShortTailwindSpacing<
         margin: ""
         space: ""
     },
-> extends ShortTailwindMarginType<
+>
+    extends
+        ShortTailwindMarginType<
             TailwindSpacing | Pluggable<SpacingPlug["margin"]>
         >,
         ShortTailwindPaddingType<

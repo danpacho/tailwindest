@@ -24,7 +24,9 @@ export interface ShortTailwindBackgrounds<
         backgroundPosition: ""
         gradientColorStops: ""
     },
-> extends ShortTailwindBackgroundClipType,
+>
+    extends
+        ShortTailwindBackgroundClipType,
         ShortTailwindBackgroundRepeatType,
         ShortTailwindBackgroundOriginType,
         ShortTailwindBackgroundAttachmentType,

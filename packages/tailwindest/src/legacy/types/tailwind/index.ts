@@ -11,8 +11,8 @@ import type {
  * @description follow `CSS` properties syntax
  */
 export type TailwindPlugin<
-    GlobalPluginOption extends
-        TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
+    GlobalPluginOption extends TailwindGlobalPlugOption =
+        TailwindDefaultGlobalPlugOption,
     PlugStyleOption extends TailwindStylePlugOption = TailwindDefaultStylePlug,
 > = PlugStyleOption extends TailwindDefaultStylePlug
     ? Tailwind<GlobalPluginOption>
@@ -23,8 +23,8 @@ export type TailwindPlugin<
  * @description follow short-handed `CSS` properties syntax
  */
 export type ShortTailwindPlugin<
-    GlobalPluginOption extends
-        TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
+    GlobalPluginOption extends TailwindGlobalPlugOption =
+        TailwindDefaultGlobalPlugOption,
     PlugStyleOption extends TailwindStylePlugOption = TailwindDefaultStylePlug,
 > = PlugStyleOption extends TailwindDefaultStylePlug
     ? ShortTailwind<GlobalPluginOption>

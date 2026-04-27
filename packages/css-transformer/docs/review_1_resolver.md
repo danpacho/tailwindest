@@ -77,11 +77,11 @@
 
 ## 5. 코드 품질 — 🟢 SHOULD PASS
 
-| #   | 검수 항목                | 판정 기준                            | 결과                                                                          |
-| --- | ------------------------ | ------------------------------------ | ----------------------------------------------------------------------------- |
-| Q-1 | TypeScript strict 컴파일 | 에러 0개                             | ✅ PASS (vitest 실행 시 tsc 검증 포함)                                        |
+| #   | 검수 항목                | 판정 기준                           | 결과                                                                          |
+| --- | ------------------------ | ----------------------------------- | ----------------------------------------------------------------------------- |
+| Q-1 | TypeScript strict 컴파일 | 에러 0개                            | ✅ PASS (vitest 실행 시 tsc 검증 포함)                                        |
 | Q-2 | 순환 의존성 없음         | resolver ↔ generator 순환 참조 없음 | ⚠️ **FINDING** — 아래 상세                                                    |
-| Q-3 | 기존 private 메서드 보존 | `@deprecated` 표시                   | ✅ PASS — L426 `getPropertyNameTailwindKeyNotFounded`, L599 `getPropertyName` |
+| Q-3 | 기존 private 메서드 보존 | `@deprecated` 표시                  | ✅ PASS — L426 `getPropertyNameTailwindKeyNotFounded`, L599 `getPropertyName` |
 
 ### Q-2 순환 의존성 FINDING
 
