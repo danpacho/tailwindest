@@ -6,9 +6,6 @@ Generate TypeScript definitions for your Tailwind CSS configuration.
 npx create-tailwind-type
 ```
 
-> [!IMPORTANT]  
-> **Requires Tailwind CSS v4.0.0 or higher.**
-
 ---
 
 ## Usage Examples

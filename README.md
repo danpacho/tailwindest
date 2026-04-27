@@ -231,9 +231,6 @@ Generate typescript definitions for your tailwind configuration.
 npx create-tailwind-type
 ```
 
-> [!IMPORTANT]  
-> **Requires Tailwind CSS `v4.0.0` or higher.**
-
 ### Usage Examples
 
 - **Use custom plugins**
@@ -281,3 +278,80 @@ npx create-tailwind-type -f src/types/tailwind.d.ts
 | `-N`           | `--disable-variants`          | Disable variant generation and types, can be increase performance.                                                                                         | `false`                |
 | N/A            | `--version`                   | Displays the current CLI version.                                                                                                                          | N/A                    |
 | N/A            | `--help`                      | Displays help and usage information for the CLI tool.                                                                                                      | N/A                    |
+
+# Transform
+
+<div align="center">
+<img src="./images/tailwind-transform.png" width="550px" alt="tailwindest-transformer-banner" />
+</div>
+
+Automate your migration from standard Tailwind CSS to type-safe **Tailwindest** objects. (e.g., shadcn components into tailwindest typed styles)
+
+## Features
+
+- **✨ Zero-Config Migration**: Automatically detects your `tailwindest` setup (namespace, paths) from your project.
+- **🚀 Smart Auto-Import**: Inserts necessary import statements into transformed files automatically.
+- **🛡️ Source-Safe**: Uses AST (Abstract Syntax Tree) traversal to ensure code logic remains untouched.
+- **🎨 Type-Safe**: Generates objects that are 100% compatible with `tailwindest` types.
+
+## Installation
+
+```bash
+# Run directly with npx
+npx @tailwindest/css-transformer <target> [options]
+
+# Or install globally
+npm install -g @tailwindest/css-transformer
+```
+
+## Usage
+
+```bash
+# Transform a single file
+npx @tailwindest/css-transformer src/components/Button.tsx
+
+# Transform an entire directory recursively
+npx @tailwindest/css-transformer src/pages --recursive
+
+# Preview changes without modifying files
+npx @tailwindest/css-transformer src --dry-run
+```
+
+## CLI Options
+
+| Option        | Alias | Default | Description                                    |
+| :------------ | :---- | :------ | :--------------------------------------------- |
+| `--recursive` | `-r`  | `false` | Recursively transform files in subdirectories. |
+| `--dry-run`   | `-d`  | `false` | Preview changes without modifying files.       |
+| `--exclude`   | `-e`  | `[]`    | List of patterns or directories to exclude.    |
+| `--version`   | `-V`  | -       | Output the version number.                     |
+| `--help`      | `-h`  | -       | Display help for command.                      |
+
+## Example
+
+**Before:**
+
+```tsx
+const className =
+    "flex items-center justify-center p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+```
+
+**After:**
+
+```tsx
+const style = tw.def({
+    display: "flex",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    padding: "p-4",
+    backgroundColor: "bg-blue-500",
+    hover: {
+        backgroundColor: "hover:bg-blue-600",
+    },
+    color: "text-white",
+    borderRadius: "rounded-lg",
+    transitionProperty: "transition-colors",
+})
+```
+
+---
