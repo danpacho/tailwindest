@@ -1,0 +1,31 @@
+{
+    "name": "css-transformer",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Tailwindest CSS Transformer",
+    "type": "module",
+    "main": "dist/index.mjs",
+    "types": "dist/index.d.mts",
+    "bin": {
+        "tailwindest-transform": "dist/cli.mjs"
+    },
+    "scripts": {
+        "build": "tsup",
+        "test": "vitest run",
+        "fixture:download": "tsx scripts/download_shadcn.ts"
+    },
+    "dependencies": {
+        "ts-morph": "^24.0.0",
+        "commander": "^12.0.0",
+        "@clack/prompts": "^1.2.0",
+        "picocolors": "^1.1.0",
+        "create-tailwind-type": "workspace:*"
+    },
+    "peerDependencies": {},
+    "devDependencies": {
+        "vitest": "^2.0.0",
+        "typescript": "^5.5.0",
+        "tsup": "^8.2.0",
+        "prettier": "^3.5.3"
+    }
+}
