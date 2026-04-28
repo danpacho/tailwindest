@@ -12,7 +12,11 @@
         "forceConsistentCasingInFileNames": true,
         "noEmit": true,
         "skipLibCheck": true,
-        "jsx": "react-jsx"
+        "jsx": "react-jsx",
+        "paths": {
+            "tailwindest": ["packages/tailwindest/src/index.ts"],
+            "tailwindest/*": ["packages/tailwindest/src/*"]
+        }
     },
     "include": ["packages"],
     "exclude": ["node_modules", "dist", "site", "examples"]

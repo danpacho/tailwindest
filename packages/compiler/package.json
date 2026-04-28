@@ -18,6 +18,7 @@
     "scripts": {
         "build": "tsup && node -e \"const fs=require('node:fs'); for (const file of ['dist/index','dist/vite/index']) if (fs.existsSync(file+'.d.ts')) fs.copyFileSync(file+'.d.ts', file+'.d.mts')\"",
         "test": "vitest run",
+        "test:e2e": "vitest run e2e",
         "e2e:vite-tailwind-v4": "vitest run e2e/vite-tailwind-v4",
         "dev": "tsup --watch"
     },
