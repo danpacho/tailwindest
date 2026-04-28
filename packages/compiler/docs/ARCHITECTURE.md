@@ -201,6 +201,34 @@ type MergerPolicy =
 
 `unsupported` merger가 포함된 호출은 strict mode에서 compile error, loose mode에서 runtime fallback으로 처리한다.
 
+### Style Object Variant Semantics
+
+Tailwindest style object key paths are semantic for known Tailwind variant
+keys. Property keys such as `backgroundColor`, `padding`, and arbitrary grouping
+keys do not create class prefixes, but variant keys such as `dark`, `hover`,
+responsive breakpoints, `@...` container variants, and arbitrary variants such
+as `[&>*]` accumulate prefixes for every string leaf below them.
+
+```ts
+tw.style({
+    dark: {
+        backgroundColor: "bg-red-900",
+        hover: { backgroundColor: "bg-red-950" },
+    },
+    backgroundColor: "bg-red-50",
+}).class()
+// "dark:bg-red-900 dark:hover:bg-red-950 bg-red-50"
+```
+
+Explicitly prefixed leaves remain supported. If a leaf already starts with the
+full accumulated prefix it is left unchanged; if it starts with a suffix of the
+path, only the missing parent variants are prepended. Unknown object keys remain
+grouping keys by default.
+
+Nested Tailwind variant keys are canonical syntax. Explicitly prefixed class
+strings remain valid and are not double-prefixed, but tests must prefer nested
+variant syntax for new fixtures.
+
 ## `createTools()` Compile Surface
 
 컴파일러는 `packages/tailwindest/src/tools/create_tools.ts`의 public surface를 기준으로 한다.
