@@ -1,12 +1,26 @@
 import { describe, expect, it } from "vitest"
 import { createCandidateManifest, updateFileCandidates } from "../manifest"
-import { injectSourceInlineBlock } from "../source_inline"
+import { injectSourceInlineBlock, isTailwindCssEntry } from "../source_inline"
 
 const manifestWith = (candidates: string[]) => {
     const manifest = createCandidateManifest()
     updateFileCandidates(manifest, "/src/app.tsx", {
         hash: "app",
         candidates,
+        diagnostics: [],
+    })
+    return manifest
+}
+
+const manifestWithExclusions = (
+    candidates: string[],
+    excludedCandidates: string[]
+) => {
+    const manifest = createCandidateManifest()
+    updateFileCandidates(manifest, "/src/app.tsx", {
+        hash: "app",
+        candidates,
+        excludedCandidates,
         diagnostics: [],
     })
     return manifest
@@ -103,6 +117,79 @@ describe("@source inline() injection", () => {
             }).code
         ).toBe(
             `/* tailwindest:start */\n@source inline("px-4");\n/* tailwindest:end */\n${plain}`
+        )
+    })
+
+    it("treats the Tailwind package CSS entry as a source bridge target without touching unrelated node_modules CSS", () => {
+        const tailwindPackageCss = `@layer theme, base, components, utilities;`
+        const manifest = manifestWithExclusions(
+            ["bg-red-50", "dark:bg-red-900"],
+            ["bg-red-900"]
+        )
+
+        expect(
+            isTailwindCssEntry(
+                "/project/node_modules/tailwindcss/index.css",
+                tailwindPackageCss
+            )
+        ).toBe(true)
+        expect(
+            isTailwindCssEntry(
+                "/@fs//project/node_modules/.pnpm/tailwindcss@4.2.4/node_modules/tailwindcss/index.css?used",
+                tailwindPackageCss
+            )
+        ).toBe(true)
+        expect(
+            isTailwindCssEntry(
+                "/project/node_modules/@scope/package/index.css",
+                tailwindPackageCss
+            )
+        ).toBe(false)
+
+        const result = injectSourceInlineBlock({
+            id: "/@fs//project/node_modules/.pnpm/tailwindcss@4.2.4/node_modules/tailwindcss/index.css?used",
+            code: tailwindPackageCss,
+            manifest,
+        })
+
+        expect(result.code).toBe(
+            [
+                `/* tailwindest:start */`,
+                `@source inline("bg-red-50 dark:bg-red-900");`,
+                `@source not inline("bg-red-900");`,
+                `/* tailwindest:end */`,
+                tailwindPackageCss,
+            ].join("\n")
+        )
+    })
+
+    it("injects and replaces effective not-inline exclusions", () => {
+        const code = [
+            `@import "tailwindcss";`,
+            `/* tailwindest:start */`,
+            `@source inline("old");`,
+            `@source not inline("stale");`,
+            `/* tailwindest:end */`,
+        ].join("\n")
+
+        const result = injectSourceInlineBlock({
+            id: "/src/app.css",
+            code,
+            manifest: manifestWithExclusions(
+                ["bg-red-50", "dark:bg-red-900", "dark:hover:bg-red-950"],
+                ["bg-red-900", "bg-red-950", "bg-red-50"]
+            ),
+        })
+
+        expect(result.code).toBe(
+            [
+                `@import "tailwindcss";`,
+                `/* tailwindest:start */`,
+                `@source inline("bg-red-50 dark:bg-red-900 dark:hover:bg-red-950");`,
+                `@source not inline("bg-red-900 bg-red-950");`,
+                `/* tailwindest:end */`,
+                ``,
+            ].join("\n")
         )
     })
 })

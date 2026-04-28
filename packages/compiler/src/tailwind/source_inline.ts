@@ -1,4 +1,5 @@
 import {
+    getSortedExcludedCandidates,
     getSortedCandidates,
     normalizeCandidateFileId,
     type CandidateManifest,
@@ -18,14 +19,16 @@ export interface SourceInlineResult {
 
 const START_MARKER = "/* tailwindest:start */"
 const END_MARKER = "/* tailwindest:end */"
-const BLOCK_PATTERN = String.raw`\/\* tailwindest:start \*\/\r?\n@source inline\("(?:\\.|[^"\\])*"\);\r?\n\/\* tailwindest:end \*\/`
+const BLOCK_PATTERN = String.raw`\/\* tailwindest:start \*\/\r?\n@source inline\("(?:\\.|[^"\\])*"\);\r?\n(?:@source not inline\("(?:\\.|[^"\\])*"\);\r?\n)?\/\* tailwindest:end \*\/`
 const BLOCK_RE = new RegExp(BLOCK_PATTERN, "g")
 const IMPORT_ADJACENT_BLOCK_RE = new RegExp(
-    String.raw`(@import\s+(?:url\(\s*)?["']tailwindcss["']\s*\)?\s*;?)\r?\n${BLOCK_PATTERN}`,
+    String.raw`(@import\s+(?:url\(\s*)?["']tailwindcss["'](?:\s*\))?(?:\s+source\(\s*none\s*\))?\s*;?)\r?\n${BLOCK_PATTERN}`,
     "g"
 )
 const TAILWIND_IMPORT_RE =
-    /@import\s+(?:url\(\s*)?["']tailwindcss["']\s*\)?\s*;?/m
+    /@import\s+(?:url\(\s*)?["']tailwindcss["'](?:\s*\))?(?:\s+source\(\s*none\s*\))?\s*;?/m
+const TAILWIND_PACKAGE_ENTRY_RE =
+    /(?:^|\/)node_modules\/(?:\.pnpm\/tailwindcss@[^/]+\/node_modules\/)?tailwindcss\/index\.css$/
 
 export function injectSourceInlineBlock(
     input: SourceInlineInput
@@ -36,8 +39,9 @@ export function injectSourceInlineBlock(
         normalizeCandidateFileId(input.id),
         input.cssEntries ?? []
     )
+    const packageEntry = isTailwindPackageCssEntry(input.id)
 
-    if (!importMatch && !explicitEntry) {
+    if (!importMatch && !explicitEntry && !packageEntry) {
         return { code: input.code, changed: false }
     }
 
@@ -59,6 +63,7 @@ export function isTailwindCssEntry(
 ): boolean {
     return (
         TAILWIND_IMPORT_RE.test(code) ||
+        isTailwindPackageCssEntry(id) ||
         matchesAny(normalizeCandidateFileId(id), cssEntries)
     )
 }
@@ -67,7 +72,14 @@ function createSourceInlineBlock(manifest: CandidateManifest): string {
     const source = getSortedCandidates(manifest)
         .map(escapeSourceInlineCandidate)
         .join(" ")
-    return `${START_MARKER}\n@source inline("${source}");\n${END_MARKER}`
+    const excludedSource = getSortedExcludedCandidates(manifest)
+        .map(escapeSourceInlineCandidate)
+        .join(" ")
+    const exclusions =
+        excludedSource.length > 0
+            ? `\n@source not inline("${excludedSource}");`
+            : ""
+    return `${START_MARKER}\n@source inline("${source}");${exclusions}\n${END_MARKER}`
 }
 
 function stripTailwindestBlocks(code: string): string {
@@ -86,6 +98,12 @@ function insertAfterImport(
 
 function startsWithNewline(value: string): boolean {
     return value.startsWith("\n") || value.startsWith("\r\n")
+}
+
+export function isTailwindPackageCssEntry(id: string): boolean {
+    return TAILWIND_PACKAGE_ENTRY_RE.test(
+        normalizeCandidateFileId(id).replace(/^\/@fs\/+/, "/")
+    )
 }
 
 function escapeSourceInlineCandidate(candidate: string): string {

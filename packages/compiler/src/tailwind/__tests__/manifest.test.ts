@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
     createCandidateManifest,
+    getSortedExcludedCandidates,
     getSortedCandidates,
     normalizeCandidateFileId,
     removeFileCandidates,
@@ -113,5 +114,38 @@ describe("CandidateManifest", () => {
 
         expect(removeFileCandidates(manifest, "/src/a.ts")).toBe(false)
         expect(manifest.revision).toBe(4)
+    })
+
+    it("keeps effective exclusions only when not required by global candidates", () => {
+        const manifest = createCandidateManifest()
+
+        updateFileCandidates(manifest, "/src/shorthand.ts", {
+            hash: "a1",
+            candidates: ["bg-red-50", "dark:bg-red-900"],
+            excludedCandidates: ["bg-red-900", "bg-red-50"],
+            diagnostics: [],
+        })
+        updateFileCandidates(manifest, "/src/explicit.ts", {
+            hash: "b1",
+            candidates: ["bg-red-900"],
+            excludedCandidates: [],
+            diagnostics: [],
+        })
+
+        expect(getSortedCandidates(manifest)).toEqual([
+            "bg-red-50",
+            "bg-red-900",
+            "dark:bg-red-900",
+        ])
+        expect(getSortedExcludedCandidates(manifest)).toEqual([])
+
+        updateFileCandidates(manifest, "/src/explicit.ts", {
+            hash: "b2",
+            candidates: ["text-blue-600"],
+            excludedCandidates: [],
+            diagnostics: [],
+        })
+
+        expect(getSortedExcludedCandidates(manifest)).toEqual(["bg-red-900"])
     })
 })

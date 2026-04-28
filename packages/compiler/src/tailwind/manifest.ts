@@ -5,6 +5,7 @@ export interface CandidateManifest {
     version: 1
     byFile: Map<string, FileCandidateRecord>
     all: Set<string>
+    excluded: Set<string>
     revision: number
 }
 
@@ -12,12 +13,14 @@ export interface FileCandidateRecord {
     id: string
     hash: string
     candidates: string[]
+    excludedCandidates: string[]
     diagnostics: CompilerDiagnostic[]
 }
 
 export interface UpdateFileCandidatesInput {
     hash: string
     candidates: string[]
+    excludedCandidates?: string[]
     diagnostics: CompilerDiagnostic[]
 }
 
@@ -26,6 +29,7 @@ export function createCandidateManifest(): CandidateManifest {
         version: 1,
         byFile: new Map(),
         all: new Set(),
+        excluded: new Set(),
         revision: 0,
     }
 }
@@ -48,6 +52,7 @@ export function updateFileCandidates(
         id: normalized,
         hash: input.hash,
         candidates: normalizeCandidates(input.candidates),
+        excludedCandidates: normalizeCandidates(input.excludedCandidates ?? []),
         diagnostics: normalizeDiagnostics(input.diagnostics),
     }
 
@@ -83,10 +88,22 @@ export function getSortedCandidates(manifest: CandidateManifest): string[] {
     return [...manifest.all].sort()
 }
 
+export function getSortedExcludedCandidates(
+    manifest: CandidateManifest
+): string[] {
+    return [...manifest.excluded].sort()
+}
+
 function rebuildGlobalCandidates(manifest: CandidateManifest): void {
     manifest.all = new Set(
         [...manifest.byFile.values()]
             .flatMap((record) => record.candidates)
+            .sort()
+    )
+    manifest.excluded = new Set(
+        [...manifest.byFile.values()]
+            .flatMap((record) => record.excludedCandidates)
+            .filter((candidate) => !manifest.all.has(candidate))
             .sort()
     )
 }
@@ -111,6 +128,7 @@ function recordsEffectivelyEqual(
 ): boolean {
     return (
         arraysEqual(left.candidates, right.candidates) &&
+        arraysEqual(left.excludedCandidates, right.excludedCandidates) &&
         diagnosticsEqual(left.diagnostics, right.diagnostics)
     )
 }
