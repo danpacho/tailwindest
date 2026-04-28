@@ -9,6 +9,7 @@
         "noUncheckedIndexedAccess": true,
         "exactOptionalPropertyTypes": true,
         "forceConsistentCasingInFileNames": true,
+        "ignoreDeprecations": "6.0",
         "noEmit": true,
         "skipLibCheck": true,
         "jsx": "react-jsx",
@@ -18,5 +19,5 @@
         }
     },
     "include": ["packages"],
-    "exclude": ["node_modules", "dist", "site", "examples"]
+    "exclude": ["node_modules", "dist", "**/dist", "site", "examples"]
 }

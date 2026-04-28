@@ -1,0 +1,5 @@
+{
+    "title": "Recipes",
+    "defaultOpen": true,
+    "pages": ["styling", "conditional-styling", "customize", "utility"]
+}
