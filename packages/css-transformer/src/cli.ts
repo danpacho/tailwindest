@@ -5,6 +5,7 @@ import fs from "fs/promises"
 import * as p from "@clack/prompts"
 import pc from "picocolors"
 import { transform } from "./index"
+import type { CssTransformerOutputMode } from "./context/output_mode"
 import {
     TailwindTypeGenerator,
     TailwindCompiler,
@@ -42,7 +43,9 @@ async function findTailwindestDefinition(
     return null
 }
 
-async function runTUI() {
+async function runTUI(
+    defaults: { outputMode?: CssTransformerOutputMode } = {}
+) {
     p.intro(pc.bgCyan(pc.black(" Tailwindest CSS Transformer ")))
 
     const detectedDef = await findTailwindestDefinition(process.cwd())
@@ -76,6 +79,28 @@ async function runTUI() {
                     initialValue: (detectedDef
                         ? `@/${detectedDef.path.replace(".ts", "")}`
                         : "~/tw") as string,
+                }),
+            outputMode: () =>
+                p.select({
+                    message: "Which Tailwindest output mode should be used?",
+                    options: [
+                        {
+                            value: "auto",
+                            label: "Auto",
+                            hint: "recommended",
+                        },
+                        {
+                            value: "runtime",
+                            label: "Runtime",
+                            hint: "CreateTailwindest",
+                        },
+                        {
+                            value: "compiled",
+                            label: "Compiled",
+                            hint: "CreateCompiledTailwindest",
+                        },
+                    ],
+                    initialValue: defaults.outputMode ?? "auto",
                 }),
             walkers: () =>
                 p.multiselect({
@@ -189,6 +214,9 @@ async function runTUI() {
                 resolver,
                 tailwindestIdentifier: config.identifier as string,
                 tailwindestModulePath: config.modulePath as string,
+                outputMode: config.outputMode as CssTransformerOutputMode,
+                projectRoot: process.cwd(),
+                sourcePath: file,
                 walkers: config.walkers as any,
             })
 
@@ -238,13 +266,23 @@ program
         "Print transformed code without writing to file",
         false
     )
+    .option("--mode <mode>", "Output mode: auto, runtime, or compiled", "auto")
     .action(async (targetPath, options) => {
+        const outputMode = normalizeOutputMode(options.mode)
         if (!targetPath) {
-            await runTUI()
+            await runTUI({ outputMode })
             return
         }
 
-        await runTUI()
+        await runTUI({ outputMode })
     })
 
 program.parse()
+
+function normalizeOutputMode(mode: string): CssTransformerOutputMode {
+    if (mode === "runtime" || mode === "compiled" || mode === "auto") {
+        return mode
+    }
+
+    throw new Error(`Invalid output mode: ${mode}`)
+}

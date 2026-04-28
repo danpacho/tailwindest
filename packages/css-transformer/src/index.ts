@@ -7,6 +7,11 @@ export * from "./walkers"
 import { Project, ScriptTarget } from "ts-morph"
 import { TokenAnalyzerImpl } from "./analyzer/token_analyzer"
 import { createContext } from "./context/transformer_context"
+import {
+    resolveOutputMode,
+    type CssTransformerOutputMode,
+    type ResolveOutputModeOptions,
+} from "./context/output_mode"
 import { TransformerRegistry } from "./registry/transformer_registry"
 import {
     CvaWalker,
@@ -21,6 +26,9 @@ import type { TransformResult, Diagnostic } from "./types"
 export interface TransformOptions {
     tailwindestIdentifier?: string
     tailwindestModulePath?: string
+    outputMode?: CssTransformerOutputMode
+    projectRoot?: string
+    sourcePath?: string
     resolver: CSSPropertyResolver
     /**
      * List of walkers to use. If not provided, all default walkers are used.
@@ -49,9 +57,24 @@ export async function transform(
     // We use a dummy filename so ts-morph can parse JSX properly
     const sourceFile = project.createSourceFile("temp.tsx", sourceCode)
 
+    const outputModeOptions: ResolveOutputModeOptions = { sourceCode }
+    if (options.outputMode !== undefined) {
+        outputModeOptions.outputMode = options.outputMode
+    }
+    if (options.projectRoot !== undefined) {
+        outputModeOptions.projectRoot = options.projectRoot
+    }
+    if (options.sourcePath !== undefined) {
+        outputModeOptions.sourcePath = options.sourcePath
+    }
+
+    const outputMode = await resolveOutputMode(outputModeOptions)
     const analyzer = new TokenAnalyzerImpl(options.resolver)
     const contextOptions: Parameters<typeof createContext>[0] = {
         analyzer,
+        outputMode: outputMode.mode,
+        outputModeEvidence: outputMode.evidence,
+        diagnostics: [...outputMode.diagnostics],
     }
     if (options.tailwindestIdentifier !== undefined) {
         contextOptions.tailwindestIdentifier = options.tailwindestIdentifier
