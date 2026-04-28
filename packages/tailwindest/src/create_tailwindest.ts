@@ -1,28 +1,24 @@
-type TAILWIND_IDENTIFIER = ":"
-type FIRST_DEPTH_NEST_CONDITION = ""
-
-type RemoveIdentifier<
-    ClassName extends string,
-    Identifier extends string = TAILWIND_IDENTIFIER,
-> = ClassName extends `${Identifier}${infer RemovedClassString}`
-    ? RemoveIdentifier<RemovedClassString, Identifier>
-    : ClassName
-
-type ActiveArbitrary<T extends string> = T | (`${string}` & {})
-type WithArray<T> = T | T[]
-type With<
-    T extends string,
-    UseArbitrary extends true | false = true,
-> = UseArbitrary extends true ? WithArray<ActiveArbitrary<T>> : WithArray<T>
+import type {
+    FirstDepthNestCondition,
+    NestIdentifierSymbols,
+    PrefixedNestGroups,
+    RemoveIdentifier,
+    TailwindestConfig,
+    TailwindIdentifier,
+    UseArbitraryValue,
+    UseArbitraryVariant,
+    With,
+} from "./types/core"
+export type { TailwindestConfig, TailwindestInterface } from "./types/core"
 
 type CombineNestConditionAtCurrentNestStyleProperty<
     NestStyle,
-    Identifier extends string = TAILWIND_IDENTIFIER,
+    Identifier extends string = TailwindIdentifier,
     UseArbitrary extends true | false = true,
-    NestCondition extends string = FIRST_DEPTH_NEST_CONDITION,
+    NestCondition extends string = FirstDepthNestCondition,
 > = {
     [NestKey in keyof NestStyle]?: NestStyle[NestKey] extends string
-        ? NestCondition extends FIRST_DEPTH_NEST_CONDITION
+        ? NestCondition extends FirstDepthNestCondition
             ? With<NestStyle[NestKey], UseArbitrary>
             : With<
                   `${RemoveIdentifier<NestCondition, Identifier>}:${NestStyle[NestKey]}`,
@@ -34,9 +30,9 @@ type CombineNestConditionAtCurrentNestStyleProperty<
 export type GetNestStyle<
     TailwindNestGroups extends string,
     Tailwind,
-    NestIdentifierSymbols extends string = TAILWIND_IDENTIFIER,
+    Identifier extends string = TailwindIdentifier,
     UseArbitrary extends true | false = true,
-    $$Nest$$ extends string = FIRST_DEPTH_NEST_CONDITION,
+    $$Nest$$ extends string = FirstDepthNestCondition,
 > = {
     [CurrentNestCondition in Exclude<
         TailwindNestGroups,
@@ -44,61 +40,16 @@ export type GetNestStyle<
     >]?: GetNestStyle<
         Exclude<TailwindNestGroups, CurrentNestCondition | $$Nest$$>,
         Tailwind,
-        NestIdentifierSymbols,
+        Identifier,
         UseArbitrary,
-        `${$$Nest$$}:${RemoveIdentifier<CurrentNestCondition, NestIdentifierSymbols>}`
+        `${$$Nest$$}:${RemoveIdentifier<CurrentNestCondition, Identifier>}`
     >
 } & CombineNestConditionAtCurrentNestStyleProperty<
     Tailwind,
-    NestIdentifierSymbols,
+    Identifier,
     UseArbitrary,
     $$Nest$$
 >
-
-interface TailwindestConfig {
-    /**
-     * Tailwind type
-     */
-    tailwind: any
-    /**
-     * Tailwind nest group literal type
-     */
-    tailwindNestGroups: string
-    /**
-     * Prefix of nest group
-     * @default ''
-     */
-    groupPrefix?: string
-    /**
-     * Enables arbitrary strings as valid style properties if `true`.
-     */
-    useArbitrary?: true | false
-    /**
-     * Enables arbitrary variants (e.g. `data-[...]`, `aria-[...]`) if `true`.
-     * Applied as a single top-level intersection — zero recursion cost.
-     * @default false
-     */
-    useArbitraryVariant?: true | false
-}
-
-export interface TailwindestInterface {
-    /**
-     * Tailwind literal typeset
-     */
-    tailwindLiteral?: any
-    /**
-     * Tailwindest typeset
-     */
-    tailwindest: any
-    /**
-     * Enables arbitrary strings as valid style properties if `true`.
-     */
-    useArbitrary?: true | false
-    /**
-     * Use typed class literal strings for extra classes
-     */
-    useTypedClassLiteral?: true | false
-}
 
 /**
  * Create tailwindest typeset
@@ -125,14 +76,10 @@ export interface TailwindestInterface {
  * ```
  */
 type _BaseNestStyle<Config extends TailwindestConfig> = GetNestStyle<
-    Config["groupPrefix"] extends string
-        ? `${Config["groupPrefix"]}${Config["tailwindNestGroups"]}`
-        : Config["tailwindNestGroups"],
+    PrefixedNestGroups<Config>,
     Config["tailwind"],
-    Config["groupPrefix"] extends string
-        ? Config["groupPrefix"] | TAILWIND_IDENTIFIER
-        : TAILWIND_IDENTIFIER,
-    Config["useArbitrary"] extends boolean ? Config["useArbitrary"] : false
+    NestIdentifierSymbols<Config>,
+    UseArbitraryValue<Config>
 >
 
 /**
@@ -153,10 +100,7 @@ type _WithArbitraryVariant<
     : Base
 
 export type CreateTailwindest<Config extends TailwindestConfig> =
-    _WithArbitraryVariant<
-        _BaseNestStyle<Config>,
-        Config["useArbitraryVariant"] extends true ? true : false
-    >
+    _WithArbitraryVariant<_BaseNestStyle<Config>, UseArbitraryVariant<Config>>
 
 /**
  * Create tailwind literal typeset

@@ -113,6 +113,22 @@ describe("Styler", () => {
         it("handles empty style", () => {
             expect(Styler.getClassName({})).toBe("")
         })
+
+        it("prefixes nested Tailwind variant keys", () => {
+            const style = {
+                dark: {
+                    backgroundColor: "bg-red-900",
+                    hover: {
+                        backgroundColor: "bg-red-950",
+                    },
+                },
+                backgroundColor: "bg-red-50",
+            }
+
+            expect(Styler.getClassName(style)).toBe(
+                "dark:bg-red-900 dark:hover:bg-red-950 bg-red-50"
+            )
+        })
     })
 
     describe("TestStyler implementation", () => {

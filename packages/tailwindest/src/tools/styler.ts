@@ -1,4 +1,5 @@
 import type { AdditionalClassTokens, Merger } from "./merger_interface"
+import { flattenStyleRecord } from "./style_normalizer"
 
 type NestedRecord = Record<string, unknown>
 export abstract class Styler<Args, Out, Literal extends string = string> {
@@ -59,13 +60,7 @@ export abstract class Styler<Args, Out, Literal extends string = string> {
     public static flattenRecord<FlattenTargetObject>(
         object: FlattenTargetObject
     ): Array<string> {
-        return Object.values(object ?? {})
-            .map((value) =>
-                typeof value !== "string"
-                    ? Styler.flattenRecord(value as NestedRecord)
-                    : value
-            )
-            .flat()
+        return flattenStyleRecord(object)
     }
 
     /**
