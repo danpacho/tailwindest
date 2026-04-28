@@ -194,7 +194,7 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
             this.files.get(normalized) ?? "",
             ts.ScriptTarget.Latest,
             true,
-            ts.ScriptKind.TS
+            sourceKindForFileName(normalized)
         )
 
         this.sourceFiles.set(normalized, { version, sourceFile })
@@ -382,6 +382,16 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
         context: ToolResolutionContext
     ): TailwindestSymbol | undefined {
         const unwrapped = unwrapExpression(expression)
+        if (
+            ts.isCallExpression(unwrapped) &&
+            ts.isPropertyAccessExpression(unwrapped.expression)
+        ) {
+            return this.resolveToolExpression(
+                unwrapped.expression.expression,
+                fileName,
+                context
+            )
+        }
         if (!ts.isIdentifier(unwrapped)) {
             return undefined
         }
@@ -416,6 +426,19 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
             }
 
             const initializer = unwrapExpression(declaration.initializer)
+            const initializerReceiver = this.resolveToolInitializer(
+                initializer,
+                fileName,
+                context
+            )
+            if (initializerReceiver) {
+                return {
+                    name,
+                    sourceFile: initializerReceiver.sourceFile,
+                    provenance: initializerReceiver.provenance,
+                }
+            }
+
             if (ts.isIdentifier(initializer)) {
                 return this.resolveToolIdentifier(
                     initializer.text,
@@ -542,6 +565,20 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
             }
 
             const expression = unwrapExpression(exported.expression)
+            const expressionReceiver = this.resolveToolInitializer(
+                expression,
+                fileName,
+                context
+            )
+            if (expressionReceiver) {
+                context.visiting.delete(key)
+                return {
+                    name: exported.localName,
+                    sourceFile: expressionReceiver.sourceFile,
+                    provenance: expressionReceiver.provenance,
+                }
+            }
+
             if (ts.isIdentifier(expression)) {
                 const result = this.resolveToolIdentifier(
                     expression.text,
@@ -556,6 +593,28 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
 
         context.visiting.delete(key)
         return undefined
+    }
+
+    private resolveToolInitializer(
+        expression: ts.Expression,
+        fileName: string,
+        context: ToolResolutionContext
+    ): TailwindestSymbol | undefined {
+        if (
+            !ts.isCallExpression(expression) ||
+            !ts.isPropertyAccessExpression(expression.expression)
+        ) {
+            return undefined
+        }
+        const propertyName = expression.expression.name.text
+        if (!TAILWINDEST_CALL_KINDS.has(propertyName as TailwindestCallKind)) {
+            return undefined
+        }
+        return this.resolveToolExpression(
+            expression.expression.expression,
+            fileName,
+            context
+        )
     }
 
     private isCreateToolsCall(
@@ -653,6 +712,16 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
 const normalizeFileName = (fileName: string): string => {
     const normalized = path.posix.normalize(fileName)
     return normalized.startsWith("/") ? normalized : `/${normalized}`
+}
+
+const sourceKindForFileName = (fileName: string): ts.ScriptKind => {
+    if (fileName.endsWith(".tsx")) {
+        return ts.ScriptKind.TSX
+    }
+    if (fileName.endsWith(".jsx")) {
+        return ts.ScriptKind.JSX
+    }
+    return ts.ScriptKind.TS
 }
 
 const isTailwindestModule = (moduleSpecifier: string): boolean => {

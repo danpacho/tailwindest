@@ -12,6 +12,14 @@ export type TailwindestCallKind =
     | "mergeRecord"
     | "compose"
 
+/**
+ * Byte-offset span in an original source file.
+ *
+ * `start` is inclusive and `end` is exclusive. Spans are used in diagnostics,
+ * source maps, debug manifests, and low-level replacement plans.
+ *
+ * @public
+ */
 export interface SourceSpan {
     fileName: string
     start: number
