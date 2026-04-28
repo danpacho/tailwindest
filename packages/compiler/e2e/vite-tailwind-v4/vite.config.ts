@@ -14,11 +14,21 @@ export default defineConfig({
     build: {
         emptyOutDir: true,
         outDir: "dist",
+        sourcemap: true,
+        rollupOptions: {
+            input: {
+                app: path.resolve(__dirname, "index.html"),
+                compiled: path.resolve(__dirname, "src/compiled-entry.ts"),
+            },
+        },
     },
     plugins: [
         tailwindest({
             include: [/src\/.*\.[cm]?[jt]sx?$/],
             cssEntries: [/src\/style\.css$/],
+            mode: "loose",
+            debug: true,
+            sourceMap: true,
         }),
         tailwindcss(),
     ],
