@@ -43,8 +43,20 @@ export const cleanupRuntimeImports = ({
         scriptKindFor(fileName)
     )
     const edits: Edit[] = []
+    const removableCreateToolStatements =
+        collectRemovableCreateToolStatements(sourceFile)
 
     for (const statement of sourceFile.statements) {
+        if (ts.isVariableStatement(statement)) {
+            if (removableCreateToolStatements.has(statement)) {
+                edits.push({
+                    start: statement.getStart(sourceFile),
+                    end: includeFollowingLineBreak(code, statement.getEnd()),
+                    text: "",
+                })
+            }
+            continue
+        }
         if (
             !ts.isImportDeclaration(statement) ||
             statement.importClause?.isTypeOnly
@@ -74,7 +86,12 @@ export const cleanupRuntimeImports = ({
 
         if (
             runtimeSpecifiers.some((specifier) =>
-                isIdentifierUsed(sourceFile, specifier.name.text, statement)
+                isIdentifierUsed(
+                    sourceFile,
+                    specifier.name.text,
+                    statement,
+                    removableCreateToolStatements
+                )
             )
         ) {
             continue
@@ -127,15 +144,41 @@ export const cleanupRuntimeImports = ({
     }
 }
 
+const collectRemovableCreateToolStatements = (
+    sourceFile: ts.SourceFile
+): Set<ts.Node> => {
+    const removable = new Set<ts.Node>()
+    for (const statement of sourceFile.statements) {
+        if (!ts.isVariableStatement(statement)) {
+            continue
+        }
+        const declaration = statement.declarationList.declarations[0]
+        if (
+            declaration &&
+            statement.declarationList.declarations.length === 1 &&
+            ts.isIdentifier(declaration.name) &&
+            declaration.initializer &&
+            ts.isCallExpression(declaration.initializer) &&
+            ts.isIdentifier(declaration.initializer.expression) &&
+            declaration.initializer.expression.text === "createTools" &&
+            !isIdentifierUsed(sourceFile, declaration.name.text, statement)
+        ) {
+            removable.add(statement)
+        }
+    }
+    return removable
+}
+
 const isIdentifierUsed = (
     sourceFile: ts.SourceFile,
     localName: string,
-    importDeclaration: ts.ImportDeclaration
+    ignoredDeclaration: ts.Node,
+    ignoredNodes: Set<ts.Node> = new Set()
 ): boolean => {
     let used = false
 
     const visit = (node: ts.Node): void => {
-        if (used || node === importDeclaration) {
+        if (used || node === ignoredDeclaration || ignoredNodes.has(node)) {
             return
         }
         if (ts.isIdentifier(node) && node.text === localName) {
