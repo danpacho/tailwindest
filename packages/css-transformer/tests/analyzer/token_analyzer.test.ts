@@ -83,6 +83,18 @@ describe("TokenAnalyzerImpl", () => {
             })
         })
 
+        it("should build compiled nested variants with raw leaf utilities", () => {
+            const analyzer = new TokenAnalyzerImpl(resolver)
+            const tokens = analyzer.analyze("hover:bg-accent")
+            expect(
+                analyzer.buildObjectTree(tokens, { outputMode: "compiled" })
+            ).toEqual({
+                hover: {
+                    backgroundColor: "bg-accent",
+                },
+            })
+        })
+
         it("should build deeply nested variants", () => {
             const analyzer = new TokenAnalyzerImpl(resolver)
             const tokens = analyzer.analyze("dark:hover:bg-accent")
@@ -90,6 +102,20 @@ describe("TokenAnalyzerImpl", () => {
                 dark: {
                     hover: {
                         backgroundColor: "dark:hover:bg-accent",
+                    },
+                },
+            })
+        })
+
+        it("should build compiled deeply nested variants with raw leaf utilities", () => {
+            const analyzer = new TokenAnalyzerImpl(resolver)
+            const tokens = analyzer.analyze("dark:hover:bg-accent")
+            expect(
+                analyzer.buildObjectTree(tokens, { outputMode: "compiled" })
+            ).toEqual({
+                dark: {
+                    hover: {
+                        backgroundColor: "bg-accent",
                     },
                 },
             })
@@ -123,12 +149,36 @@ describe("TokenAnalyzerImpl", () => {
             })
         })
 
+        it("should handle compiled variant key collisions with raw leaf utilities", () => {
+            const analyzer = new TokenAnalyzerImpl(resolver)
+            const tokens = analyzer.analyze("hover:p-4 hover:p-2")
+            expect(
+                analyzer.buildObjectTree(tokens, { outputMode: "compiled" })
+            ).toEqual({
+                hover: {
+                    padding: ["p-4", "p-2"],
+                },
+            })
+        })
+
         it("should apply group prefix", () => {
             const analyzer = new TokenAnalyzerImpl(resolver, "$")
             const tokens = analyzer.analyze("hover:bg-accent")
             expect(analyzer.buildObjectTree(tokens)).toEqual({
                 $hover: {
                     backgroundColor: "hover:bg-accent",
+                },
+            })
+        })
+
+        it("should apply group prefix in compiled mode without prefixing leaf utilities", () => {
+            const analyzer = new TokenAnalyzerImpl(resolver, "$")
+            const tokens = analyzer.analyze("hover:bg-accent")
+            expect(
+                analyzer.buildObjectTree(tokens, { outputMode: "compiled" })
+            ).toEqual({
+                $hover: {
+                    backgroundColor: "bg-accent",
                 },
             })
         })

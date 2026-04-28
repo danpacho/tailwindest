@@ -10,6 +10,7 @@ class MockResolver implements Partial<CSSPropertyResolver> {
         if (className === "flex") return "display"
         if (className === "text-sm") return "fontSize"
         if (className === "p-4") return "padding"
+        if (className === "bg-accent") return "backgroundColor"
         return null
     }
 }
@@ -25,6 +26,15 @@ describe("CnWalker", () => {
         })
         const sourceFile = project.createSourceFile("test.ts", content)
         const context = createContext({ analyzer })
+        return { sourceFile, context }
+    }
+
+    function setupCompiled(content: string) {
+        const project = new Project({
+            compilerOptions: { target: ScriptTarget.ESNext },
+        })
+        const sourceFile = project.createSourceFile("test.ts", content)
+        const context = createContext({ analyzer, outputMode: "compiled" })
         return { sourceFile, context }
     }
 
@@ -131,5 +141,27 @@ describe("CnWalker", () => {
         const walker = new CnWalker()
         expect(walker.canWalk(callExprs[0]!)).toBe(true)
         expect(walker.canWalk(callExprs[1]!)).toBe(true)
+    })
+
+    it("should strip nested variant prefixes in compiled mode", () => {
+        const { sourceFile, context } = setupCompiled(
+            `const a = cn("dark:hover:bg-accent flex")`
+        )
+        const callExpr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.CallExpression
+        )!
+        const walker = new CnWalker()
+
+        walker.walk(callExpr, context)
+
+        const style = context.styles.getStyles()[0]?.[1].style
+        expect(style).toEqual({
+            dark: {
+                hover: {
+                    backgroundColor: "bg-accent",
+                },
+            },
+            display: "flex",
+        })
     })
 })

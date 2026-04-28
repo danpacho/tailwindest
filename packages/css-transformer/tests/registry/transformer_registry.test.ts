@@ -19,6 +19,8 @@ describe("TransformerRegistry", () => {
             analyzer: {} as any, // Mock analyzer not needed for these tests
             tailwindestIdentifier: "tw",
             tailwindestModulePath: "~/tw",
+            outputMode: "runtime",
+            outputModeEvidence: [],
             imports: new ImportCollector(),
             styles: new StyleManager(),
             diagnostics: [],

@@ -9,6 +9,7 @@ class MockResolver implements Partial<CSSPropertyResolver> {
     resolveUnambiguous(className: string): string | null {
         if (className === "flex") return "display"
         if (className === "text-sm") return "fontSize"
+        if (className === "bg-accent") return "backgroundColor"
         return null
     }
 }
@@ -27,6 +28,18 @@ describe("ClassNameWalker", () => {
         })
         const sourceFile = project.createSourceFile("test.tsx", content)
         const context = createContext({ analyzer })
+        return { sourceFile, context }
+    }
+
+    function setupCompiled(content: string) {
+        const project = new Project({
+            compilerOptions: {
+                target: ScriptTarget.ESNext,
+                jsx: 1 /* Preserve */,
+            },
+        })
+        const sourceFile = project.createSourceFile("test.tsx", content)
+        const context = createContext({ analyzer, outputMode: "compiled" })
         return { sourceFile, context }
     }
 
@@ -92,5 +105,26 @@ describe("ClassNameWalker", () => {
         const result = walker.walk(attr, context)
         expect(result.success).toBe(false)
         expect(sourceFile.getFullText()).toContain(`className=""`)
+    })
+
+    it("should strip nested variant prefixes in compiled mode", () => {
+        const { sourceFile, context } = setupCompiled(
+            `const a = <div className="dark:hover:bg-accent" />`
+        )
+        const attr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.JsxAttribute
+        )!
+        const walker = new ClassNameWalker()
+
+        walker.walk(attr, context)
+
+        const style = context.styles.getStyles()[0]?.[1].style
+        expect(style).toEqual({
+            dark: {
+                hover: {
+                    backgroundColor: "bg-accent",
+                },
+            },
+        })
     })
 })
