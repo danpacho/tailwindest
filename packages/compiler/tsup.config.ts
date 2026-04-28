@@ -9,4 +9,5 @@ export default defineConfig({
     dts: true,
     clean: true,
     target: "esnext",
+    tsconfig: "tsconfig.build.json",
 })
