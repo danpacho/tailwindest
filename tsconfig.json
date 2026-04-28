@@ -4,7 +4,6 @@
         "target": "esnext",
         "module": "esnext",
         "lib": ["dom", "dom.iterable", "esnext"],
-        "baseUrl": ".",
         "esModuleInterop": true,
         "moduleResolution": "bundler",
         "noUncheckedIndexedAccess": true,
@@ -14,8 +13,8 @@
         "skipLibCheck": true,
         "jsx": "react-jsx",
         "paths": {
-            "tailwindest": ["packages/tailwindest/src/index.ts"],
-            "tailwindest/*": ["packages/tailwindest/src/*"]
+            "tailwindest": ["./packages/tailwindest/src/index.ts"],
+            "tailwindest/*": ["./packages/tailwindest/src/*"]
         }
     },
     "include": ["packages"],
