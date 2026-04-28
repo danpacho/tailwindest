@@ -20,6 +20,8 @@ const expectedCandidates = [
     "bg-slate-50",
     "bg-white",
     "border",
+    "dark:bg-red-900",
+    "dark:hover:bg-red-950",
     "dark:md:hover:bg-sky-600",
     "flex",
     "font-semibold",
@@ -128,6 +130,12 @@ describe("Vite + Tailwind v4 manifest bridge", () => {
             expect(compiledJs).not.toContain(token)
         }
         expect(compiledJs).toContain("flex px-4 text-emerald-600 rounded-md")
+        expect(debugManifest.candidates).not.toContain("bg-red-900")
+        expect(debugManifest.candidates).not.toContain("bg-red-950")
+        expect(css).toContain(cssSelector("dark:bg-red-900"))
+        expect(css).toContain(cssSelector("dark:hover:bg-red-950"))
+        expect(css).not.toContain(cssSelector("bg-red-900"))
+        expect(css).not.toContain(cssSelector("bg-red-950"))
         assertManifestDiagnosticContract(debugManifest)
 
         const source = await fs.readFile(mainFile, "utf8")
@@ -153,7 +161,7 @@ describe("Vite + Tailwind v4 manifest bridge", () => {
                 traceReplacement!.originalSpan.start,
                 traceReplacement!.originalSpan.end
             )
-        ).toContain("tw.style")
+        ).toMatch(/tw\s*\.\s*style/)
         expect(transform.code).toContain(traceReplacement!.generatedText)
         expect(css).toContain(cssSelector("px-4"))
         expect(

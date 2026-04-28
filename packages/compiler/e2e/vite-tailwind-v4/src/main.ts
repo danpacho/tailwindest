@@ -68,7 +68,18 @@ const conflictingVariantClass = tw
 const arbitraryClass = tw
     .style({
         background: "bg-[rgb(10_20_30)]",
-        hover: { background: "dark:md:hover:bg-sky-600" },
+        backgroundState: "dark:md:hover:bg-sky-600",
+    })
+    .class()
+const nestedVariantClass = tw
+    .style({
+        dark: {
+            backgroundColor: "bg-red-\u0039\u0030\u0030",
+            hover: {
+                backgroundColor: "bg-red-\u0039\u0035\u0030",
+            },
+        },
+        backgroundColor: "bg-red-50",
     })
     .class()
 
@@ -89,7 +100,10 @@ const renderedClasses = [
     independentVariantClass,
     conflictingVariantClass,
     arbitraryClass,
+    nestedVariantClass,
     looseFallback("underline"),
 ].reduce((acc, item) => (acc ? `${acc} ${item}` : item), "")
 
-document.querySelector<HTMLDivElement>("#app")!.className = renderedClasses
+export function mountTailwindestFixture() {
+    document.querySelector<HTMLDivElement>("#app")!.className = renderedClasses
+}

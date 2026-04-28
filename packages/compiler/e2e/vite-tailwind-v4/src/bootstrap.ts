@@ -1,2 +1,4 @@
 import "./style.css"
-import "./main"
+import { mountTailwindestFixture } from "./main"
+
+mountTailwindestFixture()

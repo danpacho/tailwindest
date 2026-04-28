@@ -1,0 +1,5 @@
+.artifacts/
+**/.tailwindest/
+**/dist/
+**/.next/
+design-system-next/app/
