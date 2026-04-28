@@ -10,8 +10,8 @@ type ViteTransformHandler = (
     code: string,
     id: string
 ) =>
-    | Promise<{ code: string; map: null } | null>
-    | { code: string; map: null }
+    | Promise<{ code: string; map: unknown } | null>
+    | { code: string; map: unknown }
     | null
 type WatchChangeHandler = (
     this: unknown,
@@ -77,8 +77,10 @@ export function tailwindest(
                 if (!context.shouldTransformJs(id)) {
                     return null
                 }
-                context.transformJs(code, id)
-                return null
+                const result = context.transformJs(code, id)
+                return result.changed || result.map
+                    ? { code: result.code, map: result.map }
+                    : null
             },
         },
     }

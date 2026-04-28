@@ -37,8 +37,11 @@ describe("tailwindest Vite plugin", () => {
             moduleGraph: {
                 getModuleById: (id: string) =>
                     id === cssModule.id ? cssModule : undefined,
-                invalidateModule: (module: { id: string }) =>
-                    invalidated.push(module.id),
+                invalidateModule: (module: { id?: string | null }) => {
+                    if (module.id) {
+                        invalidated.push(module.id)
+                    }
+                },
             },
         }
 
@@ -99,6 +102,74 @@ describe("tailwindest Vite plugin", () => {
             "text-emerald-600",
         ])
         expect(css.code).toContain(`@source inline("px-4 text-emerald-600");`)
+    })
+
+    it("returns compiled JS, source maps, and debug replacements for exact calls", () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true, sourceMap: true },
+        })
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const cls = tw.join("px-4", "py-2")`,
+        ].join("\n")
+
+        const result = context.transformJs(code, "/project/src/app.ts")
+        const manifest = context.getDebugManifest()
+
+        expect(result.code).toContain(`"px-4 py-2"`)
+        expect(result.changed).toBe(true)
+        expect(result.map?.sources).toEqual(["/project/src/app.ts"])
+        expect(manifest.files[0]?.replacements).toEqual([
+            {
+                kind: "join",
+                originalSpan: {
+                    fileName: "/project/src/app.ts",
+                    start: code.indexOf(`tw.join`),
+                    end:
+                        code.indexOf(`tw.join`) +
+                        `tw.join("px-4", "py-2")`.length,
+                },
+                generatedText: `"px-4 py-2"`,
+                candidates: ["px-4", "py-2"],
+                fallback: false,
+            },
+        ])
+        expect(manifest.candidates).toEqual(["px-4", "py-2"])
+    })
+
+    it("fails strict transforms for unsupported exact compile and preserves loose runtime fallback", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `declare const dynamicClass: string`,
+            `export const cls = tw.join(dynamicClass)`,
+        ].join("\n")
+
+        const strict = createCompilerContext({
+            root: "/project",
+            options: { mode: "strict" },
+        })
+        expect(() => strict.transformJs(code, "/project/src/app.ts")).toThrow(
+            /UNSUPPORTED_DYNAMIC_VALUE/
+        )
+
+        const loose = createCompilerContext({
+            root: "/project",
+            options: { mode: "loose", debug: true },
+        })
+        const result = loose.transformJs(code, "/project/src/app.ts")
+
+        expect(result.code).toBe(code)
+        expect(result.changed).toBe(false)
+        expect(loose.getDebugManifest().files[0]?.replacements).toEqual([
+            expect.objectContaining({
+                kind: "join",
+                generatedText: "",
+                fallback: true,
+            }),
+        ])
     })
 
     it("serve and build contexts derive the same manifest for the same fixture files", async () => {
@@ -181,8 +252,11 @@ describe("tailwindest Vite plugin", () => {
                         : id.endsWith("app.tsx")
                           ? jsModule
                           : undefined,
-                invalidateModule: (module: { id: string }) =>
-                    invalidated.push(module.id),
+                invalidateModule: (module: { id?: string | null }) => {
+                    if (module.id) {
+                        invalidated.push(module.id)
+                    }
+                },
             },
         }
 

@@ -1,4 +1,5 @@
 import crypto from "node:crypto"
+import fsSync from "node:fs"
 import fs from "node:fs/promises"
 import path from "node:path"
 import * as ts from "typescript"
@@ -6,6 +7,17 @@ import { createStaticAnalyzer } from "../analyzer/detector"
 import { createEvaluationEngine } from "../core/evaluator"
 import type { CompilerDiagnostic } from "../core/diagnostic_types"
 import type { MergerPolicy } from "../core/merger"
+import {
+    createDebugManifest,
+    stringifyDebugManifest,
+    type TailwindestDebugFile,
+    type TailwindestDebugManifest,
+} from "../debug/debug_manifest"
+import {
+    diagnosticWithSource,
+    diagnosticsForMode,
+    type RichCompilerDiagnostic,
+} from "../debug/diagnostics"
 import {
     createCandidateManifest,
     getSortedCandidates,
@@ -18,14 +30,18 @@ import {
     injectSourceInlineBlock,
     isTailwindCssEntry,
 } from "../tailwind/source_inline"
+import { substituteTailwindest } from "../transform/substitutor"
 import { SourceCache } from "./cache"
+import { compileTailwindestSource } from "./compile_transform"
 
 export interface TailwindestViteOptions {
     include?: Array<string | RegExp>
     exclude?: Array<string | RegExp>
     mode?: "strict" | "loose"
     debug?: boolean
+    sourceMap?: boolean
     variantTableLimit?: number
+    debugFile?: string
     cssEntries?: Array<string | RegExp>
     merger?: MergerPolicy
 }
@@ -40,7 +56,10 @@ export interface CompilerContextInput {
 
 export interface TransformOutput {
     code: string
-    map: null
+    map: ReturnType<typeof substituteTailwindest>["map"]
+    candidates: string[]
+    diagnostics: RichCompilerDiagnostic[]
+    changed: boolean
 }
 
 const JS_RE = /\.[cm]?[jt]sx?$/
@@ -58,6 +77,7 @@ export class CompilerContext {
     private readonly dependencies = new Map<string, Set<string>>()
     private readonly reverseDependencies = new Map<string, Set<string>>()
     private readonly cssEntries = new Set<string>()
+    private readonly debugFiles = new Map<string, TailwindestDebugFile>()
     private lastInvalidatedManifestRevision = 0
 
     public constructor(input: CompilerContextInput) {
@@ -132,31 +152,86 @@ export class CompilerContext {
         this.cache.set(normalized, code, hash)
 
         if (!this.shouldTransformJs(normalized)) {
-            return { code, map: null }
+            return unchangedTransform(code)
         }
 
         const analysis = this.analyzeJs(normalized, code)
         this.recordDependencies(normalized, analysis.dependencies)
+        const compiled = compileTailwindestSource({
+            fileName: normalized,
+            code,
+            mode: this.options.mode ?? "strict",
+            variantTableLimit: this.options.variantTableLimit,
+            merger: this.options.merger ?? DEFAULT_MERGER,
+        })
+        const modeDiagnostics = diagnosticsForMode(
+            compiled.diagnostics,
+            this.options.mode ?? "strict"
+        )
+        if (modeDiagnostics.shouldFail) {
+            const first = modeDiagnostics.diagnostics[0]
+            throw new Error(
+                `${first?.code ?? "TAILWINDEST_COMPILE_FAILED"}: ${first?.message ?? "Tailwindest strict transform failed."}`
+            )
+        }
+        const transform = substituteTailwindest({
+            fileName: normalized,
+            code,
+            plans: compiled.plans,
+            cleanImports: true,
+            sourceMapMode: this.options.sourceMap ? "loose" : false,
+        })
+        const fallbackSpan = fullFileSpan(normalized, code)
+        const diagnostics: RichCompilerDiagnostic[] = [
+            ...richDiagnosticsForDebug(
+                analysis.diagnostics,
+                normalized,
+                fallbackSpan
+            ),
+            ...modeDiagnostics.diagnostics,
+            ...richDiagnosticsForDebug(
+                transform.diagnostics,
+                normalized,
+                fallbackSpan
+            ),
+        ]
+        const candidates = [
+            ...analysis.candidates,
+            ...compiled.candidates,
+            ...transform.candidates,
+        ]
         updateFileCandidates(this.manifest, normalized, {
             hash,
-            candidates: analysis.candidates,
-            diagnostics: analysis.diagnostics,
+            candidates,
+            diagnostics,
+        })
+        this.updateDebugFile(normalized, hash, {
+            replacements: compiled.debugReplacements,
+            diagnostics,
         })
 
-        return { code, map: null }
+        return {
+            code: transform.code,
+            map: transform.map,
+            candidates: transform.candidates,
+            diagnostics,
+            changed: transform.changed,
+        }
     }
 
     public removeFile(id: string): boolean {
         const normalized = normalizeCandidateFileId(id)
         this.cache.delete(normalized)
         this.clearDependencies(normalized)
+        this.debugFiles.delete(normalized)
+        this.writeDebugManifest()
         return removeFileCandidates(this.manifest, normalized)
     }
 
     public transformCss(code: string, id: string): TransformOutput {
         const normalized = normalizeCandidateFileId(id)
         if (!this.shouldTransformCss(normalized, code)) {
-            return { code, map: null }
+            return unchangedTransform(code)
         }
 
         this.registerCssEntry(normalized)
@@ -171,11 +246,26 @@ export class CompilerContext {
                 ? { ...sourceInlineInput, cssEntries: this.options.cssEntries }
                 : sourceInlineInput
         )
-        return { code: result.code, map: null }
+        this.writeDebugManifest()
+        return {
+            code: result.code,
+            map: null,
+            candidates: [],
+            diagnostics: [],
+            changed: result.code !== code,
+        }
     }
 
     public getManifestCandidates(): string[] {
         return getSortedCandidates(this.manifest)
+    }
+
+    public getDebugManifest(): TailwindestDebugManifest {
+        return createDebugManifest({
+            mode: this.options.mode ?? "strict",
+            files: [...this.debugFiles.values()],
+            candidates: this.getManifestCandidates(),
+        })
     }
 
     public registerCssEntry(id: string): void {
@@ -278,6 +368,38 @@ export class CompilerContext {
             candidates: [...new Set(candidates)].sort(),
             diagnostics: result.diagnostics,
             dependencies: result.dependencies,
+        }
+    }
+
+    private updateDebugFile(
+        id: string,
+        hash: string,
+        input: Pick<TailwindestDebugFile, "replacements" | "diagnostics">
+    ): void {
+        this.debugFiles.set(id, {
+            id,
+            hash,
+            replacements: input.replacements,
+            diagnostics: input.diagnostics,
+        })
+        this.writeDebugManifest()
+    }
+
+    private writeDebugManifest(): void {
+        if (!this.options.debug) {
+            return
+        }
+        const fileName =
+            this.options.debugFile ??
+            path.join(this.root, ".tailwindest", "debug-manifest.json")
+        try {
+            fsSync.mkdirSync(path.dirname(fileName), { recursive: true })
+            fsSync.writeFileSync(
+                fileName,
+                stringifyDebugManifest(this.getDebugManifest())
+            )
+        } catch {
+            // Virtual test roots and read-only build roots should not change codegen.
         }
     }
 
@@ -422,4 +544,35 @@ function isCssId(id: string): boolean {
 
 function hashCode(code: string): string {
     return crypto.createHash("sha1").update(code).digest("hex")
+}
+
+function richDiagnosticsForDebug(
+    diagnostics: CompilerDiagnostic[],
+    file: string,
+    fallbackSpan: { fileName: string; start: number; end: number }
+): RichCompilerDiagnostic[] {
+    return diagnostics.map((diagnostic) =>
+        "modeBehavior" in diagnostic &&
+        "file" in diagnostic &&
+        "span" in diagnostic
+            ? (diagnostic as RichCompilerDiagnostic)
+            : diagnosticWithSource(diagnostic, file, fallbackSpan)
+    )
+}
+
+function fullFileSpan(
+    fileName: string,
+    code: string
+): { fileName: string; start: number; end: number } {
+    return { fileName, start: 0, end: code.length }
+}
+
+function unchangedTransform(code: string): TransformOutput {
+    return {
+        code,
+        map: null,
+        candidates: [],
+        diagnostics: [],
+        changed: false,
+    }
 }
