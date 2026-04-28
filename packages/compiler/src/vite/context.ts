@@ -4,6 +4,7 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import * as ts from "typescript"
 import { createStaticAnalyzer } from "../analyzer/detector"
+import type { TailwindestCallKind, SourceSpan } from "../analyzer/symbols"
 import { createEvaluationEngine } from "../core/evaluator"
 import type { CompilerDiagnostic } from "../core/diagnostic_types"
 import type { MergerPolicy } from "../core/merger"
@@ -20,6 +21,7 @@ import {
 } from "../debug/diagnostics"
 import {
     createCandidateManifest,
+    getSortedExcludedCandidates,
     getSortedCandidates,
     normalizeCandidateFileId,
     removeFileCandidates,
@@ -34,16 +36,90 @@ import { substituteTailwindest } from "../transform/substitutor"
 import { SourceCache } from "./cache"
 import { compileTailwindestSource } from "./compile_transform"
 
+/**
+ * Configuration for the Tailwindest Vite integration.
+ *
+ * These options control both halves of the plugin pair: JavaScript/TypeScript
+ * compilation and Tailwind CSS `@source inline()` manifest injection.
+ *
+ * @public
+ */
 export interface TailwindestViteOptions {
+    /**
+     * Source id patterns that should be compiled. When omitted, all
+     * JavaScript/TypeScript module ids are eligible.
+     */
     include?: Array<string | RegExp>
+
+    /**
+     * Source id patterns that should never be compiled or used as CSS entries.
+     */
     exclude?: Array<string | RegExp>
+
+    /**
+     * Unsupported-value policy.
+     *
+     * - `"strict"` throws during transform when a call cannot be compiled
+     *   exactly.
+     * - `"loose"` preserves the runtime call and records a fallback diagnostic.
+     *
+     * @defaultValue `"strict"`
+     */
     mode?: "strict" | "loose"
+
+    /**
+     * Write `.tailwindest/debug-manifest.json` with replacement spans,
+     * generated text, candidates, and rich diagnostics.
+     *
+     * @defaultValue `false`
+     */
     debug?: boolean
+
+    /**
+     * Emit source maps for exact JavaScript replacements.
+     *
+     * @defaultValue `false`
+     */
     sourceMap?: boolean
+
+    /**
+     * Maximum static variant lookup-table size before the compiler reports
+     * `VARIANT_TABLE_LIMIT_EXCEEDED`.
+     */
     variantTableLimit?: number
+
+    /**
+     * Custom debug manifest path. When omitted, the plugin writes to
+     * `.tailwindest/debug-manifest.json` under the Vite project root.
+     */
     debugFile?: string
+
+    /**
+     * CSS ids that should receive a Tailwindest `@source inline()` block even
+     * when they do not contain a direct `@import "tailwindcss"` statement.
+     */
     cssEntries?: Array<string | RegExp>
+
+    /**
+     * Directories to pre-scan before the first CSS transform. When omitted,
+     * the plugin scans the Vite root `src` directory.
+     */
+    scanRoots?: string[]
+
+    /**
+     * Build-time class merge policy used while evaluating Tailwindest class
+     * strings.
+     */
     merger?: MergerPolicy
+
+    /**
+     * Collect standalone candidate-like string literals from transformed
+     * modules. Disable this for fixtures that intentionally keep expected
+     * strings next to assertions and rely only on compiler call analysis.
+     *
+     * @defaultValue `true`
+     */
+    collectStringLiteralCandidates?: boolean
 }
 
 export interface CompilerContextInput {
@@ -95,7 +171,7 @@ export class CompilerContext {
     public async preScan(): Promise<void> {
         const files = this.scanFiles
             ? await this.scanFiles()
-            : await scanDefaultSourceFiles(this.root)
+            : await scanDefaultSourceFiles(this.root, this.options.scanRoots)
         for (const file of files.sort()) {
             const normalized = normalizeCandidateFileId(file)
             const code = this.readFile
@@ -157,6 +233,30 @@ export class CompilerContext {
 
         const analysis = this.analyzeJs(normalized, code)
         this.recordDependencies(normalized, analysis.dependencies)
+        const fallbackSpan = fullFileSpan(normalized, code)
+        const analysisDiagnostics = richDiagnosticsForDebug(
+            analysis.diagnostics,
+            normalized,
+            fallbackSpan
+        )
+        const analysisModeDiagnostics = diagnosticsForMode(
+            analysisDiagnostics,
+            this.options.mode ?? "strict"
+        )
+        const strictAnalysisFailures =
+            (this.options.mode ?? "strict") === "strict"
+                ? analysisModeDiagnostics.diagnostics.filter(
+                      (item) =>
+                          item.code === "NOT_TAILWINDEST_SYMBOL" ||
+                          item.message.includes("Computed property key")
+                  )
+                : []
+        if (strictAnalysisFailures.length > 0) {
+            const first = strictAnalysisFailures[0]
+            throw new Error(
+                `${first?.code ?? "TAILWINDEST_ANALYZE_FAILED"}: ${first?.message ?? "Tailwindest strict analysis failed."}`
+            )
+        }
         const compiled = compileTailwindestSource({
             fileName: normalized,
             code,
@@ -181,13 +281,8 @@ export class CompilerContext {
             cleanImports: true,
             sourceMapMode: this.options.sourceMap ? "loose" : false,
         })
-        const fallbackSpan = fullFileSpan(normalized, code)
         const diagnostics: RichCompilerDiagnostic[] = [
-            ...richDiagnosticsForDebug(
-                analysis.diagnostics,
-                normalized,
-                fallbackSpan
-            ),
+            ...analysisModeDiagnostics.diagnostics,
             ...modeDiagnostics.diagnostics,
             ...richDiagnosticsForDebug(
                 transform.diagnostics,
@@ -203,6 +298,7 @@ export class CompilerContext {
         updateFileCandidates(this.manifest, normalized, {
             hash,
             candidates,
+            excludedCandidates: analysis.excludedCandidates,
             diagnostics,
         })
         this.updateDebugFile(normalized, hash, {
@@ -265,7 +361,12 @@ export class CompilerContext {
             mode: this.options.mode ?? "strict",
             files: [...this.debugFiles.values()],
             candidates: this.getManifestCandidates(),
+            excludedCandidates: this.getExcludedManifestCandidates(),
         })
+    }
+
+    public getExcludedManifestCandidates(): string[] {
+        return getSortedExcludedCandidates(this.manifest)
     }
 
     public registerCssEntry(id: string): void {
@@ -314,6 +415,7 @@ export class CompilerContext {
         code: string
     ): {
         candidates: string[]
+        excludedCandidates: string[]
         diagnostics: CompilerDiagnostic[]
         dependencies: string[]
     } {
@@ -325,6 +427,7 @@ export class CompilerContext {
         const result = analyzer.analyzeFile(id)
         const engine = createEvaluationEngine()
         const candidates: string[] = []
+        const excludedCandidates: string[] = []
 
         for (const call of result.calls) {
             const values = call.arguments.map((argument) => argument.value)
@@ -337,35 +440,64 @@ export class CompilerContext {
                     ).candidates
                 )
             } else if (call.kind === "def") {
-                candidates.push(
-                    ...engine.def(
-                        [values[0]] as never[],
-                        values.slice(1) as never[],
-                        this.options.merger ?? DEFAULT_MERGER,
-                        this.options
-                    ).candidates
+                const result = engine.def(
+                    [values[0]] as never[],
+                    values.slice(1) as never[],
+                    this.options.merger ?? DEFAULT_MERGER,
+                    this.options
+                )
+                candidates.push(...result.candidates)
+                excludedCandidates.push(
+                    ...collectStyleExclusions(
+                        values.slice(1),
+                        result.candidates
+                    )
                 )
             } else if (call.kind === "mergeProps") {
-                candidates.push(
-                    ...engine.mergeProps(
-                        values as never[],
-                        this.options.merger ?? DEFAULT_MERGER,
-                        this.options
-                    ).candidates
+                const result = engine.mergeProps(
+                    values as never[],
+                    this.options.merger ?? DEFAULT_MERGER,
+                    this.options
+                )
+                candidates.push(...result.candidates)
+                excludedCandidates.push(
+                    ...collectStyleExclusions(values, result.candidates)
                 )
             } else if (call.kind === "mergeRecord") {
-                candidates.push(
-                    ...engine.mergeRecord(values as never[]).candidates
+                const result = engine.mergeRecord(values as never[])
+                candidates.push(...result.candidates)
+                excludedCandidates.push(
+                    ...collectStyleExclusions(values, result.candidates)
                 )
             } else {
-                candidates.push(...collectCandidatesFromValues(values))
+                const toolCandidates = collectCandidatesFromToolCall(
+                    call.kind,
+                    values,
+                    engine
+                )
+                candidates.push(...toolCandidates)
+                excludedCandidates.push(
+                    ...collectExclusionsFromToolCall(
+                        call.kind,
+                        values,
+                        toolCandidates
+                    )
+                )
             }
         }
 
-        candidates.push(...collectCandidateStringLiterals(code))
+        if (this.options.collectStringLiteralCandidates !== false) {
+            candidates.push(
+                ...collectCandidateStringLiterals(
+                    code,
+                    result.calls.map((call) => call.span)
+                )
+            )
+        }
 
         return {
             candidates: [...new Set(candidates)].sort(),
+            excludedCandidates: [...new Set(excludedCandidates)].sort(),
             diagnostics: result.diagnostics,
             dependencies: result.dependencies,
         }
@@ -419,6 +551,146 @@ export class CompilerContext {
     }
 }
 
+function collectCandidatesFromToolCall(
+    kind: TailwindestCallKind,
+    values: unknown[],
+    engine: ReturnType<typeof createEvaluationEngine>
+): string[] {
+    if (kind === "style") {
+        return collectCandidatesFromStyles([values[0]], engine)
+    }
+    if (kind === "compose") {
+        return collectCandidatesFromStyles(values, engine)
+    }
+    if (kind === "toggle") {
+        const config = values[0] as
+            | {
+                  base?: unknown
+                  truthy?: unknown
+                  falsy?: unknown
+              }
+            | undefined
+        return collectCandidatesFromStyles(
+            [config?.base ?? {}, config?.truthy ?? {}, config?.falsy ?? {}],
+            engine
+        )
+    }
+    if (kind === "rotary") {
+        const config = values[0] as
+            | {
+                  base?: unknown
+                  variants?: Record<string, unknown>
+              }
+            | undefined
+        return collectCandidatesFromStyles(
+            [config?.base ?? {}, ...Object.values(config?.variants ?? {})],
+            engine
+        )
+    }
+    if (kind === "variants") {
+        const config = values[0] as
+            | {
+                  base?: unknown
+                  variants?: Record<string, Record<string, unknown>>
+              }
+            | undefined
+        return collectCandidatesFromStyles(
+            [
+                config?.base ?? {},
+                ...Object.values(config?.variants ?? {}).flatMap((axis) =>
+                    Object.values(axis)
+                ),
+            ],
+            engine
+        )
+    }
+
+    return collectCandidatesFromValues(values)
+}
+
+function collectExclusionsFromToolCall(
+    kind: TailwindestCallKind,
+    values: unknown[],
+    effectiveCandidates: string[]
+): string[] {
+    if (kind === "style") {
+        return collectStyleExclusions([values[0]], effectiveCandidates)
+    }
+    if (kind === "compose") {
+        return collectStyleExclusions(values, effectiveCandidates)
+    }
+    if (kind === "toggle") {
+        const config = values[0] as
+            | {
+                  base?: unknown
+                  truthy?: unknown
+                  falsy?: unknown
+              }
+            | undefined
+        return collectStyleExclusions(
+            [config?.base ?? {}, config?.truthy ?? {}, config?.falsy ?? {}],
+            effectiveCandidates
+        )
+    }
+    if (kind === "rotary") {
+        const config = values[0] as
+            | {
+                  base?: unknown
+                  variants?: Record<string, unknown>
+              }
+            | undefined
+        return collectStyleExclusions(
+            [config?.base ?? {}, ...Object.values(config?.variants ?? {})],
+            effectiveCandidates
+        )
+    }
+    if (kind === "variants") {
+        const config = values[0] as
+            | {
+                  base?: unknown
+                  variants?: Record<string, Record<string, unknown>>
+              }
+            | undefined
+        return collectStyleExclusions(
+            [
+                config?.base ?? {},
+                ...Object.values(config?.variants ?? {}).flatMap((axis) =>
+                    Object.values(axis)
+                ),
+            ],
+            effectiveCandidates
+        )
+    }
+    if (kind === "mergeProps" || kind === "mergeRecord") {
+        return collectStyleExclusions(values, effectiveCandidates)
+    }
+
+    return []
+}
+
+function collectStyleExclusions(
+    styles: unknown[],
+    effectiveCandidates: string[]
+): string[] {
+    const effective = new Set(effectiveCandidates)
+    return collectCandidatesFromValues(styles).filter(
+        (candidate) => !effective.has(candidate)
+    )
+}
+
+function collectCandidatesFromStyles(
+    styles: unknown[],
+    engine: ReturnType<typeof createEvaluationEngine>
+): string[] {
+    return [
+        ...new Set(
+            styles.flatMap(
+                (style) => engine.mergeRecord([style] as never[]).candidates
+            )
+        ),
+    ]
+}
+
 export function createCompilerContext(
     input: CompilerContextInput
 ): CompilerContext {
@@ -462,7 +734,10 @@ function collectCandidatesFromValue(
     }
 }
 
-function collectCandidateStringLiterals(code: string): string[] {
+function collectCandidateStringLiterals(
+    code: string,
+    ignoredSpans: SourceSpan[] = []
+): string[] {
     if (!code.includes("tailwindest") && !code.includes("createTools")) {
         return []
     }
@@ -483,6 +758,15 @@ function collectCandidateStringLiterals(code: string): string[] {
             ts.isStringLiteral(node) ||
             ts.isNoSubstitutionTemplateLiteral(node)
         ) {
+            const start = node.getStart(sourceFile)
+            const end = node.getEnd()
+            if (
+                ignoredSpans.some(
+                    (span) => start >= span.start && end <= span.end
+                )
+            ) {
+                return
+            }
             const text = node.text
             if (isCandidateLike(text)) {
                 candidates.push(...text.split(/\s+/).filter(isCandidateLike))
@@ -502,10 +786,20 @@ function isCandidateLike(value: string): boolean {
         : /[-:[\]]/.test(value) && !value.startsWith("#")
 }
 
-async function scanDefaultSourceFiles(root: string): Promise<string[]> {
-    const sourceRoot = path.join(root, "src")
+async function scanDefaultSourceFiles(
+    root: string,
+    scanRoots?: string[]
+): Promise<string[]> {
+    const sourceRoots =
+        scanRoots && scanRoots.length > 0
+            ? scanRoots.map((item) =>
+                  path.isAbsolute(item) ? item : path.resolve(root, item)
+              )
+            : [path.join(root, "src")]
     const files: string[] = []
-    await walk(sourceRoot, files).catch(() => undefined)
+    for (const sourceRoot of sourceRoots) {
+        await walk(sourceRoot, files).catch(() => undefined)
+    }
     return files
 }
 

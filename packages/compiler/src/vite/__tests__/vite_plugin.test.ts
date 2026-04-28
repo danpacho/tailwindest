@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
+import { optimizeVariants } from "../../core/variant_optimizer"
 import { createCompilerContext } from "../context"
 import { createHotUpdateHandler } from "../hmr"
 import { tailwindest } from "../index"
@@ -104,6 +105,83 @@ describe("tailwindest Vite plugin", () => {
         expect(css.code).toContain(`@source inline("px-4 text-emerald-600");`)
     })
 
+    it("injects not-inline exclusions for raw shorthand leaves unless another candidate owns them", () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        context.transformJs(
+            `import { createTools } from "tailwindest"
+             const tw = createTools()
+             export const cls = tw.style({
+                 dark: {
+                     backgroundColor: "bg-red-900",
+                     hover: { backgroundColor: "bg-red-950" },
+                 },
+                 backgroundColor: "bg-red-50",
+             }).class()`,
+            "/project/src/app.tsx"
+        )
+
+        const css = context.transformCss(
+            `@import "tailwindcss";`,
+            "/project/src/app.css"
+        ).code
+
+        expect(context.getManifestCandidates()).toEqual([
+            "bg-red-50",
+            "dark:bg-red-900",
+            "dark:hover:bg-red-950",
+        ])
+        expect(context.getDebugManifest().excludedCandidates).toEqual([
+            "bg-red-900",
+            "bg-red-950",
+        ])
+        expect(css).toContain(`@source not inline("bg-red-900 bg-red-950");`)
+
+        context.transformJs(
+            `import { createTools } from "tailwindest"
+             const tw = createTools()
+             export const cls = tw.join("bg-red-900")`,
+            "/project/src/explicit.tsx"
+        )
+
+        const nextCss = context.transformCss(
+            `@import "tailwindcss";`,
+            "/project/src/app.css"
+        ).code
+
+        expect(context.getDebugManifest().excludedCandidates).toEqual([
+            "bg-red-950",
+        ])
+        expect(nextCss).toContain(`@source not inline("bg-red-950");`)
+        expect(nextCss).not.toContain(`@source not inline("bg-red-900`)
+    })
+
+    it("injects the source bridge into Tailwind package CSS entries used by framework dev aggregators", () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        context.transformJs(
+            `import { createTools } from "tailwindest"
+             const tw = createTools()
+             export const cls = tw.style({
+                 dark: { backgroundColor: "bg-red-900" },
+                 backgroundColor: "bg-red-50",
+             }).class()`,
+            "/project/src/app.tsx"
+        )
+
+        const css = context.transformCss(
+            `@layer theme, base, components, utilities;`,
+            "/project/node_modules/tailwindcss/index.css"
+        ).code
+
+        expect(css).toContain(`@source inline("bg-red-50 dark:bg-red-900");`)
+        expect(css).toContain(`@source not inline("bg-red-900");`)
+    })
+
     it("returns compiled JS, source maps, and debug replacements for exact calls", () => {
         const context = createCompilerContext({
             root: "/project",
@@ -152,7 +230,7 @@ describe("tailwindest Vite plugin", () => {
             options: { mode: "strict" },
         })
         expect(() => strict.transformJs(code, "/project/src/app.ts")).toThrow(
-            /UNSUPPORTED_DYNAMIC_VALUE/
+            /UNRESOLVED_STATIC_VALUE|UNSUPPORTED_DYNAMIC_VALUE/
         )
 
         const loose = createCompilerContext({
@@ -168,6 +246,273 @@ describe("tailwindest Vite plugin", () => {
                 kind: "join",
                 generatedText: "",
                 fallback: true,
+            }),
+        ])
+    })
+
+    it("fails design-system strict negatives without browser fallback", () => {
+        const cases = [
+            {
+                name: "unknown dynamic class variable in tw.join(dynamicClass)",
+                code: [
+                    `import { createTools } from "tailwindest"`,
+                    `const tw = createTools()`,
+                    `declare const dynamicClass: string`,
+                    `export const cls = tw.join(dynamicClass)`,
+                ].join("\n"),
+                error: /UNRESOLVED_STATIC_VALUE|UNSUPPORTED_DYNAMIC_VALUE/,
+            },
+            {
+                name: "dynamic style object in tw.style(dynamicStyle).class()",
+                code: [
+                    `import { createTools } from "tailwindest"`,
+                    `const tw = createTools()`,
+                    `declare const dynamicStyle: Record<string, string>`,
+                    `export const cls = tw.style(dynamicStyle).class()`,
+                ].join("\n"),
+                error: /UNRESOLVED_STATIC_VALUE|UNSUPPORTED_DYNAMIC_VALUE/,
+            },
+            {
+                name: "runtime-generated variant table key",
+                code: [
+                    `import { createTools } from "tailwindest"`,
+                    `const tw = createTools()`,
+                    `declare const runtimeKey: string`,
+                    `export const cls = tw.variants({`,
+                    `  base: { display: "flex" },`,
+                    `  variants: { tone: { [runtimeKey]: { color: "text-blue-600" } } },`,
+                    `}).class({ tone: "primary" })`,
+                ].join("\n"),
+                error: /UNRESOLVED_STATIC_VALUE/,
+            },
+            {
+                name: "unproven receiver provenance",
+                code: [
+                    `import { createTools } from "tailwindest"`,
+                    `const fake = { join: (value: string) => value }`,
+                    `export const cls = fake.join("px-4")`,
+                ].join("\n"),
+                error: /NOT_TAILWINDEST_SYMBOL/,
+            },
+        ]
+
+        for (const item of cases) {
+            const context = createCompilerContext({
+                root: "/project",
+                options: { mode: "strict", debug: true },
+            })
+            expect(
+                () =>
+                    context.transformJs(
+                        item.code,
+                        `/project/src/${item.name}.ts`
+                    ),
+                item.name
+            ).toThrow(item.error)
+        }
+    })
+
+    it("fails strict mode when variant table size exceeds the configured limit", () => {
+        const result = optimizeVariants({
+            base: { display: "flex" },
+            variants: {
+                one: {
+                    a: { color: "text-a" },
+                    b: { color: "text-b" },
+                },
+                two: {
+                    c: { color: "text-c" },
+                    d: { color: "text-d" },
+                },
+            },
+            mode: "strict",
+            variantTableLimit: 4,
+        })
+
+        expect(result.exact).toBe(false)
+        expect(result.diagnostics).toEqual([
+            expect.objectContaining({
+                code: "VARIANT_TABLE_LIMIT_EXCEEDED",
+                severity: "error",
+            }),
+        ])
+    })
+
+    it("keeps loose runtime fallback, static manifest candidates, and debug diagnostics", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `declare const dynamicClass: string`,
+            `export const cls = tw.join("px-4", dynamicClass)`,
+        ].join("\n")
+        const context = createCompilerContext({
+            root: "/project",
+            options: { mode: "loose", debug: true },
+        })
+
+        const result = context.transformJs(code, "/project/src/loose.ts")
+        const manifest = context.getDebugManifest()
+
+        expect(result.changed).toBe(false)
+        expect(result.code).toContain(`tw.join("px-4", dynamicClass)`)
+        expect(manifest.candidates).toContain("px-4")
+        expect(manifest.files[0]?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNSUPPORTED_DYNAMIC_VALUE",
+                    modeBehavior: "loose-fallback",
+                }),
+            ])
+        )
+    })
+
+    it("loose unknown dynamic class preserves runtime call, static candidates, and fallback diagnostic", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `declare const dynamicClass: string`,
+            `export const cls = tw.join("px-4", dynamicClass)`,
+        ].join("\n")
+        const context = createCompilerContext({
+            root: "/project",
+            options: { mode: "loose", debug: true },
+        })
+
+        const result = context.transformJs(code, "/project/src/loose-join.ts")
+        const manifest = context.getDebugManifest()
+
+        expect(result.changed).toBe(false)
+        expect(result.code).toContain(`tw.join("px-4", dynamicClass)`)
+        expect(manifest.candidates).toContain("px-4")
+        expect(manifest.files[0]?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNSUPPORTED_DYNAMIC_VALUE",
+                    modeBehavior: "loose-fallback",
+                }),
+            ])
+        )
+    })
+
+    it("loose dynamic style object preserves runtime call, mixed static candidates, and fallback diagnostic", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `declare const dynamicStyle: Record<string, string>`,
+            `export const cls = tw.style(dynamicStyle).class("px-4")`,
+        ].join("\n")
+        const context = createCompilerContext({
+            root: "/project",
+            options: { mode: "loose", debug: true },
+        })
+
+        const result = context.transformJs(code, "/project/src/loose-style.ts")
+        const manifest = context.getDebugManifest()
+
+        expect(result.changed).toBe(false)
+        expect(result.code).toContain(`tw.style(dynamicStyle).class("px-4")`)
+        expect(manifest.candidates).toContain("px-4")
+        expect(manifest.files[0]?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNSUPPORTED_DYNAMIC_VALUE",
+                    modeBehavior: "loose-fallback",
+                }),
+            ])
+        )
+    })
+
+    it("loose runtime-generated variant key preserves runtime call, finite candidates, and fallback diagnostic", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `declare const runtimeKey: string`,
+            `export const cls = tw.variants({`,
+            `  base: { display: "flex" },`,
+            `  variants: { tone: { [runtimeKey]: { color: "text-blue-600" }, safe: { color: "text-red-600" } } },`,
+            `}).class({ tone: "safe" })`,
+        ].join("\n")
+        const context = createCompilerContext({
+            root: "/project",
+            options: { mode: "loose", debug: true },
+        })
+
+        const result = context.transformJs(
+            code,
+            "/project/src/loose-variant-key.ts"
+        )
+        const manifest = context.getDebugManifest()
+
+        expect(result.changed).toBe(false)
+        expect(result.code).toContain(`[runtimeKey]`)
+        expect(manifest.candidates).toEqual(
+            expect.arrayContaining(["text-blue-600", "text-red-600"])
+        )
+        expect(manifest.files[0]?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNSUPPORTED_DYNAMIC_VALUE",
+                    modeBehavior: "loose-fallback",
+                }),
+            ])
+        )
+    })
+
+    it("loose variant table overflow keeps every static candidate with warning fallback", () => {
+        const result = optimizeVariants({
+            base: { display: "flex" },
+            variants: {
+                one: {
+                    a: { color: "text-a" },
+                    b: { color: "text-b" },
+                },
+                two: {
+                    c: { color: "text-c" },
+                    d: { color: "text-d" },
+                },
+            },
+            mode: "loose",
+            variantTableLimit: 4,
+        })
+
+        expect(result.exact).toBe(false)
+        expect(result.classCandidates).toEqual(
+            expect.arrayContaining([
+                "flex",
+                "text-a",
+                "text-b",
+                "text-c",
+                "text-d",
+            ])
+        )
+        expect(result.diagnostics).toEqual([
+            expect.objectContaining({
+                code: "VARIANT_TABLE_LIMIT_EXCEEDED",
+                severity: "warning",
+            }),
+        ])
+    })
+
+    it("loose unproven receiver preserves non-tailwindest call and records provenance diagnostic", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const fake = { join: (value: string) => value }`,
+            `export const cls = fake.join("px-4")`,
+        ].join("\n")
+        const context = createCompilerContext({
+            root: "/project",
+            options: { mode: "loose", debug: true },
+        })
+
+        const result = context.transformJs(code, "/project/src/loose-fake.ts")
+        const manifest = context.getDebugManifest()
+
+        expect(result.code).toContain(`fake.join("px-4")`)
+        expect(manifest.files[0]?.replacements).toEqual([])
+        expect(manifest.files[0]?.diagnostics).toEqual([
+            expect.objectContaining({
+                code: "NOT_TAILWINDEST_SYMBOL",
+                modeBehavior: "strict-fails",
             }),
         ])
     })
