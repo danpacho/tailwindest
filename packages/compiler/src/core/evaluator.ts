@@ -6,9 +6,16 @@ import {
     type EvaluationResult,
     type MergerPolicy,
 } from "./merger"
+import { flattenStyleRecord } from "./style_normalizer"
 
 type NestedRecord = Record<string, unknown>
 
+/**
+ * Deterministic evaluator used by the compiler to flatten Tailwindest style
+ * objects and class lists at build time.
+ *
+ * @public
+ */
 export interface EvaluationEngine {
     flattenRecord(style: StaticStyleObject | null | undefined): string[]
     getClassName(style: StaticStyleObject | null | undefined): string
@@ -34,18 +41,22 @@ export interface EvaluationEngine {
     ): EvaluationResult<StaticStyleObject>
 }
 
+/**
+ * Flatten every string leaf in a Tailwindest style object.
+ *
+ * @public
+ */
 export function flattenRecord(
     style: StaticStyleObject | null | undefined
 ): string[] {
-    return Object.values(style ?? {})
-        .map((value) =>
-            typeof value !== "string"
-                ? flattenRecord(value as StaticStyleObject)
-                : value
-        )
-        .flat()
+    return flattenStyleRecord(style)
 }
 
+/**
+ * Deep-merge style objects using Tailwindest's build-time overwrite rules.
+ *
+ * @public
+ */
 export function deepMerge(styles: StaticStyleObject[]): StaticStyleObject {
     return styles.reduce<NestedRecord>((mergedObject, currentObject) => {
         if (!currentObject) return mergedObject
@@ -77,12 +88,22 @@ export function deepMerge(styles: StaticStyleObject[]): StaticStyleObject {
     }, {}) as StaticStyleObject
 }
 
+/**
+ * Convert a style object into a whitespace-separated Tailwind class string.
+ *
+ * @public
+ */
 export function getClassName(
     style: StaticStyleObject | null | undefined
 ): string {
     return flattenRecord(style).join(" ")
 }
 
+/**
+ * Create a deterministic evaluator instance.
+ *
+ * @public
+ */
 export function createEvaluationEngine(): EvaluationEngine {
     return {
         flattenRecord,

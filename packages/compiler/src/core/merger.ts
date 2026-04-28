@@ -1,5 +1,14 @@
 import type { CompilerDiagnostic } from "./diagnostic_types"
 
+/**
+ * Build-time class merge policy.
+ *
+ * `kind: "none"` preserves class order and performs no semantic Tailwind merge.
+ * Other policies must be deterministic at build time or they produce fallback
+ * diagnostics so runtime and production CSS cannot drift silently.
+ *
+ * @public
+ */
 export type MergerPolicy =
     | { kind: "none" }
     | { kind: "known"; name: "tailwind-merge"; configHash: string }
@@ -11,16 +20,36 @@ export type MergerPolicy =
       }
     | { kind: "unsupported"; reason: string }
 
+/**
+ * Evaluation mode used by low-level compiler APIs.
+ *
+ * @public
+ */
 export type EvaluationMode = "strict" | "loose"
 
+/**
+ * Options shared by class merge and evaluation helpers.
+ *
+ * @public
+ */
 export interface EvaluationOptions {
     mode?: EvaluationMode
 }
 
+/**
+ * Reason a value was preserved for runtime fallback in loose mode.
+ *
+ * @public
+ */
 export interface EvaluationFallback {
     reason: string
 }
 
+/**
+ * Deterministic evaluation result returned by build-time helpers.
+ *
+ * @public
+ */
 export interface EvaluationResult<T> {
     value: T
     candidates: string[]
@@ -31,6 +60,11 @@ export interface EvaluationResult<T> {
 
 type MergerClassValue = string | readonly MergerClassValue[]
 
+/**
+ * Split a class string into non-empty Tailwind candidate tokens.
+ *
+ * @public
+ */
 export function candidatesFromClassName(className: string): string[] {
     return className
         .split(" ")
@@ -38,6 +72,11 @@ export function candidatesFromClassName(className: string): string[] {
         .filter((token) => token.length > 0)
 }
 
+/**
+ * Deterministically join class tokens without semantic conflict resolution.
+ *
+ * @public
+ */
 export function defaultMerge(classList: readonly string[]): string {
     return classList
         .flatMap((token) => token.split(" "))
@@ -47,6 +86,11 @@ export function defaultMerge(classList: readonly string[]): string {
         .trim()
 }
 
+/**
+ * Evaluate a class list with a merge policy and return candidates/diagnostics.
+ *
+ * @public
+ */
 export function evaluateMergerPolicy(
     classList: readonly MergerClassValue[],
     policy: MergerPolicy,

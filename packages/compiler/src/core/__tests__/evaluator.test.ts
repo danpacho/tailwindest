@@ -46,7 +46,7 @@ describe("evaluation engine runtime parity", () => {
             "true-class",
             "false-class",
             "hover:text-blue-500",
-            "focus:ring-2",
+            "hover:focus:ring-2",
         ])
     })
 
@@ -117,18 +117,105 @@ describe("evaluation engine runtime parity", () => {
         })
     })
 
-    it("getClassName matches runtime byte-for-byte and treats class tokens as opaque", () => {
+    it("getClassName prefixes nested Tailwind variant keys", () => {
+        const style = {
+            dark: {
+                backgroundColor: "bg-red-900",
+                hover: {
+                    backgroundColor: "bg-red-950",
+                },
+            },
+            backgroundColor: "bg-red-50",
+        }
+
+        expect(getClassName(style)).toBe(Styler.getClassName(style))
+        expect(getClassName(style)).toBe(
+            "dark:bg-red-900 dark:hover:bg-red-950 bg-red-50"
+        )
+    })
+
+    it("getClassName preserves explicit prefixes, completes partial prefixes, and ignores unknown grouping keys", () => {
         const style = {
             background: "bg-[#123456]",
             width: "w-[calc(100%-1rem)]",
             custom: "bg-(--my-color)",
-            variant: "dark:hover:sm:bg-red-500",
+            dark: {
+                backgroundColor: "dark:bg-red-900",
+                hover: {
+                    backgroundColor: "hover:bg-red-950",
+                },
+            },
+            surface: {
+                backgroundColor: "bg-white",
+            },
+            md: {
+                hover: {
+                    color: "text-blue-600",
+                },
+            },
+            "@sm": {
+                padding: ["px-4", ["py-2"]],
+            },
+            "[&>*]": {
+                margin: "mt-2",
+            },
             empty: {},
         }
 
         expect(getClassName(style)).toBe(Styler.getClassName(style))
         expect(getClassName(style)).toBe(
-            "bg-[#123456] w-[calc(100%-1rem)] bg-(--my-color) dark:hover:sm:bg-red-500"
+            "bg-[#123456] w-[calc(100%-1rem)] bg-(--my-color) dark:bg-red-900 dark:hover:bg-red-950 bg-white md:hover:text-blue-600 @sm:px-4 @sm:py-2 [&>*]:mt-2"
+        )
+    })
+
+    it("getClassName matches runtime for extended, arbitrary, group, peer, and legacy explicit variant chains", () => {
+        const style = {
+            "*": {
+                color: "text-red-600",
+            },
+            "max-sm": {
+                display: "hidden",
+            },
+            before: {
+                content: "content-['']",
+            },
+            "aria-expanded": {
+                display: "block",
+            },
+            "data-[state=open]": {
+                color: "text-blue-600",
+            },
+            group: {
+                hover: {
+                    backgroundColor: "bg-blue-500",
+                },
+            },
+            peer: {
+                focus: {
+                    color: "text-sky-600",
+                },
+            },
+            dark: {
+                group: {
+                    hover: {
+                        backgroundColor: "bg-blue-500",
+                    },
+                },
+            },
+            legacy: {
+                "*": {
+                    "2xl": {
+                        "@2xl": {
+                            padding: "**:*:2xl:3xl:4xl:@2xl:px-1000",
+                        },
+                    },
+                },
+            },
+        }
+
+        expect(getClassName(style)).toBe(Styler.getClassName(style))
+        expect(getClassName(style)).toBe(
+            "*:text-red-600 max-sm:hidden before:content-[''] aria-expanded:block data-[state=open]:text-blue-600 group-hover:bg-blue-500 peer-focus:text-sky-600 dark:group-hover:bg-blue-500 **:*:2xl:3xl:4xl:@2xl:px-1000"
         )
     })
 

@@ -46,6 +46,7 @@ describe("debug manifest", () => {
                 },
             ],
             candidates: ["px-4", "flex"],
+            excludedCandidates: ["raw-flex"],
         })
 
         expect(stringifyDebugManifest(manifest)).toMatchInlineSnapshot(`
@@ -97,6 +98,9 @@ describe("debug manifest", () => {
             "candidates": [
               "flex",
               "px-4"
+            ],
+            "excludedCandidates": [
+              "raw-flex"
             ]
           }
           "
@@ -116,6 +120,7 @@ describe("debug manifest", () => {
                 },
             ],
             candidates: ["flex", "px-4"],
+            excludedCandidates: [],
         })
 
         await writeDebugManifest({
@@ -154,12 +159,14 @@ describe("debug manifest", () => {
                 },
             ],
             candidates: ["flex", "px-4"],
+            excludedCandidates: [],
         })
 
         stringifyDebugManifest(manifest)
 
         expect(generatedCode).toBe('export const cls = "flex px-4"')
         expect(manifest.candidates).toEqual(["flex", "px-4"])
+        expect(manifest.excludedCandidates).toEqual([])
         expect(manifest.files[0]?.replacements[0]).toMatchObject({
             kind: "style",
             originalSpan: { fileName: "/src/app.tsx", start: 20, end: 54 },

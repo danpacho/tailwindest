@@ -1,3 +1,11 @@
+/**
+ * Stable diagnostic code emitted by the Tailwindest compiler.
+ *
+ * Codes are designed for CI gates and debug tooling. Treat unknown future codes
+ * as compiler diagnostics that should be displayed to users.
+ *
+ * @public
+ */
 export type CompilerDiagnosticCode =
     | "UNSUPPORTED_MERGER"
     | "NON_DETERMINISTIC_MERGER"
@@ -18,8 +26,22 @@ export type CompilerDiagnosticCode =
     | "TAILWIND_SOURCE_INJECTION_FAILED"
     | "HMR_INVALIDATION_UNCERTAIN"
 
+/**
+ * Severity level attached to every compiler diagnostic.
+ *
+ * @public
+ */
 export type CompilerDiagnosticSeverity = "error" | "warning" | "info"
 
+/**
+ * Minimal diagnostic shape shared by the core compiler, Vite integration, and
+ * debug manifest.
+ *
+ * Rich debug diagnostics add source file and span information on top of this
+ * base shape.
+ *
+ * @public
+ */
 export interface CompilerDiagnostic {
     code: CompilerDiagnosticCode
     message: string

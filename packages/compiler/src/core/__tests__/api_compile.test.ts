@@ -256,6 +256,62 @@ describe("compileTailwindestCall API surface", () => {
         ])
     })
 
+    it("compiles nested variant style shorthand into prefixed class candidates", () => {
+        const style = {
+            dark: {
+                backgroundColor: "bg-red-900",
+                hover: {
+                    backgroundColor: "bg-red-950",
+                },
+            },
+            backgroundColor: "bg-red-50",
+        }
+        const result = compileTailwindestCall({
+            kind: "style.class",
+            span,
+            style: { kind: "static", value: style },
+            extraClass: [],
+        })
+
+        expect(result.exact).toBe(true)
+        expect(evaluateExpression(result.generated.expression)).toBe(
+            "dark:bg-red-900 dark:hover:bg-red-950 bg-red-50"
+        )
+        expect(result.candidates).toEqual([
+            "dark:bg-red-900",
+            "dark:hover:bg-red-950",
+            "bg-red-50",
+        ])
+    })
+
+    it("compiles extended group and arbitrary nested variant candidates", () => {
+        const style = {
+            group: {
+                hover: {
+                    backgroundColor: "bg-blue-500",
+                },
+            },
+            "data-[state=open]": {
+                color: "text-blue-600",
+            },
+        }
+        const result = compileTailwindestCall({
+            kind: "style.class",
+            span,
+            style: { kind: "static", value: style },
+            extraClass: [],
+        })
+
+        expect(result.exact).toBe(true)
+        expect(evaluateExpression(result.generated.expression)).toBe(
+            "group-hover:bg-blue-500 data-[state=open]:text-blue-600"
+        )
+        expect(result.candidates).toEqual([
+            "group-hover:bg-blue-500",
+            "data-[state=open]:text-blue-600",
+        ])
+    })
+
     it("compiles tw.style(obj).style(...extra) static object output and candidates", () => {
         const result = compileTailwindestCall({
             kind: "style.style",

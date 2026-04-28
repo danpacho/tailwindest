@@ -7,6 +7,11 @@ import {
     type TailwindestMode,
 } from "./diagnostics"
 
+/**
+ * One source replacement recorded in the debug manifest.
+ *
+ * @public
+ */
 export interface TailwindestDebugReplacement {
     kind: string
     originalSpan: SourceSpan
@@ -15,6 +20,11 @@ export interface TailwindestDebugReplacement {
     fallback: boolean
 }
 
+/**
+ * Per-file debug data emitted by the compiler.
+ *
+ * @public
+ */
 export interface TailwindestDebugFile {
     id: string
     hash: string
@@ -22,17 +32,28 @@ export interface TailwindestDebugFile {
     diagnostics: RichCompilerDiagnostic[]
 }
 
+/**
+ * Stable debug artifact written by the Vite plugin when `debug: true`.
+ *
+ * The manifest records generated replacements, fallback diagnostics, the exact
+ * Tailwind candidate set, and effective `@source not inline()` exclusions that
+ * must be reflected in the CSS build.
+ *
+ * @public
+ */
 export interface TailwindestDebugManifest {
     version: 1
     mode: TailwindestMode
     files: TailwindestDebugFile[]
     candidates: string[]
+    excludedCandidates: string[]
 }
 
 export interface CreateDebugManifestInput {
     mode: TailwindestMode
     files: TailwindestDebugFile[]
     candidates: string[]
+    excludedCandidates?: string[]
 }
 
 export interface WriteDebugManifestInput {
@@ -57,6 +78,7 @@ export function createDebugManifest(
             }))
             .sort((left, right) => left.id.localeCompare(right.id)),
         candidates: normalizeCandidates(input.candidates),
+        excludedCandidates: normalizeCandidates(input.excludedCandidates ?? []),
     }
 }
 

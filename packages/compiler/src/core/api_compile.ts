@@ -55,26 +55,53 @@ import {
     variantKey,
 } from "./variant_optimizer"
 
+/**
+ * Compile input wrapper for a value proven static before code generation.
+ *
+ * @public
+ */
 export type StaticCompileValue<T = unknown> = {
     kind: "static"
     value: T
 }
 
+/**
+ * Compile input wrapper for a dynamic expression that can still be represented
+ * safely in generated lookup code.
+ *
+ * @public
+ */
 export type DynamicExpression = {
     kind: "dynamic"
     expression: string
 }
 
+/**
+ * Compile input wrapper for a value that cannot be compiled exactly.
+ *
+ * @public
+ */
 export type UnsupportedCompileValue = {
     kind: "unsupported"
     reason: string
 }
 
+/**
+ * Value channel accepted by the low-level per-call compiler API.
+ *
+ * @public
+ */
 export type CompileValue<T = unknown> =
     | StaticCompileValue<T>
     | DynamicExpression
     | UnsupportedCompileValue
 
+/**
+ * Dynamic variant prop expressions that can be lowered into deterministic
+ * lookup tables.
+ *
+ * @public
+ */
 export interface DynamicVariantProps {
     kind: "dynamic-variant-props"
     entries: Array<{
@@ -83,11 +110,24 @@ export interface DynamicVariantProps {
     }>
 }
 
+/**
+ * Variant props accepted by `variants.class` and `variants.style` compilation.
+ *
+ * @public
+ */
 export type VariantPropsValue =
     | StaticCompileValue<Record<string, unknown>>
     | DynamicVariantProps
     | UnsupportedCompileValue
 
+/**
+ * Low-level representation of one Tailwindest API call.
+ *
+ * Integrations normally use `compile()` or the Vite plugin. This union is
+ * exported for tool authors that already have their own AST extraction layer.
+ *
+ * @public
+ */
 export type ApiCompileInput =
     | {
           kind: "style.class"
@@ -231,6 +271,11 @@ export type ApiCompileInput =
           styles: CompileValue<StaticStyleObject>[]
       }
 
+/**
+ * Result of compiling a single Tailwindest API call.
+ *
+ * @public
+ */
 export interface ApiCompileResult {
     exact: boolean
     generated: GeneratedExpression
@@ -239,6 +284,14 @@ export interface ApiCompileResult {
     diagnostics: CompilerDiagnostic[]
 }
 
+/**
+ * Compile one already-extracted Tailwindest call.
+ *
+ * The result contains generated JavaScript, Tailwind candidates, diagnostics,
+ * and an optional replacement plan. It does not parse source text.
+ *
+ * @public
+ */
 export function compileTailwindestCall(
     input: ApiCompileInput
 ): ApiCompileResult {

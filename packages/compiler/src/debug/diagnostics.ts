@@ -5,13 +5,31 @@ import type {
     CompilerDiagnosticSeverity,
 } from "../core/diagnostic_types"
 
+/**
+ * Compiler mode used by debug manifests and diagnostic filtering.
+ *
+ * @public
+ */
 export type TailwindestMode = "strict" | "loose"
 
+/**
+ * Mode behavior attached to rich diagnostics.
+ *
+ * @public
+ */
 export type DiagnosticModeBehavior =
     | "strict-fails"
     | "loose-fallback"
     | "informational"
 
+/**
+ * Diagnostic shape written to debug manifests.
+ *
+ * Every debug diagnostic has source location data so dev, debug, and build
+ * traces are reproducible from emitted artifacts.
+ *
+ * @public
+ */
 export interface RichCompilerDiagnostic extends CompilerDiagnostic {
     severity: CompilerDiagnosticSeverity
     modeBehavior: DiagnosticModeBehavior

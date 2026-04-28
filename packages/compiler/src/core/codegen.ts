@@ -1,3 +1,11 @@
+/**
+ * Runtime-free JavaScript expression emitted by the low-level compiler.
+ *
+ * `declarations` contains deterministic helper declarations that must appear
+ * before `expression` when a lookup table is needed.
+ *
+ * @public
+ */
 export interface GeneratedExpression {
     declarations: string[]
     expression: string
