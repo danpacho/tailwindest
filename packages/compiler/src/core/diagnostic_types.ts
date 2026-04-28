@@ -14,8 +14,11 @@ export type CompilerDiagnosticCode =
     | "OVERLAPPING_REPLACEMENT"
     | "SOURCE_MAP_FAILED"
     | "IMPORT_CLEANUP_FAILED"
+    | "VARIANT_TABLE_LIMIT_EXCEEDED"
+    | "TAILWIND_SOURCE_INJECTION_FAILED"
+    | "HMR_INVALIDATION_UNCERTAIN"
 
-export type CompilerDiagnosticSeverity = "error" | "warning"
+export type CompilerDiagnosticSeverity = "error" | "warning" | "info"
 
 export interface CompilerDiagnostic {
     code: CompilerDiagnosticCode

@@ -3,9 +3,16 @@ export const compile = () => {
 }
 
 export * from "./core/diagnostic_types"
+export * from "./core/api_compile"
+export * from "./core/codegen"
 export * from "./core/evaluator"
 export * from "./core/merger"
 export * from "./core/static_value"
+export * from "./core/styler_model"
+export * from "./core/variant_optimizer"
+export * from "./debug/debug_manifest"
+export * from "./debug/diagnostics"
+export * from "./debug/reporting"
 export * from "./analyzer/dependency_graph"
 export * from "./analyzer/detector"
 export * from "./analyzer/lexical_gate"
