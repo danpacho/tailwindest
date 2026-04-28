@@ -5,9 +5,20 @@
     "type": "module",
     "main": "dist/index.mjs",
     "types": "dist/index.d.mts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.mts",
+            "import": "./dist/index.mjs"
+        },
+        "./vite": {
+            "types": "./dist/vite/index.d.mts",
+            "import": "./dist/vite/index.mjs"
+        }
+    },
     "scripts": {
-        "build": "tsup",
+        "build": "tsup && node -e \"const fs=require('node:fs'); for (const file of ['dist/index','dist/vite/index']) if (fs.existsSync(file+'.d.ts')) fs.copyFileSync(file+'.d.ts', file+'.d.mts')\"",
         "test": "vitest run",
+        "e2e:vite-tailwind-v4": "vitest run e2e/vite-tailwind-v4",
         "dev": "tsup --watch"
     },
     "dependencies": {
@@ -15,8 +26,11 @@
         "create-tailwind-type": "workspace:*"
     },
     "devDependencies": {
+        "@tailwindcss/vite": "^4.2.4",
         "tsup": "^8.2.0",
         "typescript": "^5.5.0",
+        "tailwindcss": "^4.2.4",
+        "vite": "^8.0.10",
         "vitest": "^2.0.0"
     }
 }
