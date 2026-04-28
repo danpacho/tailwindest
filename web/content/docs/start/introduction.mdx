@@ -1,0 +1,136 @@
+---
+title: Introduction
+description: Introduction to tailwindest.
+---
+
+<br />
+
+![Tailwindest Banner](/images/tailwindest-banner.png)
+
+Tailwindest is a lightweight and fast **className generation library** only for tailwindcss.
+With type safety, maintainable class names, and maximized reusable style designs,
+you can make more robust products.
+
+## Why not use tailwindcss directly?
+
+Tailwindest builds on top of tailwindcss to provide a more robust styling solution. It introduces a type-safe API for defining styles, making it easier to work with complex designs.
+
+## Define re-usable styles
+
+With Tailwindest, you can define reusable styles that can be easily applied across your components. This helps to maintain consistency and reduces duplication in your code.
+
+## Elegant conditional styling
+
+### 1. Toggle
+
+![toggle concept](/images/toggle.png)
+
+```ts /toggle/ /truthy/ /falsy/
+const themeBtn = tw.toggle({
+    base: {}, //    base style definition
+    truthy: {}, //  dark mode style
+    falsy: {}, //   light mode style
+})
+```
+
+```tsx /isDarkMode/
+const ThemeBtn = ({ children }) => {
+    const [isDarkMode, setIsDarkMode] = useState(false)
+
+    return <button className={themeBtn.class()(isDarkMode)}>{children}</button>
+}
+```
+
+### 2. Rotary
+
+![rotary concept](/images/rotary.png)
+
+```tsx /default/ /success/ /error/ /pending/
+const button = tw.rotary({
+    base: {}, //    base style definition
+    default: {}, // default style
+    success: {}, // success style
+    error: {}, //   error style
+    pending: {}, // pending style
+})
+```
+
+```tsx
+const Button = ({
+    children,
+    type = "default",
+}: {
+    children: ReactNode
+    type: GetVariants<typeof btn>
+}) => {
+    return <button className={button.class()(type)}>{children}</button>
+}
+```
+
+### 3. Variants
+
+`variants` are **combinations of rotary switches**
+
+![variants concept](/images/variants.png)
+
+```tsx /type/ /size/ {5-8, 11-13}
+const button = tw.variants({
+    base: {},
+    variants: {
+        type: {
+            default: {},
+            success: {},
+            error: {},
+            pending: {},
+        },
+        size: {
+            sm: {},
+            md: {},
+            lg: {},
+        },
+    },
+})
+```
+
+```tsx /className/
+interface BtnProps extends GetVariants<typeof btn> {
+    children: ReactNode
+}
+const Btn = ({ children, type = "default", size = "md" }) => (
+    <button
+        className={btn.class({
+            type,
+            size,
+        })}
+    >
+        {children}
+    </button>
+)
+```
+
+## What is pros and cons?
+
+### Pros
+
+1.  **Type Safety**
+2.  **Reusability**
+3.  **Maintainability**
+
+### Cons
+
+1.  Takes a little longer to write style
+2.  Verbose than original tailwind
+
+### Conclusion
+
+<Callout>
+1.  **Short `className`**: `inline-class`
+2.  **Complex & Reusable `className`**: tailwindest
+
+</Callout>
+The great thing about tailwind is that **it makes it quick and easy to get your product** done. But it introduces new problems: **readability** and **maintainability**.
+In contrast, tailwindest can't get your product done any faster than regular tailwind. It **specializes in designing products that are easy to refactor and robust style**.
+
+Now just combine the best of both worlds
+
+If you apply tailwindest in the right circumstances, you can build a much more robust product with tailwind.

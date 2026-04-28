@@ -13,14 +13,12 @@ await fs.rm(path.join(fixtureRoot, ".tailwindest"), {
     force: true,
 })
 
-const files = await walk(sourceRoot)
-const jsFiles = files.filter((file) => /\.[cm]?[jt]sx?$/.test(file))
-const cssFiles = files.filter((file) => file.endsWith(".css"))
+const appFiles = await walk(sourceRoot)
 const context = createCompilerContext({
     root: fixtureRoot,
     command: "build",
     options: {
-        include: [/src\/app\/.*\.[cm]?[jt]sx?$/],
+        include: [/next-tailwind-v4\/src\/app\/.*\.[cm]?[jt]sx?$/],
         cssEntries: [/app\/globals\.css$/],
         mode: "strict",
         debug: true,
@@ -28,7 +26,7 @@ const context = createCompilerContext({
     },
 })
 
-for (const file of jsFiles) {
+for (const file of appFiles.filter((item) => /\.[cm]?[jt]sx?$/.test(item))) {
     const relative = path.relative(sourceRoot, file)
     const output = path.join(outputRoot, relative)
     await fs.mkdir(path.dirname(output), { recursive: true })
@@ -36,7 +34,7 @@ for (const file of jsFiles) {
     await fs.writeFile(output, result.code)
 }
 
-for (const file of cssFiles) {
+for (const file of appFiles.filter((item) => item.endsWith(".css"))) {
     const relative = path.relative(sourceRoot, file)
     const output = path.join(outputRoot, relative)
     await fs.mkdir(path.dirname(output), { recursive: true })

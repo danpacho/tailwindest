@@ -1,0 +1,18 @@
+{
+    "title": "API References",
+    "defaultOpen": true,
+    "pages": [
+        "createtools",
+        "style",
+        "def",
+        "join",
+        "toggle",
+        "rotary",
+        "variants",
+        "mergeprops",
+        "mergerecord",
+        "createtailwindest",
+        "createtailwindliteral",
+        "getvariants"
+    ]
+}
