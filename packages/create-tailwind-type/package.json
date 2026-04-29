@@ -1,5 +1,5 @@
 {
-    "name": "create-tailwind-type",
+    "name": "@tailwindest/create-tailwind-type",
     "version": "1.0.9",
     "description": "Type generator for tailwindcss",
     "type": "module",

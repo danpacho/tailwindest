@@ -1,5 +1,5 @@
 {
-    "name": "css-transformer",
+    "name": "@tailwindest/css-transformer",
     "version": "0.0.0",
     "private": true,
     "description": "Tailwindest CSS Transformer",
