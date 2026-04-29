@@ -1,9 +1,7 @@
 ---
-title: CSS Transformer CLI
+title: css-transformer CLI
 description: Automate your migration to Tailwindest with the CSS Transformer CLI.
 ---
-
-# CSS Transformer CLI
 
 The **CSS Transformer CLI** is a powerful tool designed to automate the conversion of standard Tailwind CSS class strings into type-safe **Tailwindest** objects. It helps you migrate existing codebases or clean up large class strings into structured, maintainable styles.
 
@@ -35,16 +33,16 @@ npx @tailwindest/css-transformer src/pages --recursive
 
 ## Features
 
-### ✨ Zero-Config Migration
+### Zero-Config Migration
 The CLI intelligently searches for your `tailwindest` definition file (e.g., `tailwind.ts`) to automatically determine your **namespace identifier** and **import path**. You don't have to manually configure them for every run.
 
-### 🚀 Smart Auto-Import
+### Smart Auto-Import
 When transforming files, the CLI detects if the necessary `tailwindest` import is present. If missing, it automatically inserts the correct `import` statement at the top of your file.
 
-### 🛡️ Source-Safe Transformation
+### Source-Safe Transformation
 Using advanced AST (Abstract Syntax Tree) traversal, the transformer ensures that your code logic remains untouched. It only modifies the class strings it confidently identifies.
 
-### 🎨 Type-Safe Output
+### Type-Safe Output
 The generated objects are perfectly compatible with `tailwindest`, providing full autocomplete and type validation for your newly transformed styles.
 
 ## Options
@@ -92,5 +90,4 @@ const style = tw.style({
 
 ---
 
-> [!TIP]
 > Always run with `--dry-run` first to verify the transformation results before applying them to your source code.

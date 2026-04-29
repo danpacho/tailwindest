@@ -1,5 +1,5 @@
 ---
-title: create-tailwind-type
+title: create-tailwind-type CLI
 description: Documentation for the create-tailwind-type CLI tool.
 ---
 
@@ -14,30 +14,13 @@ This allows you to use all of your project's Tailwind CSS classes and variants w
 npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
 ```
 
-<Callout type="error" title="Requires Tailwind CSS v4.0.0 or higher.">
+<Callout type="info" title="Type Generation Result">
+If you are using tailwindcss >= 4.0, then it will correctly create type-def based on your tailwind version.
+
+But if you are not using tailwind v4, then it will create latest version of tailwind type-set.
 </Callout>
 ---
 
-### Usage Examples
-
-<Cards>
-    <Card title="Use custom plugins">
-        You might need to change the base directory to
-        `node_modules/tailwindcss` for your own project. ```bash npx
-        create-tailwind-type -b node_modules/tailwindcss ```
-    </Card>
-    <Card title="Generate exact variants">
-        This will generate exact variants instead of soft variants. This can
-        slowdown the TypeScript language server if you use it directly.
-        Importing subtypes will be fine. ```bash npx create-tailwind-type -S ```
-    </Card>
-    <Card title="Change output filename">
-        This will generate types in the `src/types/tailwind.d.ts` file. ```bash
-        npx create-tailwind-type -f src/types/tailwind.d.ts ```
-    </Card>
-</Cards>
-
----
 
 ## CLI Options
 

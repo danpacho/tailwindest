@@ -4,15 +4,14 @@ description: Build Typesafe Tailwindcss Product
 ---
 
 <section className="tw-hero">
-    <div className="tw-eyebrow">Tailwindest v3</div>
-    <h1 className="tw-hero-title">Tailwindest</h1>
+    <h1 className="tw-hero-title">
+        Tailwind<span className="tw-hero-title-accent">est</span>
+    </h1>
     <div className="tw-hero-copy">
-        A lightweight and fast className generation library only for Tailwind CSS.
-        Build type-safe, maintainable class names and reusable style systems for
-        robust products.
+        Build type-safe, production grade tailwind stack software.
     </div>
     <div className="tw-actions">
-        <a className="tw-btn tw-btn-primary" href="/start/introduction">
+        <a className="tw-btn tw-btn-primary" href="/setup">
             <span>Get Started</span>
         </a>
         <a className="tw-btn tw-btn-ghost" href="https://github.com/danpacho/tailwindest">
@@ -24,19 +23,13 @@ description: Build Typesafe Tailwindcss Product
 <h2 className="tw-section-heading">Features</h2>
 
 <Cards>
-    <Card title="First Class Type Safety" href="/create-tailwind-type">
+    <Card title="Type Safety" href="/create-tailwind-type">
         Generate your own type definition using `create-tailwind-type`.
     </Card>
-    <Card title="Fully Customizable" href="/recipe/customize">
-        Generate type definitions from your own Tailwind CSS configuration.
+    <Card title="Compiled Styles" href="/compiler">
+        Enhance DX, optimize classnames at build-time.
     </Card>
-    <Card title="Variants based" href="/recipe/conditional-styling">
+    <Card title="Conditional Styling" href="/recipe/conditional-styling">
         Use `variants` for modern conditional styling approaches.
-    </Card>
-    <Card title="Performant" href="/start/benefits">
-        Style operations are optimized and reusable styles are cached by default.
-    </Card>
-    <Card title="Maximized Reusability" href="/recipe/styling">
-        Reuse design primitives by declaring styles as reusable objects.
     </Card>
 </Cards>
