@@ -1,93 +1,306 @@
 ---
-title: css-transformer CLI
-description: Automate your migration to Tailwindest with the CSS Transformer CLI.
+title: CLI css-transformer
+description: Migrate Tailwind class strings to Tailwindest object styles.
 ---
 
-The **CSS Transformer CLI** is a powerful tool designed to automate the conversion of standard Tailwind CSS class strings into type-safe **Tailwindest** objects. It helps you migrate existing codebases or clean up large class strings into structured, maintainable styles.
+`@tailwindest/css-transformer` is a migration tool. It rewrites supported
+Tailwind class-string patterns into Tailwindest object-style calls, while
+preserving source code when exact conversion is not proven.
 
-## Installation
+Use it when you are moving an existing Tailwind codebase from `className`,
+`cn`, `clsx`, `classNames`, or `cva` strings into Tailwindest styles.
 
-You can run the transformer directly using `npx`:
+## Install
 
-```bash
-npx @tailwindest/css-transformer <target> [options]
-```
-
-Or install it globally:
-
-```bash
-npm install -g @tailwindest/css-transformer
-```
-
-## Basic Usage
-
-To transform a specific file or directory:
+Run the transformer directly:
 
 ```bash
-# Transform a single file
-npx @tailwindest/css-transformer src/components/Button.tsx
-
-# Transform an entire directory
-npx @tailwindest/css-transformer src/pages --recursive
+npx @tailwindest/css-transformer
 ```
 
-## Features
+Or install it for repeated local use:
 
-### Zero-Config Migration
-The CLI intelligently searches for your `tailwindest` definition file (e.g., `tailwind.ts`) to automatically determine your **namespace identifier** and **import path**. You don't have to manually configure them for every run.
+```bash
+pnpm add -D @tailwindest/css-transformer
+```
 
-### Smart Auto-Import
-When transforming files, the CLI detects if the necessary `tailwindest` import is present. If missing, it automatically inserts the correct `import` statement at the top of your file.
+The CLI opens an interactive prompt for target path, Tailwind CSS entry,
+Tailwindest import name, import path, enabled walkers, dry-run mode, and output
+mode.
 
-### Source-Safe Transformation
-Using advanced AST (Abstract Syntax Tree) traversal, the transformer ensures that your code logic remains untouched. It only modifies the class strings it confidently identifies.
+## What It Converts
 
-### Type-Safe Output
-The generated objects are perfectly compatible with `tailwindest`, providing full autocomplete and type validation for your newly transformed styles.
+Input:
 
-## Options
-
-| Option | Alias | Type | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `--recursive` | `-r` | `boolean` | `false` | Recursively transform files in subdirectories. |
-| `--dry-run` | `-d` | `boolean` | `false` | Preview changes without modifying files. |
-| `--exclude` | `-e` | `string[]` | `[]` | List of patterns or directories to exclude. |
-| `--config` | `-c` | `string` | `null` | Path to a custom transformer configuration file. |
-| `--version` | `-V` | - | - | Output the version number. |
-| `--help` | `-h` | - | - | Display help for command. |
-
-## Why use CSS Transformer?
-
-1. **Efficiency**: Converting hundreds of classes manually is error-prone and slow. The CLI does it in seconds.
-2. **Consistency**: Ensure all team members follow the same `Tailwindest` object structure across the project.
-3. **Legacy Support**: Easily move from traditional Tailwind to the type-safe world of Tailwindest without rewriting everything from scratch.
-
----
-
-## Example Transformation
-
-**Before:**
 ```tsx
-const className = "flex items-center justify-center p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+import { cn } from "@/lib/utils"
+
+export function Button() {
+    return (
+        <button
+            className={cn(
+                "flex items-center rounded-md bg-red-50 px-4 py-2",
+                "dark:hover:bg-red-950"
+            )}
+        />
+    )
+}
 ```
 
-**After:**
+Compiled-mode output:
+
 ```tsx
-const style = tw.style({
+import { tw } from "~/tw"
+
+const buttonButton = tw.style({
     display: "flex",
     alignItems: "items-center",
-    justifyContent: "justify-center",
-    padding: "p-4",
-    backgroundColor: "bg-blue-500",
-    hover: {
-      backgroundColor: "hover:bg-blue-600"
+    borderRadius: "rounded-md",
+    backgroundColor: "bg-red-50",
+    paddingLeft: "px-4",
+    paddingTop: "py-2",
+    dark: {
+        hover: {
+            backgroundColor: "bg-red-950",
+        },
     },
-    color: "text-white",
-    borderRadius: "rounded-lg",
-    transitionProperty: "transition-colors"
+})
+
+export function Button() {
+    return <button className={buttonButton.class()} />
+}
+```
+
+Runtime-mode output keeps prefixed nested leaves:
+
+```ts
+tw.style({
+    dark: {
+        hover: {
+            backgroundColor: "dark:hover:bg-red-950",
+        },
+    },
 })
 ```
 
----
+## Output Modes
 
-> Always run with `--dry-run` first to verify the transformation results before applying them to your source code.
+The transformer supports three output modes:
+
+| Mode | Target | Leaf value |
+| --- | --- | --- |
+| `runtime` | `CreateTailwindest` | original token, such as `dark:hover:bg-red-950` |
+| `compiled` | `CreateCompiledTailwindest` | raw utility, such as `bg-red-950` |
+| `auto` | detected project mode | runtime unless strong compiler evidence exists |
+
+Use `runtime` when you are migrating to normal Tailwindest runtime authoring.
+Use `compiled` when the transformed source will be consumed by
+`@tailwindest/compiler` and typed with `CreateCompiledTailwindest`.
+
+## Recommended Mode Selection
+
+```bash
+# Safe default for mixed or unknown projects
+npx @tailwindest/css-transformer --mode auto
+
+# Runtime Tailwindest migration
+npx @tailwindest/css-transformer --mode runtime
+
+# Compiler-oriented migration
+npx @tailwindest/css-transformer --mode compiled
+```
+
+`auto` switches to compiled output only from strong signals:
+
+- a Tailwindest config declaring compiler output
+- Vite config using `@tailwindest/compiler/vite`
+- a precompile bridge using `createCompilerContext`
+- source importing `CreateCompiledTailwindest`
+- explicit CLI/API mode
+
+Weak signals do not switch modes by themselves:
+
+- `.tailwindest/debug-manifest.json`
+- `@tailwindest/compiler` listed in `package.json`
+
+Weak signals produce diagnostics and keep runtime output so existing
+`CreateTailwindest` users are not broken by accident.
+
+## Compiler-Oriented Setup
+
+If you are migrating source for the zero-runtime compiler, define your
+Tailwindest type with `CreateCompiledTailwindest`:
+
+```ts filename="tw.ts"
+import {
+    createTools,
+    type CreateCompiledTailwindest,
+    type CreateTailwindLiteral,
+} from "tailwindest"
+import type { Tailwind, TailwindNestGroups } from "./tailwind"
+
+export type Tailwindest = CreateCompiledTailwindest<{
+    tailwind: Tailwind
+    tailwindNestGroups: TailwindNestGroups
+    useArbitrary: true
+}>
+
+export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
+
+export const tw = createTools<{
+    tailwindest: Tailwindest
+    tailwindLiteral: TailwindLiteral
+}>()
+```
+
+Then transform with compiled output:
+
+```bash
+npx @tailwindest/css-transformer --mode compiled
+```
+
+Nested variant leaf values will be raw utilities:
+
+```ts
+tw.style({
+    dark: {
+        backgroundColor: "bg-red-900",
+        hover: {
+            backgroundColor: "bg-red-950",
+        },
+    },
+})
+```
+
+## Runtime Tailwindest Setup
+
+If you are not using the compiler, keep `CreateTailwindest`:
+
+```ts filename="tw.ts"
+import {
+    createTools,
+    type CreateTailwindest,
+    type CreateTailwindLiteral,
+} from "tailwindest"
+import type { Tailwind, TailwindNestGroups } from "./tailwind"
+
+export type Tailwindest = CreateTailwindest<{
+    tailwind: Tailwind
+    tailwindNestGroups: TailwindNestGroups
+    useArbitrary: true
+}>
+
+export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
+
+export const tw = createTools<{
+    tailwindest: Tailwindest
+    tailwindLiteral: TailwindLiteral
+}>()
+```
+
+Transform with runtime output:
+
+```bash
+npx @tailwindest/css-transformer --mode runtime
+```
+
+Nested variant leaves preserve the original prefixed class:
+
+```ts
+tw.style({
+    dark: {
+        hover: {
+            backgroundColor: "dark:hover:bg-red-950",
+        },
+    },
+})
+```
+
+## Supported Patterns
+
+The transformer currently supports static class strings in:
+
+- `className="..."`
+- `className={"..."}`
+- `cn("...")`
+- `clsx("...")`
+- `classNames("...")`
+- `cva("...")`
+- `cva(..., { variants: { ... } })` static string options
+
+Dynamic arguments are preserved when the surrounding call can still be
+represented safely.
+
+```tsx
+cn("flex px-4", isActive && "bg-red-500", props.className)
+```
+
+The static part can become a Tailwindest style constant, while dynamic arguments
+remain in the generated `.class(...)` call.
+
+## Conservative Fallback
+
+The transformer does not rewrite code it cannot prove safe.
+
+Common fallback cases:
+
+- template literals with substitutions
+- computed class strings
+- unknown or ambiguous Tailwind utilities
+- runtime-generated `cva` variant maps
+- unsupported `compoundVariants` conversion
+- helper imports still used elsewhere
+
+Run dry-run first and inspect diagnostics before writing files.
+
+## CLI Options
+
+```bash
+npx @tailwindest/css-transformer --mode auto --dry-run
+```
+
+| Option | Alias | Default | Description |
+| --- | --- | --- | --- |
+| `--css <path>` | `-c` | `tailwind.css` | Tailwind CSS entry used to initialize the resolver. |
+| `--identifier <name>` | `-i` | `tw` | Tailwindest import identifier. |
+| `--module <path>` | `-m` | `~/tw` | Tailwindest module import path. |
+| `--dry-run` | `-d` | `false` | Preview without writing transformed files. |
+| `--mode <mode>` | none | `auto` | Output mode: `auto`, `runtime`, or `compiled`. |
+
+## Programmatic Usage
+
+```ts
+import { transform } from "@tailwindest/css-transformer"
+
+const result = await transform(source, {
+    resolver,
+    outputMode: "compiled",
+    projectRoot: process.cwd(),
+    sourcePath: "/repo/src/Button.tsx",
+    tailwindestIdentifier: "tw",
+    tailwindestModulePath: "~/tw",
+    walkers: ["cva", "cn", "classname"],
+    config: {
+        objectThreshold: 2,
+    },
+})
+
+console.log(result.code)
+console.log(result.diagnostics)
+```
+
+You normally do not need the programmatic API unless you are building custom
+migration tooling.
+
+## Safety Model
+
+The transformer uses Collect -> Reverse Execute:
+
+1. Parse source with `ts-morph`.
+2. Collect supported transform targets.
+3. Analyze static class strings.
+4. Apply replacements from the end of the file to the beginning.
+5. Apply import edits once.
+6. Return transformed code and diagnostics.
+
+This avoids stale AST ranges and keeps unrelated source code untouched.

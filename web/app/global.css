@@ -27,7 +27,7 @@
 }
 
 :root {
-    --xai-bg: #ffffff;
+    --xai-bg: #f6f6f6;
     --xai-text: #010102;
     --xai-text-secondary: rgba(23, 26, 32, 0.72);
     --xai-text-muted: rgba(23, 26, 32, 0.52);
