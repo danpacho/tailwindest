@@ -44,7 +44,7 @@ import { defineConfig } from "vite"
 export default defineConfig({
     plugins: [
         tailwindest({
-            mode: "strict",
+            mode: "loose",
             debug: true,
             sourceMap: true,
         }),
@@ -63,7 +63,7 @@ import { compile } from "@tailwindest/compiler"
 
 const result = compile(source, {
     fileName: "/repo/src/button.tsx",
-    mode: "strict",
+    mode: "loose",
     sourceMap: true,
 })
 
@@ -73,12 +73,12 @@ console.log(result.diagnostics)
 
 ## Strict and Loose Modes
 
-`strict` mode fails when exact compile-time evaluation is not possible. Use it
-for CI and production release gates.
+`loose` mode is the default. It preserves unsupported runtime calls while
+retaining every statically knowable Tailwind candidate in the manifest. Use it
+for first adoption and incremental migration.
 
-`loose` mode preserves unsupported runtime calls while retaining every
-statically knowable Tailwind candidate in the manifest. Use it for incremental
-migration.
+`strict` mode fails when exact compile-time evaluation is not possible. Use it
+for CI and production zero-runtime release gates.
 
 ## Nested Variants
 

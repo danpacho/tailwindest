@@ -33,6 +33,11 @@ export type EvaluationMode = "strict" | "loose"
  * @public
  */
 export interface EvaluationOptions {
+    /**
+     * Unsupported-value policy for low-level evaluation helpers.
+     *
+     * @defaultValue `"loose"`
+     */
     mode?: EvaluationMode
 }
 
@@ -106,7 +111,7 @@ export function applyMergerPolicy(
     options: EvaluationOptions = {}
 ): EvaluationResult<string> {
     const candidates = candidatesFromClassName(value)
-    const mode = options.mode ?? "strict"
+    const mode = options.mode ?? "loose"
 
     if (policy.kind === "none") {
         return {

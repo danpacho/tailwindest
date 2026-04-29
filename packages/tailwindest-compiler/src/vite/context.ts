@@ -63,7 +63,7 @@ export interface TailwindestViteOptions {
      *   exactly.
      * - `"loose"` preserves the runtime call and records a fallback diagnostic.
      *
-     * @defaultValue `"strict"`
+     * @defaultValue `"loose"`
      */
     mode?: "strict" | "loose"
 
@@ -241,10 +241,10 @@ export class CompilerContext {
         )
         const analysisModeDiagnostics = diagnosticsForMode(
             analysisDiagnostics,
-            this.options.mode ?? "strict"
+            this.options.mode ?? "loose"
         )
         const strictAnalysisFailures =
-            (this.options.mode ?? "strict") === "strict"
+            (this.options.mode ?? "loose") === "strict"
                 ? analysisModeDiagnostics.diagnostics.filter(
                       (item) =>
                           item.code === "NOT_TAILWINDEST_SYMBOL" ||
@@ -260,13 +260,13 @@ export class CompilerContext {
         const compiled = compileTailwindestSource({
             fileName: normalized,
             code,
-            mode: this.options.mode ?? "strict",
+            mode: this.options.mode ?? "loose",
             variantTableLimit: this.options.variantTableLimit,
             merger: this.options.merger ?? DEFAULT_MERGER,
         })
         const modeDiagnostics = diagnosticsForMode(
             compiled.diagnostics,
-            this.options.mode ?? "strict"
+            this.options.mode ?? "loose"
         )
         if (modeDiagnostics.shouldFail) {
             const first = modeDiagnostics.diagnostics[0]
@@ -309,7 +309,7 @@ export class CompilerContext {
         return {
             code: transform.code,
             map: transform.map,
-            candidates: transform.candidates,
+            candidates,
             diagnostics,
             changed: transform.changed,
         }
@@ -358,7 +358,7 @@ export class CompilerContext {
 
     public getDebugManifest(): TailwindestDebugManifest {
         return createDebugManifest({
-            mode: this.options.mode ?? "strict",
+            mode: this.options.mode ?? "loose",
             files: [...this.debugFiles.values()],
             candidates: this.getManifestCandidates(),
             excludedCandidates: this.getExcludedManifestCandidates(),

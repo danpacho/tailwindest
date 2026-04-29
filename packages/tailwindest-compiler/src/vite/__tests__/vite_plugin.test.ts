@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
+import { compile } from "../../index"
 import { optimizeVariants } from "../../core/variant_optimizer"
 import { createCompilerContext } from "../context"
 import { createHotUpdateHandler } from "../hmr"
@@ -103,6 +104,60 @@ describe("tailwindest Vite plugin", () => {
             "text-emerald-600",
         ])
         expect(css.code).toContain(`@source inline("px-4 text-emerald-600");`)
+    })
+
+    it("defaults Vite transforms to loose mode so unsupported calls remain runtime fallbacks", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `declare const dynamicClass: string`,
+            `export const cls = tw.join("px-4", dynamicClass)`,
+        ].join("\n")
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+
+        const result = context.transformJs(code, "/project/src/default.ts")
+
+        expect(result.code).toBe(code)
+        expect(result.changed).toBe(false)
+        expect(context.getDebugManifest()).toMatchObject({
+            mode: "loose",
+            files: [
+                {
+                    diagnostics: expect.arrayContaining([
+                        expect.objectContaining({
+                            code: "UNSUPPORTED_DYNAMIC_VALUE",
+                            modeBehavior: "loose-fallback",
+                        }),
+                    ]),
+                },
+            ],
+        })
+    })
+
+    it("defaults programmatic compile() to loose mode", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `declare const dynamicClass: string`,
+            `export const cls = tw.join("px-4", dynamicClass)`,
+        ].join("\n")
+
+        const result = compile(code, { fileName: "/project/src/default.ts" })
+
+        expect(result.code).toBe(code)
+        expect(result.changed).toBe(false)
+        expect(result.candidates).toContain("px-4")
+        expect(result.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNSUPPORTED_DYNAMIC_VALUE",
+                    modeBehavior: "loose-fallback",
+                }),
+            ])
+        )
     })
 
     it("injects not-inline exclusions for raw shorthand leaves unless another candidate owns them", () => {

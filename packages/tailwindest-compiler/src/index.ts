@@ -10,8 +10,8 @@ import { createCompilerContext } from "./vite/context"
  * - `"loose"` keeps the original runtime call in place and still reports
  *   diagnostics/candidates for debug and Tailwind source generation.
  *
- * Use `"strict"` for production CI gates and `"loose"` while migrating a
- * codebase or intentionally preserving a small runtime fallback.
+ * `"loose"` is the default so existing applications can adopt the compiler
+ * incrementally. Use `"strict"` for production zero-runtime CI gates.
  *
  * @public
  */
@@ -47,7 +47,7 @@ export interface CompileOptions {
     /**
      * Unsupported-value policy for the compile operation.
      *
-     * @defaultValue `"strict"`
+     * @defaultValue `"loose"`
      */
     mode?: CompileMode
 
@@ -128,7 +128,7 @@ export interface CompileResult {
  *
  * const result = compile(source, {
  *   fileName: "/repo/src/button.tsx",
- *   mode: "strict",
+ *   mode: "loose",
  *   sourceMap: true,
  * })
  * ```
@@ -145,7 +145,7 @@ export function compile(
     const fileName = options.fileName ?? "/tailwindest-entry.tsx"
     const compilerOptions = {
         include: [fileName],
-        mode: options.mode ?? "strict",
+        mode: options.mode ?? "loose",
         ...(options.sourceMap === undefined
             ? {}
             : { sourceMap: options.sourceMap }),

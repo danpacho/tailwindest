@@ -94,7 +94,7 @@ export interface TailwindestPlugin {
  *
  * export default defineConfig({
  *   plugins: [
- *     tailwindest({ mode: "strict", debug: true, sourceMap: true }),
+ *     tailwindest({ mode: "loose", debug: true, sourceMap: true }),
  *     tailwindcss(),
  *   ],
  * })
