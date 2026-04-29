@@ -3,9 +3,13 @@ title: Compiler
 description: Compile Tailwindest styles to static Tailwind class strings at build time.
 ---
 
-> If you don't need `compiler`, you can just use normal tailwindest software.
+<img src="/images/tailwindest-compiler.png" width="550px" alt="tailwindest compiler banner" />
+
+> If you do not need zero-runtime compilation, you can use normal Tailwindest
+> runtime authoring.
 >
-> `compiler` provides great DX by resolve prefix writing problem and reduce runtime overhead using build-time calculation.
+> The compiler is for projects that want Tailwindest DX in source code and
+> build-time Tailwind class output in the browser bundle.
 
 `@tailwindest/compiler` is the zero-runtime compiler for Tailwindest. It
 evaluates supported `createTools()` calls during build and replaces them with
@@ -82,8 +86,13 @@ manifest instead of relying on Tailwind to discover post-transform JavaScript.
 
 ## Authoring Types
 
-Compiler-oriented projects should use `CreateCompiledTailwindest`. It keeps
-variant prefixes in object keys and uses raw Tailwind utilities at leaf values.
+Compiler-oriented projects should use
+[`CreateCompiledTailwindest`](/apis/createcompiledtailwindest). It keeps variant
+prefixes in object keys and uses raw Tailwind utilities at leaf values.
+
+This type exists because the compiler can derive variant prefixes from the
+object path. You should not have to autocomplete or write `dark:hover:` inside
+the value when `dark` and `hover` are already present as object keys.
 
 ```ts filename="tw.ts"
 import {
@@ -106,6 +115,10 @@ export const tw = createTools<{
     tailwindLiteral: TailwindLiteral
 }>()
 ```
+
+For the complete type contract, arbitrary variant support, group prefix
+behavior, and CSS Transformer integration, see the
+[`CreateCompiledTailwindest` API reference](/apis/createcompiledtailwindest).
 
 Nested variants should be written like this:
 
@@ -273,3 +286,82 @@ console.log(result.diagnostics)
 When using `compile()` directly, you are responsible for forwarding
 `result.candidates` into your Tailwind CSS build. The Vite plugin handles this
 automatically.
+
+## Why CreateCompiledTailwindest Matters
+
+The compiler makes nested variants easier to write because it can rebuild the
+final Tailwind prefix from the object path. That is why compiler projects should
+use [`CreateCompiledTailwindest`](/apis/createcompiledtailwindest) instead of
+normal [`CreateTailwindest`](/apis/createtailwindest).
+
+### Runtime Tailwindest
+
+Runtime Tailwindest cannot assume a build-time compiler will normalize object
+paths. The nested value must include the final Tailwind prefix:
+
+```ts
+type Tailwindest = CreateTailwindest<{
+    tailwind: Tailwind
+    tailwindNestGroups: TailwindNestGroups
+}>
+
+tw.style({
+    backgroundColor: "bg-red-50",
+    dark: {
+        backgroundColor: "dark:bg-red-900",
+        hover: {
+            backgroundColor: "dark:hover:bg-red-950",
+        },
+    },
+})
+```
+
+This is compatible with runtime-only Tailwindest, but the editor still has to
+autocomplete `dark:` and `dark:hover:` inside leaf values.
+
+### Compiler Tailwindest
+
+Compiler Tailwindest already knows the object path. The value only needs the
+raw utility:
+
+```ts
+type Tailwindest = CreateCompiledTailwindest<{
+    tailwind: Tailwind
+    tailwindNestGroups: TailwindNestGroups
+}>
+
+tw.style({
+    backgroundColor: "bg-red-50",
+    dark: {
+        backgroundColor: "bg-red-900",
+        hover: {
+            backgroundColor: "bg-red-950",
+        },
+    },
+})
+```
+
+The compiler produces the same effective classes:
+
+```ts
+"bg-red-50 dark:bg-red-900 dark:hover:bg-red-950"
+```
+
+### Practical Difference
+
+| Topic | `CreateTailwindest` | `CreateCompiledTailwindest` |
+| --- | --- | --- |
+| Best for | Runtime Tailwindest | `@tailwindest/compiler` projects |
+| Nested object keys | Variant path | Variant path |
+| Nested leaf values | Prefixed classes | Raw utilities |
+| Editor autocomplete | Includes `dark:`, `hover:`, stacked prefixes | Focuses on utility names |
+| Migration transformer mode | `--mode runtime` | `--mode compiled` |
+| Output result | Runtime computes classes | Compiler emits static classes |
+
+The user-facing benefit is smaller authoring surface. You express state once in
+the object path and keep each leaf focused on the utility you actually want. In
+large design systems this reduces duplicated prefixes, improves autocomplete,
+and makes deeply nested variants easier to scan.
+
+Read the full API reference:
+[`CreateCompiledTailwindest`](/apis/createcompiledtailwindest).

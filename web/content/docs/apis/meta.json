@@ -12,6 +12,7 @@
         "mergeprops",
         "mergerecord",
         "createtailwindest",
+        "createcompiledtailwindest",
         "createtailwindliteral",
         "getvariants"
     ]
