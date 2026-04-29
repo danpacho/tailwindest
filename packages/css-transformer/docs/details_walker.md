@@ -1,68 +1,170 @@
-# Walker Design
+# Walker Details
 
-Walkers are focused source transformers registered in the
-`TransformerRegistry`. Each walker owns one syntax pattern.
+Walkers are syntax-specific transformers registered in `TransformerRegistry`.
+Each walker owns one source pattern and delegates class-string semantics to the
+shared analyzer.
 
 ## Walker Contract
 
 ```ts
-interface Walker {
+interface ClassTransformerWalker {
     name: string
     priority: number
-    canWalk(node: Node, context: TransformerContext): boolean
+    canWalk(node: Node): boolean
     walk(node: Node, context: TransformerContext): TransformResult
 }
 ```
 
-## Registry Rules
+Walkers must be small and deterministic. They should answer three questions:
 
-- Higher priority walkers run first during target collection.
-- Replacements are applied in reverse source order.
-- Overlapping targets are resolved deterministically.
-- A failed walker does not abort the whole file.
+1. Is this syntax pattern supported?
+2. Which static class strings can be safely analyzed?
+3. What replacement preserves the unsupported dynamic parts?
+
+## Registry Execution Model
+
+The registry uses Collect -> Reverse Execute:
+
+```text
+scan AST
+  -> collect matching nodes and their owning walkers
+  -> sort by source position descending
+  -> call walker.walk(...)
+  -> apply imports once
+```
+
+Reverse execution prevents source offset corruption when multiple replacements
+exist in one file.
+
+## Shared Context
+
+Every walker receives the same `TransformerContext`:
+
+```ts
+interface TransformerContext {
+    analyzer: TokenAnalyzer
+    tailwindestIdentifier: string
+    tailwindestModulePath: string
+    outputMode: "runtime" | "compiled"
+    outputModeEvidence: OutputModeEvidence[]
+    imports: ImportCollector
+    styles: StyleManager
+    diagnostics: Diagnostic[]
+}
+```
+
+Walkers must pass `context.outputMode` into `buildObjectTree()` so all supported
+syntax paths produce the same nested variant semantics.
 
 ## Cva Walker
 
-The `CvaWalker` handles supported `cva()` calls:
+`CvaWalker` supports:
 
-- base class strings
-- static `variants`
-- static `defaultVariants` when they can be represented safely
+- `cva("...")`
+- static base class strings
+- static `variants` object values
+- preservation of `defaultVariants` and `compoundVariants` metadata as comments
+  where exact conversion is not implemented
 
-Unsupported `compoundVariants` should be preserved or represented as comments
-until exact conversion is implemented.
+Example compiled-mode output:
+
+```ts
+cva("dark:hover:bg-blue-500", {
+    variants: {
+        intent: {
+            primary: "dark:hover:bg-gray-500",
+        },
+    },
+})
+```
+
+becomes a `tw.variants(...)` call with raw nested leaves:
+
+```ts
+tw.variants({
+    base: {
+        dark: {
+            hover: {
+                backgroundColor: "bg-blue-500",
+            },
+        },
+    },
+    variants: {
+        intent: {
+            primary: {
+                dark: {
+                    hover: {
+                        backgroundColor: "bg-gray-500",
+                    },
+                },
+            },
+        },
+    },
+})
+```
 
 ## Cn Walker
 
-The `CnWalker` handles `cn`, `clsx`, and compatible class helper calls.
+`CnWalker` supports:
 
-Static class strings are converted to Tailwindest style objects. Dynamic
-arguments are preserved. If the final expression cannot be represented exactly,
-the walker should prefer `tw.def(...)` or preserve the original call with a
-diagnostic.
+- `cn(...)`
+- `clsx(...)`
+- `classNames(...)`
+- static string literals
+- no-substitution template literals
+- dynamic arguments preserved in the emitted call
+
+Static and dynamic arguments are separated. Static class strings become a
+registered Tailwindest style constant when the object threshold is met. Dynamic
+arguments are passed to `.class(...)` or preserved through `tw.join(...)`.
 
 ## ClassName Walker
 
-The `ClassNameWalker` converts literal JSX `className` attributes:
+`ClassNameWalker` supports literal JSX attributes:
 
 ```tsx
-<button className="inline-flex px-3 py-2" />
+<div className="flex dark:hover:bg-accent" />
+<div className={"flex dark:hover:bg-accent"} />
 ```
 
-to a Tailwindest style call when exact conversion is possible.
+It does not rewrite dynamic JSX expressions such as:
+
+```tsx
+<div className={isActive ? "flex" : "hidden"} />
+```
+
+Those expressions require additional semantic proof and must remain unchanged
+until supported explicitly.
 
 ## Import Handling
 
-Walkers do not directly mutate imports. They report required imports to
-`ImportCollector`, which applies import changes once per file.
+Walkers must not directly edit imports. They register import requirements:
+
+```ts
+context.imports.addNamedImport(modulePath, identifier)
+context.imports.registerToRemove(helperName)
+```
+
+`ImportCollector` applies all import changes once after replacements complete.
 
 ## Safety Requirements
 
-- Do not rewrite unknown dynamic expressions.
-- Do not remove helper imports unless all usages are rewritten.
-- Do not reorder unrelated source code.
-- Do not emit invalid TypeScript.
+- Do not rewrite unsupported dynamic expressions.
+- Do not drop unresolved class tokens.
+- Do not remove helper imports unless all usages are transformed.
+- Do not mutate unrelated source formatting.
+- Do not decide runtime vs compiled semantics inside a walker.
+- Do not emit invalid TypeScript or JSX.
 
-## Verification
+## Required Tests
 
-Each walker needs unit tests and golden-file coverage.
+Every walker must cover:
+
+- supported syntax detection
+- unsupported syntax no-op behavior
+- runtime nested variant output
+- compiled nested variant output
+- mixed static and dynamic arguments
+- import insertion
+- helper import cleanup when safe
+- diagnostics for unresolved tokens

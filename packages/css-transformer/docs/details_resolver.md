@@ -1,59 +1,91 @@
-# Resolver Design
+# Resolver Details
 
-The resolver maps Tailwind utility tokens to Tailwindest object keys. It is
-intentionally deterministic and table-driven.
+The CSS transformer delegates Tailwind utility classification to
+`create-tailwind-type` through `CSSPropertyResolver`. The transformer does not
+maintain a separate Tailwind utility table because that would drift from the
+generated Tailwind type data.
+
+## Contract
+
+The resolver receives a raw utility token with variants removed:
+
+```text
+input class token: dark:hover:bg-red-950
+resolver input:     bg-red-950
+resolver output:    backgroundColor
+```
+
+The analyzer, not the resolver, owns variant nesting and leaf-value selection.
+
+```ts
+interface CSSPropertyResolver {
+    resolveUnambiguous(className: string): string | null
+}
+```
+
+Resolver return values become Tailwindest object property keys:
+
+```ts
+{
+    backgroundColor: "bg-red-950"
+}
+```
 
 ## Responsibilities
 
-- Recognize supported Tailwind utility families.
-- Return the Tailwindest property path for each token.
-- Preserve the original token as the leaf value.
-- Report unsupported or ambiguous tokens.
+- Resolve known Tailwind utilities to Tailwindest property keys.
+- Return `null` when the utility is unknown or ambiguous.
+- Keep arbitrary value utilities intact when the family is known.
+- Avoid interpreting variant prefixes.
 
-## Resolver Contract
+## Non-Responsibilities
 
-```ts
-interface TokenResolver {
-    resolve(token: string): ResolveResult
-}
+- Do not decide runtime vs compiled output mode.
+- Do not decide source-order conflict behavior.
+- Do not parse arbitrary value internals unless `create-tailwind-type` already
+  supports that utility family.
+- Do not synthesize Tailwind utilities that were not present in source.
 
-type ResolveResult =
-    | { kind: "resolved"; path: string[]; value: string }
-    | { kind: "unresolved"; token: string; reason: string }
-```
+## Variant Handling Boundary
 
-## Supported Families
-
-The production resolver should cover common layout, spacing, typography,
-border, color, background, effects, transition, transform, and state utility
-families used by application UI code.
-
-Unsupported families are allowed, but they must be explicit diagnostics rather
-than silent omissions.
-
-## Arbitrary Values
-
-Arbitrary values are preserved as leaf strings when the utility family is known:
+The analyzer strips variants before resolver lookup. This keeps all of these
+tokens resolver-compatible:
 
 ```text
-bg-[color:var(--surface)]
+hover:bg-accent             -> bg-accent
+dark:hover:bg-accent        -> bg-accent
+data-[state=open]:bg-accent -> bg-accent
 ```
 
-The resolver should not attempt to parse arbitrary value internals unless a
-specific production rule requires it.
+If the stripped utility cannot be resolved, the token remains unsupported and
+the caller decides whether to preserve the original source.
 
-## Conflict Policy
+## Ambiguity Policy
 
-The resolver does not decide final conflict precedence. It only maps tokens.
-The analyzer owns merge order and override behavior.
+`resolveUnambiguous()` may return `null` for utilities that map to multiple
+possible CSS properties. The transformer must not guess. A guessed property can
+produce valid TypeScript while changing styling behavior.
 
-## Test Coverage
+Ambiguous classes must produce diagnostics and should preserve the original
+class expression when exact migration is not possible.
 
-Required tests:
+## Production Requirements
 
-- known utility families
-- unknown utility family
-- arbitrary values
+Resolver integration is production-ready only when:
+
+- every analyzer call passes variant-stripped utility tokens
+- unresolved utilities are surfaced as warnings
+- no walker silently drops unresolved tokens
+- resolver misses are covered by tests
+- shadcn registry fixtures continue to pass
+
+## Required Tests
+
+- known utility resolution
+- unknown utility diagnostics
+- ambiguous utility fallback
+- variant-prefixed class stripping
+- arbitrary values and arbitrary variants
 - negative values
-- variant-prefixed tokens
-- unsupported syntax diagnostics
+- color, spacing, layout, typography, border, effect, transition, and transform
+  families when supported by the generated resolver

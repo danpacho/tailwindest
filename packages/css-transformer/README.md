@@ -8,10 +8,10 @@ Automate your migration from standard Tailwind CSS to type-safe **Tailwindest** 
 
 ## Features
 
-- **✨ Zero-Config Migration**: Automatically detects your `tailwindest` setup (namespace, paths) from your project.
-- **🚀 Smart Auto-Import**: Inserts necessary import statements into transformed files automatically.
-- **🛡️ Source-Safe**: Uses AST (Abstract Syntax Tree) traversal to ensure code logic remains untouched.
-- **🎨 Type-Safe**: Generates objects that are 100% compatible with `tailwindest` types.
+- **Zero-Config Migration**: Automatically detects your `tailwindest` setup (namespace, paths) from your project.
+- **Smart Auto-Import**: Inserts necessary import statements into transformed files automatically.
+- **Source-Safe**: Uses AST (Abstract Syntax Tree) traversal to ensure code logic remains untouched.
+- **Type-Safe**: Generates objects that are 100% compatible with `tailwindest` types.
 
 ## Installation
 

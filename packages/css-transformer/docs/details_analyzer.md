@@ -1,40 +1,96 @@
-# Analyzer Design
+# Analyzer Details
 
-The analyzer converts Tailwind class strings into structured Tailwindest style
-records. It is the semantic core of the CSS transformer.
+The analyzer is the semantic core of `@tailwindest/css-transformer`. It converts
+static Tailwind class strings into Tailwindest style records while preserving
+enough token information to support both runtime and compiler-oriented output.
 
-## Inputs
-
-- A class string from JSX, `cn`, `clsx`, or `cva`.
-- A `TokenResolver` capable of resolving utility tokens.
-- Optional context about variants or grouping.
-
-## Outputs
+## Data Model
 
 ```ts
-interface AnalyzeResult {
-    record: Record<string, unknown>
-    unresolved: string[]
-    diagnostics: TransformerDiagnostic[]
+interface ParsedToken {
+    original: string
+    utility: string
+    property: string | null
+    variants: string[]
+    warning?: string
 }
 ```
 
-## Token Handling
-
-The analyzer splits class strings by whitespace, preserves token order, and
-resolves each token independently. Resolved tokens are merged into a style
-record. Unresolved tokens remain in diagnostics so the caller can decide whether
-to preserve the original expression.
-
-## Variant Handling
-
-Variant prefixes become nested object keys:
+Example:
 
 ```ts
-"dark:hover:bg-red-950"
+{
+    original: "dark:hover:bg-red-950",
+    utility: "bg-red-950",
+    property: "backgroundColor",
+    variants: ["dark", "hover"],
+}
 ```
 
-becomes:
+`original` and `utility` are both required:
+
+- `original` is required for `CreateTailwindest` runtime output.
+- `utility` is required for `CreateCompiledTailwindest` compiler output.
+
+## Tokenization
+
+The analyzer splits class strings by whitespace and preserves source order. It
+does not normalize, sort, or merge class tokens during tokenization.
+
+Supported inputs:
+
+```ts
+analyze("flex dark:hover:bg-red-950")
+analyze(["flex", "dark:hover:bg-red-950"])
+```
+
+Empty strings produce an empty token list.
+
+## Variant Extraction
+
+Variant prefixes are extracted before resolver lookup:
+
+```text
+dark:hover:bg-red-950
+│    │     └─ utility: bg-red-950
+│    └─────── variant: hover
+└──────────── variant: dark
+```
+
+The object path is built from variants first and the resolved property key last:
+
+```ts
+{
+    dark: {
+        hover: {
+            backgroundColor: "<leaf>",
+        },
+    },
+}
+```
+
+## Output Mode Leaf Selection
+
+`buildObjectTree()` is mode-aware:
+
+```ts
+buildObjectTree(tokens, { outputMode: "runtime" })
+buildObjectTree(tokens, { outputMode: "compiled" })
+```
+
+Runtime mode preserves the source token:
+
+```ts
+{
+    dark: {
+        hover: {
+            backgroundColor: "dark:hover:bg-red-950",
+        },
+    },
+}
+```
+
+Compiled mode stores only the raw utility:
 
 ```ts
 {
@@ -46,37 +102,74 @@ becomes:
 }
 ```
 
-The analyzer does not guess unknown prefixes. Unknown prefixes are reported and
-the caller should preserve the original source when exact conversion cannot be
-proven.
+The default is `runtime` to preserve existing migrations.
 
-## Merge Behavior
+## Group Prefixes
 
-Multiple tokens that map to the same property are applied in source order. The
-last compatible token wins, matching Tailwind class precedence for static
-strings.
+When a group prefix is configured, it applies only to variant object keys:
 
-Arrays are used only where the Tailwindest style model expects multiple
-classes for one property.
+```ts
+new TokenAnalyzerImpl(resolver, "$")
+```
+
+```ts
+{
+    $hover: {
+        backgroundColor: "bg-accent",
+    },
+}
+```
+
+The group prefix must never be added to leaf class values.
+
+## Collision Policy
+
+When multiple tokens map to the same object leaf, the analyzer promotes the leaf
+to an array and preserves source order:
+
+```ts
+hover:p-4 hover:p-2
+```
+
+Compiled mode:
+
+```ts
+{
+    hover: {
+        padding: ["p-4", "p-2"],
+    },
+}
+```
+
+The analyzer does not run Tailwind merge. It preserves enough information for
+Tailwindest runtime or compiler stages to apply their own semantics.
 
 ## Diagnostics
 
-Diagnostics must include:
+If a utility cannot be resolved, the parsed token receives a warning and is
+excluded from the generated object tree:
 
-- token text
-- reason
-- source span when available
-- severity
+```ts
+{
+    original: "unknown-xyz",
+    utility: "unknown-xyz",
+    property: null,
+    variants: [],
+    warning: "Could not resolve property for utility: unknown-xyz",
+}
+```
 
-The transformer should never silently drop unresolved classes.
+Walkers collect these warnings and decide whether the surrounding source can be
+rewritten safely.
 
-## Test Coverage
+## Required Tests
 
-Required tests:
-
-- simple utility classes
-- stacked variants
-- arbitrary values
-- duplicate property override
-- unresolved token preservation
-- mixed supported and unsupported classes
+- simple utility records
+- runtime nested variant leaves
+- compiled nested variant leaves
+- deeply nested variants
+- arbitrary variants
+- group-prefixed variants
+- duplicate property array promotion
+- unresolved token diagnostics
+- mixed supported and unsupported class strings
