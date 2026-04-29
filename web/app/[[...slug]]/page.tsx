@@ -1,5 +1,4 @@
 import { getMDXComponents } from "@/components/mdx"
-import { CollapseSidebarOnLoad } from "@/components/collapse-sidebar-on-load"
 import { baseOptions } from "@/lib/layout.shared"
 import { source } from "@/lib/source"
 import { DocsLayout } from "fumadocs-ui/layouts/docs"
@@ -51,7 +50,6 @@ export default async function Page({ params }: PageProps) {
 
     return (
         <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
-            <CollapseSidebarOnLoad />
             <DocsPage toc={page.data.toc} footer={{ className: "tw-page-footer" }}>
                 {!isHome ? <DocsTitle>{page.data.title}</DocsTitle> : null}
                 {!isHome ? (
