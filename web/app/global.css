@@ -2,9 +2,6 @@
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 
-@source "../**/*.{ts,tsx,mdx}";
-@source "../../node_modules/fumadocs-ui/dist/**/*.js";
-
 @theme {
     --font-sans: universalSans, "Inter", ui-sans-serif, system-ui, sans-serif;
     --font-mono: GeistMono, ui-monospace, SFMono-Regular, "Roboto Mono", Menlo,
@@ -29,18 +26,47 @@
     --color-fd-overlay: rgba(0, 0, 0, 0.5);
 }
 
-:root,
+:root {
+    --xai-bg: #ffffff;
+    --xai-text: #010102;
+    --xai-text-secondary: rgba(23, 26, 32, 0.72);
+    --xai-text-muted: rgba(23, 26, 32, 0.52);
+    --xai-text-subtle: rgba(23, 26, 32, 0.32);
+    --xai-border: rgba(23, 26, 32, 0.12);
+    --xai-border-strong: rgb(253, 128, 25);
+    --xai-surface: rgba(23, 26, 32, 0.03);
+    --xai-surface-strong: rgba(23, 26, 32, 0.05);
+    --xai-surface-hover: rgba(23, 26, 32, 0.01);
+    --color-fd-background: var(--xai-bg);
+    --color-fd-foreground: var(--xai-text);
+    --color-fd-muted: var(--xai-surface-strong);
+    --color-fd-muted-foreground: var(--xai-text-secondary);
+    --color-fd-popover: var(--xai-bg);
+    --color-fd-popover-foreground: var(--xai-text);
+    --color-fd-card: var(--xai-surface);
+    --color-fd-card-foreground: var(--xai-text);
+    --color-fd-border: var(--xai-border);
+    --color-fd-primary: var(--xai-text);
+    --color-fd-primary-foreground: var(--xai-bg);
+    --color-fd-secondary: var(--xai-surface-strong);
+    --color-fd-secondary-foreground: var(--xai-text);
+    --color-fd-accent: var(--xai-surface-hover);
+    --color-fd-accent-foreground: var(--xai-text);
+    --color-fd-ring: rgba(59, 130, 246, 0.5);
+    color-scheme: light;
+}
+
 .dark {
-    --xai-bg: #1f2228;
+    --xai-bg: #121212;
     --xai-text: #ffffff;
     --xai-text-secondary: rgba(255, 255, 255, 0.7);
     --xai-text-muted: rgba(255, 255, 255, 0.5);
     --xai-text-subtle: rgba(255, 255, 255, 0.3);
     --xai-border: rgba(255, 255, 255, 0.1);
-    --xai-border-strong: rgba(255, 255, 255, 0.2);
+    --xai-border-strong: rgb(254, 137, 27);
     --xai-surface: rgba(255, 255, 255, 0.03);
     --xai-surface-strong: rgba(255, 255, 255, 0.05);
-    --xai-surface-hover: rgba(255, 255, 255, 0.08);
+    --xai-surface-hover: rgba(255, 255, 255, 0.01);
     --color-fd-background: var(--xai-bg);
     --color-fd-foreground: var(--xai-text);
     --color-fd-muted: var(--xai-surface-strong);
@@ -123,9 +149,103 @@ button,
     border-color: var(--xai-border) !important;
 }
 
+#nd-sidebar {
+    box-shadow: none !important;
+    border-inline-end: 1px solid var(--xai-border) !important;
+}
+
+#nd-sidebar[data-collapsed="true"] {
+    border: 1px solid var(--xai-border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+#nd-sidebar-mobile {
+    border-color: var(--xai-border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-family: var(--font-mono);
+}
+
+#nd-sidebar-mobile :where(*) {
+    border-radius: 0 !important;
+}
+
+#nd-sidebar-mobile :where(a, button, [role="button"]) {
+    color: var(--xai-text-secondary);
+    font-family: var(--font-mono);
+}
+
+#nd-sidebar-mobile :where(a:hover, button:hover, [role="button"]:hover) {
+    color: var(--xai-text-muted);
+    background: transparent;
+}
+
+#nd-sidebar-mobile :where([data-active="true"], [data-active="true"]:hover) {
+    color: var(--xai-text) !important;
+    background: var(--xai-surface-strong) !important;
+    border-color: var(--xai-border-strong) !important;
+}
+
+[data-sidebar-panel] {
+    background: var(--xai-bg) !important;
+    border-color: var(--xai-border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+[data-sidebar-panel] button {
+    border-radius: 0 !important;
+}
+
+[role="dialog"][data-state] {
+    border-color: var(--xai-border) !important;
+    border-radius: 0 !important;
+    background: var(--xai-bg) !important;
+    box-shadow: none !important;
+    color: var(--xai-text) !important;
+}
+
+[role="dialog"][data-state] > * {
+    border-color: var(--xai-border) !important;
+}
+
+[role="dialog"][data-state] input {
+    color: var(--xai-text) !important;
+    font-family: var(--font-mono);
+    font-size: 1rem !important;
+}
+
+[role="dialog"][data-state] input::placeholder {
+    color: var(--xai-text-muted) !important;
+}
+
+[role="dialog"][data-state] svg {
+    color: var(--xai-text-muted) !important;
+}
+
+[role="dialog"][data-state] button {
+    border-color: var(--xai-border) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--xai-text-secondary) !important;
+    font-family: var(--font-mono);
+}
+
+[role="dialog"][data-state] button:hover {
+    background: var(--xai-surface-hover) !important;
+    color: var(--xai-text-muted) !important;
+}
+
+[role="dialog"][data-state] :where(a, button, [role="option"], [cmdk-item]) {
+    text-transform: none !important;
+}
+
 #nd-sidebar a,
 #nd-toc a,
 #nd-subnav a {
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
     color: var(--xai-text-secondary);
     border-radius: 0 !important;
 }
@@ -140,8 +260,44 @@ button,
 #nd-sidebar [data-active="true"],
 #nd-toc [data-active="true"] {
     color: var(--xai-text) !important;
-    background: var(--xai-surface-hover) !important;
-    border-color: var(--xai-border-strong) !important;
+    background: var(--xai-surface-strong) !important;
+    border-color: var(--xai-border) !important;
+}
+
+#nd-sidebar > div:last-child > div {
+    border: 1px solid var(--xai-border) !important;
+    border-radius: 0 !important;
+    background: var(--xai-surface) !important;
+    color: var(--xai-text-secondary) !important;
+}
+
+#nd-sidebar > div:last-child > div :where(a, button, svg) {
+    border-radius: 0 !important;
+}
+
+#nd-sidebar > div:last-child > div :where(a, button) {
+    color: var(--xai-text-secondary) !important;
+}
+
+#nd-sidebar > div:last-child > div :where(a:hover, button:hover) {
+    background: transparent !important;
+    color: var(--xai-text-muted) !important;
+}
+
+#nd-sidebar [data-theme-toggle] {
+    border-color: var(--xai-border) !important;
+    background: transparent !important;
+}
+
+#nd-sidebar [data-theme-toggle] svg {
+    background: transparent !important;
+    color: var(--xai-text-muted) !important;
+}
+
+#nd-sidebar [data-theme-toggle] svg.bg-fd-accent {
+    color: var(--xai-text) !important;
+    outline: 1px solid var(--xai-border);
+    outline-offset: -1px;
 }
 
 .prose {
@@ -161,7 +317,7 @@ button,
     --tw-prose-pre-bg: var(--xai-surface);
     --tw-prose-th-borders: var(--xai-border-strong);
     --tw-prose-td-borders: var(--xai-border);
-    font-size: 16px;
+    font-size: 1rem;
     line-height: 1.5;
     overflow-wrap: anywhere;
 }
@@ -176,7 +332,7 @@ button,
 }
 
 .prose h1 {
-    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-size: clamp(2.5rem, 8vw, 3rem);
     line-height: 1;
 }
 
@@ -212,13 +368,43 @@ button,
     font-style: normal;
 }
 
-.prose :where(pre) {
+.prose > :where(pre) {
     border: 1px solid var(--xai-border);
-    border-radius: 0;
+    border-radius: 0 !important;
     background: var(--xai-surface) !important;
 }
 
-.prose :where(code):not(pre code) {
+.prose :where(figure.shiki),
+.prose :where(figure.shiki > div),
+.prose :where(figure.shiki button),
+.prose :where(.shiki),
+.prose :where(.shiki pre) {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.prose :where([data-orientation="horizontal"][dir="ltr"]),
+.prose :where([role="tablist"][data-orientation="horizontal"]),
+.prose :where([role="tabpanel"][data-orientation="horizontal"]) {
+    border-radius: 0 !important;
+}
+
+.prose :where([data-orientation="horizontal"][dir="ltr"]) {
+    border-color: var(--xai-border) !important;
+    background: var(--xai-surface) !important;
+}
+
+.prose :where([role="tabpanel"][data-orientation="horizontal"]) {
+    background: var(--xai-bg) !important;
+}
+
+.prose :where([role="tab"][data-orientation="horizontal"]) {
+    border-radius: 0 !important;
+    font-family: var(--font-mono);
+    font-weight: 400;
+}
+
+.prose :where(code):not(pre code):not(figure code) {
     border: 1px solid var(--xai-border);
     border-radius: 0;
     background: var(--xai-surface);
@@ -253,18 +439,26 @@ button,
     margin: 24px 0 0 !important;
     color: var(--xai-text);
     font-family: var(--font-mono) !important;
-    font-size: clamp(3rem, 18vw, 20rem) !important;
-    font-weight: 300 !important;
+    font-size: clamp(3rem, 10vw, 5rem) !important;
+    font-weight: 200 !important;
     letter-spacing: 0 !important;
     line-height: 1 !important;
+    white-space: nowrap;
+}
+
+.tw-hero-title-accent {
+    color: var(--xai-border-strong);
+    font-style: italic;
+    font-weight: bold;
 }
 
 .tw-hero-copy {
     max-width: 680px;
     margin-top: 24px;
     color: var(--xai-text-secondary);
-    font-size: 18px;
+    font-size: 1rem;
     line-height: 1.5;
+    font-family: var(--font-mono);
     overflow-wrap: anywhere;
 }
 
@@ -294,27 +488,33 @@ button,
 
 .tw-btn-primary {
     background: var(--xai-text);
+    border-color: var(--xai-border);
     color: var(--xai-bg) !important;
+    font-family: var(--font-mono);
+    border: 1px solid transparent;
 }
 
 .tw-btn-primary:hover {
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--xai-text);
+    border-color: var(--xai-border-strong);
     color: var(--xai-bg) !important;
+    border: 1px solid var(--xai-text);
 }
 
 .tw-btn-ghost {
-    border-color: var(--xai-border-strong);
     background: transparent;
+    border-color: var(--xai-border);
+    font-family: var(--font-mono);
     color: var(--xai-text) !important;
 }
 
 .tw-btn-ghost:hover {
-    background: var(--xai-surface-strong);
-    color: var(--xai-text-muted) !important;
+    border-color: var(--xai-border-strong);
 }
 
 .tw-section-heading {
     margin-top: 48px !important;
+    font-family: var(--font-mono);
     font-size: 30px !important;
     font-weight: 400 !important;
     line-height: 1.2 !important;
@@ -339,33 +539,78 @@ button,
     color: var(--xai-text);
     text-decoration: none !important;
     transition:
-        border-color 150ms ease,
-        background-color 150ms ease,
-        color 150ms ease;
+        all 25ms ease-out;
 }
 
 .tw-card:hover {
     border-color: var(--xai-border-strong);
     background: var(--xai-surface-hover);
     color: var(--xai-text);
+    cursor: pointer;
 }
 
 .tw-card-title {
+    font-family: var(--font-mono) !important;
     color: var(--xai-text);
-    font-size: 22px;
+    font-size: 1rem;
     font-weight: 400;
     line-height: 1.25;
 }
 
 .tw-card-body {
     margin-top: 24px;
+    font-family: var(--font-mono) !important;
     color: var(--xai-text-secondary);
-    font-size: 16px;
+    font-size: 0.75rem;
     line-height: 1.5;
 }
 
 .tw-card:hover .tw-card-body {
     color: var(--xai-text-muted);
+}
+
+.tw-page-footer {
+    gap: 8px !important;
+    margin-top: 48px;
+}
+
+.tw-page-footer a {
+    min-height: min-content;
+    border: 1px solid var(--xai-border) !important;
+    border-radius: 0 !important;
+    background: var(--xai-surface) !important;
+    box-shadow: none !important;
+    color: var(--xai-text) !important;
+    padding: 24px !important;
+    text-decoration: none !important;
+    transition:
+        border-color 25ms ease-out,
+        background-color 25ms ease-out,
+        color 25ms ease-out !important;
+}
+
+.tw-page-footer a:hover {
+    border-color: var(--xai-border-strong) !important;
+    background: var(--xai-surface-hover) !important;
+}
+
+.tw-page-footer a > div {
+    color: var(--xai-text) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 1rem;
+    font-weight: 400 !important;
+    line-height: 1.25;
+}
+
+.tw-page-footer a > p {
+    color: var(--xai-text-secondary) !important;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.tw-page-footer a:hover > p {
+    color: var(--xai-text-muted) !important;
 }
 
 .tw-callout {

@@ -21,12 +21,17 @@
     },
     "include": [
         "next-env.d.ts",
-        ".next/types/**/*.ts",
         ".source/**/*.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.mts",
-        "**/*.mdx"
+        "app/**/*.ts",
+        "app/**/*.tsx",
+        "components/**/*.ts",
+        "components/**/*.tsx",
+        "content/**/*.mdx",
+        "lib/**/*.ts",
+        "lib/**/*.tsx",
+        "*.ts",
+        "*.tsx",
+        "*.mts"
     ],
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules", ".next", "dist"]
 }

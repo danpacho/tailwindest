@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 
 export default function Layout({ children }: { children: ReactNode }) {
     return (
-        <html className="dark" lang="en" suppressHydrationWarning>
+        <html lang="en" suppressHydrationWarning>
             <body className="flex min-h-screen flex-col">
                 <RootProvider>{children}</RootProvider>
             </body>
