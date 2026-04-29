@@ -66,7 +66,7 @@ import { defineConfig } from "vite"
 export default defineConfig({
     plugins: [
         tailwindest({
-            mode: "strict",
+            mode: "loose",
             debug: true,
             sourceMap: true,
         }),
@@ -149,23 +149,24 @@ leaves are the canonical form for `CreateCompiledTailwindest`.
 
 ## Strict and Loose Modes
 
-`strict` mode is for CI and production builds. It fails when a Tailwindest call
-cannot be compiled exactly.
-
-```ts
-tailwindest({ mode: "strict" })
-```
-
-`loose` mode is for incremental migration. Unsupported call sites stay in the
-source as runtime fallbacks, while static candidates are still recorded for the
-Tailwind manifest.
+`loose` mode is the default. It is the safest first-adoption mode for real
+applications. Unsupported call sites stay in the source as runtime fallbacks,
+while static candidates are still recorded for the Tailwind manifest.
 
 ```ts
 tailwindest({ mode: "loose", debug: true })
 ```
 
-Use `strict` when you expect zero-runtime output. Use `loose` when a project is
-still moving dynamic styling patterns into compiler-supported shapes.
+`strict` mode is for CI and zero-runtime production gates. It fails when a
+Tailwindest call cannot be compiled exactly.
+
+```ts
+tailwindest({ mode: "strict", debug: true, sourceMap: true })
+```
+
+Use `loose` while a project is still moving dynamic styling patterns into
+compiler-supported shapes. Use `strict` when you expect every supported
+Tailwindest call to compile without runtime fallback.
 
 ## Options
 
@@ -173,7 +174,7 @@ still moving dynamic styling patterns into compiler-supported shapes.
 tailwindest({
     include: [/src\/.*\.[jt]sx?$/],
     exclude: [/node_modules/],
-    mode: "strict",
+    mode: "loose",
     debug: true,
     sourceMap: true,
     variantTableLimit: 256,
@@ -186,7 +187,7 @@ tailwindest({
 | --- | --- | --- |
 | `include` | all JS/TS modules | Source id patterns eligible for compilation. |
 | `exclude` | none | Source id patterns never compiled or used as CSS entries. |
-| `mode` | `"strict"` | Unsupported-value policy: `"strict"` or `"loose"`. |
+| `mode` | `"loose"` | Unsupported-value policy: `"loose"` or `"strict"`. |
 | `debug` | `false` | Writes `.tailwindest/debug-manifest.json`. |
 | `debugFile` | `.tailwindest/debug-manifest.json` | Custom debug manifest path. |
 | `sourceMap` | `false` | Emits source maps for exact replacements. |
@@ -246,7 +247,7 @@ Enable debug mode during integration:
 
 ```ts
 tailwindest({
-    mode: "strict",
+    mode: "loose",
     debug: true,
     sourceMap: true,
 })
@@ -274,7 +275,7 @@ import { compile } from "@tailwindest/compiler"
 
 const result = compile(source, {
     fileName: "/repo/src/button.tsx",
-    mode: "strict",
+    mode: "loose",
     sourceMap: true,
 })
 
