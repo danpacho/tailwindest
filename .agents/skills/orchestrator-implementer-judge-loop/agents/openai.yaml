@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrator Judge Loop"
+  short_description: "Strict implementer and judge task cycle"
+  default_prompt: "Use $orchestrator-implementer-judge-loop to run each task through strategy, implementation, judgment, and regression until final pass."
