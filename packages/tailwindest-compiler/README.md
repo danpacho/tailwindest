@@ -4,12 +4,13 @@
 <img src="../../images/tailwindest-compiler.png" width="550px" alt="tailwindest compiler banner" />
 </div>
 
-Zero-runtime CSS-in-JS compiler for Tailwindest.
+Progressive CSS-in-JS compiler for Tailwindest.
 
 `@tailwindest/compiler` evaluates supported Tailwindest `createTools()` calls
 at build time and replaces them with static Tailwind class strings, style
-objects, or bounded lookup tables. Fully compiled browser bundles do not ship
-Tailwindest styler runtime code.
+objects, or bounded lookup tables. Calls that cannot be proven static remain as
+runtime Tailwindest calls with diagnostics and manifest candidates where they
+can be known safely.
 
 ## Status
 
@@ -44,7 +45,6 @@ import { defineConfig } from "vite"
 export default defineConfig({
     plugins: [
         tailwindest({
-            mode: "loose",
             debug: true,
             sourceMap: true,
         }),
@@ -55,32 +55,50 @@ export default defineConfig({
 
 The plugin pair performs JavaScript/TypeScript replacement and injects the
 Tailwind CSS v4 `@source inline()` candidate manifest into CSS entries.
+During CSS processing it also loads Tailwind variant metadata through
+`@tailwindest/tailwind-internal`, the same internal Tailwind compiler layer used
+by `create-tailwind-type`. The compiler does not maintain a hard-coded variant
+key list.
 
 ## Programmatic Usage
 
 ```ts
-import { compile } from "@tailwindest/compiler"
+import { compile, compileAsync } from "@tailwindest/compiler"
 
 const result = compile(source, {
     fileName: "/repo/src/button.tsx",
-    mode: "loose",
     sourceMap: true,
 })
 
 console.log(result.code)
 console.log(result.diagnostics)
+
+const cssBacked = await compileAsync(source, {
+    fileName: "/repo/src/button.tsx",
+    cssRoot: "/repo/src/app.css",
+})
 ```
 
-## Strict and Loose Modes
+Use `compileAsync()` with `cssRoot` or `cssSource` when source uses
+`CreateCompiledTailwindest` nested shorthand. Plain `compile()` is intentionally
+file-local; without Tailwind CSS metadata it preserves shorthand-dependent call
+sites as runtime fallbacks instead of guessing variant keys.
 
-`loose` mode is the default. It preserves unsupported runtime calls while
-retaining every statically knowable Tailwind candidate in the manifest. Use it
-for first adoption and incremental migration.
+## Progressive Runtime Fallback
 
-`strict` mode fails when exact compile-time evaluation is not possible. Use it
-for CI and production zero-runtime release gates.
+The compiler has one public behavior: exact calls are compiled when they can be
+proven statically, and unsupported calls are preserved for Tailwindest runtime.
+Fallback diagnostics explain why a call remained at runtime, and statically
+knowable Tailwind candidates are retained in the manifest.
+
+There is no compiler policy switch. Production builds, development builds,
+debug manifests, and programmatic compilation all use this same fallback-safe
+contract.
 
 ## Nested Variants
+
+Nested variant prefix generation is owned by the compiler. Normal Tailwindest
+runtime keeps object keys structural and preserves authored leaf class strings.
 
 Nested Tailwind variant keys in `tw.style()` objects are canonical syntax:
 
@@ -122,8 +140,7 @@ The compiler targets the public Tailwindest `createTools()` API:
 - `tw.mergeProps(...)`
 - `tw.mergeRecord(...)`
 
-Unsupported dynamic values either fail in strict mode or remain as runtime
-fallbacks in loose mode.
+Unsupported dynamic values remain runtime fallbacks with diagnostics.
 
 ## Debug Artifacts
 
@@ -143,15 +160,15 @@ The package release gate is:
 
 ```bash
 pnpm ts:typecheck
-pnpm --filter @tailwindest/compiler build
-pnpm --filter tailwindest build
-pnpm --filter @tailwindest/compiler exec vitest run src
-pnpm vitest run packages/tailwindest/src
-pnpm --filter @tailwindest/compiler e2e:vite-tailwind-v4
-pnpm --filter @tailwindest/compiler e2e:frameworks
-pnpm --filter @tailwindest/compiler e2e:design-system
+pnpm test
+pnpm build
 pnpm --filter @tailwindest/compiler pack:dry
-git diff --check -- packages/compiler packages/tailwindest pnpm-lock.yaml
+git diff --check -- packages/tailwindest-compiler packages/tailwindest packages/tailwindest-core packages/tailwind-internal packages/create-tailwind-type pnpm-lock.yaml
 ```
+
+The root test script runs through Turbo. Package-local Vitest configs own any
+required source aliases, and the compiler test runner serializes framework e2e
+files so multiple dev/preview servers do not compete inside one package test
+process.
 
 See `docs/ARCHITECTURE.md` for the full production architecture.

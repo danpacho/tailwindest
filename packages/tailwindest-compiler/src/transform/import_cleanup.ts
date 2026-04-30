@@ -107,7 +107,7 @@ export const cleanupRuntimeImports = ({
         const defaultImportName = statement.importClause?.name?.text
         if (preservedSpecifiers.length === 0 && !defaultImportName) {
             edits.push({
-                start: statement.getFullStart(),
+                start: statement.getStart(sourceFile),
                 end: includeFollowingLineBreak(code, statement.getEnd()),
                 text: "",
             })
@@ -155,6 +155,7 @@ const collectRemovableCreateToolStatements = (
         const declaration = statement.declarationList.declarations[0]
         if (
             declaration &&
+            !hasExportModifier(statement) &&
             statement.declarationList.declarations.length === 1 &&
             ts.isIdentifier(declaration.name) &&
             declaration.initializer &&
@@ -168,6 +169,12 @@ const collectRemovableCreateToolStatements = (
     }
     return removable
 }
+
+const hasExportModifier = (node: ts.VariableStatement): boolean =>
+    ts
+        .getModifiers(node)
+        ?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword) ??
+    false
 
 const isIdentifierUsed = (
     sourceFile: ts.SourceFile,

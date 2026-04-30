@@ -55,6 +55,57 @@ describe("tailwindest symbol detector", () => {
         ])
     })
 
+    it("marks imported runtime-merger receivers and preserves no-merger aliases", () => {
+        const analyzer = createStaticAnalyzer({
+            "/src/tools.ts": `
+                import { createTools } from "tailwindest"
+                const runtimeMerger = (...classes: string[]) => classes[0] ?? ""
+                export const runtimeTw = createTools({ merger: runtimeMerger })
+                export const runtimeAlias = runtimeTw
+                export const plainTw = createTools()
+                export const plainAlias = plainTw
+            `,
+            [app]: `
+                import { runtimeAlias, plainAlias } from "./tools"
+                runtimeAlias.join("px-2", "px-4")
+                plainAlias.join("px-2", "px-4")
+            `,
+        })
+
+        const result = analyzer.analyzeFile(app)
+
+        expect(result.calls.map((call) => call.receiver.runtimeMerger)).toEqual(
+            [true, false]
+        )
+        expect(result.diagnostics).toEqual([])
+    })
+
+    it("treats unknown and spread createTools options as runtime merger risks", () => {
+        const analyzer = createStaticAnalyzer({
+            "/src/tools.ts": `
+                import { createTools } from "tailwindest"
+                declare const unknownOptions: { merger?: (...classes: string[]) => string }
+                const safeOptions = { other: true }
+                const spreadOptions = { ...safeOptions }
+                export const unknownTw = createTools(unknownOptions)
+                export const safeTw = createTools(safeOptions)
+                export const spreadTw = createTools(spreadOptions)
+            `,
+            [app]: `
+                import { unknownTw, safeTw, spreadTw } from "./tools"
+                unknownTw.join("px-2")
+                safeTw.join("px-2")
+                spreadTw.join("px-2")
+            `,
+        })
+
+        const result = analyzer.analyzeFile(app)
+
+        expect(result.calls.map((call) => call.receiver.runtimeMerger)).toEqual(
+            [true, false, true]
+        )
+    })
+
     it("detects destructured tools when createTools() provenance remains provable", () => {
         const analyzer = createStaticAnalyzer({
             [app]: `

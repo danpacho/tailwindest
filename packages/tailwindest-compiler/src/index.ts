@@ -2,24 +2,12 @@ import type { CompilerDiagnostic } from "./core/diagnostic_types"
 import type { MergerPolicy } from "./core/merger"
 import type { ViteSourceMap } from "./transform/replacement"
 import { createCompilerContext } from "./vite/context"
-
-/**
- * Controls how the compiler handles values that cannot be proven static.
- *
- * - `"strict"` fails compilation for unsupported dynamic values.
- * - `"loose"` keeps the original runtime call in place and still reports
- *   diagnostics/candidates for debug and Tailwind source generation.
- *
- * `"loose"` is the default so existing applications can adopt the compiler
- * incrementally. Use `"strict"` for production zero-runtime CI gates.
- *
- * @public
- */
-export type CompileMode = "strict" | "loose"
+import { loadTailwindNestGroups } from "@tailwindest/tailwind-internal"
+import { createCompiledVariantResolver } from "./core/compiled_variant_resolver"
 
 /**
  * Options for compiling one TypeScript/JavaScript source string with the
- * Tailwindest zero-runtime compiler.
+ * Tailwindest progressive compiler.
  *
  * This API is intentionally file-local. Vite projects should prefer the
  * `tailwindest()` plugin from `@tailwindest/compiler/vite`, because the plugin
@@ -45,13 +33,6 @@ export interface CompileOptions {
     root?: string
 
     /**
-     * Unsupported-value policy for the compile operation.
-     *
-     * @defaultValue `"loose"`
-     */
-    mode?: CompileMode
-
-    /**
      * Emit a Vite-compatible source map that maps every exact replacement back
      * to the original Tailwindest call span.
      *
@@ -71,6 +52,20 @@ export interface CompileOptions {
      * without invoking a runtime merger.
      */
     merger?: MergerPolicy
+}
+
+export interface CompileAsyncOptions extends CompileOptions {
+    /**
+     * Tailwind CSS entry file used to load the project design system for
+     * nested shorthand variant compilation.
+     */
+    cssRoot?: string
+
+    /**
+     * Inline Tailwind CSS source used to load the project design system for
+     * nested shorthand variant compilation.
+     */
+    cssSource?: string
 }
 
 /**
@@ -114,7 +109,7 @@ export interface CompileResult {
 }
 
 /**
- * Compile one source file with the Tailwindest zero-runtime compiler.
+ * Compile one source file with the Tailwindest progressive compiler.
  *
  * This is the stable programmatic entry point for build tools that cannot use
  * the Vite plugin. It performs the same evaluator and replacement pass used by
@@ -128,13 +123,9 @@ export interface CompileResult {
  *
  * const result = compile(source, {
  *   fileName: "/repo/src/button.tsx",
- *   mode: "loose",
  *   sourceMap: true,
  * })
  * ```
- *
- * @throws Error when `mode` is `"strict"` and the source contains a
- * Tailwindest call that cannot be compiled exactly.
  *
  * @public
  */
@@ -142,10 +133,41 @@ export function compile(
     source: string,
     options: CompileOptions = {}
 ): CompileResult {
+    return compileWithResolver(source, options)
+}
+
+export async function compileAsync(
+    source: string,
+    options: CompileAsyncOptions = {}
+): Promise<CompileResult> {
+    const variantGroups =
+        options.cssRoot === undefined && options.cssSource === undefined
+            ? []
+            : await loadTailwindNestGroups({
+                  ...(options.cssRoot === undefined
+                      ? {}
+                      : { cssRoot: options.cssRoot }),
+                  ...(options.cssSource === undefined
+                      ? {}
+                      : { cssSource: options.cssSource }),
+              })
+    return compileWithResolver(
+        source,
+        options,
+        variantGroups.length > 0
+            ? createCompiledVariantResolver(variantGroups)
+            : undefined
+    )
+}
+
+function compileWithResolver(
+    source: string,
+    options: CompileOptions,
+    variantResolver?: ReturnType<typeof createCompiledVariantResolver>
+): CompileResult {
     const fileName = options.fileName ?? "/tailwindest-entry.tsx"
     const compilerOptions = {
         include: [fileName],
-        mode: options.mode ?? "loose",
         ...(options.sourceMap === undefined
             ? {}
             : { sourceMap: options.sourceMap }),
@@ -157,6 +179,7 @@ export function compile(
     const context = createCompilerContext({
         root: options.root ?? process.cwd(),
         options: compilerOptions,
+        variantResolver,
     })
     const result = context.transformJs(source, fileName)
 
@@ -201,8 +224,6 @@ export type {
  */
 export type {
     EvaluationFallback,
-    EvaluationMode,
-    EvaluationOptions,
     EvaluationResult,
     MergerPolicy,
 } from "./core/merger"
@@ -229,7 +250,9 @@ export { defaultMerge, evaluateMergerPolicy } from "./core/merger"
  * @public
  */
 export { compileTailwindestCall } from "./core/api_compile"
+export { createCompiledVariantResolver } from "./core/compiled_variant_resolver"
 export type {
+    ApiCompileOptions,
     ApiCompileInput,
     ApiCompileResult,
     CompileValue,
@@ -239,6 +262,7 @@ export type {
     UnsupportedCompileValue,
     VariantPropsValue,
 } from "./core/api_compile"
+export type { CompiledVariantResolver } from "./core/compiled_variant_resolver"
 
 /**
  * Runtime-free generated expression shape returned by low-level compile APIs.
@@ -262,9 +286,8 @@ export type { ReplacementPlan } from "./transform/replacement"
  * @public
  */
 export type {
-    DiagnosticModeBehavior,
+    DiagnosticFallbackBehavior,
     RichCompilerDiagnostic,
-    TailwindestMode,
 } from "./debug/diagnostics"
 export type {
     TailwindestDebugFile,

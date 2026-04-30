@@ -30,6 +30,7 @@ export interface TailwindestSymbol {
     name: string
     sourceFile: string
     provenance: "createTools"
+    runtimeMerger: boolean
 }
 
 export interface ResolvedStaticArgument {
@@ -46,6 +47,8 @@ export interface TailwindestCallSite {
 
 export interface DetectionResult {
     calls: TailwindestCallSite[]
+    provenReceiverSpans: SourceSpan[]
+    runtimeMergerCalls: SourceSpan[]
     dependencies: string[]
     diagnostics: CompilerDiagnostic[]
 }

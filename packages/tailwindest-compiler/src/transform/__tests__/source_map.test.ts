@@ -64,7 +64,7 @@ describe("source maps", () => {
                     `"flex"`
                 ),
             ],
-            sourceMapMode: "strict",
+            sourceMapBehavior: "revert-on-error",
         })
 
         expect(result.map).toMatchObject({
@@ -103,7 +103,7 @@ describe("source maps", () => {
         expect(firstSegment).toEqual([12, 0, 0, callStart])
     })
 
-    it("returns original code and diagnostic when strict source map generation fails", () => {
+    it("returns original code and diagnostic when source map failure policy reverts on error", () => {
         const code = `const cls = tw.style({ display: "flex" }).class()`
         const result = substituteTailwindest({
             fileName,
@@ -115,7 +115,7 @@ describe("source maps", () => {
                     `"flex"`
                 ),
             ],
-            sourceMapMode: "strict",
+            sourceMapBehavior: "revert-on-error",
             createSourceMap: () => {
                 throw new Error("map failure")
             },
@@ -129,7 +129,7 @@ describe("source maps", () => {
         ).toContain("SOURCE_MAP_FAILED")
     })
 
-    it("keeps changed code with a diagnostic when loose source map generation fails", () => {
+    it("keeps changed code with a diagnostic when source map failure policy reports diagnostics", () => {
         const code = `const cls = tw.style({ display: "flex" }).class()`
         const result = substituteTailwindest({
             fileName,
@@ -141,7 +141,7 @@ describe("source maps", () => {
                     `"flex"`
                 ),
             ],
-            sourceMapMode: "loose",
+            sourceMapBehavior: "diagnostic-on-error",
             createSourceMap: () => {
                 throw new Error("map failure")
             },

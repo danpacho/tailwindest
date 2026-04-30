@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
     createCandidateManifest,
     getSortedExcludedCandidates,
+    getSortedCandidateRecords,
     getSortedCandidates,
     normalizeCandidateFileId,
     removeFileCandidates,
@@ -16,6 +17,141 @@ const warning: CompilerDiagnostic = {
 }
 
 describe("CandidateManifest", () => {
+    it("normalizes exact and fallback-known candidate records while preserving sorted string candidates", () => {
+        const manifest = createCandidateManifest()
+        const span = { fileName: "/src/app.tsx", start: 12, end: 30 }
+
+        updateFileCandidates(manifest, "/src/app.tsx", {
+            hash: "one",
+            candidates: [],
+            candidateRecords: [
+                { candidate: " py-2 ", kind: "fallback-known" },
+                { candidate: "px-4", kind: "exact", sourceSpan: span },
+                { candidate: "px-4", kind: "exact", sourceSpan: span },
+                { candidate: "", kind: "exact" },
+            ],
+            diagnostics: [],
+        })
+
+        expect(manifest.byFile.get("/src/app.tsx")?.candidateRecords).toEqual([
+            { candidate: "px-4", kind: "exact", sourceSpan: span },
+            { candidate: "py-2", kind: "fallback-known" },
+        ])
+        expect(getSortedCandidates(manifest)).toEqual(["px-4", "py-2"])
+        expect(getSortedCandidateRecords(manifest)).toEqual([
+            { candidate: "px-4", kind: "exact", sourceSpan: span },
+            { candidate: "py-2", kind: "fallback-known" },
+        ])
+    })
+
+    it("treats provenance changes as effective updates but ignores equivalent ordering and hash-only changes", () => {
+        const manifest = createCandidateManifest()
+
+        updateFileCandidates(manifest, "/src/app.tsx", {
+            hash: "one",
+            candidates: [],
+            candidateRecords: [
+                { candidate: "py-2", kind: "fallback-known" },
+                { candidate: "px-4", kind: "exact" },
+            ],
+            diagnostics: [warning],
+        })
+        const firstRevision = manifest.revision
+
+        expect(
+            updateFileCandidates(manifest, "/src/app.tsx", {
+                hash: "two",
+                candidates: [],
+                candidateRecords: [
+                    { candidate: "px-4", kind: "exact" },
+                    { candidate: "py-2", kind: "fallback-known" },
+                    { candidate: "py-2", kind: "fallback-known" },
+                ],
+                diagnostics: [warning],
+            })
+        ).toBe(false)
+        expect(manifest.revision).toBe(firstRevision)
+
+        expect(
+            updateFileCandidates(manifest, "/src/app.tsx", {
+                hash: "three",
+                candidates: [],
+                candidateRecords: [
+                    { candidate: "px-4", kind: "fallback-known" },
+                    { candidate: "py-2", kind: "fallback-known" },
+                ],
+                diagnostics: [warning],
+            })
+        ).toBe(true)
+        expect(manifest.revision).toBe(firstRevision + 1)
+    })
+
+    it("removes stale exact and fallback-known records when file ownership is removed", () => {
+        const manifest = createCandidateManifest()
+
+        updateFileCandidates(manifest, "/src/a.ts", {
+            hash: "a1",
+            candidates: [],
+            candidateRecords: [
+                { candidate: "shared", kind: "exact" },
+                { candidate: "only-a", kind: "fallback-known" },
+            ],
+            diagnostics: [],
+        })
+        updateFileCandidates(manifest, "/src/b.ts", {
+            hash: "b1",
+            candidates: [],
+            candidateRecords: [{ candidate: "shared", kind: "fallback-known" }],
+            diagnostics: [],
+        })
+
+        expect(removeFileCandidates(manifest, "/src/a.ts?mtime=1")).toBe(true)
+
+        expect(getSortedCandidates(manifest)).toEqual(["shared"])
+        expect(getSortedCandidateRecords(manifest)).toEqual([
+            { candidate: "shared", kind: "fallback-known" },
+        ])
+    })
+
+    it("keeps deterministic record order and does not exclude a raw nested leaf also included at top level", () => {
+        const manifest = createCandidateManifest()
+
+        updateFileCandidates(manifest, "/src/shorthand.ts", {
+            hash: "a1",
+            candidates: [],
+            candidateRecords: [
+                { candidate: "dark:bg-red-900", kind: "fallback-known" },
+                { candidate: "bg-red-900", kind: "exact" },
+                {
+                    candidate: "bg-red-900",
+                    kind: "fallback-known",
+                    sourceSpan: {
+                        fileName: "/src/shorthand.ts",
+                        start: 40,
+                        end: 70,
+                    },
+                },
+            ],
+            excludedCandidates: ["bg-red-900"],
+            diagnostics: [],
+        })
+
+        expect(getSortedCandidateRecords(manifest)).toEqual([
+            { candidate: "bg-red-900", kind: "exact" },
+            {
+                candidate: "bg-red-900",
+                kind: "fallback-known",
+                sourceSpan: {
+                    fileName: "/src/shorthand.ts",
+                    start: 40,
+                    end: 70,
+                },
+            },
+            { candidate: "dark:bg-red-900", kind: "fallback-known" },
+        ])
+        expect(getSortedExcludedCandidates(manifest)).toEqual([])
+    })
+
     it("normalizes file ids and keeps stable sorted global candidates", () => {
         const manifest = createCandidateManifest()
 

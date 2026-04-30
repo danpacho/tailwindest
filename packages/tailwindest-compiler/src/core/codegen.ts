@@ -19,7 +19,8 @@ export function resetCodegenSymbolCounter(): void {
 
 export function createGeneratedSymbol(prefix: string): string {
     symbolCounter += 1
-    return `__tw_${prefix}_${symbolCounter}`
+    const safePrefix = sanitizeIdentifierPart(prefix)
+    return `__tw_${safePrefix}_${symbolCounter}`
 }
 
 export function emitStringLiteral(value: string): GeneratedExpression {
@@ -74,4 +75,10 @@ export function literalExpression(value: unknown): string {
         return `{${entries.join(",")}}`
     }
     return "undefined"
+}
+
+function sanitizeIdentifierPart(value: string): string {
+    const sanitized = value.replace(/[^A-Za-z0-9_$]/g, "_")
+    if (sanitized.length === 0) return "value"
+    return /^[0-9]/.test(sanitized) ? `_${sanitized}` : sanitized
 }

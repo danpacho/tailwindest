@@ -21,28 +21,7 @@ export type MergerPolicy =
     | { kind: "unsupported"; reason: string }
 
 /**
- * Evaluation mode used by low-level compiler APIs.
- *
- * @public
- */
-export type EvaluationMode = "strict" | "loose"
-
-/**
- * Options shared by class merge and evaluation helpers.
- *
- * @public
- */
-export interface EvaluationOptions {
-    /**
-     * Unsupported-value policy for low-level evaluation helpers.
-     *
-     * @defaultValue `"loose"`
-     */
-    mode?: EvaluationMode
-}
-
-/**
- * Reason a value was preserved for runtime fallback in loose mode.
+ * Reason a value was preserved for runtime fallback.
  *
  * @public
  */
@@ -98,20 +77,17 @@ export function defaultMerge(classList: readonly string[]): string {
  */
 export function evaluateMergerPolicy(
     classList: readonly MergerClassValue[],
-    policy: MergerPolicy,
-    options: EvaluationOptions = {}
+    policy: MergerPolicy
 ): EvaluationResult<string> {
     const value = defaultMerge(flattenMergerClassValues(classList))
-    return applyMergerPolicy(value, policy, options)
+    return applyMergerPolicy(value, policy)
 }
 
 export function applyMergerPolicy(
     value: string,
-    policy: MergerPolicy,
-    options: EvaluationOptions = {}
+    policy: MergerPolicy
 ): EvaluationResult<string> {
     const candidates = candidatesFromClassName(value)
-    const mode = options.mode ?? "loose"
 
     if (policy.kind === "none") {
         return {
@@ -123,48 +99,42 @@ export function applyMergerPolicy(
     }
 
     if (policy.kind === "unsupported") {
-        return unsafeMergerResult(value, candidates, mode, {
+        return unsafeMergerResult(value, candidates, {
             code: "UNSUPPORTED_MERGER",
             message: policy.reason,
-            severity: mode === "strict" ? "error" : "warning",
+            severity: "warning",
         })
     }
 
     if (policy.kind === "known" && policy.configHash.length === 0) {
-        return unsafeMergerResult(value, candidates, mode, {
+        return unsafeMergerResult(value, candidates, {
             code: "MERGER_CONFIG_MISSING",
             message: "Known merger policy requires a stable config hash.",
-            severity: "error",
+            severity: "warning",
         })
     }
 
-    return unsafeMergerResult(value, candidates, mode, {
+    return unsafeMergerResult(value, candidates, {
         code: "NON_DETERMINISTIC_MERGER",
         message: "No equivalent build-time merger evaluator is available.",
-        severity: mode === "strict" ? "error" : "warning",
+        severity: "warning",
     })
 }
 
 function unsafeMergerResult(
     value: string,
     candidates: string[],
-    mode: EvaluationMode,
     diagnostic: CompilerDiagnostic
 ): EvaluationResult<string> {
-    const result: EvaluationResult<string> = {
+    return {
         value,
         candidates,
         diagnostics: [diagnostic],
         exact: false,
-    }
-
-    if (mode === "loose") {
-        result.fallback = {
+        fallback: {
             reason: diagnostic.message,
-        }
+        },
     }
-
-    return result
 }
 
 function flattenMergerClassValues(

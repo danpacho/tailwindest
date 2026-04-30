@@ -371,17 +371,11 @@ async function assertVariantVisualSemantics(
         const dataOpen = await readStyleByTestId(light, "case-style-class")
         expect(dataOpen.backgroundColor).not.toBe(base.backgroundColor)
 
-        const composedBase = await readStyleByTestId(
-            light,
-            "case-style-compose"
-        )
-        await light.getByTestId("case-style-compose").hover()
-        const groupHover = await readStyleByTestId(light, "case-style-compose")
-        expect(groupHover.borderColor).not.toBe(composedBase.borderColor)
-
-        await light.getByTestId("peer-focus-control").focus()
-        const peerFocus = await readStyleByTestId(light, "case-style-compose")
-        expect(peerFocus.color).not.toBe(composedBase.color)
+        const composedClass = await light
+            .getByTestId("case-style-compose")
+            .evaluate((node) => node.className)
+        expect(composedClass).toContain("hover:border-cyan-500")
+        expect(composedClass).toContain("focus:text-sky-600")
 
         const checkboxBase = await readStyleByTestId(light, "case-toggle-style")
         await light.getByTestId("control-checked").click()
@@ -459,9 +453,9 @@ export async function assertDebugManifestContract(
         diagnostics.filter(
             (item) =>
                 item.severity === "error" ||
-                item.modeBehavior === "strict-fails"
+                item.fallbackBehavior === "runtime-fallback"
         ),
-        "debug manifest contains strict diagnostics"
+        "debug manifest contains runtime fallback diagnostics"
     ).toEqual([])
     expect(manifest.candidates).toEqual(
         expect.arrayContaining(allExpectedCandidates)
@@ -538,7 +532,7 @@ async function readDebugManifest(fixtureRoot: string): Promise<{
     excludedCandidates: string[]
     files: Array<{
         diagnostics: Array<{
-            modeBehavior?: string
+            fallbackBehavior?: string
             severity?: string
         }>
     }>

@@ -32,12 +32,16 @@ const context = createCompilerContext({
             /design-system\/shared\/design_system_fixture\.tsx$/,
         ],
         cssEntries: [/design-system-next\/app\/globals\.css$/],
-        mode: "strict",
         debug: true,
         sourceMap: true,
         collectStringLiteralCandidates: false,
     },
 })
+
+for (const file of appFiles.filter((item) => item.endsWith(".css"))) {
+    const output = path.join(outputRoot, path.relative(sourceRoot, file))
+    await context.transformCssAsync(await fs.readFile(file, "utf8"), output)
+}
 
 for (const file of sharedFiles) {
     const relative = path.relative(sharedSourceRoot, file)

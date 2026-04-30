@@ -55,6 +55,133 @@ describe("cleanupRuntimeImports", () => {
         expect(result.changed).toBe(false)
     })
 
+    it("preserves exported createTools setup after exact replacements", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `export const tw = createTools()`,
+            `export const cls = tw.join("px-4")`,
+        ].join("\n")
+
+        const result = substituteTailwindest({
+            fileName,
+            code,
+            cleanImports: true,
+            plans: [
+                {
+                    ...planFor(code, `tw.join("px-4")`, `"px-4"`, ["px-4"]),
+                    kind: "join",
+                },
+            ],
+        })
+
+        expect(result.code).toBe(
+            [
+                `import { createTools } from "tailwindest"`,
+                `export const tw = createTools()`,
+                `export const cls = "px-4"`,
+            ].join("\n")
+        )
+    })
+
+    it("removes exact-only local createTools setup after replacements", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `const cls = tw.join("px-4")`,
+        ].join("\n")
+
+        const result = substituteTailwindest({
+            fileName,
+            code,
+            cleanImports: true,
+            plans: [
+                {
+                    ...planFor(code, `tw.join("px-4")`, `"px-4"`, ["px-4"]),
+                    kind: "join",
+                },
+            ],
+        })
+
+        expect(result.code).toBe(`const cls = "px-4"`)
+    })
+
+    it("preserves createTools setup when exact and fallback calls are mixed", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `const exact = tw.join("px-4")`,
+            `const fallback = tw.join(dynamicValue)`,
+        ].join("\n")
+
+        const result = substituteTailwindest({
+            fileName,
+            code,
+            cleanImports: true,
+            plans: [
+                {
+                    ...planFor(code, `tw.join("px-4")`, `"px-4"`, ["px-4"]),
+                    kind: "join",
+                },
+            ],
+        })
+
+        expect(result.code).toBe(
+            [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `const exact = "px-4"`,
+                `const fallback = tw.join(dynamicValue)`,
+            ].join("\n")
+        )
+    })
+
+    it("preserves multi-declaration createTools statements", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools(), untouched = 1`,
+            `const cls = "px-4"`,
+        ].join("\n")
+
+        const result = cleanupRuntimeImports({ fileName, code })
+
+        expect(result.code).toBe(code)
+        expect(result.changed).toBe(false)
+    })
+
+    it("preserves aliased createTools imports used by runtime setup", () => {
+        const code = [
+            `import { createTools as createTw } from "tailwindest"`,
+            `const tw = createTw()`,
+            `const cls = tw.join(dynamicValue)`,
+        ].join("\n")
+
+        const result = cleanupRuntimeImports({ fileName, code })
+
+        expect(result.code).toBe(code)
+        expect(result.changed).toBe(false)
+    })
+
+    it("preserves type-only imports and unrelated external named imports", () => {
+        const code = [
+            `import type { ToolOptions } from "tailwindest"`,
+            `import { helper } from "other-lib"`,
+            `import { createTools } from "tailwindest"`,
+            `helper()`,
+            `const cls = "px-4"`,
+        ].join("\n")
+
+        const result = cleanupRuntimeImports({ fileName, code })
+
+        expect(result.code).toBe(
+            [
+                `import type { ToolOptions } from "tailwindest"`,
+                `import { helper } from "other-lib"`,
+                `helper()`,
+                `const cls = "px-4"`,
+            ].join("\n")
+        )
+    })
+
     it("preserves unrelated named imports from the same declaration", () => {
         const code = [
             `import { createTools, keepMe } from "tailwindest"`,

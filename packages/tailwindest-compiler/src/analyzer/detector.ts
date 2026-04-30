@@ -59,13 +59,21 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
         const normalized = normalizeFileName(fileName)
         const source = this.files.get(normalized) ?? ""
         const calls: DetectionResult["calls"] = []
+        const provenReceiverSpans: DetectionResult["provenReceiverSpans"] = []
+        const runtimeMergerCalls: DetectionResult["runtimeMergerCalls"] = []
         const diagnostics: DetectionResult["diagnostics"] = []
         const dependencies = new Set<string>()
 
         this.dependencyGraph.clearConsumer(normalized)
 
         if (!hasTailwindestSentinel(source)) {
-            return { calls, dependencies: [], diagnostics }
+            return {
+                calls,
+                provenReceiverSpans,
+                runtimeMergerCalls,
+                dependencies: [],
+                diagnostics,
+            }
         }
 
         const sourceFile = this.getSourceFile(normalized)
@@ -129,6 +137,16 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
                 return
             }
 
+            const span = {
+                fileName: normalized,
+                start: node.getStart(sourceFile),
+                end: node.getEnd(),
+            }
+            provenReceiverSpans.push(span)
+            if (receiver.runtimeMerger) {
+                runtimeMergerCalls.push(span)
+            }
+
             const resolvedArguments = resolver.resolveArguments(
                 normalized,
                 node.arguments
@@ -141,11 +159,7 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
             if (resolvedArguments.diagnostics.length === 0) {
                 calls.push({
                     kind: propertyName as TailwindestCallKind,
-                    span: {
-                        fileName: normalized,
-                        start: node.getStart(sourceFile),
-                        end: node.getEnd(),
-                    },
+                    span,
                     receiver,
                     arguments: resolvedArguments.arguments,
                 })
@@ -158,6 +172,8 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
 
         return {
             calls,
+            provenReceiverSpans,
+            runtimeMergerCalls,
             dependencies: [...dependencies],
             diagnostics,
         }
@@ -421,8 +437,13 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
                 return undefined
             }
 
-            if (this.isCreateToolsCall(declaration.initializer, fileName)) {
-                return { name, sourceFile: fileName, provenance: "createTools" }
+            const createToolsSymbol = this.resolveCreateToolsSymbol(
+                name,
+                declaration.initializer,
+                fileName
+            )
+            if (createToolsSymbol) {
+                return createToolsSymbol
             }
 
             const initializer = unwrapExpression(declaration.initializer)
@@ -436,6 +457,7 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
                     name,
                     sourceFile: initializerReceiver.sourceFile,
                     provenance: initializerReceiver.provenance,
+                    runtimeMerger: initializerReceiver.runtimeMerger,
                 }
             }
 
@@ -496,8 +518,13 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
             return undefined
         }
 
-        if (this.isCreateToolsCall(initializer, fileName)) {
-            return { name, sourceFile: fileName, provenance: "createTools" }
+        const createToolsSymbol = this.resolveCreateToolsSymbol(
+            name,
+            initializer,
+            fileName
+        )
+        if (createToolsSymbol) {
+            return createToolsSymbol
         }
 
         const unwrapped = unwrapExpression(initializer)
@@ -513,6 +540,7 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
                       name,
                       sourceFile: receiver.sourceFile,
                       provenance: receiver.provenance,
+                      runtimeMerger: receiver.runtimeMerger,
                   }
                 : undefined
         }
@@ -555,13 +583,14 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
         }
 
         if (exported.expression && exported.localName) {
-            if (this.isCreateToolsCall(exported.expression, fileName)) {
+            const createToolsSymbol = this.resolveCreateToolsSymbol(
+                exported.localName,
+                exported.expression,
+                fileName
+            )
+            if (createToolsSymbol) {
                 context.visiting.delete(key)
-                return {
-                    name: exported.localName,
-                    sourceFile: fileName,
-                    provenance: "createTools",
-                }
+                return createToolsSymbol
             }
 
             const expression = unwrapExpression(exported.expression)
@@ -576,6 +605,7 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
                     name: exported.localName,
                     sourceFile: expressionReceiver.sourceFile,
                     provenance: expressionReceiver.provenance,
+                    runtimeMerger: expressionReceiver.runtimeMerger,
                 }
             }
 
@@ -617,16 +647,62 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
         )
     }
 
-    private isCreateToolsCall(
+    private resolveCreateToolsSymbol(
+        name: string,
         expression: ts.Expression,
         fileName: string
-    ): boolean {
+    ): TailwindestSymbol | undefined {
         const unwrapped = unwrapExpression(expression)
-        return (
-            ts.isCallExpression(unwrapped) &&
-            ts.isIdentifier(unwrapped.expression) &&
-            this.isCreateToolsIdentifier(unwrapped.expression.text, fileName)
+        if (
+            !ts.isCallExpression(unwrapped) ||
+            !ts.isIdentifier(unwrapped.expression) ||
+            !this.isCreateToolsIdentifier(unwrapped.expression.text, fileName)
+        ) {
+            return undefined
+        }
+
+        return {
+            name,
+            sourceFile: fileName,
+            provenance: "createTools",
+            runtimeMerger: this.createToolsCallHasRuntimeMerger(
+                unwrapped,
+                fileName
+            ),
+        }
+    }
+
+    private createToolsCallHasRuntimeMerger(
+        call: ts.CallExpression,
+        fileName: string
+    ): boolean {
+        const options = call.arguments[0]
+        if (!options) {
+            return false
+        }
+
+        const unwrapped = unwrapExpression(options)
+        if (ts.isObjectLiteralExpression(unwrapped)) {
+            return !isMergerFreeObjectLiteral(unwrapped)
+        }
+        if (!ts.isIdentifier(unwrapped)) {
+            return true
+        }
+
+        const sourceFile = this.getSourceFile(fileName)
+        const declaration = findVisibleVariableDeclaration(
+            sourceFile,
+            unwrapped.text,
+            unwrapped.getStart(sourceFile)
         )
+        if (!declaration?.initializer) {
+            return true
+        }
+
+        const initializer = unwrapExpression(declaration.initializer)
+        return ts.isObjectLiteralExpression(initializer)
+            ? !isMergerFreeObjectLiteral(initializer)
+            : true
     }
 
     private isCreateToolsIdentifier(name: string, fileName: string): boolean {
@@ -742,6 +818,54 @@ const unwrapExpression = (expression: ts.Expression): ts.Expression => {
         current = current.expression
     }
     return current
+}
+
+const objectLiteralHasMerger = (expression: ts.Expression): boolean => {
+    if (!ts.isObjectLiteralExpression(expression)) {
+        return false
+    }
+    return expression.properties.some((property) => {
+        if (ts.isShorthandPropertyAssignment(property)) {
+            return property.name.text === "merger"
+        }
+        if (ts.isPropertyAssignment(property)) {
+            return propertyNameOf(property.name) === "merger"
+        }
+        return false
+    })
+}
+
+const isMergerFreeObjectLiteral = (
+    expression: ts.ObjectLiteralExpression
+): boolean => {
+    return expression.properties.every((property) => {
+        if (ts.isSpreadAssignment(property)) {
+            return false
+        }
+        if (ts.isShorthandPropertyAssignment(property)) {
+            return property.name.text !== "merger"
+        }
+        if (
+            ts.isPropertyAssignment(property) ||
+            ts.isMethodDeclaration(property) ||
+            ts.isGetAccessorDeclaration(property) ||
+            ts.isSetAccessorDeclaration(property)
+        ) {
+            const name = propertyNameOf(property.name)
+            return Boolean(name) && name !== "merger"
+        }
+        return false
+    })
+}
+
+const propertyNameOf = (name: ts.PropertyName): string | undefined => {
+    if (ts.isIdentifier(name) || ts.isStringLiteral(name)) {
+        return name.text
+    }
+    if (ts.isNumericLiteral(name)) {
+        return name.text
+    }
+    return undefined
 }
 
 const isAssignmentOperator = (kind: ts.SyntaxKind): boolean => {

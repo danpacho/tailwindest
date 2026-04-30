@@ -207,7 +207,7 @@ describe("variant optimizer conflict graph", () => {
         expect(optimized.diagnostics).toEqual([])
     })
 
-    it("over limit strict mode counts optional missing states in the emitted table size", () => {
+    it("over limit fallback counts optional missing states in the emitted table size", () => {
         const optimized = optimizeVariants({
             base,
             variants: {
@@ -221,7 +221,6 @@ describe("variant optimizer conflict graph", () => {
                 },
             },
             variantTableLimit: 4,
-            mode: "strict",
         })
 
         expect(
@@ -232,12 +231,12 @@ describe("variant optimizer conflict graph", () => {
         expect(optimized.diagnostics).toEqual([
             expect.objectContaining({
                 code: "VARIANT_TABLE_LIMIT_EXCEEDED",
-                severity: "error",
+                severity: "warning",
             }),
         ])
     })
 
-    it("over limit strict mode emits VARIANT_TABLE_LIMIT_EXCEEDED and no huge table", () => {
+    it("over limit fallback emits VARIANT_TABLE_LIMIT_EXCEEDED and no huge table", () => {
         const optimized = optimizeVariants({
             base,
             variants: {
@@ -253,7 +252,6 @@ describe("variant optimizer conflict graph", () => {
                 },
             },
             variantTableLimit: 8,
-            mode: "strict",
         })
 
         expect(optimized.exact).toBe(false)
@@ -261,7 +259,7 @@ describe("variant optimizer conflict graph", () => {
         expect(optimized.diagnostics).toEqual([
             expect.objectContaining({
                 code: "VARIANT_TABLE_LIMIT_EXCEEDED",
-                severity: "error",
+                severity: "warning",
             }),
         ])
         expect(optimized.classCandidates).toEqual(
@@ -276,7 +274,7 @@ describe("variant optimizer conflict graph", () => {
         )
     })
 
-    it("over limit loose mode falls back but preserves all manifest candidates", () => {
+    it("over limit fallback preserves all manifest candidates", () => {
         const optimized = optimizeVariants({
             base,
             variants: {
@@ -292,7 +290,6 @@ describe("variant optimizer conflict graph", () => {
                 },
             },
             variantTableLimit: 8,
-            mode: "loose",
         })
 
         expect(optimized.exact).toBe(false)

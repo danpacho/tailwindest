@@ -22,4 +22,4 @@ pnpm --filter @tailwindest/compiler e2e:design-system-vite
 - Built CSS and dev CSS raw-leak checks.
 - Zero-runtime client bundle checks.
 - Screenshot artifacts under
-  `packages/compiler/e2e/.artifacts/design-system-screenshots/vite/`.
+  `packages/tailwindest-compiler/e2e/.artifacts/design-system-screenshots/vite/`.

@@ -35,8 +35,12 @@ describe("merger policy safety", () => {
         expect(result.diagnostics).toEqual([
             expect.objectContaining({
                 code: "MERGER_CONFIG_MISSING",
+                severity: "warning",
             }),
         ])
+        expect(result.fallback).toEqual({
+            reason: "Known merger policy requires a stable config hash.",
+        })
     })
 
     it("known merger with a stable hash is still non-exact until an equivalent build-time merger is wired", () => {
@@ -55,26 +59,27 @@ describe("merger policy safety", () => {
         ])
     })
 
-    it("unsupported merger emits UNSUPPORTED_MERGER and strict mode refuses exact compilation", () => {
-        const result = engine.join(
-            ["bg-red-100", "hover:bg-blue-100"],
-            { kind: "unsupported", reason: "runtime closure" },
-            { mode: "strict" }
-        )
+    it("unsupported merger emits UNSUPPORTED_MERGER and preserves runtime fallback intent", () => {
+        const result = engine.join(["bg-red-100", "hover:bg-blue-100"], {
+            kind: "unsupported",
+            reason: "runtime closure",
+        })
 
         expect(result.value).toBe("bg-red-100 hover:bg-blue-100")
         expect(result.exact).toBe(false)
-        expect(result.fallback).toBeUndefined()
+        expect(result.fallback).toEqual({
+            reason: "runtime closure",
+        })
         expect(result.candidates).toEqual(["bg-red-100", "hover:bg-blue-100"])
         expect(result.diagnostics).toEqual([
             expect.objectContaining({
                 code: "UNSUPPORTED_MERGER",
-                severity: "error",
+                severity: "warning",
             }),
         ])
     })
 
-    it("loose mode returns fallback intent and candidates for unsupported statically knowable values", () => {
+    it("returns fallback intent and candidates for unsupported statically knowable values", () => {
         const result = engine.def(
             ["bg-[#123456]", "dark:hover:sm:bg-red-500"],
             [
@@ -83,8 +88,7 @@ describe("merger policy safety", () => {
                     custom: "bg-(--my-color)",
                 },
             ],
-            { kind: "unsupported", reason: "user provided merger" },
-            { mode: "loose" }
+            { kind: "unsupported", reason: "user provided merger" }
         )
 
         expect(result.value).toBe(

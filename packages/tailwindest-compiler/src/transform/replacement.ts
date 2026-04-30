@@ -38,4 +38,5 @@ export interface TransformResult {
     candidates: string[]
     diagnostics: CompilerDiagnostic[]
     changed: boolean
+    skippedSpans?: SourceSpan[]
 }

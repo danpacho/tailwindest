@@ -1,14 +1,18 @@
+import {
+    deepMerge as coreDeepMerge,
+    toClass as coreToClass,
+} from "@tailwindest/core"
+import {
+    flattenCompiledStyleRecord,
+    type CompiledStyleNormalizationOptions,
+} from "./compiled_style_normalizer"
 import type { StaticClassValue, StaticStyleObject } from "./static_value"
 import {
     applyMergerPolicy,
     candidatesFromClassName,
-    type EvaluationOptions,
     type EvaluationResult,
     type MergerPolicy,
 } from "./merger"
-import { flattenStyleRecord } from "./style_normalizer"
-
-type NestedRecord = Record<string, unknown>
 
 /**
  * Deterministic evaluator used by the compiler to flatten Tailwindest style
@@ -22,24 +26,23 @@ export interface EvaluationEngine {
     deepMerge(styles: StaticStyleObject[]): StaticStyleObject
     join(
         values: StaticClassValue[],
-        merger: MergerPolicy,
-        options?: EvaluationOptions
+        merger: MergerPolicy
     ): EvaluationResult<string>
     def(
         classList: StaticClassValue[],
         styles: StaticStyleObject[],
-        merger: MergerPolicy,
-        options?: EvaluationOptions
+        merger: MergerPolicy
     ): EvaluationResult<string>
     mergeProps(
         styles: StaticStyleObject[],
-        merger: MergerPolicy,
-        options?: EvaluationOptions
+        merger: MergerPolicy
     ): EvaluationResult<string>
     mergeRecord(
         styles: StaticStyleObject[]
     ): EvaluationResult<StaticStyleObject>
 }
+
+export type EvaluationEngineOptions = CompiledStyleNormalizationOptions
 
 /**
  * Flatten every string leaf in a Tailwindest style object.
@@ -47,9 +50,10 @@ export interface EvaluationEngine {
  * @public
  */
 export function flattenRecord(
-    style: StaticStyleObject | null | undefined
+    style: StaticStyleObject | null | undefined,
+    options: EvaluationEngineOptions = {}
 ): string[] {
-    return flattenStyleRecord(style)
+    return flattenCompiledStyleRecord(style, options)
 }
 
 /**
@@ -58,34 +62,7 @@ export function flattenRecord(
  * @public
  */
 export function deepMerge(styles: StaticStyleObject[]): StaticStyleObject {
-    return styles.reduce<NestedRecord>((mergedObject, currentObject) => {
-        if (!currentObject) return mergedObject
-
-        for (const [key, value] of Object.entries(currentObject)) {
-            if (mergedObject[key] === undefined) {
-                mergedObject[key] = value
-            } else {
-                const existing = mergedObject[key]
-                if (Array.isArray(value)) {
-                    mergedObject[key] = value
-                } else if (
-                    typeof existing === "object" &&
-                    existing !== null &&
-                    typeof value === "object" &&
-                    value !== null
-                ) {
-                    mergedObject[key] = deepMerge([
-                        existing as StaticStyleObject,
-                        value as StaticStyleObject,
-                    ])
-                } else {
-                    mergedObject[key] = value
-                }
-            }
-        }
-
-        return mergedObject
-    }, {}) as StaticStyleObject
+    return coreDeepMerge(...styles)
 }
 
 /**
@@ -94,9 +71,10 @@ export function deepMerge(styles: StaticStyleObject[]): StaticStyleObject {
  * @public
  */
 export function getClassName(
-    style: StaticStyleObject | null | undefined
+    style: StaticStyleObject | null | undefined,
+    options: EvaluationEngineOptions = {}
 ): string {
-    return flattenRecord(style).join(" ")
+    return flattenRecord(style, options).join(" ")
 }
 
 /**
@@ -104,90 +82,60 @@ export function getClassName(
  *
  * @public
  */
-export function createEvaluationEngine(): EvaluationEngine {
+export function createEvaluationEngine(
+    options: EvaluationEngineOptions = {}
+): EvaluationEngine {
     return {
-        flattenRecord,
-        getClassName,
+        flattenRecord: (style) => flattenRecord(style, options),
+        getClassName: (style) => getClassName(style, options),
         deepMerge,
-        join,
-        def,
-        mergeProps,
-        mergeRecord,
+        join: (values, merger) => join(values, merger),
+        def: (classList, styles, merger) =>
+            def(classList, styles, merger, options),
+        mergeProps: (styles, merger) => mergeProps(styles, merger, options),
+        mergeRecord: (styles) => mergeRecord(styles, options),
     }
 }
 
 export function join(
     values: StaticClassValue[],
-    merger: MergerPolicy,
-    options?: EvaluationOptions
+    merger: MergerPolicy
 ): EvaluationResult<string> {
-    return applyMergerPolicy(toClass(values), merger, options)
+    return applyMergerPolicy(toClass(values), merger)
 }
 
 export function def(
     classList: StaticClassValue[],
     styles: StaticStyleObject[],
     merger: MergerPolicy,
-    options?: EvaluationOptions
+    options: EvaluationEngineOptions = {}
 ): EvaluationResult<string> {
-    const styleClassName = getClassName(deepMerge(styles))
-    return join([...classList, styleClassName], merger, options)
+    const styleClassName = getClassName(deepMerge(styles), options)
+    return join([...classList, styleClassName], merger)
 }
 
 export function mergeProps(
     styles: StaticStyleObject[],
     merger: MergerPolicy,
-    options?: EvaluationOptions
+    options: EvaluationEngineOptions = {}
 ): EvaluationResult<string> {
-    return applyMergerPolicy(getClassName(deepMerge(styles)), merger, options)
+    return applyMergerPolicy(getClassName(deepMerge(styles), options), merger)
 }
 
 export function mergeRecord(
-    styles: StaticStyleObject[]
+    styles: StaticStyleObject[],
+    options: EvaluationEngineOptions = {}
 ): EvaluationResult<StaticStyleObject> {
     const value = deepMerge(styles)
 
     return {
         value,
-        candidates: candidatesFromClassName(getClassName(value)),
+        candidates: candidatesFromClassName(getClassName(value, options)),
         diagnostics: [],
         exact: true,
     }
 }
 
-function toClass(values: StaticClassValue[]): string {
-    const classes: string[] = []
-
-    for (const value of values) {
-        const className = toClassValue(value)
-        if (className.length > 0) {
-            classes.push(className)
-        }
-    }
-
-    return classes.join(" ")
-}
-
-function toClassValue(value: StaticClassValue): string {
-    if (!value) return ""
-
-    if (typeof value === "string" || typeof value === "number") {
-        return String(value)
-    }
-
-    if (Array.isArray(value)) {
-        return toClass(value)
-    }
-
-    if (typeof value === "object") {
-        const classes: string[] = []
-        for (const key in value) {
-            if (value[key]) {
-                classes.push(key)
-            }
-        }
-        return classes.join(" ")
-    }
-
-    return ""
+export function toClass(values: StaticClassValue[]): string {
+    return coreToClass(...values)
 }

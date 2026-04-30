@@ -2,6 +2,7 @@ import {
     createTools,
     type CreateCompiledTailwindest,
 } from "tailwindest"
+import type { TailwindNestGroups } from "./tailwind"
 
 type FixtureTailwind = {
     backgroundColor: `bg-red-${string}`
@@ -12,11 +13,9 @@ type FixtureTailwind = {
     padding: `px-${string}`
 }
 
-type FixtureNestGroups = "dark" | "hover" | "focus" | "group" | "peer"
-
 type FixtureCompiledStyle = CreateCompiledTailwindest<{
     tailwind: FixtureTailwind
-    tailwindNestGroups: FixtureNestGroups
+    tailwindNestGroups: TailwindNestGroups
     useArbitrary: false
     useArbitraryVariant: true
 }>
@@ -43,7 +42,7 @@ const compiledClassName = tw
         },
         group: { hover: { borderColor: "border-blue-500" } },
         peer: { focus: { color: "text-sky-600" } },
-        "data-[state=open]": { padding: "px-6" },
+        "data-open": { padding: "px-6" },
         backgroundColor: "bg-red-50",
         border: "border",
         borderRadius: "rounded-md",

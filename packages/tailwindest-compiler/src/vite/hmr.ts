@@ -38,6 +38,12 @@ export function createHotUpdateHandler(context: CompilerContext) {
             } else {
                 context.removeFile(changedFile)
             }
+        } else if (isCssId(changedFile) && read) {
+            try {
+                await context.transformCssAsync(await read(), changedFile)
+            } catch {
+                context.removeFile(changedFile)
+            }
         }
 
         const affectedIds = [
@@ -93,4 +99,8 @@ function isModule(
 
 function isJsId(id: string): boolean {
     return /\.[cm]?[jt]sx?$/.test(id)
+}
+
+function isCssId(id: string): boolean {
+    return /\.css$/.test(id)
 }

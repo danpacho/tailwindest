@@ -1,14 +1,24 @@
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 import tailwindcss from "@tailwindcss/vite"
 import { defineConfig } from "vite"
 import { tailwindest } from "../../src/vite"
 
+const fixtureRoot = fileURLToPath(new URL(".", import.meta.url))
+
 export default defineConfig({
-    root: __dirname,
+    root: fixtureRoot,
     logLevel: "error",
     resolve: {
         alias: {
-            tailwindest: path.resolve(__dirname, "src/runtime-tailwindest.ts"),
+            "@tailwindest/core": path.resolve(
+                fixtureRoot,
+                "../../../tailwindest-core/src/index.ts"
+            ),
+            tailwindest: path.resolve(
+                fixtureRoot,
+                "src/runtime-tailwindest.ts"
+            ),
         },
     },
     build: {
@@ -17,8 +27,8 @@ export default defineConfig({
         sourcemap: true,
         rollupOptions: {
             input: {
-                app: path.resolve(__dirname, "index.html"),
-                compiled: path.resolve(__dirname, "src/compiled-entry.ts"),
+                app: path.resolve(fixtureRoot, "index.html"),
+                compiled: path.resolve(fixtureRoot, "src/compiled-entry.ts"),
             },
         },
     },
@@ -26,7 +36,6 @@ export default defineConfig({
         tailwindest({
             include: [/src\/.*\.[cm]?[jt]sx?$/],
             cssEntries: [/src\/style\.css$/],
-            mode: "loose",
             debug: true,
             sourceMap: true,
         }),

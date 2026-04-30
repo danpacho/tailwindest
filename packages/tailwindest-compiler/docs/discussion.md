@@ -14,7 +14,7 @@ not as an exploratory brainstorming document.
 | AST replacement      | Collect -> Reverse Execute                | Span-based replacement is safer than mutating AST nodes.                                                                           |
 | Parsing strategy     | Hook filter + lexical gate + semantic AST | This keeps HMR fast while preventing false exact compilation.                                                                      |
 | Dynamic variants     | Conflict graph with table limit           | This preserves deep merge semantics without unbounded cartesian output.                                                            |
-| Unsupported values   | Strict error or loose fallback            | Silent partial compilation can produce CSS/runtime mismatch.                                                                       |
+| Unsupported values   | Progressive runtime fallback              | Silent partial compilation can produce CSS/runtime mismatch.                                                                       |
 
 ## 1. Dev and Production Parity
 
@@ -73,7 +73,7 @@ Rules:
 - collect replacements as `{ start, end, text }`
 - discard ambiguous overlapping replacements
 - apply replacements in reverse source order
-- keep original source when loose fallback is required
+- keep original source when runtime fallback is required
 - report source-map issues as diagnostics instead of corrupting output
 
 Memory target per file is:
@@ -107,9 +107,8 @@ The production algorithm:
 2. Emit independent axes as additive maps.
 3. Group conflicting axes into components.
 4. Precompute component tables only within `variantTableLimit`.
-5. Fail strict mode on overflow.
-6. Preserve runtime calls in loose mode.
-7. Always retain statically knowable candidates in the Tailwind manifest.
+5. Preserve runtime calls on overflow.
+6. Always retain statically knowable candidates in the Tailwind manifest.
 
 ## 6. Public API Coverage
 
@@ -143,7 +142,7 @@ instead of only isolated unit snippets.
 | HMR keeps stale candidates                        | Dev/prod divergence              | Reverse dependency invalidation                  |
 | Custom merger is not deterministic                | Wrong classes                    | Exact compile only for supported mergers         |
 | Variant table explosion                           | Bundle bloat                     | Conflict graph and table limit                   |
-| Unsupported value is silently skipped             | Runtime/CSS mismatch             | Strict diagnostics and loose fallback            |
+| Unsupported value is silently skipped             | Runtime/CSS mismatch             | Fallback diagnostics and runtime preservation    |
 | Raw nested leaves leak                            | Extra CSS and semantic confusion | Effective exclusions with `@source not inline()` |
 | Next/TanStack adapter drift                       | Framework mismatch               | Dedicated E2E fixtures and screenshots           |
 

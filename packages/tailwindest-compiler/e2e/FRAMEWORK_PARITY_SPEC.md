@@ -23,10 +23,10 @@ contract.
 
 - Hard gate: TanStack Start dev server, production build, production server,
   browser visual parity, dev style endpoint leakage, debug manifest, CSS
-  selector leakage, zero-runtime client asset checks.
+  selector leakage, static replacement client asset checks.
 - Hard gate: Next App Router in webpack mode using `next dev --webpack`,
   `next build --webpack`, `next start`, browser visual parity, debug manifest,
-  CSS selector leakage, zero-runtime client asset checks.
+  CSS selector leakage, static replacement client asset checks.
 - Experimental gate: Next Turbopack. Next 16 defaults to Turbopack, but the
   Tailwindest Vite plugin cannot run there and the webpack/precompile bridge is
   the current hard gate. Turbopack support requires a dedicated bridge and is
@@ -63,7 +63,7 @@ style must cover:
   `excludedCandidates`.
 - Screenshot artifacts:
   each framework gate must save `dev.png`, `debug.png`, and `prod.png` under
-  `packages/compiler/e2e/.artifacts/framework-screenshots/<fixture>/` so the
+  `packages/tailwindest-compiler/e2e/.artifacts/framework-screenshots/<fixture>/` so the
   rendered dev page, debug manifest summary, and production page can be
   inspected after the test run.
 - Zero-runtime JS:
@@ -80,9 +80,7 @@ Run the baseline compiler and Tailwindest checks:
 
 ```bash
 pnpm ts:typecheck
-pnpm vitest run packages/tailwindest/src
-pnpm --filter @tailwindest/compiler test -- e2e/vite-tailwind-v4/vite-tailwind-v4.test.ts
-pnpm --filter @tailwindest/compiler test:e2e
+pnpm test
 pnpm --filter @tailwindest/compiler build
 ```
 

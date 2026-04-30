@@ -11,6 +11,12 @@ import {
 const fixtureRoot = path.resolve(__dirname)
 const repoRoot = path.resolve(fixtureRoot, "../../../..")
 const viteBin = path.join(repoRoot, "node_modules/.bin/vite")
+const viteSourceConfigEnv = {
+    NODE_OPTIONS: [process.env.NODE_OPTIONS, "--import tsx"]
+        .filter(Boolean)
+        .join(" "),
+    TSX_TSCONFIG_PATH: path.join(repoRoot, "tsconfig.json"),
+}
 
 describe("TanStack Start design-system E2E", () => {
     it("compiles every createTools API across dev and production", async () => {
@@ -37,14 +43,24 @@ describe("TanStack Start design-system E2E", () => {
                         "--strictPort",
                         "--config",
                         "vite.config.ts",
+                        "--configLoader",
+                        "native",
                     ],
+                    env: viteSourceConfigEnv,
                     url: `http://127.0.0.1:${port}/`,
                 }),
             build: async () => {
                 await runCommand({
                     cwd: fixtureRoot,
                     command: viteBin,
-                    args: ["build", "--config", "vite.config.ts"],
+                    args: [
+                        "build",
+                        "--config",
+                        "vite.config.ts",
+                        "--configLoader",
+                        "native",
+                    ],
+                    env: viteSourceConfigEnv,
                 })
             },
             startProd: async (port) =>
@@ -60,7 +76,10 @@ describe("TanStack Start design-system E2E", () => {
                         "--strictPort",
                         "--config",
                         "vite.config.ts",
+                        "--configLoader",
+                        "native",
                     ],
+                    env: viteSourceConfigEnv,
                     url: `http://127.0.0.1:${port}/`,
                 }),
         })

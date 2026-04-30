@@ -20,11 +20,15 @@ const context = createCompilerContext({
     options: {
         include: [/next-tailwind-v4\/src\/app\/.*\.[cm]?[jt]sx?$/],
         cssEntries: [/app\/globals\.css$/],
-        mode: "strict",
         debug: true,
         sourceMap: true,
     },
 })
+
+for (const file of appFiles.filter((item) => item.endsWith(".css"))) {
+    const output = path.join(outputRoot, path.relative(sourceRoot, file))
+    await context.transformCssAsync(await fs.readFile(file, "utf8"), output)
+}
 
 for (const file of appFiles.filter((item) => /\.[cm]?[jt]sx?$/.test(item))) {
     const relative = path.relative(sourceRoot, file)

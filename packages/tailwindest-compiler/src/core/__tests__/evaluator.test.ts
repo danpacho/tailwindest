@@ -7,19 +7,38 @@ import {
     flattenRecord,
     getClassName,
 } from "../evaluator"
+import { createCompiledVariantResolver } from "../compiled_variant_resolver"
 import type { StaticClassValue, StaticStyleObject } from "../static_value"
 
-const engine = createEvaluationEngine()
+const variantResolver = createCompiledVariantResolver([
+    "*",
+    "2xl",
+    "@2xl",
+    "@sm",
+    "[&>*]",
+    "aria-expanded",
+    "before",
+    "dark",
+    "data-[state=open]",
+    "focus",
+    "group-hover",
+    "hover",
+    "max-sm",
+    "md",
+    "peer-focus",
+])
+const variantOptions = { variantResolver }
+const engine = createEvaluationEngine(variantOptions)
 const runtimeTools = createTools()
 
-describe("evaluation engine runtime parity", () => {
+describe("evaluation engine", () => {
     it("flattenRecord returns [] for nullish and empty style records", () => {
         expect(flattenRecord(undefined)).toEqual([])
         expect(flattenRecord(null)).toEqual([])
         expect(flattenRecord({})).toEqual(Styler.flattenRecord({}))
     })
 
-    it("flattenRecord preserves runtime insertion order for nested records and special keys", () => {
+    it("flattenRecord preserves insertion order for nested compiled records and special keys", () => {
         const style = {
             display: "flex",
             nested: {
@@ -37,8 +56,7 @@ describe("evaluation engine runtime parity", () => {
             },
         }
 
-        expect(flattenRecord(style)).toEqual(Styler.flattenRecord(style))
-        expect(flattenRecord(style)).toEqual([
+        expect(flattenRecord(style, variantOptions)).toEqual([
             "flex",
             "one",
             "two",
@@ -117,7 +135,7 @@ describe("evaluation engine runtime parity", () => {
         })
     })
 
-    it("getClassName prefixes nested Tailwind variant keys", () => {
+    it("getClassName prefixes nested compiled variant keys", () => {
         const style = {
             dark: {
                 backgroundColor: "bg-red-900",
@@ -128,8 +146,7 @@ describe("evaluation engine runtime parity", () => {
             backgroundColor: "bg-red-50",
         }
 
-        expect(getClassName(style)).toBe(Styler.getClassName(style))
-        expect(getClassName(style)).toBe(
+        expect(getClassName(style, variantOptions)).toBe(
             "dark:bg-red-900 dark:hover:bg-red-950 bg-red-50"
         )
     })
@@ -162,13 +179,12 @@ describe("evaluation engine runtime parity", () => {
             empty: {},
         }
 
-        expect(getClassName(style)).toBe(Styler.getClassName(style))
-        expect(getClassName(style)).toBe(
+        expect(getClassName(style, variantOptions)).toBe(
             "bg-[#123456] w-[calc(100%-1rem)] bg-(--my-color) dark:bg-red-900 dark:hover:bg-red-950 bg-white md:hover:text-blue-600 @sm:px-4 @sm:py-2 [&>*]:mt-2"
         )
     })
 
-    it("getClassName matches runtime for extended, arbitrary, group, peer, and legacy explicit variant chains", () => {
+    it("getClassName handles extended, arbitrary, group, peer, and legacy explicit variant chains", () => {
         const style = {
             "*": {
                 color: "text-red-600",
@@ -213,8 +229,7 @@ describe("evaluation engine runtime parity", () => {
             },
         }
 
-        expect(getClassName(style)).toBe(Styler.getClassName(style))
-        expect(getClassName(style)).toBe(
+        expect(getClassName(style, variantOptions)).toBe(
             "*:text-red-600 max-sm:hidden before:content-[''] aria-expanded:block data-[state=open]:text-blue-600 group-hover:bg-blue-500 peer-focus:text-sky-600 dark:group-hover:bg-blue-500 **:*:2xl:3xl:4xl:@2xl:px-1000"
         )
     })

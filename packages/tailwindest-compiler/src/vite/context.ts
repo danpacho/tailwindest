@@ -3,8 +3,13 @@ import fsSync from "node:fs"
 import fs from "node:fs/promises"
 import path from "node:path"
 import * as ts from "typescript"
+import { loadTailwindNestGroups } from "@tailwindest/tailwind-internal"
 import { createStaticAnalyzer } from "../analyzer/detector"
 import type { TailwindestCallKind, SourceSpan } from "../analyzer/symbols"
+import {
+    createCompiledVariantResolver,
+    type CompiledVariantResolver,
+} from "../core/compiled_variant_resolver"
 import { createEvaluationEngine } from "../core/evaluator"
 import type { CompilerDiagnostic } from "../core/diagnostic_types"
 import type { MergerPolicy } from "../core/merger"
@@ -13,19 +18,22 @@ import {
     stringifyDebugManifest,
     type TailwindestDebugFile,
     type TailwindestDebugManifest,
+    type TailwindestDebugReplacement,
 } from "../debug/debug_manifest"
 import {
     diagnosticWithSource,
-    diagnosticsForMode,
+    diagnosticsForRuntimeFallback,
     type RichCompilerDiagnostic,
 } from "../debug/diagnostics"
 import {
     createCandidateManifest,
+    getSortedCandidateRecords,
     getSortedExcludedCandidates,
     getSortedCandidates,
     normalizeCandidateFileId,
     removeFileCandidates,
     updateFileCandidates,
+    type CandidateRecord,
     type CandidateManifest,
 } from "../tailwind/manifest"
 import {
@@ -34,7 +42,10 @@ import {
 } from "../tailwind/source_inline"
 import { substituteTailwindest } from "../transform/substitutor"
 import { SourceCache } from "./cache"
-import { compileTailwindestSource } from "./compile_transform"
+import {
+    compileTailwindestSource,
+    type CandidateOnlyDebugCall,
+} from "./compile_transform"
 
 /**
  * Configuration for the Tailwindest Vite integration.
@@ -55,17 +66,6 @@ export interface TailwindestViteOptions {
      * Source id patterns that should never be compiled or used as CSS entries.
      */
     exclude?: Array<string | RegExp>
-
-    /**
-     * Unsupported-value policy.
-     *
-     * - `"strict"` throws during transform when a call cannot be compiled
-     *   exactly.
-     * - `"loose"` preserves the runtime call and records a fallback diagnostic.
-     *
-     * @defaultValue `"loose"`
-     */
-    mode?: "strict" | "loose"
 
     /**
      * Write `.tailwindest/debug-manifest.json` with replacement spans,
@@ -128,6 +128,7 @@ export interface CompilerContextInput {
     options: TailwindestViteOptions
     readFile?: (id: string) => Promise<string>
     scanFiles?: () => Promise<string[]>
+    variantResolver?: CompiledVariantResolver | undefined
 }
 
 export interface TransformOutput {
@@ -153,15 +154,21 @@ export class CompilerContext {
     private readonly dependencies = new Map<string, Set<string>>()
     private readonly reverseDependencies = new Map<string, Set<string>>()
     private readonly cssEntries = new Set<string>()
+    private readonly cssEntryGroups = new Map<string, string[]>()
+    private readonly cssEntryHashes = new Map<string, string>()
+    private variantResolver: CompiledVariantResolver | undefined
+    private variantResolverReadiness: Promise<void> | undefined
+    private variantResolverReadinessChecked = false
     private readonly debugFiles = new Map<string, TailwindestDebugFile>()
     private lastInvalidatedManifestRevision = 0
 
     public constructor(input: CompilerContextInput) {
         this.root = normalizeCandidateFileId(input.root)
         this.command = input.command ?? "serve"
-        this.options = input.options
+        this.options = normalizeOptions(input.options)
         this.readFile = input.readFile
         this.scanFiles = input.scanFiles
+        this.variantResolver = input.variantResolver
     }
 
     public updateRoot(root: string): void {
@@ -172,13 +179,14 @@ export class CompilerContext {
         const files = this.scanFiles
             ? await this.scanFiles()
             : await scanDefaultSourceFiles(this.root, this.options.scanRoots)
+        const jsFiles: Array<{ id: string; code: string }> = []
         for (const file of files.sort()) {
             const normalized = normalizeCandidateFileId(file)
             const code = this.readFile
                 ? await this.readFile(normalized)
                 : await fs.readFile(normalized, "utf8")
             if (isJsId(normalized) && this.shouldTransformJs(normalized)) {
-                this.transformJs(code, normalized)
+                jsFiles.push({ id: normalized, code })
             } else if (
                 isCssId(normalized) &&
                 isTailwindCssEntry(
@@ -187,10 +195,23 @@ export class CompilerContext {
                     this.options.cssEntries ?? []
                 )
             ) {
-                this.registerCssEntry(normalized)
+                await this.loadVariantResolverFromCss(normalized, code)
                 this.cache.set(normalized, code, hashCode(code))
             }
         }
+        for (const file of jsFiles) {
+            this.transformJs(file.code, file.id)
+        }
+        this.variantResolverReadinessChecked = true
+    }
+
+    public async ensureVariantResolverReady(): Promise<void> {
+        if (this.variantResolverReadinessChecked) {
+            return
+        }
+        this.variantResolverReadiness ??=
+            this.loadDiscoveredCssVariantResolvers()
+        await this.variantResolverReadiness
     }
 
     public shouldTransformJs(id: string): boolean {
@@ -231,7 +252,7 @@ export class CompilerContext {
             return unchangedTransform(code)
         }
 
-        const analysis = this.analyzeJs(normalized, code)
+        const analysis = this.analyzeJs(normalized, code, this.variantResolver)
         this.recordDependencies(normalized, analysis.dependencies)
         const fallbackSpan = fullFileSpan(normalized, code)
         const analysisDiagnostics = richDiagnosticsForDebug(
@@ -239,51 +260,38 @@ export class CompilerContext {
             normalized,
             fallbackSpan
         )
-        const analysisModeDiagnostics = diagnosticsForMode(
-            analysisDiagnostics,
-            this.options.mode ?? "loose"
-        )
-        const strictAnalysisFailures =
-            (this.options.mode ?? "loose") === "strict"
-                ? analysisModeDiagnostics.diagnostics.filter(
-                      (item) =>
-                          item.code === "NOT_TAILWINDEST_SYMBOL" ||
-                          item.message.includes("Computed property key")
-                  )
-                : []
-        if (strictAnalysisFailures.length > 0) {
-            const first = strictAnalysisFailures[0]
-            throw new Error(
-                `${first?.code ?? "TAILWINDEST_ANALYZE_FAILED"}: ${first?.message ?? "Tailwindest strict analysis failed."}`
-            )
-        }
+        const analysisFallbackDiagnostics =
+            diagnosticsForRuntimeFallback(analysisDiagnostics)
         const compiled = compileTailwindestSource({
             fileName: normalized,
             code,
-            mode: this.options.mode ?? "loose",
+            provenCalls: analysis.provenCalls,
+            provenReceiverCalls: analysis.provenReceiverCalls,
+            runtimeMergerCalls: analysis.runtimeMergerCalls,
+            candidateOnlyCalls: analysis.candidateOnlyCalls,
             variantTableLimit: this.options.variantTableLimit,
             merger: this.options.merger ?? DEFAULT_MERGER,
+            variantResolver: this.variantResolver,
         })
-        const modeDiagnostics = diagnosticsForMode(
-            compiled.diagnostics,
-            this.options.mode ?? "loose"
+        const fallbackDiagnostics = diagnosticsForRuntimeFallback(
+            compiled.diagnostics
         )
-        if (modeDiagnostics.shouldFail) {
-            const first = modeDiagnostics.diagnostics[0]
-            throw new Error(
-                `${first?.code ?? "TAILWINDEST_COMPILE_FAILED"}: ${first?.message ?? "Tailwindest strict transform failed."}`
-            )
-        }
         const transform = substituteTailwindest({
             fileName: normalized,
             code,
             plans: compiled.plans,
             cleanImports: true,
-            sourceMapMode: this.options.sourceMap ? "loose" : false,
+            sourceMapBehavior: this.options.sourceMap
+                ? "diagnostic-on-error"
+                : false,
         })
+        const debugReplacements = debugReplacementsForTransform(
+            compiled.debugReplacements,
+            transform
+        )
         const diagnostics: RichCompilerDiagnostic[] = [
-            ...analysisModeDiagnostics.diagnostics,
-            ...modeDiagnostics.diagnostics,
+            ...analysisFallbackDiagnostics.diagnostics,
+            ...fallbackDiagnostics.diagnostics,
             ...richDiagnosticsForDebug(
                 transform.diagnostics,
                 normalized,
@@ -295,14 +303,20 @@ export class CompilerContext {
             ...compiled.candidates,
             ...transform.candidates,
         ]
+        const candidateRecords = candidateRecordsForTransform(
+            candidates,
+            transform.candidates,
+            debugReplacements
+        )
         updateFileCandidates(this.manifest, normalized, {
             hash,
             candidates,
+            candidateRecords,
             excludedCandidates: analysis.excludedCandidates,
             diagnostics,
         })
         this.updateDebugFile(normalized, hash, {
-            replacements: compiled.debugReplacements,
+            replacements: debugReplacements,
             diagnostics,
         })
 
@@ -320,6 +334,11 @@ export class CompilerContext {
         this.cache.delete(normalized)
         this.clearDependencies(normalized)
         this.debugFiles.delete(normalized)
+        this.cssEntries.delete(normalized)
+        if (this.cssEntryGroups.delete(normalized)) {
+            this.cssEntryHashes.delete(normalized)
+            this.rebuildVariantResolver()
+        }
         this.writeDebugManifest()
         return removeFileCandidates(this.manifest, normalized)
     }
@@ -352,15 +371,26 @@ export class CompilerContext {
         }
     }
 
+    public async transformCssAsync(
+        code: string,
+        id: string
+    ): Promise<TransformOutput> {
+        const normalized = normalizeCandidateFileId(id)
+        if (this.shouldTransformCss(normalized, code)) {
+            await this.loadVariantResolverFromCss(normalized, code)
+        }
+        return this.transformCss(code, id)
+    }
+
     public getManifestCandidates(): string[] {
         return getSortedCandidates(this.manifest)
     }
 
     public getDebugManifest(): TailwindestDebugManifest {
         return createDebugManifest({
-            mode: this.options.mode ?? "loose",
             files: [...this.debugFiles.values()],
             candidates: this.getManifestCandidates(),
+            candidateRecords: getSortedCandidateRecords(this.manifest),
             excludedCandidates: this.getExcludedManifestCandidates(),
         })
     }
@@ -412,12 +442,17 @@ export class CompilerContext {
 
     private analyzeJs(
         id: string,
-        code: string
+        code: string,
+        variantResolver: CompiledVariantResolver | undefined
     ): {
         candidates: string[]
         excludedCandidates: string[]
         diagnostics: CompilerDiagnostic[]
         dependencies: string[]
+        provenCalls: SourceSpan[]
+        provenReceiverCalls: SourceSpan[]
+        runtimeMergerCalls: SourceSpan[]
+        candidateOnlyCalls: CandidateOnlyDebugCall[]
     } {
         const files = Object.fromEntries(
             this.cache.entries().map((entry) => [entry.id, entry.code])
@@ -425,52 +460,50 @@ export class CompilerContext {
         files[id] = code
         const analyzer = createStaticAnalyzer(files)
         const result = analyzer.analyzeFile(id)
-        const engine = createEvaluationEngine()
+        const engine = createEvaluationEngine({ variantResolver })
         const candidates: string[] = []
         const excludedCandidates: string[] = []
+        const candidateOnlyCalls: CandidateOnlyDebugCall[] = []
 
         for (const call of result.calls) {
             const values = call.arguments.map((argument) => argument.value)
+            let toolCandidates: string[] = []
             if (call.kind === "join") {
-                candidates.push(
-                    ...engine.join(
-                        values as never[],
-                        this.options.merger ?? DEFAULT_MERGER,
-                        this.options
-                    ).candidates
-                )
+                toolCandidates = engine.join(
+                    values as never[],
+                    this.options.merger ?? DEFAULT_MERGER
+                ).candidates
+                candidates.push(...toolCandidates)
             } else if (call.kind === "def") {
                 const result = engine.def(
                     [values[0]] as never[],
                     values.slice(1) as never[],
-                    this.options.merger ?? DEFAULT_MERGER,
-                    this.options
+                    this.options.merger ?? DEFAULT_MERGER
                 )
-                candidates.push(...result.candidates)
+                toolCandidates = result.candidates
+                candidates.push(...toolCandidates)
                 excludedCandidates.push(
-                    ...collectStyleExclusions(
-                        values.slice(1),
-                        result.candidates
-                    )
+                    ...collectStyleExclusions(values.slice(1), toolCandidates)
                 )
             } else if (call.kind === "mergeProps") {
                 const result = engine.mergeProps(
                     values as never[],
-                    this.options.merger ?? DEFAULT_MERGER,
-                    this.options
+                    this.options.merger ?? DEFAULT_MERGER
                 )
-                candidates.push(...result.candidates)
+                toolCandidates = result.candidates
+                candidates.push(...toolCandidates)
                 excludedCandidates.push(
-                    ...collectStyleExclusions(values, result.candidates)
+                    ...collectStyleExclusions(values, toolCandidates)
                 )
             } else if (call.kind === "mergeRecord") {
                 const result = engine.mergeRecord(values as never[])
-                candidates.push(...result.candidates)
+                toolCandidates = result.candidates
+                candidates.push(...toolCandidates)
                 excludedCandidates.push(
-                    ...collectStyleExclusions(values, result.candidates)
+                    ...collectStyleExclusions(values, toolCandidates)
                 )
             } else {
-                const toolCandidates = collectCandidatesFromToolCall(
+                toolCandidates = collectCandidatesFromToolCall(
                     call.kind,
                     values,
                     engine
@@ -483,6 +516,14 @@ export class CompilerContext {
                         toolCandidates
                     )
                 )
+            }
+            if (isCandidateOnlyToolCall(call.kind)) {
+                candidateOnlyCalls.push({
+                    kind: call.kind,
+                    span: call.span,
+                    candidates: toolCandidates,
+                    reason: "Candidates collected; no supported replacement was attempted.",
+                })
             }
         }
 
@@ -500,7 +541,69 @@ export class CompilerContext {
             excludedCandidates: [...new Set(excludedCandidates)].sort(),
             diagnostics: result.diagnostics,
             dependencies: result.dependencies,
+            provenCalls: result.calls.map((call) => call.span),
+            provenReceiverCalls: result.provenReceiverSpans,
+            runtimeMergerCalls: result.runtimeMergerCalls,
+            candidateOnlyCalls,
         }
+    }
+
+    private async loadVariantResolverFromCss(
+        id: string,
+        code: string
+    ): Promise<void> {
+        const normalized = normalizeCandidateFileId(id)
+        this.registerCssEntry(normalized)
+        const hash = hashCode(code)
+        if (this.cssEntryHashes.get(normalized) === hash) return
+
+        const groups = await loadTailwindNestGroups({
+            cssRoot: normalized,
+            cssSource: code,
+        })
+        this.cssEntryHashes.set(normalized, hash)
+        this.cssEntryGroups.set(normalized, groups)
+        this.rebuildVariantResolver()
+    }
+
+    private async loadDiscoveredCssVariantResolvers(): Promise<void> {
+        const files = this.scanFiles
+            ? await this.scanFiles()
+            : await scanDefaultSourceFiles(this.root, this.options.scanRoots)
+        for (const file of files.sort()) {
+            const normalized = normalizeCandidateFileId(file)
+            if (!isCssId(normalized)) {
+                continue
+            }
+            const code = this.readFile
+                ? await this.readFile(normalized)
+                : await fs.readFile(normalized, "utf8")
+            if (
+                isTailwindCssEntry(
+                    normalized,
+                    code,
+                    this.options.cssEntries ?? []
+                )
+            ) {
+                await this.loadVariantResolverFromCss(normalized, code)
+                this.cache.set(normalized, code, hashCode(code))
+            }
+        }
+        this.variantResolverReadinessChecked = true
+    }
+
+    private rebuildVariantResolver(): void {
+        const groups = [
+            ...new Set(
+                [...this.cssEntryGroups.keys()]
+                    .sort()
+                    .flatMap((id) => this.cssEntryGroups.get(id) ?? [])
+            ),
+        ]
+        this.variantResolver =
+            groups.length > 0
+                ? createCompiledVariantResolver(groups)
+                : undefined
     }
 
     private updateDebugFile(
@@ -608,6 +711,16 @@ function collectCandidatesFromToolCall(
     return collectCandidatesFromValues(values)
 }
 
+function isCandidateOnlyToolCall(kind: TailwindestCallKind): boolean {
+    return (
+        kind === "style" ||
+        kind === "toggle" ||
+        kind === "rotary" ||
+        kind === "variants" ||
+        kind === "compose"
+    )
+}
+
 function collectExclusionsFromToolCall(
     kind: TailwindestCallKind,
     values: unknown[],
@@ -668,6 +781,95 @@ function collectExclusionsFromToolCall(
     return []
 }
 
+function debugReplacementsForTransform(
+    replacements: TailwindestDebugReplacement[],
+    transform: ReturnType<typeof substituteTailwindest>
+): TailwindestDebugReplacement[] {
+    const unsafeDiagnostic = transform.diagnostics.find((diagnostic) =>
+        isUnsafeSkippedDiagnostic(diagnostic)
+    )
+    if (!unsafeDiagnostic) {
+        return replacements
+    }
+
+    const skippedSpanKeys = new Set((transform.skippedSpans ?? []).map(spanKey))
+    const shouldMarkAllCompiled =
+        !transform.changed && skippedSpanKeys.size === 0
+    return replacements.map((replacement) =>
+        replacement.status !== "compiled" ||
+        (!shouldMarkAllCompiled &&
+            !skippedSpanKeys.has(spanKey(replacement.originalSpan)))
+            ? replacement
+            : {
+                  ...replacement,
+                  generatedText: "",
+                  status: "unsafe-skipped",
+                  fallback: true,
+                  candidateRecords: candidateRecordsForReplacement({
+                      ...replacement,
+                      status: "unsafe-skipped",
+                  }),
+                  reason: unsafeDiagnostic.message,
+              }
+    )
+}
+
+function candidateRecordsForTransform(
+    candidates: string[],
+    appliedCandidates: string[],
+    replacements: TailwindestDebugReplacement[]
+): CandidateRecord[] {
+    const records = replacements.flatMap(candidateRecordsForReplacement)
+    const exactCandidates = new Set(
+        records
+            .filter((record) => record.kind === "exact")
+            .map((record) => record.candidate)
+    )
+    for (const candidate of appliedCandidates) {
+        if (!exactCandidates.has(candidate)) {
+            records.push({ candidate, kind: "exact" })
+            exactCandidates.add(candidate)
+        }
+    }
+
+    const recordedCandidates = new Set(
+        records.map((record) => record.candidate.trim()).filter(Boolean)
+    )
+    for (const candidate of candidates) {
+        const normalized = candidate.trim()
+        if (normalized && !recordedCandidates.has(normalized)) {
+            records.push({ candidate: normalized, kind: "fallback-known" })
+            recordedCandidates.add(normalized)
+        }
+    }
+    return records
+}
+
+function candidateRecordsForReplacement(
+    replacement: TailwindestDebugReplacement
+): CandidateRecord[] {
+    const kind: CandidateRecord["kind"] =
+        replacement.status === "compiled" ? "exact" : "fallback-known"
+    return replacement.candidates.map((candidate) => ({
+        candidate,
+        kind,
+        sourceSpan: replacement.originalSpan,
+    }))
+}
+
+function isUnsafeSkippedDiagnostic(diagnostic: CompilerDiagnostic): boolean {
+    return (
+        diagnostic.code === "INVALID_REPLACEMENT_SPAN" ||
+        diagnostic.code === "INVALID_REPLACEMENT_SYNTAX" ||
+        diagnostic.code === "OVERLAPPING_REPLACEMENT" ||
+        diagnostic.code === "IMPORT_CLEANUP_FAILED"
+    )
+}
+
+function spanKey(span: SourceSpan): string {
+    return `${span.fileName}:${span.start}:${span.end}`
+}
+
 function collectStyleExclusions(
     styles: unknown[],
     effectiveCandidates: string[]
@@ -695,6 +897,12 @@ export function createCompilerContext(
     input: CompilerContextInput
 ): CompilerContext {
     return new CompilerContext(input)
+}
+
+function normalizeOptions(
+    options: TailwindestViteOptions
+): TailwindestViteOptions {
+    return options
 }
 
 function collectCandidatesFromValues(values: unknown[]): string[] {
@@ -846,7 +1054,7 @@ function richDiagnosticsForDebug(
     fallbackSpan: { fileName: string; start: number; end: number }
 ): RichCompilerDiagnostic[] {
     return diagnostics.map((diagnostic) =>
-        "modeBehavior" in diagnostic &&
+        "fallbackBehavior" in diagnostic &&
         "file" in diagnostic &&
         "span" in diagnostic
             ? (diagnostic as RichCompilerDiagnostic)

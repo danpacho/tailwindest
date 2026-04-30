@@ -21,9 +21,15 @@ import {
 const fixtureRoot = path.resolve(__dirname)
 const repoRoot = path.resolve(fixtureRoot, "../../../..")
 const viteBin = path.join(repoRoot, "node_modules/.bin/vite")
+const viteSourceConfigEnv = {
+    NODE_OPTIONS: [process.env.NODE_OPTIONS, "--import tsx"]
+        .filter(Boolean)
+        .join(" "),
+    TSX_TSCONFIG_PATH: path.join(repoRoot, "tsconfig.json"),
+}
 
 describe("TanStack Start + Tailwind v4 framework parity", () => {
-    it("converges dev and production visuals with Tailwindest zero-runtime output", async () => {
+    it("converges dev and production visuals with Tailwindest static replacement output", async () => {
         await assertFixtureRoot(fixtureRoot)
         await cleanPaths([
             path.join(fixtureRoot, "dist"),
@@ -44,7 +50,10 @@ describe("TanStack Start + Tailwind v4 framework parity", () => {
                 "--strictPort",
                 "--config",
                 "vite.config.ts",
+                "--configLoader",
+                "native",
             ],
+            env: viteSourceConfigEnv,
             url: `http://127.0.0.1:${devPort}/`,
         })
         try {
@@ -54,7 +63,14 @@ describe("TanStack Start + Tailwind v4 framework parity", () => {
             await runCommand({
                 cwd: fixtureRoot,
                 command: viteBin,
-                args: ["build", "--config", "vite.config.ts"],
+                args: [
+                    "build",
+                    "--config",
+                    "vite.config.ts",
+                    "--configLoader",
+                    "native",
+                ],
+                env: viteSourceConfigEnv,
             })
             const prod = await startServer({
                 cwd: fixtureRoot,
@@ -68,7 +84,10 @@ describe("TanStack Start + Tailwind v4 framework parity", () => {
                     "--strictPort",
                     "--config",
                     "vite.config.ts",
+                    "--configLoader",
+                    "native",
                 ],
+                env: viteSourceConfigEnv,
                 url: `http://127.0.0.1:${prodPort}/`,
             })
             try {

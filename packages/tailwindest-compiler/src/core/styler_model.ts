@@ -1,5 +1,24 @@
-import { deepMerge, getClassName } from "./evaluator"
-import { candidatesFromClassName, defaultMerge } from "./merger"
+import {
+    composePrimitive as coreComposePrimitive,
+    composeRotary as coreComposeRotary,
+    composeToggle as coreComposeToggle,
+    composeVariants as coreComposeVariants,
+    createPrimitiveModel as coreCreatePrimitiveModel,
+    createRotaryModel as coreCreateRotaryModel,
+    createToggleModel as coreCreateToggleModel,
+    createVariantsModel as coreCreateVariantsModel,
+    primitiveStyle as corePrimitiveStyle,
+    rotaryStyleFor as coreRotaryStyleFor,
+    toClass as coreToClass,
+    toggleStyleFor as coreToggleStyleFor,
+    variantsStyleFor as coreVariantsStyleFor,
+    type PrimitiveStyleModel as CorePrimitiveStyleModel,
+    type RotaryStyleModel as CoreRotaryStyleModel,
+    type ToggleStyleModel as CoreToggleStyleModel,
+    type VariantsStyleModel as CoreVariantsStyleModel,
+} from "@tailwindest/core"
+import { getClassName, type EvaluationEngineOptions } from "./evaluator"
+import { candidatesFromClassName } from "./merger"
 import type { StaticClassValue, StaticStyleObject } from "./static_value"
 
 export type StaticVariantRecord = Record<
@@ -7,29 +26,10 @@ export type StaticVariantRecord = Record<
     Record<string, StaticStyleObject>
 >
 
-export interface PrimitiveStyleModel {
-    kind: "style"
-    style: StaticStyleObject
-}
-
-export interface ToggleStyleModel {
-    kind: "toggle"
-    base: StaticStyleObject
-    truthy: StaticStyleObject
-    falsy: StaticStyleObject
-}
-
-export interface RotaryStyleModel {
-    kind: "rotary"
-    base: StaticStyleObject
-    variants: Record<string, StaticStyleObject>
-}
-
-export interface VariantsStyleModel {
-    kind: "variants"
-    base: StaticStyleObject
-    variants: StaticVariantRecord
-}
+export type PrimitiveStyleModel = CorePrimitiveStyleModel<StaticStyleObject>
+export type ToggleStyleModel = CoreToggleStyleModel<StaticStyleObject>
+export type RotaryStyleModel = CoreRotaryStyleModel<StaticStyleObject>
+export type VariantsStyleModel = CoreVariantsStyleModel<StaticStyleObject>
 
 export type StylerModel =
     | PrimitiveStyleModel
@@ -40,10 +40,7 @@ export type StylerModel =
 export function createPrimitiveModel(
     style: StaticStyleObject
 ): PrimitiveStyleModel {
-    return {
-        kind: "style",
-        style,
-    }
+    return coreCreatePrimitiveModel(style)
 }
 
 export function createToggleModel(config: {
@@ -51,55 +48,43 @@ export function createToggleModel(config: {
     truthy: StaticStyleObject
     falsy: StaticStyleObject
 }): ToggleStyleModel {
-    return {
-        kind: "toggle",
-        base: config.base ?? {},
-        truthy: config.truthy,
-        falsy: config.falsy,
-    }
+    return coreCreateToggleModel(config)
 }
 
 export function createRotaryModel(config: {
     base?: StaticStyleObject
     variants: Record<string, StaticStyleObject>
 }): RotaryStyleModel {
-    return {
-        kind: "rotary",
-        base: config.base ?? {},
-        variants: config.variants,
-    }
+    return coreCreateRotaryModel(config)
 }
 
 export function createVariantsModel(config: {
     base?: StaticStyleObject
     variants: StaticVariantRecord
 }): VariantsStyleModel {
-    return {
-        kind: "variants",
-        base: config.base ?? {},
-        variants: config.variants,
-    }
+    return coreCreateVariantsModel(config)
 }
 
 export function primitiveClass(
     model: PrimitiveStyleModel,
-    extraClass: unknown[] = []
+    extraClass: unknown[] = [],
+    options: EvaluationEngineOptions = {}
 ): string {
-    return mergeClassNames(getClassName(model.style), ...extraClass)
+    return mergeClassNames(getClassName(model.style, options), ...extraClass)
 }
 
 export function primitiveStyle(
     model: PrimitiveStyleModel,
     extraStyles: StaticStyleObject[] = []
 ): StaticStyleObject {
-    return deepMerge([model.style, ...extraStyles])
+    return corePrimitiveStyle(model, extraStyles)
 }
 
 export function composePrimitive(
     model: PrimitiveStyleModel,
     styles: StaticStyleObject[]
 ): PrimitiveStyleModel {
-    return createPrimitiveModel(deepMerge([model.style, ...styles]))
+    return coreComposePrimitive(model, styles)
 }
 
 export function toggleStyleFor(
@@ -107,20 +92,17 @@ export function toggleStyleFor(
     condition: boolean,
     extraStyles: StaticStyleObject[] = []
 ): StaticStyleObject {
-    return deepMerge([
-        model.base,
-        condition ? model.truthy : model.falsy,
-        ...extraStyles,
-    ])
+    return coreToggleStyleFor(model, condition, extraStyles)
 }
 
 export function toggleClassFor(
     model: ToggleStyleModel,
     condition: boolean,
-    extraClass: unknown[] = []
+    extraClass: unknown[] = [],
+    options: EvaluationEngineOptions = {}
 ): string {
     return mergeClassNames(
-        getClassName(toggleStyleFor(model, condition)),
+        getClassName(toggleStyleFor(model, condition), options),
         ...extraClass
     )
 }
@@ -129,10 +111,7 @@ export function composeToggle(
     model: ToggleStyleModel,
     styles: StaticStyleObject[]
 ): ToggleStyleModel {
-    return {
-        ...model,
-        base: deepMerge([model.base, ...styles]),
-    }
+    return coreComposeToggle(model, styles)
 }
 
 export function rotaryStyleFor(
@@ -140,17 +119,17 @@ export function rotaryStyleFor(
     key: string,
     extraStyles: StaticStyleObject[] = []
 ): StaticStyleObject {
-    const selected = key === "base" ? {} : (model.variants[key] ?? {})
-    return deepMerge([model.base, selected, ...extraStyles])
+    return coreRotaryStyleFor(model, key, extraStyles)
 }
 
 export function rotaryClassFor(
     model: RotaryStyleModel,
     key: string,
-    extraClass: unknown[] = []
+    extraClass: unknown[] = [],
+    options: EvaluationEngineOptions = {}
 ): string {
     return mergeClassNames(
-        getClassName(rotaryStyleFor(model, key)),
+        getClassName(rotaryStyleFor(model, key), options),
         ...extraClass
     )
 }
@@ -159,10 +138,7 @@ export function composeRotary(
     model: RotaryStyleModel,
     styles: StaticStyleObject[]
 ): RotaryStyleModel {
-    return {
-        ...model,
-        base: deepMerge([model.base, ...styles]),
-    }
+    return coreComposeRotary(model, styles)
 }
 
 export function variantsStyleFor(
@@ -170,24 +146,17 @@ export function variantsStyleFor(
     props: Record<string, unknown>,
     extraStyles: StaticStyleObject[] = []
 ): StaticStyleObject {
-    const styles: StaticStyleObject[] = [model.base]
-    for (const [axis, value] of Object.entries(props)) {
-        if (!value) continue
-        const axisRecord = model.variants[axis]
-        if (!axisRecord) continue
-        const style = axisRecord[String(value)]
-        if (style) styles.push(style)
-    }
-    return deepMerge([...styles, ...extraStyles])
+    return coreVariantsStyleFor(model, props, extraStyles)
 }
 
 export function variantsClassFor(
     model: VariantsStyleModel,
     props: Record<string, unknown>,
-    extraClass: unknown[] = []
+    extraClass: unknown[] = [],
+    options: EvaluationEngineOptions = {}
 ): string {
     return mergeClassNames(
-        getClassName(variantsStyleFor(model, props)),
+        getClassName(variantsStyleFor(model, props), options),
         ...extraClass
     )
 }
@@ -196,18 +165,18 @@ export function composeVariants(
     model: VariantsStyleModel,
     styles: StaticStyleObject[]
 ): VariantsStyleModel {
-    return {
-        ...model,
-        base: deepMerge([model.base, ...styles]),
-    }
+    return coreComposeVariants(model, styles)
 }
 
 export function classCandidatesFromStyles(
-    styles: StaticStyleObject[]
+    styles: StaticStyleObject[],
+    options: EvaluationEngineOptions = {}
 ): string[] {
     const candidates: string[] = []
     for (const style of styles) {
-        candidates.push(...candidatesFromClassName(getClassName(style)))
+        candidates.push(
+            ...candidatesFromClassName(getClassName(style, options))
+        )
     }
     return unique(candidates)
 }
@@ -239,45 +208,11 @@ export function mergeClassNames(
     base: string,
     ...extraClass: unknown[]
 ): string {
-    return defaultMerge([
-        base,
-        ...extraClass.flatMap((item) => normalizeClassToken(item)),
-    ])
-}
-
-function normalizeClassToken(value: unknown): string[] {
-    if (!value) return []
-    if (typeof value === "string" || typeof value === "number") {
-        return [String(value)]
-    }
-    if (Array.isArray(value)) {
-        return value.flatMap((item) => normalizeClassToken(item))
-    }
-    return []
+    return coreToClass(base, ...(extraClass as StaticClassValue[]))
 }
 
 export function toClass(values: StaticClassValue[]): string {
-    const classes: string[] = []
-    for (const value of values) {
-        const className = toClassValue(value)
-        if (className.length > 0) classes.push(className)
-    }
-    return classes.join(" ")
-}
-
-function toClassValue(value: StaticClassValue): string {
-    if (!value) return ""
-    if (typeof value === "string" || typeof value === "number")
-        return String(value)
-    if (Array.isArray(value)) return toClass(value)
-    if (typeof value === "object") {
-        const classes: string[] = []
-        for (const key in value) {
-            if (value[key]) classes.push(key)
-        }
-        return classes.join(" ")
-    }
-    return ""
+    return coreToClass(...values)
 }
 
 function unique(values: string[]): string[] {

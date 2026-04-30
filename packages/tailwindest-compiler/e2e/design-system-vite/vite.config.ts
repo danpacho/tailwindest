@@ -14,6 +14,10 @@ export default defineConfig({
     logLevel: "error",
     resolve: {
         alias: {
+            "@tailwindest/core": path.resolve(
+                fixtureRoot,
+                "../../../tailwindest-core/src/index.ts"
+            ),
             react: path.resolve(fixtureRoot, "../../../../node_modules/react"),
             "react/jsx-runtime": path.resolve(
                 fixtureRoot,
@@ -55,7 +59,6 @@ export default defineConfig({
             ],
             cssEntries: [/design-system-vite\/src\/style\.css$/],
             scanRoots: [path.resolve(fixtureRoot, "src"), sharedRoot],
-            mode: "strict",
             debug: true,
             sourceMap: true,
             collectStringLiteralCandidates: false,

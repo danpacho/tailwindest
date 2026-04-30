@@ -46,7 +46,7 @@ const buttonBaseStyle = {
             focus: { ring: "ring-sky-300" },
         },
     },
-    "data-[state=open]": {
+    "data-open": {
         backgroundColor: "bg-blue-600",
         color: "text-white",
     },
@@ -89,8 +89,8 @@ const composedCardBase = {
 
 const composedCardExtra = {
     boxShadow: "shadow-md",
-    group: { hover: { borderColor: "border-cyan-500" } },
-    peer: { focus: { color: "text-sky-600" } },
+    hover: { borderColor: "border-cyan-500" },
+    focus: { color: "text-sky-600" },
 }
 
 const toggleSwitch = tw.toggle({
@@ -126,7 +126,7 @@ const checkboxToggle = tw.toggle({
         borderColor: "border-slate-400",
         backgroundColor: "bg-white",
         focus: { ring: "ring-2" },
-        "aria-[checked=true]": {
+        "aria-checked": {
             backgroundColor: "bg-emerald-600",
             borderColor: "border-emerald-600",
         },
@@ -335,8 +335,8 @@ const cardOpen = {
 }
 
 const cardNested = {
-    "data-[state=open]": { backgroundColor: "bg-violet-50" },
-    "aria-[checked=true]": { borderColor: "border-violet-600" },
+    "data-open": { backgroundColor: "bg-violet-50" },
+    "aria-checked": { borderColor: "border-violet-600" },
 }
 
 const fieldStatusStyle = fieldStatusVariants.style({ status: "success" })
@@ -987,7 +987,10 @@ export function DesignSystemFixture() {
                 </Section>
 
                 <Section title="Composite Cards">
-                    <div className="group grid gap-2">
+                    <div
+                        className="group grid gap-2"
+                        data-testid="case-style-compose-group"
+                    >
                         <input
                             data-testid="peer-focus-control"
                             className="peer rounded-md border border-slate-300 px-3 py-2"
@@ -1000,6 +1003,7 @@ export function DesignSystemFixture() {
                                 styleComposeClass
                             )}
                             className={styleComposeClass}
+                            tabIndex={0}
                         >
                             style.compose
                         </div>

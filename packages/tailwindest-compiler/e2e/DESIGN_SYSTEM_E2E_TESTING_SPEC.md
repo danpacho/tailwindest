@@ -33,7 +33,7 @@ Target compiler paths:
 
 - Static exact replacement.
 - Dynamic lookup replacement for statically known variant tables.
-- Strict unsupported dynamic failure in unit/integration tests.
+- Unsupported dynamic fallback in unit/integration tests.
 - Manifest bridge to Tailwind v4 via `@source inline()` and
   `@source not inline()`.
 - Vite dev, Vite build, TanStack Start dev/build, and Next webpack
@@ -269,8 +269,8 @@ Compiler assertions:
 - Debug manifest records replacement candidates for the variants call.
 - Client JS contains no `VariantsStyler`.
 - Lookup size is bounded and deterministic; if table limit is exceeded in a
-  dedicated negative test, strict mode fails and loose mode preserves all
-  candidates.
+  dedicated negative test, the runtime call is preserved and all static
+  candidates remain in the manifest.
 
 ### `tw.join`
 
@@ -288,9 +288,9 @@ Dynamic cases:
 
 - Conditional class object uses a runtime boolean:
   `tw.join("base", { "ring-2": focused })`.
-- In strict compiler mode, this must either compile exactly when statically
-  resolvable or produce a strict diagnostic when not statically knowable.
-  The test must explicitly assert the chosen behavior.
+- This must either compile exactly when statically resolvable or remain a
+  runtime fallback when not statically knowable. The test must explicitly
+  assert the chosen behavior.
 
 Visual assertions:
 
@@ -373,7 +373,7 @@ Dynamic cases:
 
 - A form control builds a merged record from base + status map + state map.
 - The resulting `.class()` call must still compile to deterministic output or
-  fail loudly in strict mode if unsupported. The expected behavior must be
+  remain runtime fallback if unsupported. The expected behavior must be
   captured in the test.
 
 Visual assertions:
@@ -492,7 +492,7 @@ For each framework target, run:
 - computed style assertions
 - CSS artifact assertions
 - debug manifest assertions
-- zero-runtime JS assertions
+- static replacement JS assertions
 
 Required screenshots:
 
@@ -506,7 +506,7 @@ Required screenshots:
 Store under:
 
 ```text
-packages/compiler/e2e/.artifacts/design-system-screenshots/<framework>/
+packages/tailwindest-compiler/e2e/.artifacts/design-system-screenshots/<framework>/
 ```
 
 Required browser interactions:
@@ -600,16 +600,14 @@ Create a dedicated type test for the design-system fixture:
 
 ## Negative Tests
 
-Add tests that must fail in strict mode:
+Add fallback negative tests:
 
 - Unknown dynamic class variable passed to `tw.join(dynamicClass)`.
 - Dynamic style object passed to `tw.style(dynamicStyle).class()`.
 - Runtime-generated variant table key that cannot be statically enumerated.
-- Variant table exceeding configured strict table limit.
+- Variant table exceeding configured table limit.
 - Chained call where receiver provenance is not proven to come from
   `createTools()`.
-
-Add matching loose-mode tests:
 
 - Unsupported call remains runtime fallback.
 - All statically knowable candidates still enter the manifest.
@@ -665,18 +663,16 @@ The critic must reject the implementation if any item below is missing:
 - Raw nested shorthand leakage is tested in manifest, dev CSS, and built CSS.
 - Dev/prod computed style snapshots are equal.
 - Screenshots are generated for dev/debug/prod and interaction/mobile states.
-- Zero-runtime bundle assertions include all runtime tool tokens.
+- Static replacement bundle assertions include all runtime tool tokens for
+  fully compiled cases.
 - Type/DX tests cover `CreateCompiledTailwindest` and legacy
   `CreateTailwindest`.
-- Strict negative tests and loose fallback tests exist.
+- Fallback negative tests exist.
 - `pnpm ts:typecheck` passes.
-- `pnpm --filter @tailwindest/compiler e2e:vite-tailwind-v4` passes.
-- `pnpm --filter @tailwindest/compiler e2e:frameworks` passes.
-- `pnpm vitest run packages/tailwindest/src` passes.
-- `pnpm --filter @tailwindest/compiler exec vitest run src` passes.
-- `pnpm --filter @tailwindest/compiler build` passes.
+- `pnpm test` passes.
+- `pnpm build` passes.
 - `pnpm --filter @tailwindest/compiler pack:dry` passes.
-- `git diff --check -- packages/compiler packages/tailwindest pnpm-lock.yaml`
+- `git diff --check -- packages/tailwindest-compiler packages/tailwindest packages/tailwindest-core packages/tailwind-internal packages/create-tailwind-type pnpm-lock.yaml`
   passes.
 
 ## Critic Review Procedure
@@ -687,9 +683,9 @@ The critic must inspect:
 2. The transformed output and debug manifest.
 3. Browser screenshots for dev/debug/prod/interaction/mobile.
 4. Final CSS selector presence and raw leakage absence.
-5. Client JS bundle for zero-runtime tokens.
+5. Client JS bundle for static replacement tokens.
 6. Type tests for compiled-vs-legacy nested variant authoring.
-7. Negative strict/loose diagnostics.
+7. Negative fallback diagnostics.
 
 Approval is only allowed when the implementation proves semantic equivalence
 between runtime Tailwindest behavior and compiler output across all APIs.

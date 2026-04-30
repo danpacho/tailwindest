@@ -94,7 +94,7 @@ export interface TailwindestPlugin {
  *
  * export default defineConfig({
  *   plugins: [
- *     tailwindest({ mode: "loose", debug: true, sourceMap: true }),
+ *     tailwindest({ debug: true, sourceMap: true }),
  *     tailwindcss(),
  *   ],
  * })
@@ -139,10 +139,11 @@ export function tailwindest(
         },
         transform: {
             filter: { id: /\.[cm]?[jt]sx?(?:[?#].*)?$/ },
-            handler(code, id) {
+            async handler(code, id) {
                 if (!context.shouldTransformJs(id)) {
                     return null
                 }
+                await context.ensureVariantResolverReady()
                 const result = context.transformJs(code, id)
                 return result.changed || result.map
                     ? { code: result.code, map: result.map }
@@ -157,8 +158,8 @@ export function tailwindest(
         configResolved: applyConfig,
         transform: {
             filter: { id: /\.css(?:[?#].*)?$/ },
-            handler(code, id) {
-                const result = context.transformCss(code, id)
+            async handler(code, id) {
+                const result = await context.transformCssAsync(code, id)
                 return result.code === code ? null : result
             },
         },

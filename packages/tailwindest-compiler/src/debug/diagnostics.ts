@@ -6,21 +6,11 @@ import type {
 } from "../core/diagnostic_types"
 
 /**
- * Compiler mode used by debug manifests and diagnostic filtering.
+ * Runtime fallback behavior attached to rich diagnostics.
  *
  * @public
  */
-export type TailwindestMode = "strict" | "loose"
-
-/**
- * Mode behavior attached to rich diagnostics.
- *
- * @public
- */
-export type DiagnosticModeBehavior =
-    | "strict-fails"
-    | "loose-fallback"
-    | "informational"
+export type DiagnosticFallbackBehavior = "runtime-fallback" | "informational"
 
 /**
  * Diagnostic shape written to debug manifests.
@@ -32,7 +22,7 @@ export type DiagnosticModeBehavior =
  */
 export interface RichCompilerDiagnostic extends CompilerDiagnostic {
     severity: CompilerDiagnosticSeverity
-    modeBehavior: DiagnosticModeBehavior
+    fallbackBehavior: DiagnosticFallbackBehavior
     file: string
     span: SourceSpan
     suggestion?: string
@@ -41,7 +31,7 @@ export interface RichCompilerDiagnostic extends CompilerDiagnostic {
 export interface CreateRichDiagnosticInput {
     code: CompilerDiagnosticCode
     severity: CompilerDiagnosticSeverity
-    modeBehavior: DiagnosticModeBehavior
+    fallbackBehavior: DiagnosticFallbackBehavior
     file: string
     span: SourceSpan
     message: string
@@ -67,7 +57,7 @@ export function createRichDiagnostic(
     return {
         code: input.code,
         severity: input.severity,
-        modeBehavior: input.modeBehavior,
+        fallbackBehavior: input.fallbackBehavior,
         file: input.file,
         span: input.span,
         message: input.message,
@@ -79,12 +69,14 @@ export function diagnosticWithSource(
     diagnostic: CompilerDiagnostic,
     file: string,
     span: SourceSpan,
-    modeBehavior: DiagnosticModeBehavior = defaultModeBehavior(diagnostic)
+    fallbackBehavior: DiagnosticFallbackBehavior = defaultFallbackBehavior(
+        diagnostic
+    )
 ): RichCompilerDiagnostic {
     return createRichDiagnostic({
         code: diagnostic.code,
         severity: diagnostic.severity,
-        modeBehavior,
+        fallbackBehavior,
         file,
         span,
         message: diagnostic.message,
@@ -111,37 +103,28 @@ export function compareDiagnostics(
     )
 }
 
-export function diagnosticsForMode(
-    diagnostics: RichCompilerDiagnostic[],
-    mode: TailwindestMode
+export function diagnosticsForRuntimeFallback(
+    diagnostics: RichCompilerDiagnostic[]
 ): {
     diagnostics: RichCompilerDiagnostic[]
-    shouldFail: boolean
     shouldFallback: boolean
 } {
     const sorted = sortDiagnostics(diagnostics)
     return {
         diagnostics: sorted,
-        shouldFail:
-            mode === "strict" &&
-            sorted.some((item) => item.modeBehavior === "strict-fails"),
-        shouldFallback:
-            mode === "loose" &&
-            sorted.some(
-                (item) =>
-                    item.modeBehavior === "strict-fails" ||
-                    item.modeBehavior === "loose-fallback"
-            ),
+        shouldFallback: sorted.some(
+            (item) => item.fallbackBehavior === "runtime-fallback"
+        ),
     }
 }
 
-function defaultModeBehavior(
+function defaultFallbackBehavior(
     diagnostic: CompilerDiagnostic
-): DiagnosticModeBehavior {
+): DiagnosticFallbackBehavior {
     if (diagnostic.severity === "info") {
         return "informational"
     }
-    return diagnostic.severity === "error" ? "strict-fails" : "loose-fallback"
+    return "runtime-fallback"
 }
 
 function getDiagnosticFile(diagnostic: CompilerDiagnostic): string {

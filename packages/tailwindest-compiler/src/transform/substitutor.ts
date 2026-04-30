@@ -20,7 +20,7 @@ export interface SubstituteTailwindestInput {
     code: string
     plans: ReplacementPlan[]
     cleanImports?: boolean
-    sourceMapMode?: "strict" | "loose" | false
+    sourceMapBehavior?: "revert-on-error" | "diagnostic-on-error" | false
     cleanupImports?: (input: ImportCleanupInput) => ImportCleanupResult
     createSourceMap?: (input: ReplacementSourceMapInput) => ViteSourceMap
 }
@@ -30,7 +30,7 @@ export const substituteTailwindest = ({
     code,
     plans,
     cleanImports = false,
-    sourceMapMode = false,
+    sourceMapBehavior = false,
     cleanupImports = cleanupRuntimeImports,
     createSourceMap = createReplacementSourceMap,
 }: SubstituteTailwindestInput): TransformResult => {
@@ -45,13 +45,17 @@ export const substituteTailwindest = ({
         (plan) => !isValidSpan(code, fileName, plan)
     )
     if (invalidPlan) {
-        return unchanged(code, [
-            ...diagnostics,
-            diagnostic(
-                "INVALID_REPLACEMENT_SPAN",
-                `Invalid replacement span ${invalidPlan.span.start}:${invalidPlan.span.end}.`
-            ),
-        ])
+        return unchanged(
+            code,
+            [
+                ...diagnostics,
+                diagnostic(
+                    "INVALID_REPLACEMENT_SPAN",
+                    `Invalid replacement span ${invalidPlan.span.start}:${invalidPlan.span.end}.`
+                ),
+            ],
+            [invalidPlan.span]
+        )
     }
 
     try {
@@ -64,16 +68,24 @@ export const substituteTailwindest = ({
         const resolved = resolveOverlaps(protectedResult.plans)
         diagnostics.push(...resolved.diagnostics)
         const appliedPlans = resolved.plans
+        const skippedPlans = [
+            ...(protectedResult.skippedPlans ?? []),
+            ...(resolved.skippedPlans ?? []),
+        ]
         const replacedCode = applyReplacements(code, appliedPlans)
 
         if (hasSyntaxError(fileName, replacedCode)) {
-            return unchanged(code, [
-                ...diagnostics,
-                diagnostic(
-                    "INVALID_REPLACEMENT_SYNTAX",
-                    "Generated replacement code contains a syntax error."
-                ),
-            ])
+            return unchanged(
+                code,
+                [
+                    ...diagnostics,
+                    diagnostic(
+                        "INVALID_REPLACEMENT_SYNTAX",
+                        "Generated replacement code contains a syntax error."
+                    ),
+                ],
+                appliedPlans.map((plan) => plan.span)
+            )
         }
 
         let finalCode = replacedCode
@@ -82,15 +94,19 @@ export const substituteTailwindest = ({
             try {
                 cleanup = cleanupImports({ fileName, code: finalCode })
             } catch (error) {
-                return unchanged(code, [
-                    ...diagnostics,
-                    diagnostic(
-                        "IMPORT_CLEANUP_FAILED",
-                        error instanceof Error
-                            ? error.message
-                            : "Import cleanup failed."
-                    ),
-                ])
+                return unchanged(
+                    code,
+                    [
+                        ...diagnostics,
+                        diagnostic(
+                            "IMPORT_CLEANUP_FAILED",
+                            error instanceof Error
+                                ? error.message
+                                : "Import cleanup failed."
+                        ),
+                    ],
+                    appliedPlans.map((plan) => plan.span)
+                )
             }
 
             if (
@@ -98,7 +114,11 @@ export const substituteTailwindest = ({
                     (item) => item.code === "IMPORT_CLEANUP_FAILED"
                 )
             ) {
-                return unchanged(code, [...diagnostics, ...cleanup.diagnostics])
+                return unchanged(
+                    code,
+                    [...diagnostics, ...cleanup.diagnostics],
+                    appliedPlans.map((plan) => plan.span)
+                )
             }
 
             finalCode = cleanup.code
@@ -106,7 +126,7 @@ export const substituteTailwindest = ({
         }
 
         let map: ViteSourceMap | null = null
-        if (sourceMapMode) {
+        if (sourceMapBehavior) {
             try {
                 map = createSourceMap({
                     fileName,
@@ -121,8 +141,12 @@ export const substituteTailwindest = ({
                         ? error.message
                         : "Source map generation failed."
                 )
-                if (sourceMapMode === "strict") {
-                    return unchanged(code, [...diagnostics, mapDiagnostic])
+                if (sourceMapBehavior === "revert-on-error") {
+                    return unchanged(
+                        code,
+                        [...diagnostics, mapDiagnostic],
+                        appliedPlans.map((plan) => plan.span)
+                    )
                 }
                 diagnostics.push(mapDiagnostic)
             }
@@ -134,21 +158,31 @@ export const substituteTailwindest = ({
             candidates: collectCandidates(appliedPlans),
             diagnostics,
             changed: finalCode !== code,
+            ...(skippedPlans.length > 0
+                ? { skippedSpans: skippedPlans.map((plan) => plan.span) }
+                : {}),
         }
     } catch (error) {
-        return unchanged(code, [
-            ...diagnostics,
-            diagnostic(
-                "INVALID_REPLACEMENT_SYNTAX",
-                error instanceof Error ? error.message : "Replacement failed."
-            ),
-        ])
+        return unchanged(
+            code,
+            [
+                ...diagnostics,
+                diagnostic(
+                    "INVALID_REPLACEMENT_SYNTAX",
+                    error instanceof Error
+                        ? error.message
+                        : "Replacement failed."
+                ),
+            ],
+            replacementPlans.map((plan) => plan.span)
+        )
     }
 }
 
 interface ResolvedPlans {
     plans: ReplacementPlan[]
     diagnostics: CompilerDiagnostic[]
+    skippedPlans?: ReplacementPlan[]
 }
 
 const removeProtectedOverlaps = (
@@ -161,6 +195,7 @@ const removeProtectedOverlaps = (
 
     const accepted: ReplacementPlan[] = []
     const diagnostics: CompilerDiagnostic[] = []
+    const skippedPlans: ReplacementPlan[] = []
 
     for (const plan of plans) {
         if (
@@ -174,13 +209,14 @@ const removeProtectedOverlaps = (
                     "Replacement overlaps a protected fallback span."
                 )
             )
+            skippedPlans.push(plan)
             continue
         }
 
         accepted.push(plan)
     }
 
-    return { plans: accepted, diagnostics }
+    return { plans: accepted, diagnostics, skippedPlans }
 }
 
 const resolveOverlaps = (plans: ReplacementPlan[]): ResolvedPlans => {
@@ -213,6 +249,7 @@ const resolveOverlaps = (plans: ReplacementPlan[]): ResolvedPlans => {
 
     const accepted: ReplacementPlan[] = []
     const diagnostics: CompilerDiagnostic[] = []
+    const skippedPlans: ReplacementPlan[] = []
 
     for (const cluster of clusters) {
         if (cluster.length === 1) {
@@ -232,9 +269,10 @@ const resolveOverlaps = (plans: ReplacementPlan[]): ResolvedPlans => {
                 "Overlapping replacements could not be proven safe."
             )
         )
+        skippedPlans.push(...cluster)
     }
 
-    return { plans: accepted, diagnostics }
+    return { plans: accepted, diagnostics, skippedPlans }
 }
 
 const spansOverlap = (
@@ -347,11 +385,13 @@ const diagnostic = (
 
 const unchanged = (
     code: string,
-    diagnostics: CompilerDiagnostic[]
+    diagnostics: CompilerDiagnostic[],
+    skippedSpans: TransformResult["skippedSpans"] = []
 ): TransformResult => ({
     code,
     map: null,
     candidates: [],
     diagnostics,
     changed: false,
+    ...(skippedSpans.length > 0 ? { skippedSpans } : {}),
 })

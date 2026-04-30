@@ -22,4 +22,4 @@ pnpm --filter @tailwindest/compiler e2e:design-system-tanstack-start
 - Tailwind candidate and exclusion manifest.
 - Zero-runtime client bundle checks.
 - Screenshot artifacts under
-  `packages/compiler/e2e/.artifacts/design-system-screenshots/tanstack-start/`.
+  `packages/tailwindest-compiler/e2e/.artifacts/design-system-screenshots/tanstack-start/`.

@@ -6,8 +6,8 @@
         "target": "ES2022",
         "strict": true,
         "skipLibCheck": true,
-        "baseUrl": ".",
         "paths": {
+            "@tailwindest/core": ["../../../tailwindest-core/src/index.ts"],
             "tailwindest": ["../../../tailwindest/src/index.ts"]
         },
         "plugins": [
@@ -21,7 +21,8 @@
         "incremental": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "isolatedModules": true
+        "isolatedModules": true,
+        "forceConsistentCasingInFileNames": true
     },
     "include": [
         "next-env.d.ts",

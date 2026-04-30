@@ -27,19 +27,24 @@ type DesignTailwind = {
     width: string
 }
 
-type DesignNestGroups =
-    | "active"
-    | "aria-[checked=true]"
-    | "dark"
-    | "data-[invalid=true]"
-    | "data-[state=open]"
-    | "disabled"
-    | "focus"
-    | "group"
-    | "hover"
-    | "md"
-    | "peer"
-    | "sm"
+export const tailwindNestGroups = [
+    "active",
+    "aria-checked",
+    "dark",
+    "data-[invalid=true]",
+    "data-open",
+    "disabled",
+    "focus",
+    "group",
+    "group-hover",
+    "hover",
+    "md",
+    "peer",
+    "peer-focus",
+    "sm",
+] as const
+
+type DesignNestGroups = (typeof tailwindNestGroups)[number]
 
 export type DesignSystemStyle = CreateCompiledTailwindest<{
     tailwind: DesignTailwind

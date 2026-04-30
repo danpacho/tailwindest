@@ -40,13 +40,13 @@ export interface DesignSystemExpectation {
 }
 
 const styleClass =
-    "inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-semibold leading-5 text-slate-900 shadow-sm transition hover:bg-slate-100 focus:ring-2 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 dark:hover:focus:ring-sky-300 data-[state=open]:bg-blue-600 data-[state=open]:text-white"
+    "inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-semibold leading-5 text-slate-900 shadow-sm transition hover:bg-slate-100 focus:ring-2 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 dark:hover:focus:ring-sky-300 data-open:bg-blue-600 data-open:text-white"
 
 const styleStyleClass =
     "inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:ring-2"
 
 const styleComposeClass =
-    "inline-flex items-center justify-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-5 py-3 text-base font-semibold text-indigo-900 shadow-md group-hover:border-cyan-500 peer-focus:text-sky-600"
+    "inline-flex items-center justify-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-5 py-3 text-base font-semibold text-indigo-900 shadow-md hover:border-cyan-500 focus:text-sky-600"
 
 const toggleOffClass =
     "inline-flex h-7 w-12 items-center rounded-full border border-slate-300 bg-slate-200 p-1 transition"
@@ -86,9 +86,9 @@ const mergePropsDenseInfoClass =
     "rounded-md border border-sky-600 bg-sky-50 px-3 py-2 text-sm text-sky-900 shadow-sm"
 
 const mergeRecordDefaultClass =
-    "rounded-md border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm data-[state=open]:bg-violet-50 aria-[checked=true]:border-violet-600"
+    "rounded-md border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm data-open:bg-violet-50 aria-checked:border-violet-600"
 const mergeRecordOpenClass =
-    "rounded-md border border-violet-500 bg-violet-100 px-4 py-3 text-sm text-violet-900 shadow-sm data-[state=open]:bg-violet-50 aria-[checked=true]:border-violet-600"
+    "rounded-md border border-violet-500 bg-violet-100 px-4 py-3 text-sm text-violet-900 shadow-sm data-open:bg-violet-50 aria-checked:border-violet-600"
 
 const requiredNestedCandidates = [
     "hover:bg-slate-100",
@@ -97,12 +97,12 @@ const requiredNestedCandidates = [
     "dark:text-white",
     "dark:hover:bg-slate-800",
     "dark:hover:focus:ring-sky-300",
-    "data-[state=open]:bg-blue-600",
-    "data-[state=open]:text-white",
-    "group-hover:border-cyan-500",
-    "peer-focus:text-sky-600",
-    "data-[state=open]:bg-violet-50",
-    "aria-[checked=true]:border-violet-600",
+    "data-open:bg-blue-600",
+    "data-open:text-white",
+    "hover:border-cyan-500",
+    "focus:text-sky-600",
+    "data-open:bg-violet-50",
+    "aria-checked:border-violet-600",
 ]
 
 const raw = (...parts: string[]) => parts.join("-")
@@ -189,8 +189,8 @@ export const expectedDesignSystemCases = {
             "bg-indigo-50",
             "border-indigo-300",
             "shadow-md",
-            "group-hover:border-cyan-500",
-            "peer-focus:text-sky-600",
+            "hover:border-cyan-500",
+            "focus:text-sky-600",
         ],
         excludedCandidates: [
             raw("border", "cyan", "500"),
@@ -216,24 +216,24 @@ export const expectedDesignSystemCases = {
         section: "Checkbox",
         tokenGroup: "checkbox-toggle-style",
         staticClass:
-            "inline-flex h-5 w-5 items-center justify-center rounded border border-slate-400 bg-white aria-[checked=true]:bg-emerald-600 aria-[checked=true]:border-emerald-600 focus:ring-2",
+            "inline-flex h-5 w-5 items-center justify-center rounded border border-slate-400 bg-white aria-checked:bg-emerald-600 aria-checked:border-emerald-600 focus:ring-2",
         staticStyle: {
             width: "w-5",
             height: "h-5",
-            "aria-[checked=true]": {
+            "aria-checked": {
                 backgroundColor: "bg-emerald-600",
                 borderColor: "border-emerald-600",
             },
         },
         dynamicStates: {
             unchecked:
-                "inline-flex h-5 w-5 items-center justify-center rounded border border-slate-400 bg-white aria-[checked=true]:bg-emerald-600 aria-[checked=true]:border-emerald-600 focus:ring-2",
+                "inline-flex h-5 w-5 items-center justify-center rounded border border-slate-400 bg-white aria-checked:bg-emerald-600 aria-checked:border-emerald-600 focus:ring-2",
             checked:
-                "inline-flex h-5 w-5 items-center justify-center rounded border border-slate-400 bg-white aria-[checked=true]:bg-emerald-600 aria-[checked=true]:border-emerald-600 focus:ring-2",
+                "inline-flex h-5 w-5 items-center justify-center rounded border border-slate-400 bg-white aria-checked:bg-emerald-600 aria-checked:border-emerald-600 focus:ring-2",
         },
         candidates: [
-            "aria-[checked=true]:bg-emerald-600",
-            "aria-[checked=true]:border-emerald-600",
+            "aria-checked:bg-emerald-600",
+            "aria-checked:border-emerald-600",
             "focus:ring-2",
         ],
         excludedCandidates: [raw("ring", "2")],
@@ -410,7 +410,7 @@ export const expectedDesignSystemCases = {
         staticClass: mergeRecordDefaultClass,
         staticStyle: {
             borderColor: "border-slate-300",
-            "data-[state=open]": {
+            "data-open": {
                 backgroundColor: "bg-violet-50",
             },
         },
@@ -421,8 +421,8 @@ export const expectedDesignSystemCases = {
         candidates: [
             "bg-violet-100",
             "border-violet-500",
-            "data-[state=open]:bg-violet-50",
-            "aria-[checked=true]:border-violet-600",
+            "data-open:bg-violet-50",
+            "aria-checked:border-violet-600",
         ],
         excludedCandidates: [
             raw("bg", "violet", "50"),

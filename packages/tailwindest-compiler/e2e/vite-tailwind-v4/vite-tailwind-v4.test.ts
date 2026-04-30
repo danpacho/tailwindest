@@ -2,6 +2,7 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import { build } from "vite"
 import { describe, expect, it } from "vitest"
+import viteConfig from "./vite.config"
 import type { TailwindestDebugManifest } from "../../src/debug/debug_manifest"
 import { createCompilerContext } from "../../src/vite/context"
 import { createHotUpdateHandler } from "../../src/vite/hmr"
@@ -61,7 +62,8 @@ describe("Vite + Tailwind v4 manifest bridge", () => {
         })
 
         await build({
-            configFile: path.join(fixtureRoot, "vite.config.ts"),
+            ...viteConfig,
+            configFile: false,
         })
 
         const assets = await fs.readdir(path.join(fixtureRoot, "dist/assets"))
@@ -142,7 +144,7 @@ describe("Vite + Tailwind v4 manifest bridge", () => {
         const context = createCompilerContext({
             root: fixtureRoot,
             command: "build",
-            options: { mode: "loose", debug: true, sourceMap: true },
+            options: { debug: true, sourceMap: true },
             scanFiles: async () => [mainFile, cssFile],
             readFile: async (id) =>
                 id === mainFile ? source : `@import "tailwindcss";`,
@@ -186,14 +188,14 @@ describe("Vite + Tailwind v4 manifest bridge", () => {
         const serve = createCompilerContext({
             root: fixtureRoot,
             command: "serve",
-            options: { mode: "loose", debug: true, sourceMap: true },
+            options: { debug: true, sourceMap: true },
             scanFiles,
             readFile,
         })
         const buildContext = createCompilerContext({
             root: fixtureRoot,
             command: "build",
-            options: { mode: "loose", debug: true, sourceMap: true },
+            options: { debug: true, sourceMap: true },
             scanFiles,
             readFile,
         })
@@ -211,7 +213,7 @@ describe("Vite + Tailwind v4 manifest bridge", () => {
         const context = createCompilerContext({
             root: fixtureRoot,
             command: "serve",
-            options: { mode: "loose", sourceMap: true },
+            options: { sourceMap: true },
         })
         const cssModule = { id: cssFile }
         const appModule = { id: mainFile }
@@ -302,8 +304,8 @@ function assertManifestDiagnosticContract(manifest: {
             expect(diagnostic).toMatchObject({
                 code: expect.any(String),
                 severity: expect.stringMatching(/^(error|warning|info)$/),
-                modeBehavior: expect.stringMatching(
-                    /^(strict-fails|loose-fallback|informational)$/
+                fallbackBehavior: expect.stringMatching(
+                    /^(runtime-fallback|informational)$/
                 ),
                 file: expect.any(String),
                 span: {

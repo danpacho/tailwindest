@@ -13,6 +13,10 @@ export default defineConfig({
     logLevel: "error",
     resolve: {
         alias: {
+            "@tailwindest/core": path.resolve(
+                fixtureRoot,
+                "../../../tailwindest-core/src/index.ts"
+            ),
             tailwindest: path.resolve(
                 fixtureRoot,
                 "../../../tailwindest/src/index.ts"
@@ -30,7 +34,6 @@ export default defineConfig({
         tailwindest({
             include: [/src\/.*\.[cm]?[jt]sx?$/],
             cssEntries: [/src\/style\.css$/],
-            mode: "strict",
             debug: true,
             sourceMap: true,
         }),

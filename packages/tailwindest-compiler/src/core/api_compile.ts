@@ -11,6 +11,11 @@ import {
 } from "./codegen"
 import type { CompilerDiagnostic } from "./diagnostic_types"
 import {
+    styleNeedsCompiledVariantMetadata,
+    type CompiledStyleNormalizationOptions,
+} from "./compiled_style_normalizer"
+import type { CompiledVariantResolver } from "./compiled_variant_resolver"
+import {
     deepMerge,
     getClassName,
     join,
@@ -18,9 +23,8 @@ import {
     mergeRecord,
 } from "./evaluator"
 import {
+    applyMergerPolicy,
     candidatesFromClassName,
-    type EvaluationMode,
-    type EvaluationOptions,
     type MergerPolicy,
 } from "./merger"
 import type { StaticClassValue, StaticStyleObject } from "./static_value"
@@ -104,10 +108,15 @@ export type CompileValue<T = unknown> =
  */
 export interface DynamicVariantProps {
     kind: "dynamic-variant-props"
+    staticProps?: Record<string, unknown>
     entries: Array<{
         axis: string
         expression: string
     }>
+    orderedEntries?: Array<
+        | { kind: "static"; axis: string }
+        | { kind: "dynamic"; axis: string; expression: string }
+    >
 }
 
 /**
@@ -135,7 +144,6 @@ export type ApiCompileInput =
           style: CompileValue<StaticStyleObject>
           extraClass: CompileValue[]
           merger?: MergerPolicy
-          mode?: EvaluationMode
       }
     | {
           kind: "style.style"
@@ -159,6 +167,7 @@ export type ApiCompileInput =
           }>
           condition: CompileValue<boolean>
           extraClass: CompileValue[]
+          merger?: MergerPolicy
       }
     | {
           kind: "toggle.style"
@@ -190,6 +199,7 @@ export type ApiCompileInput =
           }>
           key: CompileValue<string>
           extraClass: CompileValue[]
+          merger?: MergerPolicy
       }
     | {
           kind: "rotary.style"
@@ -219,8 +229,8 @@ export type ApiCompileInput =
           }>
           props: VariantPropsValue
           extraClass: CompileValue[]
+          merger?: MergerPolicy
           variantTableLimit?: number
-          mode?: EvaluationMode
       }
     | {
           kind: "variants.style"
@@ -232,7 +242,6 @@ export type ApiCompileInput =
           props: VariantPropsValue
           extraStyles: CompileValue<StaticStyleObject>[]
           variantTableLimit?: number
-          mode?: EvaluationMode
       }
     | {
           kind: "variants.compose"
@@ -248,7 +257,6 @@ export type ApiCompileInput =
           span: SourceSpan
           classList: CompileValue<StaticClassValue>[]
           merger?: MergerPolicy
-          mode?: EvaluationMode
       }
     | {
           kind: "def"
@@ -256,14 +264,12 @@ export type ApiCompileInput =
           classList: CompileValue<StaticClassValue[]>
           styles: CompileValue<StaticStyleObject>[]
           merger?: MergerPolicy
-          mode?: EvaluationMode
       }
     | {
           kind: "mergeProps"
           span: SourceSpan
           styles: CompileValue<StaticStyleObject>[]
           merger?: MergerPolicy
-          mode?: EvaluationMode
       }
     | {
           kind: "mergeRecord"
@@ -284,6 +290,10 @@ export interface ApiCompileResult {
     diagnostics: CompilerDiagnostic[]
 }
 
+export interface ApiCompileOptions extends CompiledStyleNormalizationOptions {
+    variantResolver?: CompiledVariantResolver | undefined
+}
+
 /**
  * Compile one already-extracted Tailwindest call.
  *
@@ -293,107 +303,139 @@ export interface ApiCompileResult {
  * @public
  */
 export function compileTailwindestCall(
-    input: ApiCompileInput
+    input: ApiCompileInput,
+    options: ApiCompileOptions = {}
 ): ApiCompileResult {
     resetCodegenSymbolCounter()
 
     switch (input.kind) {
         case "style.class":
-            return compilePrimitiveClass(input)
+            return compilePrimitiveClass(input, options)
         case "style.style":
-            return compilePrimitiveStyle(input)
+            return compilePrimitiveStyle(input, options)
         case "style.compose":
-            return compilePrimitiveCompose(input)
+            return compilePrimitiveCompose(input, options)
         case "toggle.class":
-            return compileToggleClass(input)
+            return compileToggleClass(input, options)
         case "toggle.style":
-            return compileToggleStyle(input)
+            return compileToggleStyle(input, options)
         case "toggle.compose":
-            return compileToggleCompose(input)
+            return compileToggleCompose(input, options)
         case "rotary.class":
-            return compileRotaryClass(input)
+            return compileRotaryClass(input, options)
         case "rotary.style":
-            return compileRotaryStyle(input)
+            return compileRotaryStyle(input, options)
         case "rotary.compose":
-            return compileRotaryCompose(input)
+            return compileRotaryCompose(input, options)
         case "variants.class":
-            return compileVariantsClass(input)
+            return compileVariantsClass(input, options)
         case "variants.style":
-            return compileVariantsStyle(input)
+            return compileVariantsStyle(input, options)
         case "variants.compose":
-            return compileVariantsCompose(input)
+            return compileVariantsCompose(input, options)
         case "join":
             return compileJoin(input)
         case "def":
-            return compileDef(input)
+            return compileDef(input, options)
         case "mergeProps":
-            return compileMergeProps(input)
+            return compileMergeProps(input, options)
         case "mergeRecord":
-            return compileMergeRecord(input)
+            return compileMergeRecord(input, options)
     }
 }
 
 function compilePrimitiveClass(
-    input: Extract<ApiCompileInput, { kind: "style.class" }>
+    input: Extract<ApiCompileInput, { kind: "style.class" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.style, ...input.extraClass])
     if (unsupported) return fallback(input, unsupported.reason)
     const style = staticValue(input.style)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        [style],
+        options
+    )
+    if (missingMetadata) return missingMetadata
     const extras = staticValues(input.extraClass)
     const model = createPrimitiveModel(style)
-    const value = primitiveClass(model, extras)
-    return exact(
-        input,
-        emitStringLiteral(value),
-        candidatesFromClassName(value)
-    )
+    const value = primitiveClass(model, extras, options)
+    const candidates = candidatesFromClassName(value)
+    const mergerFallback = fallbackForClassMerger(input, candidates)
+    if (mergerFallback) return mergerFallback
+    return exact(input, emitStringLiteral(value), candidates)
 }
 
 function compilePrimitiveStyle(
-    input: Extract<ApiCompileInput, { kind: "style.style" }>
+    input: Extract<ApiCompileInput, { kind: "style.style" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.style, ...input.extraStyles])
     if (unsupported) return fallback(input, unsupported.reason)
-    const model = createPrimitiveModel(staticValue(input.style))
-    const style = primitiveStyle(model, staticValues(input.extraStyles))
+    const style = staticValue(input.style)
+    const extraStyles = staticValues(input.extraStyles)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        [style, ...extraStyles],
+        options
+    )
+    if (missingMetadata) return missingMetadata
+    const model = createPrimitiveModel(style)
+    const mergedStyle = primitiveStyle(model, extraStyles)
     return exact(
         input,
-        emitValueLiteral(style),
-        classCandidatesFromStyles([style])
+        emitValueLiteral(mergedStyle),
+        classCandidatesFromStyles([mergedStyle], options)
     )
 }
 
 function compilePrimitiveCompose(
-    input: Extract<ApiCompileInput, { kind: "style.compose" }>
+    input: Extract<ApiCompileInput, { kind: "style.compose" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.style, ...input.styles])
     if (unsupported) return fallback(input, unsupported.reason)
-    const model = composePrimitive(
-        createPrimitiveModel(staticValue(input.style)),
-        staticValues(input.styles)
+    const style = staticValue(input.style)
+    const styles = staticValues(input.styles)
+    const model = composePrimitive(createPrimitiveModel(style), styles)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        [model.style],
+        options
     )
+    if (missingMetadata) return missingMetadata
     return exactWithoutReplacement(
         input,
         emitValueLiteral(model.style),
-        classCandidatesFromStyles([model.style])
+        classCandidatesFromStyles([model.style], options)
     )
 }
 
 function compileToggleClass(
-    input: Extract<ApiCompileInput, { kind: "toggle.class" }>
+    input: Extract<ApiCompileInput, { kind: "toggle.class" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.config, ...input.extraClass])
     if (unsupported) return fallback(input, unsupported.reason)
     if (isUnsupported(input.condition))
         return fallback(input, input.condition.reason)
     const model = createToggleModel(staticValue(input.config))
+    const styles = allToggleStyles(model)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
+    )
+    if (missingMetadata) return missingMetadata
     const extras = staticValues(input.extraClass)
-    const candidates = classCandidatesFromStyles(allToggleStyles(model)).concat(
+    const candidates = classCandidatesFromStyles(styles, options).concat(
         classCandidatesFromStrings(extras.map(String))
     )
+    const mergerFallback = fallbackForClassMerger(input, candidates)
+    if (mergerFallback) return mergerFallback
     if (isDynamic(input.condition)) {
-        const truthy = toggleClassFor(model, true, extras)
-        const falsy = toggleClassFor(model, false, extras)
+        const truthy = toggleClassFor(model, true, extras, options)
+        const falsy = toggleClassFor(model, false, extras, options)
         return exact(
             input,
             {
@@ -406,14 +448,20 @@ function compileToggleClass(
     return exact(
         input,
         emitStringLiteral(
-            toggleClassFor(model, Boolean(staticValue(input.condition)), extras)
+            toggleClassFor(
+                model,
+                Boolean(staticValue(input.condition)),
+                extras,
+                options
+            )
         ),
         unique(candidates)
     )
 }
 
 function compileToggleStyle(
-    input: Extract<ApiCompileInput, { kind: "toggle.style" }>
+    input: Extract<ApiCompileInput, { kind: "toggle.style" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([
         input.config,
@@ -423,9 +471,14 @@ function compileToggleStyle(
     if (unsupported) return fallback(input, unsupported.reason)
     const model = createToggleModel(staticValue(input.config))
     const extras = staticValues(input.extraStyles)
-    const candidates = classCandidatesFromStyles(
-        allToggleStyles(model).concat(extras)
+    const styles = allToggleStyles(model).concat(extras)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
     )
+    if (missingMetadata) return missingMetadata
+    const candidates = classCandidatesFromStyles(styles, options)
     if (isDynamic(input.condition)) {
         const truthy = toggleStyleFor(model, true, extras)
         const falsy = toggleStyleFor(model, false, extras)
@@ -447,7 +500,8 @@ function compileToggleStyle(
 }
 
 function compileToggleCompose(
-    input: Extract<ApiCompileInput, { kind: "toggle.compose" }>
+    input: Extract<ApiCompileInput, { kind: "toggle.compose" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.config, ...input.styles])
     if (unsupported) return fallback(input, unsupported.reason)
@@ -455,33 +509,50 @@ function compileToggleCompose(
         createToggleModel(staticValue(input.config)),
         staticValues(input.styles)
     )
+    const styles = allToggleStyles(model)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
+    )
+    if (missingMetadata) return missingMetadata
     const style = toggleStyleFor(model, true)
     return exactWithoutReplacement(
         input,
         emitValueLiteral(style),
-        classCandidatesFromStyles(allToggleStyles(model))
+        classCandidatesFromStyles(styles, options)
     )
 }
 
 function compileRotaryClass(
-    input: Extract<ApiCompileInput, { kind: "rotary.class" }>
+    input: Extract<ApiCompileInput, { kind: "rotary.class" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.config, ...input.extraClass])
     if (unsupported) return fallback(input, unsupported.reason)
     if (isUnsupported(input.key)) return fallback(input, input.key.reason)
     const model = createRotaryModel(staticValue(input.config))
+    const styles = allRotaryStyles(model)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
+    )
+    if (missingMetadata) return missingMetadata
     const extras = staticValues(input.extraClass)
     const table = Object.fromEntries(
         ["base", ...Object.keys(model.variants)].map((key) => [
             key,
-            rotaryClassFor(model, key, extras),
+            rotaryClassFor(model, key, extras, options),
         ])
     )
     const candidates = unique(
-        classCandidatesFromStyles(allRotaryStyles(model)).concat(
+        classCandidatesFromStyles(styles, options).concat(
             classCandidatesFromStrings(extras.map(String))
         )
     )
+    const mergerFallback = fallbackForClassMerger(input, candidates)
+    if (mergerFallback) return mergerFallback
     if (isDynamic(input.key)) {
         const symbol = createGeneratedSymbol("rotary_class")
         return exact(
@@ -501,7 +572,8 @@ function compileRotaryClass(
 }
 
 function compileRotaryStyle(
-    input: Extract<ApiCompileInput, { kind: "rotary.style" }>
+    input: Extract<ApiCompileInput, { kind: "rotary.style" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([
         input.config,
@@ -511,15 +583,20 @@ function compileRotaryStyle(
     if (unsupported) return fallback(input, unsupported.reason)
     const model = createRotaryModel(staticValue(input.config))
     const extras = staticValues(input.extraStyles)
+    const styles = allRotaryStyles(model).concat(extras)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
+    )
+    if (missingMetadata) return missingMetadata
     const table = Object.fromEntries(
         ["base", ...Object.keys(model.variants)].map((key) => [
             key,
             rotaryStyleFor(model, key, extras),
         ])
     )
-    const candidates = classCandidatesFromStyles(
-        allRotaryStyles(model).concat(extras)
-    )
+    const candidates = classCandidatesFromStyles(styles, options)
     if (isDynamic(input.key)) {
         const symbol = createGeneratedSymbol("rotary_style")
         return exact(
@@ -539,7 +616,8 @@ function compileRotaryStyle(
 }
 
 function compileRotaryCompose(
-    input: Extract<ApiCompileInput, { kind: "rotary.compose" }>
+    input: Extract<ApiCompileInput, { kind: "rotary.compose" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.config, ...input.styles])
     if (unsupported) return fallback(input, unsupported.reason)
@@ -547,6 +625,13 @@ function compileRotaryCompose(
         createRotaryModel(staticValue(input.config)),
         staticValues(input.styles)
     )
+    const styles = allRotaryStyles(model)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
+    )
+    if (missingMetadata) return missingMetadata
     const style = rotaryStyleFor(
         model,
         Object.prototype.hasOwnProperty.call(model.variants, "sm")
@@ -556,31 +641,47 @@ function compileRotaryCompose(
     return exactWithoutReplacement(
         input,
         emitValueLiteral(style),
-        classCandidatesFromStyles(allRotaryStyles(model))
+        classCandidatesFromStyles(styles, options)
     )
 }
 
 function compileVariantsClass(
-    input: Extract<ApiCompileInput, { kind: "variants.class" }>
+    input: Extract<ApiCompileInput, { kind: "variants.class" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.config, ...input.extraClass])
     if (unsupported) return fallback(input, unsupported.reason)
     if (isUnsupported(input.props)) return fallback(input, input.props.reason)
     const model = createVariantsModel(staticValue(input.config))
+    const styles = allVariantStyles(model)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
+    )
+    if (missingMetadata) return missingMetadata
     const extras = staticValues(input.extraClass)
     const candidates = unique(
-        classCandidatesFromStyles(allVariantStyles(model)).concat(
+        classCandidatesFromStyles(styles, options).concat(
             classCandidatesFromStrings(extras.map(String))
         )
     )
+    const mergerFallback = fallbackForClassMerger(input, candidates)
+    if (mergerFallback) return mergerFallback
     if (isStatic(input.props)) {
-        const value = variantsClassFor(model, input.props.value, extras)
+        const value = variantsClassFor(
+            model,
+            input.props.value,
+            extras,
+            options
+        )
         return exact(input, emitStringLiteral(value), candidates)
     }
     const optimized = optimizeVariants({
         base: model.base,
         variants: model.variants,
-        ...optionalVariantOptions(input.variantTableLimit, input.mode),
+        variantResolver: options.variantResolver,
+        ...optionalVariantOptions(input.variantTableLimit),
     })
     if (!optimized.exact)
         return fallback(
@@ -589,26 +690,44 @@ function compileVariantsClass(
             candidates,
             optimized.diagnostics
         )
-    const generated = emitDynamicVariantsClass(
-        model.base,
-        input.props,
-        optimized,
-        extras
-    )
+    const overflow = orderedVariantTableOverflow(input.props, optimized, input)
+    if (overflow)
+        return fallback(input, overflow.message, candidates, [overflow])
+    const generated = shouldUseOrderedVariantTable(input.props)
+        ? emitOrderedDynamicVariantsClass(
+              model,
+              input.props,
+              optimized,
+              extras,
+              options
+          )
+        : emitDynamicVariantsClass(
+              model.base,
+              input.props,
+              optimized,
+              extras,
+              options
+          )
     return exact(input, generated, candidates)
 }
 
 function compileVariantsStyle(
-    input: Extract<ApiCompileInput, { kind: "variants.style" }>
+    input: Extract<ApiCompileInput, { kind: "variants.style" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.config, ...input.extraStyles])
     if (unsupported) return fallback(input, unsupported.reason)
     if (isUnsupported(input.props)) return fallback(input, input.props.reason)
     const model = createVariantsModel(staticValue(input.config))
     const extras = staticValues(input.extraStyles)
-    const candidates = classCandidatesFromStyles(
-        allVariantStyles(model).concat(extras)
+    const styles = allVariantStyles(model).concat(extras)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
     )
+    if (missingMetadata) return missingMetadata
+    const candidates = classCandidatesFromStyles(styles, options)
     if (isStatic(input.props)) {
         const style = variantsStyleFor(model, input.props.value, extras)
         return exact(input, emitValueLiteral(style), candidates)
@@ -616,7 +735,8 @@ function compileVariantsStyle(
     const optimized = optimizeVariants({
         base: model.base,
         variants: model.variants,
-        ...optionalVariantOptions(input.variantTableLimit, input.mode),
+        variantResolver: options.variantResolver,
+        ...optionalVariantOptions(input.variantTableLimit),
     })
     if (!optimized.exact)
         return fallback(
@@ -625,17 +745,30 @@ function compileVariantsStyle(
             candidates,
             optimized.diagnostics
         )
-    const generated = emitDynamicVariantsStyle(
-        model.base,
-        input.props,
-        optimized,
-        extras
-    )
+    const overflow = orderedVariantTableOverflow(input.props, optimized, input)
+    if (overflow)
+        return fallback(input, overflow.message, candidates, [overflow])
+    const generated = shouldUseOrderedVariantTable(input.props)
+        ? emitOrderedDynamicVariantsStyle(
+              model,
+              input.props,
+              optimized,
+              extras,
+              options
+          )
+        : emitDynamicVariantsStyle(
+              model.base,
+              input.props,
+              optimized,
+              extras,
+              options
+          )
     return exact(input, generated, candidates)
 }
 
 function compileVariantsCompose(
-    input: Extract<ApiCompileInput, { kind: "variants.compose" }>
+    input: Extract<ApiCompileInput, { kind: "variants.compose" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.config, ...input.styles])
     if (unsupported) return fallback(input, unsupported.reason)
@@ -643,6 +776,13 @@ function compileVariantsCompose(
         createVariantsModel(staticValue(input.config)),
         staticValues(input.styles)
     )
+    const styles = allVariantStyles(model)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
+    )
+    if (missingMetadata) return missingMetadata
     const firstAxis = Object.keys(model.variants)[0]
     const firstValue = firstAxis
         ? Object.keys(model.variants[firstAxis] ?? {})[0]
@@ -654,7 +794,7 @@ function compileVariantsCompose(
     return exactWithoutReplacement(
         input,
         emitValueLiteral(style),
-        classCandidatesFromStyles(allVariantStyles(model))
+        classCandidatesFromStyles(styles, options)
     )
 }
 
@@ -665,8 +805,7 @@ function compileJoin(
     if (unsupported) return fallback(input, unsupported.reason)
     const result = join(
         staticValues(input.classList),
-        input.merger ?? { kind: "none" },
-        optionalEvaluationOptions(input.mode)
+        input.merger ?? { kind: "none" }
     )
     return result.exact
         ? exact(
@@ -684,16 +823,22 @@ function compileJoin(
 }
 
 function compileDef(
-    input: Extract<ApiCompileInput, { kind: "def" }>
+    input: Extract<ApiCompileInput, { kind: "def" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported([input.classList, ...input.styles])
     if (unsupported) return fallback(input, unsupported.reason)
     const classList = staticValue(input.classList)
     const styles = staticValues(input.styles)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
+    )
+    if (missingMetadata) return missingMetadata
     const result = join(
-        [...classList, getClassName(deepMerge(styles))],
-        input.merger ?? { kind: "none" },
-        optionalEvaluationOptions(input.mode)
+        [...classList, getClassName(deepMerge(styles), options)],
+        input.merger ?? { kind: "none" }
     )
     return result.exact
         ? exact(
@@ -711,15 +856,19 @@ function compileDef(
 }
 
 function compileMergeProps(
-    input: Extract<ApiCompileInput, { kind: "mergeProps" }>
+    input: Extract<ApiCompileInput, { kind: "mergeProps" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported(input.styles)
     if (unsupported) return fallback(input, unsupported.reason)
-    const result = mergeProps(
-        staticValues(input.styles),
-        input.merger ?? { kind: "none" },
-        optionalEvaluationOptions(input.mode)
+    const styles = staticValues(input.styles)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
     )
+    if (missingMetadata) return missingMetadata
+    const result = mergeProps(styles, input.merger ?? { kind: "none" }, options)
     return result.exact
         ? exact(
               input,
@@ -736,19 +885,65 @@ function compileMergeProps(
 }
 
 function compileMergeRecord(
-    input: Extract<ApiCompileInput, { kind: "mergeRecord" }>
+    input: Extract<ApiCompileInput, { kind: "mergeRecord" }>,
+    options: ApiCompileOptions
 ): ApiCompileResult {
     const unsupported = firstUnsupported(input.styles)
     if (unsupported) return fallback(input, unsupported.reason)
-    const result = mergeRecord(staticValues(input.styles))
+    const styles = staticValues(input.styles)
+    const missingMetadata = fallbackForMissingVariantMetadata(
+        input,
+        styles,
+        options
+    )
+    if (missingMetadata) return missingMetadata
+    const result = mergeRecord(styles, options)
     return exact(input, emitValueLiteral(result.value), result.candidates)
+}
+
+function emitOrderedDynamicVariantsClass(
+    model: ReturnType<typeof createVariantsModel>,
+    props: DynamicVariantProps,
+    optimized: OptimizedVariants,
+    extras: unknown[],
+    options: ApiCompileOptions
+): GeneratedExpression {
+    const entries = dynamicVariantLookupEntries(props, optimized)
+    const table = createOrderedVariantResultTable(props, entries, (item) =>
+        variantsClassFor(model, item, extras, options)
+    )
+    const symbol = createGeneratedSymbol("variants_class")
+    return {
+        declarations: [emitReadonlyConst(symbol, table)],
+        expression: `${symbol}[${dynamicVariantKeyExpression(entries)}]`,
+    }
+}
+
+function emitOrderedDynamicVariantsStyle(
+    model: ReturnType<typeof createVariantsModel>,
+    props: DynamicVariantProps,
+    optimized: OptimizedVariants,
+    extras: StaticStyleObject[],
+    options: ApiCompileOptions
+): GeneratedExpression {
+    void options
+    const entries = dynamicVariantLookupEntries(props, optimized)
+    const table = createOrderedVariantResultTable(props, entries, (item) =>
+        variantsStyleFor(model, item, extras)
+    )
+    const symbol = createGeneratedSymbol("variants_style")
+    return {
+        declarations: [emitReadonlyConst(symbol, table)],
+        expression: `${symbol}[${dynamicVariantKeyExpression(entries)}]`,
+    }
 }
 
 function emitDynamicVariantsClass(
     base: StaticStyleObject,
     props: DynamicVariantProps,
     optimized: OptimizedVariants,
-    extras: unknown[]
+    extras: unknown[],
+    options: ApiCompileOptions
 ): GeneratedExpression {
     const declarations: string[] = []
     const baseResidual = omitStylePaths(base, [
@@ -765,7 +960,7 @@ function emitDynamicVariantsClass(
             )
         ),
     ])
-    const parts = [JSON.stringify(getClassName(baseResidual))]
+    const parts = [JSON.stringify(getClassName(baseResidual, options))]
 
     for (const axis of optimized.additiveAxes) {
         const prop = props.entries.find((entry) => entry.axis === axis.axis)
@@ -792,7 +987,8 @@ function emitDynamicVariantsClass(
                 createOrderedComponentClassTable(
                     base,
                     component,
-                    componentProps
+                    componentProps,
+                    options
                 )
             )
         )
@@ -816,7 +1012,8 @@ function emitDynamicVariantsClass(
 function createOrderedComponentClassTable(
     base: StaticStyleObject,
     component: OptimizedVariants["components"][number],
-    componentProps: Array<{ axis: string; expression: string }>
+    componentProps: Array<{ axis: string; expression: string }>,
+    options: ApiCompileOptions
 ): Record<string, string> {
     const entries = cartesian(
         componentProps.map((entry) =>
@@ -846,7 +1043,10 @@ function createOrderedComponentClassTable(
                             component.axisStyleMaps[axis]?.[value] ?? {}
                     ),
             ]
-            return [variantKey(combination), getClassName(deepMerge(styles))]
+            return [
+                variantKey(combination),
+                getClassName(deepMerge(styles), options),
+            ]
         })
     )
 }
@@ -855,8 +1055,10 @@ function emitDynamicVariantsStyle(
     base: StaticStyleObject,
     props: DynamicVariantProps,
     optimized: OptimizedVariants,
-    extras: StaticStyleObject[]
+    extras: StaticStyleObject[],
+    options: ApiCompileOptions
 ): GeneratedExpression {
+    void options
     const declarations: string[] = []
     const leafPaths = collectDynamicStyleLeafPaths(
         base,
@@ -902,6 +1104,159 @@ function emitDynamicVariantsStyle(
         declarations,
         expression: emitNestedObjectFromLeaves(leaves),
     }
+}
+
+type DynamicVariantLookupEntry = {
+    axis: string
+    expression: string
+    values: string[]
+}
+
+type OrderedVariantEntry = NonNullable<
+    DynamicVariantProps["orderedEntries"]
+>[number]
+
+function shouldUseOrderedVariantTable(props: DynamicVariantProps): boolean {
+    return (
+        Object.keys(staticVariantProps(props)).length > 0 ||
+        Boolean(props.orderedEntries?.some((entry) => entry.kind === "static"))
+    )
+}
+
+function orderedVariantTableOverflow(
+    props: DynamicVariantProps,
+    optimized: OptimizedVariants,
+    input: ApiCompileInput
+): CompilerDiagnostic | undefined {
+    if (!shouldUseOrderedVariantTable(props)) return undefined
+    const entries = dynamicVariantLookupEntries(props, optimized)
+    const count = entries.reduce(
+        (total, entry) => total * (entry.values.length + 1),
+        1
+    )
+    const limit =
+        (input as { variantTableLimit?: number }).variantTableLimit ?? 256
+    if (count <= limit) return undefined
+
+    return {
+        code: "VARIANT_TABLE_LIMIT_EXCEEDED",
+        message: `Variant table for ${entries.map((entry) => entry.axis).join(", ")} has ${count} entries, exceeding limit ${limit}.`,
+        severity: "warning",
+    }
+}
+
+function createOrderedVariantResultTable<T>(
+    props: DynamicVariantProps,
+    entries: DynamicVariantLookupEntry[],
+    evaluate: (props: Record<string, unknown>) => T
+): Record<string, T> {
+    const groups = entries.map((entry) => [
+        MISSING_VARIANT_VALUE,
+        ...entry.values,
+    ])
+    return Object.fromEntries(
+        cartesian(groups).map((combination) => {
+            const dynamicValues = Object.fromEntries(
+                combination.map((value, index) => [entries[index]!.axis, value])
+            )
+            return [
+                dynamicVariantKey(entries, combination),
+                evaluate(orderedVariantProps(props, dynamicValues)),
+            ]
+        })
+    )
+}
+
+function dynamicVariantLookupEntries(
+    props: DynamicVariantProps,
+    optimized: OptimizedVariants
+): DynamicVariantLookupEntry[] {
+    const seen = new Set<string>()
+    const entries: DynamicVariantLookupEntry[] = []
+    for (const entry of orderedVariantEntries(props)) {
+        if (entry.kind !== "dynamic" || seen.has(entry.axis)) continue
+        const values = optimized.axisValueKeys[entry.axis]
+        if (!values) continue
+        seen.add(entry.axis)
+        entries.push({ ...entry, values })
+    }
+    return entries
+}
+
+function orderedVariantProps(
+    props: DynamicVariantProps,
+    dynamicValues: Record<string, string>
+): Record<string, unknown> {
+    const result: Record<string, unknown> = {}
+    const staticProps = staticVariantProps(props)
+
+    for (const entry of orderedVariantEntries(props)) {
+        if (entry.kind === "static") {
+            result[entry.axis] = staticProps[entry.axis]
+            continue
+        }
+        const value = dynamicValues[entry.axis] ?? MISSING_VARIANT_VALUE
+        result[entry.axis] = value === MISSING_VARIANT_VALUE ? undefined : value
+    }
+
+    return result
+}
+
+function orderedVariantEntries(
+    props: DynamicVariantProps
+): OrderedVariantEntry[] {
+    const entries: OrderedVariantEntry[] = [...(props.orderedEntries ?? [])]
+    const staticProps = staticVariantProps(props)
+    const staticAxes = new Set(
+        entries
+            .filter((entry) => entry.kind === "static")
+            .map((entry) => entry.axis)
+    )
+    const dynamicAxes = new Set(
+        entries
+            .filter((entry) => entry.kind === "dynamic")
+            .map((entry) => entry.axis)
+    )
+
+    for (const axis of Object.keys(staticProps)) {
+        if (!staticAxes.has(axis)) entries.push({ kind: "static", axis })
+    }
+    for (const entry of props.entries) {
+        if (!dynamicAxes.has(entry.axis)) {
+            entries.push({ kind: "dynamic", ...entry })
+        }
+    }
+
+    return entries
+}
+
+function staticVariantProps(
+    props: DynamicVariantProps
+): Record<string, unknown> {
+    return props.staticProps ?? {}
+}
+
+function dynamicVariantKey(
+    entries: DynamicVariantLookupEntry[],
+    values: string[]
+): string {
+    return variantKey(
+        entries.map(
+            (entry, index) => [entry.axis, values[index]!] as [string, string]
+        )
+    )
+}
+
+function dynamicVariantKeyExpression(
+    entries: DynamicVariantLookupEntry[]
+): string {
+    if (entries.length === 0) return JSON.stringify(variantKey([]))
+    return entries
+        .map((entry) => {
+            const expression = `(${entry.expression})`
+            return `${JSON.stringify(`${entry.axis}:`)} + (${expression} ? String(${expression}) : ${JSON.stringify(MISSING_VARIANT_VALUE)})`
+        })
+        .join(' + "|" + ')
 }
 
 function collectDynamicStyleLeafPaths(
@@ -1055,6 +1410,45 @@ function exactWithoutReplacement(
     }
 }
 
+function fallbackForClassMerger(
+    input: ApiCompileInput,
+    candidates: string[]
+): ApiCompileResult | undefined {
+    const policy = "merger" in input ? input.merger : undefined
+    if (!policy || policy.kind === "none") return undefined
+
+    const result = applyMergerPolicy("", policy)
+    return fallback(
+        input,
+        result.diagnostics[0]?.message ?? "unsupported merger",
+        candidates,
+        result.diagnostics
+    )
+}
+
+function fallbackForMissingVariantMetadata(
+    input: ApiCompileInput,
+    styles: unknown[],
+    options: ApiCompileOptions
+): ApiCompileResult | undefined {
+    if (options.variantResolver) return undefined
+    if (!styles.some(styleNeedsCompiledVariantMetadata)) return undefined
+
+    return fallback(
+        input,
+        "Compiled variant metadata is required for nested compiled shorthand.",
+        [],
+        [
+            {
+                code: "MISSING_COMPILED_VARIANT_METADATA",
+                message:
+                    "Compiled variant metadata is required for nested compiled shorthand.",
+                severity: "error",
+            },
+        ]
+    )
+}
+
 function fallback(
     input: ApiCompileInput,
     reason: string,
@@ -1130,23 +1524,10 @@ function staticValues<T>(values: CompileValue<T>[]): T[] {
     return values.map((value) => staticValue(value))
 }
 
-function optionalEvaluationOptions(
-    mode: EvaluationMode | undefined
-): EvaluationOptions {
-    return mode ? { mode } : {}
-}
-
-function optionalVariantOptions(
-    variantTableLimit: number | undefined,
-    mode: EvaluationMode | undefined
-): {
+function optionalVariantOptions(variantTableLimit: number | undefined): {
     variantTableLimit?: number
-    mode?: EvaluationMode
 } {
-    return {
-        ...(variantTableLimit === undefined ? {} : { variantTableLimit }),
-        ...(mode === undefined ? {} : { mode }),
-    }
+    return variantTableLimit === undefined ? {} : { variantTableLimit }
 }
 
 function candidatesForFallback(input: ApiCompileInput): string[] {

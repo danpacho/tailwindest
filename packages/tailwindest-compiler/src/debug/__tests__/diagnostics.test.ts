@@ -3,7 +3,7 @@ import type { SourceSpan } from "../../analyzer/symbols"
 import {
     REQUIRED_DIAGNOSTIC_CODES,
     createRichDiagnostic,
-    diagnosticsForMode,
+    diagnosticsForRuntimeFallback,
     sortDiagnostics,
 } from "../diagnostics"
 import { formatDiagnostic } from "../reporting"
@@ -23,7 +23,7 @@ describe("rich diagnostics", () => {
         const diagnostic = createRichDiagnostic({
             code: "UNSUPPORTED_DYNAMIC_VALUE",
             severity: "warning",
-            modeBehavior: "loose-fallback",
+            fallbackBehavior: "runtime-fallback",
             file: "/src/app.tsx",
             span: span("/src/app.tsx", 12, 18),
             message: "Dynamic class value cannot be compiled exactly.",
@@ -33,7 +33,7 @@ describe("rich diagnostics", () => {
         expect(diagnostic).toEqual({
             code: "UNSUPPORTED_DYNAMIC_VALUE",
             severity: "warning",
-            modeBehavior: "loose-fallback",
+            fallbackBehavior: "runtime-fallback",
             file: "/src/app.tsx",
             span: { fileName: "/src/app.tsx", start: 12, end: 18 },
             message: "Dynamic class value cannot be compiled exactly.",
@@ -41,12 +41,12 @@ describe("rich diagnostics", () => {
         })
     })
 
-    it("makes strict-fails diagnostics stop strict mode while loose fallback continues", () => {
+    it("treats runtime-fallback diagnostics as fallback signals", () => {
         const diagnostics = [
             createRichDiagnostic({
                 code: "UNSUPPORTED_DYNAMIC_VALUE",
                 severity: "error",
-                modeBehavior: "strict-fails",
+                fallbackBehavior: "runtime-fallback",
                 file: "/src/app.tsx",
                 span: span("/src/app.tsx", 4),
                 message: "Dynamic input is unsupported.",
@@ -54,41 +54,31 @@ describe("rich diagnostics", () => {
             createRichDiagnostic({
                 code: "TAILWIND_SOURCE_INJECTION_FAILED",
                 severity: "info",
-                modeBehavior: "informational",
+                fallbackBehavior: "informational",
                 file: "/src/app.css",
                 span: span("/src/app.css", 0),
                 message: "Source injection was skipped.",
             }),
         ]
 
-        expect(diagnosticsForMode(diagnostics, "strict")).toMatchObject({
-            shouldFail: true,
-            shouldFallback: false,
-        })
-        expect(diagnosticsForMode(diagnostics, "loose")).toMatchObject({
-            shouldFail: false,
+        expect(diagnosticsForRuntimeFallback(diagnostics)).toMatchObject({
             shouldFallback: true,
         })
     })
 
-    it("keeps informational diagnostics non-failing in both modes", () => {
+    it("keeps informational diagnostics out of runtime fallback signals", () => {
         const diagnostics = [
             createRichDiagnostic({
                 code: "HMR_INVALIDATION_UNCERTAIN",
                 severity: "info",
-                modeBehavior: "informational",
+                fallbackBehavior: "informational",
                 file: "/src/app.tsx",
                 span: span("/src/app.tsx", 0),
                 message: "Invalidated the full graph.",
             }),
         ]
 
-        expect(diagnosticsForMode(diagnostics, "strict")).toMatchObject({
-            shouldFail: false,
-            shouldFallback: false,
-        })
-        expect(diagnosticsForMode(diagnostics, "loose")).toMatchObject({
-            shouldFail: false,
+        expect(diagnosticsForRuntimeFallback(diagnostics)).toMatchObject({
             shouldFallback: false,
         })
     })
@@ -98,7 +88,7 @@ describe("rich diagnostics", () => {
             createRichDiagnostic({
                 code: "UNKNOWN_SPREAD",
                 severity: "error",
-                modeBehavior: "strict-fails",
+                fallbackBehavior: "runtime-fallback",
                 file: "/src/b.tsx",
                 span: span("/src/b.tsx", 1),
                 message: "b",
@@ -106,7 +96,7 @@ describe("rich diagnostics", () => {
             createRichDiagnostic({
                 code: "MUTATED_BINDING",
                 severity: "error",
-                modeBehavior: "strict-fails",
+                fallbackBehavior: "runtime-fallback",
                 file: "/src/a.tsx",
                 span: span("/src/a.tsx", 4),
                 message: "a4",
@@ -114,7 +104,7 @@ describe("rich diagnostics", () => {
             createRichDiagnostic({
                 code: "CIRCULAR_STATIC_REFERENCE",
                 severity: "error",
-                modeBehavior: "strict-fails",
+                fallbackBehavior: "runtime-fallback",
                 file: "/src/a.tsx",
                 span: span("/src/a.tsx", 4),
                 message: "a4b",
@@ -122,7 +112,7 @@ describe("rich diagnostics", () => {
             createRichDiagnostic({
                 code: "OVERLAPPING_REPLACEMENT",
                 severity: "warning",
-                modeBehavior: "loose-fallback",
+                fallbackBehavior: "runtime-fallback",
                 file: "/src/a.tsx",
                 span: span("/src/a.tsx", 2),
                 message: "a2",
@@ -147,12 +137,8 @@ describe("rich diagnostics", () => {
                         : index % 2 === 0
                           ? "warning"
                           : "error",
-                modeBehavior:
-                    index % 3 === 0
-                        ? "informational"
-                        : index % 2 === 0
-                          ? "loose-fallback"
-                          : "strict-fails",
+                fallbackBehavior:
+                    index % 3 === 0 ? "informational" : "runtime-fallback",
                 file: `/src/${code}.tsx`,
                 span: span(`/src/${code}.tsx`, index, index + 1),
                 message: `${code} fixture`,
@@ -176,8 +162,8 @@ describe("rich diagnostics", () => {
             expect(fixture).toMatchObject({
                 code: expect.any(String),
                 severity: expect.stringMatching(/^(error|warning|info)$/),
-                modeBehavior: expect.stringMatching(
-                    /^(strict-fails|loose-fallback|informational)$/
+                fallbackBehavior: expect.stringMatching(
+                    /^(runtime-fallback|informational)$/
                 ),
                 file: expect.any(String),
                 span: {

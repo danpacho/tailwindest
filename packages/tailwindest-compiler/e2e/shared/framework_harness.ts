@@ -53,6 +53,7 @@ const RAW_NESTED_LEAF_CANDIDATES = [
 ]
 
 type PipedChildProcess = ChildProcessByStdio<null, Readable, Readable>
+type ProcessEnvOverrides = Record<string, string | undefined>
 
 export async function assertFixtureRoot(fixtureRoot: string): Promise<void> {
     await expectPath(path.join(fixtureRoot, "README.md"))
@@ -64,6 +65,8 @@ export async function cleanPaths(paths: string[]): Promise<void> {
             fs.rm(target, {
                 recursive: true,
                 force: true,
+                maxRetries: 5,
+                retryDelay: 100,
             })
         )
     )
@@ -106,7 +109,7 @@ export async function runCommand(input: {
     cwd: string
     command: string
     args: string[]
-    env?: NodeJS.ProcessEnv
+    env?: ProcessEnvOverrides
     timeoutMs?: number
 }): Promise<string> {
     const child = spawn(input.command, input.args, {
@@ -122,7 +125,7 @@ export async function startServer(input: {
     command: string
     args: string[]
     url: string
-    env?: NodeJS.ProcessEnv
+    env?: ProcessEnvOverrides
     timeoutMs?: number
 }): Promise<ServerHandle> {
     const child = spawn(input.command, input.args, {
@@ -178,10 +181,12 @@ export async function captureVisualSnapshot(
         const base = await readTargetStyle(lightPage)
 
         await hoverByMouse(lightPage, "twpeer")
+        await waitForTargetStyleChange(lightPage, base, ["borderColor"])
         const groupHover = await readTargetStyle(lightPage)
 
         await lightPage.mouse.move(0, 0)
         await focusByKeyboard(lightPage, 1)
+        await waitForTargetStyleChange(lightPage, base, ["color"])
         const peerFocus = await readTargetStyle(lightPage)
 
         const darkPage = await browser.newPage({ colorScheme: "dark" })
@@ -191,6 +196,10 @@ export async function captureVisualSnapshot(
             const darkBase = await readTargetStyle(darkPage)
             await hoverByMouse(darkPage, "twtarget")
             await focusByKeyboard(darkPage, 2)
+            await waitForTargetStyleChange(darkPage, darkBase, [
+                "backgroundColor",
+                "color",
+            ])
             const hoverFocus = await readTargetStyle(darkPage)
             if (options.screenshotPath) {
                 await savePageScreenshot(darkPage, options.screenshotPath)
@@ -246,7 +255,7 @@ export function assertVisualParity(
     expect(dev.className).toContain("dark:hover:focus:text-white")
     expect(dev.className).toContain("group-hover:border-blue-500")
     expect(dev.className).toContain("peer-focus:text-sky-600")
-    expect(dev.className).toContain("data-[state=open]:px-6")
+    expect(dev.className).toContain("data-open:px-6")
     expect(dev.light.base.paddingLeft).toBe("24px")
     expect(dev.light.base.paddingRight).toBe("24px")
     expect(dev.light.groupHover.borderColor).not.toBe(
@@ -286,7 +295,7 @@ export function assertManifestContract(manifest: {
             "dark:hover:focus:text-white",
             "group-hover:border-blue-500",
             "peer-focus:text-sky-600",
-            "data-[state=open]:px-6",
+            "data-open:px-6",
         ])
     )
     expect(manifest.excludedCandidates).toEqual(
@@ -315,7 +324,7 @@ function assertCssContract(css: string): void {
     expect(css).toContain(cssSelector("dark:hover:bg-red-950"))
     expect(css).toContain(cssSelector("group-hover:border-blue-500"))
     expect(css).toContain(cssSelector("peer-focus:text-sky-600"))
-    expect(css).toContain(cssSelector("data-[state=open]:px-6"))
+    expect(css).toContain(cssSelector("data-open:px-6"))
     for (const candidate of RAW_NESTED_LEAF_CANDIDATES) {
         expect(css).not.toContain(cssSelector(candidate))
     }
@@ -345,6 +354,23 @@ async function readTargetStyle(page: Page): Promise<StyleSnapshot> {
             paddingRight: style.paddingRight,
         }
     })
+}
+
+async function waitForTargetStyleChange(
+    page: Page,
+    base: StyleSnapshot,
+    keys: Array<keyof StyleSnapshot>
+): Promise<void> {
+    await page.waitForFunction(
+        ({ base, keys }) => {
+            const node = document.querySelector('[data-testid="twtarget"]')
+            if (!node) return false
+            const style = getComputedStyle(node)
+            return keys.every((key) => style[key] !== base[key])
+        },
+        { base, keys },
+        { timeout: 5_000 }
+    )
 }
 
 async function hoverByMouse(page: Page, testId: string): Promise<void> {

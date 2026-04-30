@@ -1,9 +1,11 @@
 import type { CompilerDiagnostic } from "./diagnostic_types"
-import { deepMerge, getClassName } from "./evaluator"
+import {
+    deepMerge,
+    getClassName,
+    type EvaluationEngineOptions,
+} from "./evaluator"
 import { candidatesFromClassName } from "./merger"
 import type { StaticStyleObject } from "./static_value"
-
-export type VariantOptimizerMode = "strict" | "loose"
 
 export const MISSING_VARIANT_VALUE = "__missing"
 
@@ -11,7 +13,7 @@ export interface OptimizeVariantsInput {
     base?: StaticStyleObject
     variants: Record<string, Record<string, StaticStyleObject>>
     variantTableLimit?: number
-    mode?: VariantOptimizerMode
+    variantResolver?: EvaluationEngineOptions["variantResolver"]
 }
 
 export interface OptimizedAdditiveAxis {
@@ -46,13 +48,18 @@ export function optimizeVariants({
     base = {},
     variants,
     variantTableLimit = 256,
-    mode = "strict",
+    variantResolver,
 }: OptimizeVariantsInput): OptimizedVariants {
+    const evaluationOptions: EvaluationEngineOptions = { variantResolver }
     const axes = Object.keys(variants)
     const axisValueKeys = Object.fromEntries(
         axes.map((axis) => [axis, Object.keys(variants[axis] ?? {})])
     )
-    const candidates = collectVariantCandidates(base, variants)
+    const candidates = collectVariantCandidates(
+        base,
+        variants,
+        evaluationOptions
+    )
     const graph = buildConflictGraph(axes, variants)
     const groups = connectedComponents(axes, graph)
     const additiveAxes: OptimizedAdditiveAxis[] = []
@@ -63,7 +70,12 @@ export function optimizeVariants({
         if (group.length === 1) {
             const axis = group[0]!
             additiveAxes.push(
-                createAdditiveAxis(axis, variants[axis] ?? {}, base)
+                createAdditiveAxis(
+                    axis,
+                    variants[axis] ?? {},
+                    base,
+                    evaluationOptions
+                )
             )
             continue
         }
@@ -73,7 +85,7 @@ export function optimizeVariants({
             diagnostics.push({
                 code: "VARIANT_TABLE_LIMIT_EXCEEDED",
                 message: `Variant component table for ${group.join(", ")} has ${count} entries, exceeding limit ${variantTableLimit}.`,
-                severity: mode === "strict" ? "error" : "warning",
+                severity: "warning",
             })
             return {
                 strategy: "fallback",
@@ -86,7 +98,9 @@ export function optimizeVariants({
             }
         }
 
-        components.push(createComponent(group, variants, base))
+        components.push(
+            createComponent(group, variants, base, evaluationOptions)
+        )
     }
 
     return {
@@ -138,7 +152,8 @@ export function variantKey(values: [string, string][]): string {
 function createAdditiveAxis(
     axis: string,
     values: Record<string, StaticStyleObject>,
-    base: StaticStyleObject
+    base: StaticStyleObject,
+    options: EvaluationEngineOptions
 ): OptimizedAdditiveAxis {
     const baseFallbackStyle = pickStylePaths(base, axisWritePaths(values))
     return {
@@ -146,19 +161,20 @@ function createAdditiveAxis(
         classMap: Object.fromEntries(
             Object.entries(values).map(([key, style]) => [
                 key,
-                getClassName(style),
+                getClassName(style, options),
             ])
         ),
         styleMap: values,
         baseFallbackStyle,
-        baseFallbackClass: getClassName(baseFallbackStyle),
+        baseFallbackClass: getClassName(baseFallbackStyle, options),
     }
 }
 
 function createComponent(
     axes: string[],
     variants: Record<string, Record<string, StaticStyleObject>>,
-    base: StaticStyleObject
+    base: StaticStyleObject,
+    options: EvaluationEngineOptions
 ): OptimizedVariantComponent {
     const entries = cartesian(
         axes.map((axis) =>
@@ -179,7 +195,7 @@ function createComponent(
         axisClassMaps[axis] = Object.fromEntries(
             Object.entries(axisStyles).map(([key, style]) => [
                 key,
-                getClassName(style),
+                getClassName(style, options),
             ])
         )
         axisStyleMaps[axis] = axisStyles
@@ -188,7 +204,8 @@ function createComponent(
             axisWritePaths(axisStyles)
         )
         axisBaseFallbackClasses[axis] = getClassName(
-            axisBaseFallbackStyles[axis]!
+            axisBaseFallbackStyles[axis]!,
+            options
         )
     }
 
@@ -206,7 +223,7 @@ function createComponent(
         ]
         const style = deepMerge(styles)
         styleTable[variantKey(combination)] = style
-        classTable[variantKey(combination)] = getClassName(style)
+        classTable[variantKey(combination)] = getClassName(style, options)
     }
 
     return {
@@ -369,13 +386,14 @@ function cartesian<T>(groups: T[][]): T[][] {
 
 function collectVariantCandidates(
     base: StaticStyleObject,
-    variants: Record<string, Record<string, StaticStyleObject>>
+    variants: Record<string, Record<string, StaticStyleObject>>,
+    options: EvaluationEngineOptions
 ): string[] {
     return unique([
-        ...candidatesFromClassName(getClassName(base)),
+        ...candidatesFromClassName(getClassName(base, options)),
         ...Object.values(variants).flatMap((axis) =>
             Object.values(axis).flatMap((style) =>
-                candidatesFromClassName(getClassName(style))
+                candidatesFromClassName(getClassName(style, options))
             )
         ),
     ])

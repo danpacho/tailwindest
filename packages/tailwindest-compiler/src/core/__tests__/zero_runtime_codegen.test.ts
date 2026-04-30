@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest"
 import { compileTailwindestCall } from "../api_compile"
-import { emitReadonlyConst, emitRuntimeFreeModule } from "../codegen"
+import {
+    createGeneratedSymbol,
+    emitReadonlyConst,
+    emitRuntimeFreeModule,
+    resetCodegenSymbolCounter,
+} from "../codegen"
+import { createTools } from "../../../../tailwindest/src/tools/create_tools"
 
 const span = {
     fileName: "fixture.ts",
@@ -21,6 +27,8 @@ function expectZeroRuntime(code: string) {
         expect(code).not.toContain(token)
     }
 }
+
+const runtimeTw = createTools()
 
 describe("zero-runtime codegen", () => {
     it("does not emit runtime styler imports or calls for fully compiled expressions", () => {
@@ -64,6 +72,68 @@ describe("zero-runtime codegen", () => {
         expect(declaration).not.toContain("()")
     })
 
+    it("sanitizes generated symbols for identifier-unsafe prefixes", () => {
+        resetCodegenSymbolCounter()
+
+        for (const prefix of ["data-state", "aria-checked", "1size"]) {
+            const symbol = createGeneratedSymbol(prefix)
+
+            expect(symbol).toMatch(/^[$A-Z_a-z][$\w]*$/)
+            expect(
+                new Function(`const ${symbol} = 1; return ${symbol};`)()
+            ).toBe(1)
+        }
+    })
+
+    it("emits valid lookup declarations for identifier-unsafe variant axes", () => {
+        const config = {
+            base: { display: "inline-flex" },
+            variants: {
+                "data-state": {
+                    open: { color: "text-green-700" },
+                },
+                "aria-checked": {
+                    true: { background: "bg-green-50" },
+                },
+                "1size": {
+                    "2": { padding: "p-2" },
+                },
+            },
+        }
+        const result = compileTailwindestCall({
+            kind: "variants.class",
+            span,
+            config: { kind: "static", value: config },
+            props: {
+                kind: "dynamic-variant-props",
+                staticProps: {},
+                entries: [
+                    { axis: "data-state", expression: "state" },
+                    { axis: "aria-checked", expression: "checked" },
+                    { axis: "1size", expression: "size" },
+                ],
+            },
+            extraClass: [],
+            variantTableLimit: 16,
+        })
+
+        expect(result.exact).toBe(true)
+        expect(
+            new Function(
+                "state",
+                "checked",
+                "size",
+                `${result.generated.declarations.join("\n").replaceAll(" as const", "")}\nreturn (${result.generated.expression});`
+            )("open", "true", 2)
+        ).toBe(
+            runtimeTw.variants(config).class({
+                "data-state": "open",
+                "aria-checked": "true",
+                "1size": 2,
+            } as never)
+        )
+    })
+
     it("fully compiled variants use generated lookup symbols only", () => {
         const result = compileTailwindestCall({
             kind: "variants.class",
@@ -86,6 +156,7 @@ describe("zero-runtime codegen", () => {
             },
             props: {
                 kind: "dynamic-variant-props",
+                staticProps: {},
                 entries: [
                     { axis: "intent", expression: "intent" },
                     { axis: "size", expression: "size" },
