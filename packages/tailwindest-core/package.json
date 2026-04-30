@@ -1,0 +1,32 @@
+{
+    "name": "@tailwindest/core",
+    "version": "0.0.1",
+    "description": "Pure semantic helpers for Tailwindest runtime behavior",
+    "type": "module",
+    "main": "./dist/index.mjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs"
+        },
+        "./package.json": {
+            "default": "./package.json"
+        }
+    },
+    "scripts": {
+        "build": "tsup && node -e \"const fs=require('node:fs'); if (fs.existsSync('dist/index.d.ts')) fs.copyFileSync('dist/index.d.ts', 'dist/index.d.mts')\"",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "clsx": "^2.1.1"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}
