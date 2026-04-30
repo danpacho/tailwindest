@@ -66,7 +66,6 @@ import { defineConfig } from "vite"
 export default defineConfig({
     plugins: [
         tailwindest({
-            mode: "loose",
             debug: true,
             sourceMap: true,
         }),
@@ -83,6 +82,8 @@ The Vite integration returns two coordinated plugins:
 
 This means development, debug, and production builds use the same compiler
 manifest instead of relying on Tailwind to discover post-transform JavaScript.
+The CSS side also loads Tailwind's design-system variant groups, so compiled
+nested shorthand uses the same variant metadata as `create-tailwind-type`.
 
 ## Authoring Types
 
@@ -120,6 +121,12 @@ For the complete type contract, arbitrary variant support, group prefix
 behavior, and CSS Transformer integration, see the
 [`CreateCompiledTailwindest` API reference](/apis/createcompiledtailwindest).
 
+This path-prefix normalization is compiler-owned. Runtime Tailwindest keeps
+object keys structural and preserves the leaf class strings you authored.
+The compiler does not use a hard-coded variant allowlist. It derives variant
+keys from the active Tailwind CSS design system through the same internal
+Tailwind compiler package used by `create-tailwind-type`.
+
 Nested variants should be written like this:
 
 ```ts
@@ -147,26 +154,26 @@ tw.style({
 The compiler accepts explicit-prefixed leaves for compatibility, but raw nested
 leaves are the canonical form for `CreateCompiledTailwindest`.
 
-## Strict and Loose Modes
+### Variant Metadata
 
-`loose` mode is the default. It is the safest first-adoption mode for real
-applications. Unsupported call sites stay in the source as runtime fallbacks,
-while static candidates are still recorded for the Tailwind manifest.
+The Vite plugin loads variant metadata from CSS entries that import Tailwind
+CSS. This is what lets the compiler understand project-specific variants such
+as `surface`, `data-[state=open]`, custom variants, responsive variants, and
+arbitrary variants without expecting a generated `tailwind.ts` file at runtime.
 
-```ts
-tailwindest({ mode: "loose", debug: true })
-```
+If a low-level programmatic compile cannot load Tailwind CSS metadata, nested
+compiled shorthand falls back instead of guessing. Use `compileAsync()` with
+`cssRoot` or `cssSource` for fully correct compiled shorthand outside Vite.
 
-`strict` mode is for CI and zero-runtime production gates. It fails when a
-Tailwindest call cannot be compiled exactly.
+## Runtime Fallback Contract
 
-```ts
-tailwindest({ mode: "strict", debug: true, sourceMap: true })
-```
+The compiler has one behavior. It compiles call sites that are proven
+deterministic and preserves unsupported call sites as Tailwindest runtime calls.
+Diagnostics explain why a call remained at runtime, and statically knowable
+Tailwind candidates are still forwarded to the Tailwind CSS manifest.
 
-Use `loose` while a project is still moving dynamic styling patterns into
-compiler-supported shapes. Use `strict` when you expect every supported
-Tailwindest call to compile without runtime fallback.
+There is no compiler policy switch. Development, debug, production, and
+programmatic compilation all use the same fallback-safe contract.
 
 ## Options
 
@@ -174,7 +181,6 @@ Tailwindest call to compile without runtime fallback.
 tailwindest({
     include: [/src\/.*\.[jt]sx?$/],
     exclude: [/node_modules/],
-    mode: "loose",
     debug: true,
     sourceMap: true,
     variantTableLimit: 256,
@@ -187,7 +193,6 @@ tailwindest({
 | --- | --- | --- |
 | `include` | all JS/TS modules | Source id patterns eligible for compilation. |
 | `exclude` | none | Source id patterns never compiled or used as CSS entries. |
-| `mode` | `"loose"` | Unsupported-value policy: `"loose"` or `"strict"`. |
 | `debug` | `false` | Writes `.tailwindest/debug-manifest.json`. |
 | `debugFile` | `.tailwindest/debug-manifest.json` | Custom debug manifest path. |
 | `sourceMap` | `false` | Emits source maps for exact replacements. |
@@ -247,7 +252,6 @@ Enable debug mode during integration:
 
 ```ts
 tailwindest({
-    mode: "loose",
     debug: true,
     sourceMap: true,
 })
@@ -275,7 +279,6 @@ import { compile } from "@tailwindest/compiler"
 
 const result = compile(source, {
     fileName: "/repo/src/button.tsx",
-    mode: "loose",
     sourceMap: true,
 })
 
@@ -284,7 +287,30 @@ console.log(result.candidates)
 console.log(result.diagnostics)
 ```
 
-When using `compile()` directly, you are responsible for forwarding
+`compile()` is file-local and does not load Tailwind CSS design-system metadata.
+It is enough for already-prefixed classes and non-nested shorthand, but nested
+compiled shorthand needs `compileAsync()`:
+
+```ts
+import { compileAsync } from "@tailwindest/compiler"
+
+const result = await compileAsync(source, {
+    fileName: "/repo/src/button.tsx",
+    cssRoot: "/repo/src/app.css",
+    sourceMap: true,
+})
+```
+
+You can also pass inline CSS:
+
+```ts
+await compileAsync(source, {
+    fileName: "/repo/src/button.tsx",
+    cssSource: '@import "tailwindcss";',
+})
+```
+
+When using either programmatic API directly, you are responsible for forwarding
 `result.candidates` into your Tailwind CSS build. The Vite plugin handles this
 automatically.
 
@@ -356,7 +382,7 @@ The compiler produces the same effective classes:
 | Nested object keys | Variant path | Variant path |
 | Nested leaf values | Prefixed classes | Raw utilities |
 | Editor autocomplete | Includes `dark:`, `hover:`, stacked prefixes | Focuses on utility names |
-| Migration transformer mode | `--mode runtime` | `--mode compiled` |
+| Migration path | Keep runtime API unchanged | Switch compiler projects to `CreateCompiledTailwindest` |
 | Output result | Runtime computes classes | Compiler emits static classes |
 
 The user-facing benefit is smaller authoring surface. You express state once in

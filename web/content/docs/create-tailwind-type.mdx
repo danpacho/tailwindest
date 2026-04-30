@@ -11,13 +11,15 @@ which allows you to use all of your project's Tailwind CSS classes and variants 
 ### Installation
 
 ```bash /create-tailwind-type/
-npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
+npx create-tailwind-type
 ```
 
 <Callout type="info" title="Type Generation Result">
-If you are using tailwindcss >= 4.0, then it will correctly create type-def based on your tailwind version.
+If you are using Tailwind CSS >= 4.0, the generator resolves your installed
+Tailwind package and active `tailwind.css` automatically.
 
-But if you are not using tailwind v4, then it will create latest version of tailwind type-set.
+If your local Tailwind version is older than v4, the generator falls back to
+the internal Tailwind v4 engine for type generation.
 </Callout>
 ---
 
@@ -37,6 +39,7 @@ But if you are not using tailwind v4, then it will create latest version of tail
 | `-k`           | `--string-kind-variants-only` | Limits the generated types to only string kind variants.                                                                                                   | `false`                |
 | `-o`           | `--optional-property`         | Generates optional properties in the output types, which can be useful for partial configurations.                                                         | `false`                |
 | `-N`           | `--disable-variants`          | Disable variant generation and types, can be increase performance.                                                                                         | `false`                |
+| `-v`           | `--arbitrary-variant`         | Enables arbitrary variant keys such as `data-[state=open]` and `[&_svg]`.                                                                                 | `false`                |
 | N/A            | `--version`                   | Displays the current CLI version.                                                                                                                          | N/A                    |
 | N/A            | `--help`                      | Displays help and usage information for the CLI tool.                                                                                                      | N/A                    |
 
@@ -46,7 +49,7 @@ But if you are not using tailwind v4, then it will create latest version of tail
 
 ### `-b, --base <path>`
 
-Specifies a custom base directory for locating Tailwind CSS files.
+Specifies a custom base directory for locating `@tailwindcss/node`.
 
 - **Default:** Automatically resolves to the installed `@tailwindcss` package directory.
 - **Example:**
@@ -144,4 +147,15 @@ Instructs the CLI to disable variant generation.
     ```bash
     npx create-tailwind-type --disable-variants
     npx create-tailwind-type -N
+    ```
+
+### `-v, --arbitrary-variant`
+
+Enables arbitrary variant keys in the generated nested variant types.
+
+- **Default:** `false`
+- **Example:**
+    ```bash
+    npx create-tailwind-type --arbitrary-variant
+    npx create-tailwind-type -v
     ```
