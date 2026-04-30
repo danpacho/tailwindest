@@ -12,10 +12,12 @@ npx create-tailwind-type
 
 - Use custom plugins
 
-**Should change base directory to `node_modules/tailwindcss`** for your own project.
+The CLI automatically resolves your local Tailwind CSS package from the
+detected CSS root. Use `--base` only when you need to point at a custom
+`@tailwindcss/node` location.
 
 ```bash
-npx create-tailwind-type -b node_modules/tailwindcss
+npx create-tailwind-type -b ./custom-tailwindcss
 ```
 
 - Generate exact variants
@@ -49,6 +51,7 @@ npx create-tailwind-type -f src/types/tailwind.d.ts
 | `-k`           | `--string-kind-variants-only` | Limits the generated types to only string kind variants.                                                                                                   | `false`                | `npx create-tailwind-type --string-kind-variants-only`                        |
 | `-o`           | `--optional-property`         | Generates optional properties in the output types, which can be useful for partial configurations.                                                         | `false`                | `npx create-tailwind-type --optional-property`                                |
 | `-N`           | `--disable-variants`          | Disable variant generation and types, can be increase performance.                                                                                         | `false`                | `npx create-tailwind-type --disable-variants`                                 |
+| `-v`           | `--arbitrary-variant`         | Enables arbitrary variant keys such as `data-[state=open]` and `[&_svg]`.                                                                                  | `false`                | `npx create-tailwind-type --arbitrary-variant`                                |
 | N/A            | `--version`                   | Displays the current CLI version.                                                                                                                          | N/A                    | `npx create-tailwind-type --version`                                          |
 | N/A            | `--help`                      | Displays help and usage information for the CLI tool.                                                                                                      | N/A                    | `npx create-tailwind-type --help`                                             |
 
@@ -58,7 +61,7 @@ npx create-tailwind-type -f src/types/tailwind.d.ts
 
 ### `-b, --base <path>`
 
-Specifies a custom base directory for locating Tailwind CSS files.
+Specifies a custom base directory for locating `@tailwindcss/node`.
 
 - **Default:** Automatically resolves to the installed `@tailwindcss` package directory.
 - **Example:**
@@ -156,6 +159,17 @@ Instructs the CLI to disable variant generation.
     ```bash
     npx create-tailwind-type --disable-variants
     npx create-tailwind-type -N
+    ```
+
+### `-v, --arbitrary-variant`
+
+Enables arbitrary variant keys in the generated nested variant types.
+
+- **Default:** `false`
+- **Example:**
+    ```bash
+    npx create-tailwind-type --arbitrary-variant
+    npx create-tailwind-type -v
     ```
 
 ---

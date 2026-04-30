@@ -1,6 +1,7 @@
+import path from "node:path"
 import { describe, expect, it } from "vitest"
 import { TailwindTypeGenerator } from "../generator"
-import { TailwindCompiler } from "../../internal/compiler"
+import { TailwindCompiler } from "@tailwindest/tailwind-internal"
 import { CSSAnalyzer } from "../css_analyzer"
 import { TypeSchemaGenerator } from "../../type_tools"
 import { CSSPropertyResolver } from "../css_property_resolver"
@@ -9,7 +10,10 @@ describe("CSSPropertyResolver", () => {
     // Reuse same deps as generator.test.ts
     const compiler = new TailwindCompiler({
         cssRoot: `${__dirname}/__mocks__/tailwind.css`,
-        base: "node_modules/tailwindcss",
+        base: path.resolve(
+            __dirname,
+            "../../../../../node_modules/tailwindcss"
+        ),
     })
     const cssAnalyzer = new CSSAnalyzer()
     const schemaGenerator = new TypeSchemaGenerator()

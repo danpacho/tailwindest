@@ -1,18 +1,40 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { findTailwindCSSRoot, checkFileForImport } from "../discovery"
-import fs from "fs"
-import fsPromises from "fs/promises"
-import { glob } from "glob"
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises"
+import { tmpdir } from "node:os"
+import { dirname, join } from "node:path"
+import { afterEach, describe, expect, it } from "vitest"
+import {
+    checkFileForImport,
+    findTailwindCSSRoot,
+} from "@tailwindest/tailwind-internal"
 
-vi.mock("fs")
-vi.mock("fs/promises")
-vi.mock("glob")
+const tempDirs: string[] = []
+
+afterEach(async () => {
+    await Promise.all(
+        tempDirs
+            .splice(0)
+            .map((dir) => rm(dir, { recursive: true, force: true }))
+    )
+})
+
+async function makeTempProject(): Promise<string> {
+    const dir = await mkdtemp(join(tmpdir(), "tailwindest-discovery-"))
+    tempDirs.push(dir)
+    return dir
+}
+
+async function writeProjectFile(
+    root: string,
+    relativePath: string,
+    content: string
+): Promise<string> {
+    const file = join(root, relativePath)
+    await mkdir(dirname(file), { recursive: true })
+    await writeFile(file, content)
+    return file
+}
 
 describe("Tailwind CSS Root Discovery", () => {
-    beforeEach(() => {
-        vi.clearAllMocks()
-    })
-
     describe("checkFileForImport", () => {
         const markers = [
             "@import 'tailwindcss'",
@@ -27,108 +49,98 @@ describe("Tailwind CSS Root Discovery", () => {
         it.each(markers)(
             "should return true if file contains marker: %s",
             async (marker) => {
-                vi.mocked(fsPromises.readFile).mockResolvedValue(`
-                /* some styles */
-                ${marker}
-                /* more styles */
-            `)
-                const result = await checkFileForImport("test.css")
-                expect(result).toBe(true)
+                const root = await makeTempProject()
+                const file = await writeProjectFile(
+                    root,
+                    "test.css",
+                    `/* some styles */\n${marker}\n/* more styles */`
+                )
+
+                await expect(checkFileForImport(file)).resolves.toBe(true)
             }
         )
 
         it("should return false if no markers are present", async () => {
-            vi.mocked(fsPromises.readFile).mockResolvedValue(`
-                .btn { color: red; }
-            `)
-            const result = await checkFileForImport("test.css")
-            expect(result).toBe(false)
+            const root = await makeTempProject()
+            const file = await writeProjectFile(
+                root,
+                "test.css",
+                ".btn { color: red; }"
+            )
+
+            await expect(checkFileForImport(file)).resolves.toBe(false)
         })
 
         it("should return false if file read fails", async () => {
-            vi.mocked(fsPromises.readFile).mockRejectedValue(
-                new Error("File not found")
-            )
-            const result = await checkFileForImport("missing.css")
-            expect(result).toBe(false)
+            const root = await makeTempProject()
+
+            await expect(
+                checkFileForImport(join(root, "missing.css"))
+            ).resolves.toBe(false)
         })
     })
 
     describe("findTailwindCSSRoot", () => {
         it("should find the root in the fast path (common filename)", async () => {
-            // Mock tailwind.css exists and has markers
-            vi.mocked(fs.existsSync).mockImplementation((path) =>
-                path.toString().endsWith("tailwind.css")
-            )
-            vi.mocked(fsPromises.readFile).mockResolvedValue(
+            const root = await makeTempProject()
+            await writeProjectFile(
+                root,
+                "tailwind.css",
                 "@theme { --color-primary: red; }"
             )
 
-            const result = await findTailwindCSSRoot("/project")
-            expect(result).toContain("tailwind.css")
+            await expect(findTailwindCSSRoot(root)).resolves.toBe(
+                join(root, "tailwind.css")
+            )
         })
 
         it("should find the root in src/globals.css", async () => {
-            vi.mocked(fs.existsSync).mockImplementation((path) =>
-                path.toString().endsWith("src/globals.css")
-            )
-            vi.mocked(fsPromises.readFile).mockResolvedValue(
+            const root = await makeTempProject()
+            await writeProjectFile(
+                root,
+                "src/globals.css",
                 "@import 'tailwindcss';"
             )
 
-            const result = await findTailwindCSSRoot("/project")
-            expect(result).toContain("src/globals.css")
+            await expect(findTailwindCSSRoot(root)).resolves.toBe(
+                join(root, "src/globals.css")
+            )
         })
 
         it("should fallback to slow path (glob) if fast path fails", async () => {
-            // No common paths exist
-            vi.mocked(fs.existsSync).mockReturnValue(false)
-
-            // Glob finds a random css file
-            vi.mocked(glob).mockResolvedValue([
+            const root = await makeTempProject()
+            await writeProjectFile(
+                root,
                 "src/features/ui/entry.pcss",
-            ] as any)
-            vi.mocked(fsPromises.readFile).mockResolvedValue(
                 "@plugin 'some-plugin';"
             )
 
-            const result = await findTailwindCSSRoot("/project")
-            expect(result).toContain("src/features/ui/entry.pcss")
-
-            // Verify glob was called with correct ignore patterns
-            expect(glob).toHaveBeenCalledWith(
-                expect.any(String),
-                expect.objectContaining({
-                    ignore: expect.arrayContaining([
-                        "node_modules/**",
-                        "dist/**",
-                    ]),
-                })
+            await expect(findTailwindCSSRoot(root)).resolves.toBe(
+                join(root, "src/features/ui/entry.pcss")
             )
         })
 
-        it("should ignore files in excluded directories even if they have markers (handled by glob ignore)", async () => {
-            vi.mocked(fs.existsSync).mockReturnValue(false)
+        it("should ignore files in excluded directories", async () => {
+            const root = await makeTempProject()
+            await writeProjectFile(
+                root,
+                "node_modules/package/entry.css",
+                '@import "tailwindcss";'
+            )
 
-            // Glob correctly returns nothing due to ignore (simulated by returning empty)
-            vi.mocked(glob).mockResolvedValue([])
-
-            const result = await findTailwindCSSRoot("/project")
-            expect(result).toBe(null)
+            await expect(findTailwindCSSRoot(root)).resolves.toBe(null)
         })
 
         it("should return null if no tailwind entry point is found", async () => {
-            vi.mocked(fs.existsSync).mockReturnValue(false)
-            vi.mocked(glob).mockResolvedValue([
+            const root = await makeTempProject()
+            await writeProjectFile(
+                root,
                 "index.css",
-                "styles.css",
-            ] as any)
-            vi.mocked(fsPromises.readFile).mockResolvedValue(
                 ".normal-css { color: blue; }"
             )
+            await writeProjectFile(root, "styles.css", ".other { color: red; }")
 
-            const result = await findTailwindCSSRoot("/project")
-            expect(result).toBe(null)
+            await expect(findTailwindCSSRoot(root)).resolves.toBe(null)
         })
     })
 })

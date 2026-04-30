@@ -2,7 +2,13 @@
 
 import { Command } from "commander"
 import { TailwindTypeGenerator, CSSAnalyzer } from "./generator"
-import { TailwindCompiler } from "./internal"
+import {
+    findTailwindCSSRoot,
+    getTailwindVersion,
+    isVersionSufficient,
+    resolveTailwindNodeDir,
+    TailwindCompiler,
+} from "@tailwindest/tailwind-internal"
 import { TypeSchemaGenerator } from "./type_tools"
 import { existsSync } from "fs"
 import { resolve } from "path"
@@ -10,12 +16,6 @@ import { Logger } from "./logger"
 import * as p from "@clack/prompts"
 import pc from "picocolors"
 import pkg from "../package.json"
-import { findTailwindCSSRoot } from "./internal/discovery"
-import {
-    getTailwindVersion,
-    isVersionSufficient,
-    resolveTailwindNodeDir,
-} from "./internal/resolution"
 
 const programVersion = pkg.version
 const logger = new Logger({ name: "create-tailwind-type" })

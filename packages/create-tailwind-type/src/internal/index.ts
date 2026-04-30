@@ -1,1 +1,1 @@
-export * from "./compiler"
+export * from "@tailwindest/tailwind-internal"

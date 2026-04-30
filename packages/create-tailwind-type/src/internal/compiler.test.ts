@@ -1,5 +1,10 @@
+import path from "node:path"
 import { describe, it, expect, beforeAll } from "vitest"
-import { ClassEntry, TailwindCompiler, VariantEntry } from "./compiler"
+import {
+    type ClassEntry,
+    TailwindCompiler,
+    type VariantEntry,
+} from "@tailwindest/tailwind-internal"
 import { CSSAnalyzer } from "../generator/css_analyzer"
 
 describe("TailwindCompiler - Internal", () => {
@@ -7,8 +12,10 @@ describe("TailwindCompiler - Internal", () => {
     beforeAll(async () => {
         compiler = new TailwindCompiler({
             cssRoot: `${__dirname}/__mocks__/tailwind.css`,
-            // base: "packages/create-tailwind-type/node_modules/tailwindcss",
-            base: "node_modules/tailwindcss",
+            base: path.resolve(
+                __dirname,
+                "../../../../node_modules/tailwindcss"
+            ),
         })
     })
 

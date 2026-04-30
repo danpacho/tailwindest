@@ -1,6 +1,7 @@
+import path from "node:path"
 import { describe, expect, it } from "vitest"
 import { TailwindTypeGenerator } from "../generator"
-import { TailwindCompiler } from "../../internal/compiler"
+import { TailwindCompiler } from "@tailwindest/tailwind-internal"
 import { CSSAnalyzer } from "../css_analyzer"
 import { TypeSchemaGenerator } from "../../type_tools"
 
@@ -8,8 +9,10 @@ describe("TypeGenerator", () => {
     // dependencies
     const compiler = new TailwindCompiler({
         cssRoot: `${__dirname}/__mocks__/tailwind.css`,
-        // base: "packages/create-tailwind-type/node_modules/tailwindcss",
-        base: "node_modules/tailwindcss",
+        base: path.resolve(
+            __dirname,
+            "../../../../../node_modules/tailwindcss"
+        ),
     })
     const cssAnalyzer = new CSSAnalyzer()
     const schemaGenerator = new TypeSchemaGenerator()
@@ -442,6 +445,26 @@ describe("TypeGenerator", () => {
             "noscript",
           ]
         `)
+    })
+
+    it("emits TailwindNestGroups as a pure type from shared variant extraction", async () => {
+        const typeSource = await (
+            generator as unknown as {
+                generateType(input: {
+                    globalReference: { color: string[] }
+                    optimizationList: never[]
+                }): Promise<string>
+            }
+        ).generateType({
+            globalReference: { color: ["red-500"] },
+            optimizationList: [],
+        })
+
+        expect(typeSource).not.toContain("export const tailwindNestGroups")
+        expect(typeSource).toContain("export type TailwindNestGroups =")
+        expect(typeSource.indexOf("group-hover")).toBeGreaterThan(
+            typeSource.indexOf("export type TailwindNestGroups")
+        )
     })
 
     it("should build types", async () => {

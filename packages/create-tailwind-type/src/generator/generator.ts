@@ -4,7 +4,8 @@ import type {
     TailwindCompiler,
     VariantEntry,
     DesignSystem,
-} from "../internal/compiler"
+} from "@tailwindest/tailwind-internal"
+import { extractTailwindNestGroups } from "@tailwindest/tailwind-internal"
 import { Logger } from "../logger"
 import type { TypeSchemaGenerator } from "../type_tools"
 import * as t from "../type_tools"
@@ -278,7 +279,7 @@ export class TailwindTypeGenerator {
             this._ds = await this.compiler.getDesignSystem()
             this._classList = this._ds.getClassList()
             this._variantsEntry = this._ds.getVariants()
-            this.variants = this.extractVariants()
+            this.variants = extractTailwindNestGroups(this.variantsEntry)
 
             await this.prepareTypeAliasMap()
 
@@ -296,29 +297,6 @@ export class TailwindTypeGenerator {
             this.$.error("initialization failed")
             console.error(e)
         }
-    }
-
-    private extractVariants(): Array<string> {
-        // exception lists
-        const exception = new Set(["group", "peer", "not"])
-
-        const fullVariants: Array<string> = this.variantsEntry
-            .map((e) => {
-                const merged = e.values.map((value) => {
-                    if (exception.has(value)) {
-                        return null
-                    }
-                    return `${e.name}${e.hasDash ? "-" : ""}${value}`
-                })
-                if (e.values.length === 0) {
-                    merged.push(e.name)
-                }
-                return merged
-            })
-            .flat()
-            .filter((e) => e !== null)
-
-        return fullVariants
     }
 
     private hash(str: string, seed: number = 0): string {
@@ -1992,18 +1970,6 @@ export class TailwindTypeGenerator {
             }
         )
 
-        const tailwindNestGroups = t
-            .union(
-                this.variants.map((variant) => t.literal(variant)),
-                capitalize("tailwind", "nest", "groups")
-            )
-            .addDoc("@description", "Tailwind nest groups")
-            .addDoc(
-                "@see",
-                `{@link https://tailwindcss.com/docs Tailwind docs}`
-            )
-            .setExport(true)
-
         const tailwindSchema = t
             .record(
                 "Tailwind",
@@ -2015,15 +1981,33 @@ export class TailwindTypeGenerator {
             .setExport(true)
             .setExtends(interfaceList.tailwindInterface)
 
-        const typeString = await this.generator.generateAll([
-            ...this.extractTypeFromMap(this.globalMap),
-            ...this.extractTypeFromMap(this.variantsMap),
-            ...interfaceList.referenceTypeMap,
-            ...interfaceList.tailwindInterface,
-            tailwindSchema,
-            tailwindNestGroups,
-        ])
+        const tailwindNestGroups = await this.generateTailwindNestGroups()
+        const typeString =
+            tailwindNestGroups +
+            (await this.generator.generateAll([
+                ...this.extractTypeFromMap(this.globalMap),
+                ...this.extractTypeFromMap(this.variantsMap),
+                ...interfaceList.referenceTypeMap,
+                ...interfaceList.tailwindInterface,
+                tailwindSchema,
+            ]))
 
         return typeString
+    }
+
+    private async generateTailwindNestGroups(): Promise<string> {
+        const variants =
+            this.variants.length === 0
+                ? "never"
+                : this.variants
+                      .map((variant) => JSON.stringify(variant))
+                      .join(" | ")
+        return await this.generator.prettify(`
+            /**
+             * @description Tailwind nest groups
+             * @see {@link https://tailwindcss.com/docs Tailwind docs}
+             */
+            export type TailwindNestGroups = ${variants}
+        `)
     }
 }
