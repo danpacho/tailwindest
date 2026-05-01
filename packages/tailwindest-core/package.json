@@ -20,7 +20,7 @@
         }
     },
     "scripts": {
-        "build": "tsup && node -e \"const fs=require('node:fs'); if (fs.existsSync('dist/index.d.ts')) fs.copyFileSync('dist/index.d.ts', 'dist/index.d.mts')\"",
+        "build": "tsup",
         "test": "vitest run"
     },
     "dependencies": {
