@@ -88,9 +88,7 @@ export class ClassNameWalker implements ClassTransformerWalker {
             if (t.warning) warnings.push(t.warning)
         })
 
-        const staticObj = context.analyzer.buildObjectTree(tokens, {
-            outputMode: context.outputMode,
-        })
+        const staticObj = context.analyzer.buildObjectTree(tokens)
 
         if (Object.keys(staticObj).length === 0) {
             return {

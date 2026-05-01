@@ -29,15 +29,6 @@ describe("CnWalker", () => {
         return { sourceFile, context }
     }
 
-    function setupCompiled(content: string) {
-        const project = new Project({
-            compilerOptions: { target: ScriptTarget.ESNext },
-        })
-        const sourceFile = project.createSourceFile("test.ts", content)
-        const context = createContext({ analyzer, outputMode: "compiled" })
-        return { sourceFile, context }
-    }
-
     it("should transform static only cn call", () => {
         const { sourceFile, context } = setup(`const a = cn("flex text-sm")`)
         const callExpr = sourceFile.getFirstDescendantByKind(
@@ -143,8 +134,8 @@ describe("CnWalker", () => {
         expect(walker.canWalk(callExprs[1]!)).toBe(true)
     })
 
-    it("should strip nested variant prefixes in compiled mode", () => {
-        const { sourceFile, context } = setupCompiled(
+    it("should preserve nested variant prefixes in runtime output", () => {
+        const { sourceFile, context } = setup(
             `const a = cn("dark:hover:bg-accent flex")`
         )
         const callExpr = sourceFile.getFirstDescendantByKind(
@@ -158,7 +149,7 @@ describe("CnWalker", () => {
         expect(style).toEqual({
             dark: {
                 hover: {
-                    backgroundColor: "bg-accent",
+                    backgroundColor: "dark:hover:bg-accent",
                 },
             },
             display: "flex",

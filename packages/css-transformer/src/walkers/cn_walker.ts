@@ -74,9 +74,7 @@ export class CnWalker implements ClassTransformerWalker {
             tokens.forEach((t) => {
                 if (t.warning) warnings.push(t.warning)
             })
-            staticObj = context.analyzer.buildObjectTree(tokens, {
-                outputMode: context.outputMode,
-            })
+            staticObj = context.analyzer.buildObjectTree(tokens)
         }
 
         const propertyCount = Object.keys(staticObj).length

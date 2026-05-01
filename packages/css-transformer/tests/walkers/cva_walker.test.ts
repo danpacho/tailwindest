@@ -30,15 +30,6 @@ describe("CvaWalker", () => {
         return { sourceFile, context }
     }
 
-    function setupCompiled(content: string) {
-        const project = new Project({
-            compilerOptions: { target: ScriptTarget.ESNext },
-        })
-        const sourceFile = project.createSourceFile("test.ts", content)
-        const context = createContext({ analyzer, outputMode: "compiled" })
-        return { sourceFile, context }
-    }
-
     it("should transform basic cva call", () => {
         const { sourceFile, context } = setup(
             `const a = cva("flex items-center")`
@@ -106,8 +97,8 @@ describe("CvaWalker", () => {
         expect(text).toContain(`tw.variants({`)
     })
 
-    it("should strip nested variant prefixes in compiled mode", () => {
-        const { sourceFile, context } = setupCompiled(`
+    it("should preserve nested variant prefixes in runtime output", () => {
+        const { sourceFile, context } = setup(`
             const btn = cva("dark:hover:bg-blue-500", {
                 variants: {
                     intent: {
@@ -124,9 +115,7 @@ describe("CvaWalker", () => {
         walker.walk(callExpr, context)
         const text = sourceFile.getFullText()
 
-        expect(text).toContain(`backgroundColor: "bg-blue-500"`)
-        expect(text).toContain(`backgroundColor: "bg-gray-500"`)
-        expect(text).not.toContain(`backgroundColor: "dark:hover:bg-blue-500"`)
-        expect(text).not.toContain(`backgroundColor: "dark:hover:bg-gray-500"`)
+        expect(text).toContain(`backgroundColor: "dark:hover:bg-blue-500"`)
+        expect(text).toContain(`backgroundColor: "dark:hover:bg-gray-500"`)
     })
 })

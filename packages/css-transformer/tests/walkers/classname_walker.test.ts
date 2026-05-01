@@ -31,18 +31,6 @@ describe("ClassNameWalker", () => {
         return { sourceFile, context }
     }
 
-    function setupCompiled(content: string) {
-        const project = new Project({
-            compilerOptions: {
-                target: ScriptTarget.ESNext,
-                jsx: 1 /* Preserve */,
-            },
-        })
-        const sourceFile = project.createSourceFile("test.tsx", content)
-        const context = createContext({ analyzer, outputMode: "compiled" })
-        return { sourceFile, context }
-    }
-
     it("should transform string literal className", () => {
         const { sourceFile, context } = setup(
             `const a = <div className="flex text-sm" />`
@@ -107,8 +95,8 @@ describe("ClassNameWalker", () => {
         expect(sourceFile.getFullText()).toContain(`className=""`)
     })
 
-    it("should strip nested variant prefixes in compiled mode", () => {
-        const { sourceFile, context } = setupCompiled(
+    it("should preserve nested variant prefixes in runtime output", () => {
+        const { sourceFile, context } = setup(
             `const a = <div className="dark:hover:bg-accent" />`
         )
         const attr = sourceFile.getFirstDescendantByKind(
@@ -122,7 +110,7 @@ describe("ClassNameWalker", () => {
         expect(style).toEqual({
             dark: {
                 hover: {
-                    backgroundColor: "bg-accent",
+                    backgroundColor: "dark:hover:bg-accent",
                 },
             },
         })

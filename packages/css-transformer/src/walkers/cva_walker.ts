@@ -54,9 +54,7 @@ export class CvaWalker implements ClassTransformerWalker {
             tokens.forEach((t) => {
                 if (t.warning) warnings.push(t.warning)
             })
-            baseObj = context.analyzer.buildObjectTree(tokens, {
-                outputMode: context.outputMode,
-            })
+            baseObj = context.analyzer.buildObjectTree(tokens)
         }
 
         const variantsObj: Record<string, any> = {}
@@ -108,11 +106,7 @@ export class CvaWalker implements ClassTransformerWalker {
                                                     optionName
                                                 ] =
                                                     context.analyzer.buildObjectTree(
-                                                        tokens,
-                                                        {
-                                                            outputMode:
-                                                                context.outputMode,
-                                                        }
+                                                        tokens
                                                     )
                                             }
                                         }
