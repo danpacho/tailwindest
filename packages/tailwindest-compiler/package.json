@@ -1,7 +1,8 @@
 {
     "name": "@tailwindest/compiler",
     "version": "0.0.1",
-    "description": "Progressive Tailwindest compiler for static Tailwind candidates",
+    "private": true,
+    "description": "Deprecated internal Tailwindest compiler experiment; not published",
     "type": "module",
     "main": "dist/index.js",
     "module": "dist/index.js",
@@ -53,15 +54,13 @@
         "e2e:frameworks": "vitest run e2e/tanstack-start-tailwind-v4 e2e/next-tailwind-v4",
         "dev": "tsup --watch",
         "prepack": "pnpm run build",
+        "prepublishOnly": "node -e \"throw new Error('@tailwindest/compiler is deprecated and private; do not publish')\"",
         "pack:dry": "npm pack --dry-run"
     },
     "dependencies": {
         "@tailwindest/core": "workspace:*",
         "@tailwindest/tailwind-internal": "workspace:*",
         "typescript": "^5.5.0"
-    },
-    "publishConfig": {
-        "access": "public"
     },
     "peerDependencies": {
         "tailwindcss": ">=4.0.0",
