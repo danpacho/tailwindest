@@ -8,15 +8,15 @@ This document records the major engineering decisions behind
 `@tailwindest/css-transformer` rewrites source code to Tailwindest authoring
 patterns. It does not remove Tailwindest runtime calls from application bundles.
 
-`@tailwindest/compiler` performs build-time evaluation and zero-runtime
-replacement. The transformer may generate compiler-oriented source when asked,
-but it is not responsible for Tailwind CSS candidate manifests, `@source
-inline()`, HMR, or bundle substitution.
+`@tailwindest/compiler` was the build-time evaluation experiment. That package
+is now deprecated and private. The transformer may still keep explicit
+compiled output for internal fixtures, but it should not promote compiler
+workflows.
 
 Decision:
 
 - Keep css-transformer focused on migration.
-- Keep zero-runtime behavior in `@tailwindest/compiler`.
+- Keep deprecated zero-runtime behavior out of public transformer workflows.
 
 ## Runtime vs Compiled Nested Variants
 
@@ -32,9 +32,10 @@ Decision:
 
 - Runtime mode uses `token.original`.
 - Compiled mode uses `token.utility`.
-- Auto mode defaults to runtime unless strong compiler evidence exists.
+- Auto mode defaults to runtime and keeps runtime even when deprecated compiler
+  evidence exists.
 
-## Why Package Dependency Is Not Enough
+## Why Compiler Evidence Is Not Enough
 
 A project may install `@tailwindest/compiler` while still using the transformer
 to migrate runtime Tailwindest source. If dependency presence switched the
@@ -43,19 +44,19 @@ type checks or change authoring semantics.
 
 Decision:
 
-- `@tailwindest/compiler` dependency is a weak signal.
-- Weak signals produce diagnostics and keep runtime mode.
+- Compiler signals produce diagnostics and keep runtime mode.
 
-## Why Source Type Imports Are Strong Enough
+## Why Source Type Imports Are Not Enough Anymore
 
 If a source file imports `CreateCompiledTailwindest`, the file is explicitly
-authoring against compiler-oriented Tailwindest types. In that context, nested
-leaf values must be raw utilities.
+authoring against compiler-oriented Tailwindest types. That is no longer enough
+to let auto mode generate raw utility leaves, because the compiler path is
+deprecated and private.
 
 Decision:
 
-- `CreateCompiledTailwindest` import resolves compiled mode for that transform
-  context when no explicit mode overrides it.
+- `CreateCompiledTailwindest` import is deprecated compiler evidence.
+- Auto mode records the evidence, reports a warning, and keeps runtime output.
 
 ## Why Walkers Do Not Own Mode Semantics
 

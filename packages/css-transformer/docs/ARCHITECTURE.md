@@ -12,7 +12,7 @@ implementation.
 
 - Tailwindest runtime style API: `packages/tailwindest/src/tools/create_tools.ts`
 - Runtime authoring type: `CreateTailwindest`
-- Compiler authoring type: `CreateCompiledTailwindest`
+- Deprecated compiler authoring type: `CreateCompiledTailwindest`
 - Property resolver source: `create-tailwind-type` `CSSPropertyResolver`
 - AST engine: `ts-morph`
 - Supported source kinds: `.ts`, `.tsx`, `.js`, `.jsx`
@@ -26,10 +26,10 @@ Nested variant output is mode-sensitive:
 
 - `runtime` mode targets `CreateTailwindest` and preserves the original
   prefixed class token at each leaf.
-- `compiled` mode targets `CreateCompiledTailwindest` and stores raw utility
-  leaf values. Variant prefixes are represented only by object keys.
-- `auto` mode may select `compiled` only from strong compiler evidence. Weak
-  signals, such as package dependency presence, must not silently change output.
+- `compiled` mode is deprecated and reserved for internal compiler experiments.
+  It stores raw utility leaf values.
+- `auto` mode never selects `compiled`. Deprecated compiler signals produce
+  diagnostics and keep runtime output.
 
 ## Pipeline
 
@@ -94,7 +94,6 @@ The CLI mirrors the output mode option:
 ```bash
 tailwindest-transform src --mode auto
 tailwindest-transform src --mode runtime
-tailwindest-transform src --mode compiled
 ```
 
 `auto` is the default. Unknown projects resolve to `runtime`.
@@ -106,21 +105,19 @@ tailwindest-transform src --mode compiled
 `OutputModeResolver` determines whether object leaf values should preserve the
 original token or use the raw utility token.
 
-Strong compiled-mode signals:
+Deprecated compiler-mode signals:
 
 - explicit `--mode compiled` or API `outputMode: "compiled"`
 - Tailwindest config declaring compiler output
 - Vite config using `@tailwindest/compiler/vite`
 - precompile bridge using `createCompilerContext`
 - source importing `CreateCompiledTailwindest`
-
-Weak signals:
-
 - `.tailwindest/debug-manifest.json`
 - `@tailwindest/compiler` package dependency
 
-Weak signals produce diagnostics and keep `runtime` mode unless paired with a
-strong signal.
+Explicit compiled mode is still accepted for internal experiments and emits a
+deprecation diagnostic. Auto mode records compiler evidence, emits diagnostics,
+and keeps `runtime`.
 
 ### Token Analyzer
 

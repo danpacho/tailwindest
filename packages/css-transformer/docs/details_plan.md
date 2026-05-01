@@ -9,8 +9,8 @@ loose exploratory milestones as the production reference.
 - Migrate supported class-string source patterns to Tailwindest object style
   calls.
 - Preserve runtime behavior unless exact conversion is proven.
-- Support both `CreateTailwindest` and `CreateCompiledTailwindest` output
-  contracts through explicit or safely detected output mode.
+- Support `CreateTailwindest` runtime output as the public path.
+- Keep `CreateCompiledTailwindest` output deprecated and internal-only.
 - Keep import changes deterministic and local to transformed files.
 - Provide strict tests for every supported walker and every known fallback.
 
@@ -22,6 +22,7 @@ loose exploratory milestones as the production reference.
 - Do not guess unresolved or ambiguous class tokens.
 - Do not transform arbitrary dynamic expressions without semantic proof.
 - Do not make weak compiler signals switch output mode silently.
+- Do not make any compiler signal switch auto mode to compiled output.
 
 ## Phase 1: Resolver Integration
 
@@ -57,15 +58,15 @@ Requirements:
 
 - Support `runtime`, `compiled`, and `auto`.
 - Resolve unknown projects to runtime.
-- Treat compiler package dependency and compiler artifacts as weak signals.
-- Emit diagnostics for weak signals.
+- Treat all compiler evidence as deprecated signals in auto mode.
+- Emit diagnostics for deprecated compiler signals.
 - Allow explicit mode to override auto detection.
 
 Verification:
 
 - Unit tests cover every detection priority.
 - Build declaration generation succeeds.
-- CLI exposes `--mode auto|runtime|compiled`.
+- CLI exposes `--mode auto|runtime`; compiled remains internal/deprecated.
 
 ## Phase 3: Analyzer Object Tree
 

@@ -1,5 +1,11 @@
 # Compiled Output Mode Strategy
 
+> **Deprecated / historical**
+>
+> This strategy has been superseded. Compiler-oriented output is now
+> internal-only; auto mode must keep runtime output and report deprecated
+> compiler signals instead of switching to compiled mode.
+
 `@tailwindest/css-transformer` must support two different Tailwindest authoring
 targets without silently changing semantics:
 
@@ -58,19 +64,20 @@ const leafValue =
 
 ## Detection Priority
 
-Automatic detection is allowed only when the signal is strong enough to avoid
-breaking runtime users.
+Automatic detection no longer switches to compiled output. Compiler signals are
+diagnostic evidence only.
 
-| Priority | Signal                                                                                               | Decision                                                                                 |
-| -------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| 1        | CLI/API option: `mode: "runtime" \| "compiled"`                                                      | Use exactly as requested.                                                                |
-| 2        | Tailwindest config declares transformer/compiler output mode                                         | Use config mode.                                                                         |
-| 3        | Vite config uses `@tailwindest/compiler/vite` or `tailwindest()` compiler plugin                     | Use compiled mode.                                                                       |
-| 4        | Next/precompile bridge imports `createCompilerContext` from `@tailwindest/compiler`                  | Use compiled mode for that transform run.                                                |
-| 5        | Source imports `CreateCompiledTailwindest` or compiler-only Tailwindest types                        | Use compiled mode for that file when no stronger project mode exists.                    |
-| 6        | Compiler artifacts exist, such as `.tailwindest/debug-manifest.json` or an `@source inline()` bridge | Treat as probable compiled mode; require confirmation unless paired with another signal. |
-| 7        | `package.json` includes `@tailwindest/compiler`                                                      | Weak signal only; do not switch modes by itself.                                         |
-| 8        | Unknown                                                                                              | Default to runtime mode.                                                                 |
+| Priority | Signal                                                                                               | Decision                                         |
+| -------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| 1        | CLI/API option: `mode: "runtime"`                                                                    | Use runtime mode.                                |
+| 2        | CLI/API option: `mode: "compiled"`                                                                   | Use compiled mode with a deprecation diagnostic. |
+| 3        | Tailwindest config declares transformer/compiler output mode                                         | Keep runtime mode with a deprecation diagnostic. |
+| 4        | Vite config uses `@tailwindest/compiler/vite` or `tailwindest()` compiler plugin                     | Keep runtime mode with a deprecation diagnostic. |
+| 5        | Next/precompile bridge imports `createCompilerContext` from `@tailwindest/compiler`                  | Keep runtime mode with a deprecation diagnostic. |
+| 6        | Source imports `CreateCompiledTailwindest` or compiler-only Tailwindest types                        | Keep runtime mode with a deprecation diagnostic. |
+| 7        | Compiler artifacts exist, such as `.tailwindest/debug-manifest.json` or an `@source inline()` bridge | Keep runtime mode with a deprecation diagnostic. |
+| 8        | `package.json` includes `@tailwindest/compiler`                                                      | Keep runtime mode with a deprecation diagnostic. |
+| 9        | Unknown                                                                                              | Default to runtime mode.                         |
 
 ## Configuration Surface
 
@@ -138,11 +145,11 @@ Walker tests:
 Mode detection tests:
 
 - explicit runtime beats every auto signal
-- explicit compiled beats every auto signal
-- compiler Vite plugin resolves compiled
-- Next precompile bridge resolves compiled
-- `CreateCompiledTailwindest` import resolves compiled at file scope
-- `@tailwindest/compiler` dependency alone remains runtime with a diagnostic
+- explicit compiled emits a deprecation diagnostic
+- compiler Vite plugin remains runtime with a diagnostic
+- Next precompile bridge remains runtime with a diagnostic
+- `CreateCompiledTailwindest` import remains runtime with a diagnostic
+- `@tailwindest/compiler` dependency remains runtime with a diagnostic
 - unknown projects remain runtime
 
 ## Non-Goals

@@ -5,6 +5,9 @@ important compatibility boundary in the CSS transformer because runtime
 Tailwindest and compiler Tailwindest intentionally use different authoring
 types.
 
+Compiler-oriented output is now deprecated and internal-only. Auto mode must
+not select it.
+
 ## Modes
 
 ```ts
@@ -36,7 +39,8 @@ expects nested leaf literals to include accumulated variant prefixes.
 
 ## Compiled Mode
 
-Compiled mode targets `CreateCompiledTailwindest`.
+Compiled mode is deprecated and targets the internal
+`CreateCompiledTailwindest` experiment.
 
 ```ts
 tw.style({
@@ -53,42 +57,48 @@ the semantic prefix from the object path.
 
 ## Auto Resolution Priority
 
-`auto` mode is conservative. It switches to compiled mode only when strong
-evidence exists.
+`auto` mode is conservative. It records compiler evidence, emits diagnostics,
+and keeps runtime output.
 
-| Priority | Evidence                                            | Resolved Mode        |
-| -------- | --------------------------------------------------- | -------------------- |
-| 1        | explicit `runtime` or `compiled` option             | requested mode       |
-| 2        | Tailwindest config with compiler output mode        | compiled             |
-| 3        | Vite config importing `@tailwindest/compiler/vite`  | compiled             |
-| 4        | precompile bridge importing `createCompilerContext` | compiled             |
-| 5        | source importing `CreateCompiledTailwindest`        | compiled             |
-| 6        | compiler artifact only                              | runtime with warning |
-| 7        | `@tailwindest/compiler` dependency only             | runtime with warning |
-| 8        | unknown project                                     | runtime              |
+| Priority | Evidence                                            | Resolved Mode         |
+| -------- | --------------------------------------------------- | --------------------- |
+| 1        | explicit `runtime` option                           | runtime               |
+| 2        | explicit `compiled` option                          | compiled with warning |
+| 3        | Tailwindest config with compiler output mode        | runtime with warning  |
+| 4        | Vite config importing `@tailwindest/compiler/vite`  | runtime with warning  |
+| 5        | precompile bridge importing `createCompilerContext` | runtime with warning  |
+| 6        | source importing `CreateCompiledTailwindest`        | runtime with warning  |
+| 7        | compiler artifact only                              | runtime with warning  |
+| 8        | `@tailwindest/compiler` dependency only             | runtime with warning  |
+| 9        | unknown project                                     | runtime               |
 
-## Weak Signal Policy
+## Deprecated Signal Policy
 
-Weak signals are intentionally not enough to switch modes:
+Compiler signals are intentionally not enough to switch modes:
 
 - `.tailwindest/debug-manifest.json`
 - `.tailwindest/manifest.json`
 - `@tailwindest/compiler` in `dependencies`, `devDependencies`, or
   `peerDependencies`
+- Tailwindest compiler config
+- compiler Vite plugin
+- precompile bridge
+- `CreateCompiledTailwindest` source import
 
 These may appear in projects that still use the transformer for runtime
-Tailwindest migration. Switching to compiled output from weak evidence would
-silently generate values that do not satisfy `CreateTailwindest`.
+Tailwindest migration. Switching to compiled output from evidence would silently
+generate values that do not satisfy `CreateTailwindest`.
 
 ## Diagnostics
 
-Weak signal diagnostics use `OutputModeResolver` as the diagnostic owner:
+Deprecated compiler diagnostics use `OutputModeResolver` as the diagnostic
+owner:
 
 ```ts
 {
     level: "warning",
     walkerName: "OutputModeResolver",
-    message: "The @tailwindest/compiler dependency is a weak signal only..."
+    message: "Detected deprecated compiler-mode signal..."
 }
 ```
 
@@ -112,16 +122,15 @@ CLI:
 ```bash
 tailwindest-transform src --mode auto
 tailwindest-transform src --mode runtime
-tailwindest-transform src --mode compiled
 ```
 
 ## Required Tests
 
 - explicit runtime beats compiled auto signals
-- explicit compiled wins
-- Vite compiler plugin resolves compiled
-- precompile bridge resolves compiled
-- `CreateCompiledTailwindest` source import resolves compiled
+- explicit compiled emits a deprecation diagnostic
+- Vite compiler plugin remains runtime with warning
+- precompile bridge remains runtime with warning
+- `CreateCompiledTailwindest` source import remains runtime with warning
 - compiler artifact only remains runtime with warning
 - compiler dependency only remains runtime with warning
 - unknown projects remain runtime with no diagnostic
