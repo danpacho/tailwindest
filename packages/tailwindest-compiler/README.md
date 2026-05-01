@@ -86,17 +86,19 @@ Use `compileAsync()` with `cssRoot` or `cssSource` when source uses
 file-local; without Tailwind CSS metadata it preserves shorthand-dependent call
 sites as runtime fallbacks instead of guessing variant keys.
 
-## Progressive Runtime Fallback
+## Compile Contract
 
-The compiler has one public behavior: nested variant class-output calls compile
-only when they can be proven exact, and unsupported calls are preserved for
-Tailwindest runtime. Fallback diagnostics explain why a call remained at
-runtime, and statically knowable Tailwind candidates are retained in the
+The compiler has one public behavior: lower nested variant object syntax to
+Tailwind class prefixes, then bridge those candidates into Tailwind CSS.
+
+JavaScript replacement is allowed only when the final observable value is a
+class string and the compiler can prove the result exactly. Unsupported calls
+are preserved for Tailwindest runtime. Diagnostics explain why a call remained
+at runtime, and statically knowable Tailwind candidates are retained in the
 manifest.
 
 There is no compiler policy switch. Production builds, development builds,
-debug manifests, and programmatic compilation all use this same fallback-safe
-contract.
+debug manifests, and programmatic compilation all use this same contract.
 
 ## Nested Variants
 
@@ -132,18 +134,17 @@ reports `COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT`.
 ## Release Compile Surface
 
 The compiler recognizes the public Tailwindest `createTools()` API, but the
-release compile contract is intentionally smaller than the runtime API. During
-this migration, implementation helpers may still cover broader APIs; those
-helpers are transitional and are not the public release objective.
+release compile contract is intentionally smaller than the runtime API.
 
 - `tw.style(...).class()`
 - `tw.toggle(...).class()`
 - `tw.rotary(...).class()`
 - `tw.variants(...).class()`
 - `tw.def(...)` and `tw.mergeProps(...)` as exact class-output helpers
-- `tw.join(...)` as a candidate/class helper, not a standalone compiler goal
+- `tw.join(...)` as candidate collection only; no JavaScript replacement
+  contract
 - runtime-visible object/styler values such as `*.style()`, `*.compose()`, and
-  `tw.mergeRecord(...)` are not release replacement targets
+  `tw.mergeRecord(...)` are never release replacement targets
 
 Unsupported dynamic values remain runtime fallbacks with diagnostics.
 

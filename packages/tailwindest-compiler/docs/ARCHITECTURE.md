@@ -11,9 +11,9 @@ This document defines the production architecture for Vite 8 and Tailwind CSS
 4.2.
 
 The compiler intentionally has no public policy switch. Its single production
-contract is fallback-safe nested variant compilation: exact class-output call
-sites may be replaced, and call sites that require runtime semantics are
-preserved with diagnostics and manifest candidates.
+contract is nested variant lowering plus Tailwind CSS manifest bridging. Exact
+class-output call sites may be replaced, and call sites that require runtime
+semantics are preserved with diagnostics and manifest candidates.
 
 ## Reference Targets
 
@@ -272,9 +272,7 @@ loads this metadata automatically from CSS entries.
 
 The compiler recognizes the public surface of
 `packages/tailwindest/src/tools/create_tools.ts`, but the release compile
-contract is smaller than the runtime API. During this migration, implementation
-helpers may still cover broader APIs; those helpers are transitional and are
-not the release objective.
+contract is smaller than the runtime API.
 
 | API group                                      | Release role                                      |
 | ---------------------------------------------- | ------------------------------------------------- |
@@ -283,8 +281,8 @@ not the release objective.
 | `tw.rotary(config).class(key)`                 | exact class-output lowering when key proves       |
 | `tw.variants(config).class(props)`             | exact class-output lowering when props prove      |
 | `tw.def(...)` and `tw.mergeProps(...)`         | class-output helpers when all inputs prove exact  |
-| `tw.join(...)`                                 | candidate/class helper, not a standalone goal     |
-| `*.style()`, `*.compose()`, `tw.mergeRecord()` | runtime-visible values; not release replacements  |
+| `tw.join(...)`                                 | candidate collection only; no JS replacement      |
+| `*.style()`, `*.compose()`, `tw.mergeRecord()` | runtime-visible values; never replacements        |
 
 Compile eligibility is based on symbol identity, not variable names. A variable
 named `tw` is not enough; the receiver must be proven to originate from
@@ -327,13 +325,12 @@ not TypeScript node references.
 
 ## Dynamic Variant Boundary
 
-The release path does not require general lookup-table emission for dynamic
-variants. Exact nested variant class-output replacement is allowed only when the
-variant props can be proven. Otherwise the runtime call is preserved and
-statically knowable candidates are retained in the manifest.
+Exact nested variant class-output replacement is allowed only when the variant
+props can be proven or when a bounded lookup table is exact and
+collision-safe. Otherwise the runtime call is preserved and statically knowable
+candidates are retained in the manifest.
 
-Existing implementation helpers may still use a conflict graph while the
-replacement surface is being narrowed:
+The dynamic class-output path uses a conflict graph:
 
 1. Compute the style path set touched by each variant axis.
 2. Emit independent axes as additive maps.
@@ -343,8 +340,8 @@ replacement surface is being narrowed:
 5. When the table would exceed the limit, preserve the runtime call and still
    record all static candidates.
 
-This preserves Tailwindest deep merge semantics for transitional coverage, but
-general dynamic lookup generation is not the release goal.
+This preserves Tailwindest deep merge semantics while keeping lookup generation
+inside the class-output boundary.
 
 ## Debug Manifest
 

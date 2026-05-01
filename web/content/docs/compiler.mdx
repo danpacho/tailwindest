@@ -1,22 +1,26 @@
 ---
 title: Compiler
-description: Compile Tailwindest styles to static Tailwind class strings at build time.
+description: Lower Tailwindest nested variant shorthand into Tailwind class prefixes.
 ---
 
-<img src="/images/tailwindest-compiler.png" width="550px" alt="tailwindest compiler banner" />
+<img
+    src="/images/tailwindest-compiler.png"
+    width="550px"
+    alt="tailwindest compiler banner"
+/>
 
-> If you do not need zero-runtime compilation, you can use normal Tailwindest
-> runtime authoring.
+> If you do not use `CreateCompiledTailwindest` nested variant shorthand, you
+> can use normal Tailwindest runtime authoring.
 >
-> The compiler is for projects that want Tailwindest DX in source code and
-> build-time Tailwind class output in the browser bundle.
+> The compiler is for projects that want raw nested variant leaves in source
+> code and exact Tailwind class candidates in the Tailwind CSS build.
 
-`@tailwindest/compiler` is the zero-runtime compiler for Tailwindest. It
-evaluates supported `createTools()` calls during build and replaces them with
-static Tailwind class strings, style records, or bounded lookup code.
+`@tailwindest/compiler` is the nested variant lowering layer for Tailwindest.
+It lowers `CreateCompiledTailwindest` object paths into Tailwind variant
+prefixes and forwards the resulting candidates to Tailwind CSS v4.
 
-Use it when you want Tailwindest authoring DX in source code, but optimized
-Tailwind output in the browser bundle.
+It is not a general Tailwindest partial evaluator. Runtime-visible objects,
+stylers, `tw.join(...)`, and `tw.mergeRecord(...)` remain runtime API calls.
 
 ## What It Does
 
@@ -35,14 +39,15 @@ const button = tw.style({
 button.class()
 ```
 
-Compiled output is equivalent to:
+When the terminal call produces a class string and the input is exact, compiled
+output is equivalent to:
 
 ```ts
 "flex bg-red-50 dark:bg-red-900 dark:hover:bg-red-950"
 ```
 
-Fully compiled call sites do not need Tailwindest styler runtime logic in the
-browser.
+Unsupported call sites are preserved as Tailwindest runtime calls. Statically
+knowable candidates are still retained for the Tailwind CSS manifest.
 
 ## Install
 
@@ -165,15 +170,34 @@ If a low-level programmatic compile cannot load Tailwind CSS metadata, nested
 compiled shorthand falls back instead of guessing. Use `compileAsync()` with
 `cssRoot` or `cssSource` for fully correct compiled shorthand outside Vite.
 
-## Runtime Fallback Contract
+## Compile Contract
 
-The compiler has one behavior. It compiles call sites that are proven
-deterministic and preserves unsupported call sites as Tailwindest runtime calls.
-Diagnostics explain why a call remained at runtime, and statically knowable
-Tailwind candidates are still forwarded to the Tailwind CSS manifest.
+The compiler has one production behavior: lower nested variant object syntax to
+Tailwind class prefixes, then bridge those candidates into Tailwind CSS.
+
+JavaScript replacement is allowed only when the final observable value is a
+class string and the compiler can prove the result exactly. Unsupported call
+sites are preserved as Tailwindest runtime calls. Diagnostics explain why a
+call remained at runtime, and statically knowable Tailwind candidates are still
+forwarded to the Tailwind CSS manifest.
 
 There is no compiler policy switch. Development, debug, production, and
-programmatic compilation all use the same fallback-safe contract.
+programmatic compilation all use the same contract.
+
+Raw nested shorthand is not runtime-compatible in object-returning channels.
+For example, this call is preserved, candidates are collected when possible,
+and the compiler reports `COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT`:
+
+```ts
+tw.style({ dark: { color: "text-white" } }).style()
+```
+
+Use runtime-compatible prefixed values when a runtime object or styler value
+must cross the compiler boundary:
+
+```ts
+tw.style({ dark: { color: "dark:text-white" } }).style()
+```
 
 ## Options
 
@@ -189,42 +213,44 @@ tailwindest({
 })
 ```
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `include` | all JS/TS modules | Source id patterns eligible for compilation. |
-| `exclude` | none | Source id patterns never compiled or used as CSS entries. |
-| `debug` | `false` | Writes `.tailwindest/debug-manifest.json`. |
-| `debugFile` | `.tailwindest/debug-manifest.json` | Custom debug manifest path. |
-| `sourceMap` | `false` | Emits source maps for exact replacements. |
-| `variantTableLimit` | internal default | Maximum generated lookup table size for bounded variants. |
-| `cssEntries` | Tailwind CSS imports | CSS ids that should receive `@source inline()` injection. |
-| `scanRoots` | `["src"]` under Vite root | Directories scanned before the first CSS transform. |
-| `merger` | `{ kind: "none" }` | Build-time class merge policy. |
-| `collectStringLiteralCandidates` | `true` | Collects standalone candidate-like string literals from transformed modules. |
+| Option                           | Default                            | Description                                                                  |
+| -------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------- |
+| `include`                        | all JS/TS modules                  | Source id patterns eligible for compilation.                                 |
+| `exclude`                        | none                               | Source id patterns never compiled or used as CSS entries.                    |
+| `debug`                          | `false`                            | Writes `.tailwindest/debug-manifest.json`.                                   |
+| `debugFile`                      | `.tailwindest/debug-manifest.json` | Custom debug manifest path.                                                  |
+| `sourceMap`                      | `false`                            | Emits source maps for exact replacements.                                    |
+| `variantTableLimit`              | internal default                   | Maximum generated lookup table size for bounded variants.                    |
+| `cssEntries`                     | Tailwind CSS imports               | CSS ids that should receive `@source inline()` injection.                    |
+| `scanRoots`                      | `["src"]` under Vite root          | Directories scanned before the first CSS transform.                          |
+| `merger`                         | `{ kind: "none" }`                 | Build-time class merge policy.                                               |
+| `collectStringLiteralCandidates` | `true`                             | Collects standalone candidate-like string literals from transformed modules. |
 
-## Supported API Surface
+## Supported Compile Surface
 
 The compiler targets the public `createTools()` API:
 
-| API | Static output | Dynamic output |
-| --- | --- | --- |
-| `tw.style(obj).class()` | class string | fallback when unsupported |
-| `tw.style(obj).style()` | style record | fallback when unsupported |
-| `tw.style(obj).compose()` | composed styler metadata | fallback when unsupported |
-| `tw.toggle(config).class(condition)` | selected class string | ternary |
-| `tw.toggle(config).style(condition)` | selected style record | ternary object |
-| `tw.rotary(config).class(key)` | selected class string | lookup |
-| `tw.rotary(config).style(key)` | selected style record | lookup object |
-| `tw.variants(config).class(props)` | class string | bounded lookup or fallback |
-| `tw.variants(config).style(props)` | style record | bounded lookup or fallback |
-| `tw.join(...)` | class string | partial fold or fallback |
-| `tw.def(...)` | class string | partial fold or fallback |
-| `tw.mergeProps(...)` | class string | fallback if any style is unknown |
-| `tw.mergeRecord(...)` | style record | fallback if any style is unknown |
+| API                                  | Replacement role                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------- |
+| `tw.style(obj).class(...extra)`      | exact class-output lowering                                                           |
+| `tw.mergeProps(...styles)`           | exact class-output helper when every input proves static                              |
+| `tw.def(classList, ...styles)`       | exact class-output helper when every input proves static                              |
+| `tw.toggle(config).class(condition)` | exact class-output lowering when the condition is proven or a safe ternary is emitted |
+| `tw.rotary(config).class(key)`       | exact class-output lowering when the key is proven or a finite lookup is safe         |
+| `tw.variants(config).class(props)`   | exact class-output lowering when the bounded table is collision-safe                  |
+| `tw.join(...)`                       | candidate collection only; no JS replacement contract                                 |
+| `*.style(...)`                       | runtime-visible object value; no JS replacement                                       |
+| `*.compose(...)`                     | runtime-visible styler value; no JS replacement                                       |
+| `tw.mergeRecord(...)`                | runtime-visible object value; no JS replacement                                       |
 
 Compile eligibility is based on symbol provenance, not variable names. A
 receiver named `tw` is not enough; the compiler must prove that it originates
 from `createTools()`.
+
+If a runtime merger is configured, class-output replacement is disabled unless
+the merger is known to be deterministic at build time. The compiler preserves
+the original call and reports a diagnostic instead of approximating merge
+semantics.
 
 ## Tailwind CSS Bridge
 
@@ -376,14 +402,14 @@ The compiler produces the same effective classes:
 
 ### Practical Difference
 
-| Topic | `CreateTailwindest` | `CreateCompiledTailwindest` |
-| --- | --- | --- |
-| Best for | Runtime Tailwindest | `@tailwindest/compiler` projects |
-| Nested object keys | Variant path | Variant path |
-| Nested leaf values | Prefixed classes | Raw utilities |
-| Editor autocomplete | Includes `dark:`, `hover:`, stacked prefixes | Focuses on utility names |
-| Migration path | Keep runtime API unchanged | Switch compiler projects to `CreateCompiledTailwindest` |
-| Output result | Runtime computes classes | Compiler emits static classes |
+| Topic               | `CreateTailwindest`                          | `CreateCompiledTailwindest`                                              |
+| ------------------- | -------------------------------------------- | ------------------------------------------------------------------------ |
+| Best for            | Runtime Tailwindest                          | `@tailwindest/compiler` projects                                         |
+| Nested object keys  | Variant path                                 | Variant path                                                             |
+| Nested leaf values  | Prefixed classes                             | Raw utilities                                                            |
+| Editor autocomplete | Includes `dark:`, `hover:`, stacked prefixes | Focuses on utility names                                                 |
+| Migration path      | Keep runtime API unchanged                   | Switch compiler projects to `CreateCompiledTailwindest`                  |
+| Output result       | Runtime computes classes                     | Compiler lowers exact class-output calls and records Tailwind candidates |
 
 The user-facing benefit is smaller authoring surface. You express state once in
 the object path and keep each leaf focused on the utility you actually want. In

@@ -3,7 +3,11 @@ title: css-transformer
 description: Migrate Tailwind class strings to Tailwindest object styles.
 ---
 
-<img src="/images/tailwind-transform.png" width="550px" alt="tailwindest compiler banner" />
+<img
+    src="/images/tailwind-transform.png"
+    width="550px"
+    alt="tailwindest compiler banner"
+/>
 
 `@tailwindest/css-transformer` is a migration tool. It rewrites supported
 Tailwind class-string patterns into Tailwindest object-style calls, while
@@ -89,11 +93,11 @@ tw.style({
 
 The transformer supports three output modes:
 
-| Mode | Target | Leaf value |
-| --- | --- | --- |
-| `runtime` | `CreateTailwindest` | original token, such as `dark:hover:bg-red-950` |
-| `compiled` | `CreateCompiledTailwindest` | raw utility, such as `bg-red-950` |
-| `auto` | detected project mode | runtime unless strong compiler evidence exists |
+| Mode       | Target                      | Leaf value                                      |
+| ---------- | --------------------------- | ----------------------------------------------- |
+| `runtime`  | `CreateTailwindest`         | original token, such as `dark:hover:bg-red-950` |
+| `compiled` | `CreateCompiledTailwindest` | raw utility, such as `bg-red-950`               |
+| `auto`     | detected project mode       | runtime unless strong compiler evidence exists  |
 
 Use `runtime` when you are migrating to normal Tailwindest runtime authoring.
 Use `compiled` when the transformed source will be consumed by
@@ -130,7 +134,7 @@ Weak signals produce diagnostics and keep runtime output so existing
 
 ## Compiler-Oriented Setup
 
-If you are migrating source for the zero-runtime compiler, define your
+If you are migrating source for the nested variant compiler, define your
 Tailwindest type with `CreateCompiledTailwindest`:
 
 ```ts filename="tw.ts"
@@ -261,13 +265,13 @@ Run dry-run first and inspect diagnostics before writing files.
 npx @tailwindest/css-transformer --mode auto --dry-run
 ```
 
-| Option | Alias | Default | Description |
-| --- | --- | --- | --- |
-| `--css <path>` | `-c` | `tailwind.css` | Tailwind CSS entry used to initialize the resolver. |
-| `--identifier <name>` | `-i` | `tw` | Tailwindest import identifier. |
-| `--module <path>` | `-m` | `~/tw` | Tailwindest module import path. |
-| `--dry-run` | `-d` | `false` | Preview without writing transformed files. |
-| `--mode <mode>` | none | `auto` | Output mode: `auto`, `runtime`, or `compiled`. |
+| Option                | Alias | Default        | Description                                         |
+| --------------------- | ----- | -------------- | --------------------------------------------------- |
+| `--css <path>`        | `-c`  | `tailwind.css` | Tailwind CSS entry used to initialize the resolver. |
+| `--identifier <name>` | `-i`  | `tw`           | Tailwindest import identifier.                      |
+| `--module <path>`     | `-m`  | `~/tw`         | Tailwindest module import path.                     |
+| `--dry-run`           | `-d`  | `false`        | Preview without writing transformed files.          |
+| `--mode <mode>`       | none  | `auto`         | Output mode: `auto`, `runtime`, or `compiled`.      |
 
 ## Programmatic Usage
 
