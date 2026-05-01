@@ -3,6 +3,7 @@ import {
     collectMutatedBindingNames,
     findLexicalBinding,
     findVisibleVariableDeclaration,
+    isBindingDeclaredBeforeUse,
 } from "../analyzer/ast_bindings"
 import type { SourceSpan, TailwindestCallKind } from "../analyzer/symbols"
 import {
@@ -40,6 +41,8 @@ export interface CompileTransformInput {
 export interface CompileTransformOutput {
     plans: ReplacementPlan[]
     candidates: string[]
+    excludedCandidates: string[]
+    excludedCandidateSpans: SourceSpan[]
     diagnostics: RichCompilerDiagnostic[]
     debugReplacements: TailwindestDebugReplacement[]
 }
@@ -126,13 +129,14 @@ export function compileTailwindestSource({
         true,
         scriptKindFor(fileName)
     )
+    const provenReceiverSpanKeys = new Set(
+        (provenReceiverCalls ?? provenCalls ?? []).map(spanKey)
+    )
     const context: CompileContext = {
         fileName,
         sourceFile,
         provenCallSpans: new Set((provenCalls ?? []).map(spanKey)),
-        provenReceiverSpans: new Set(
-            (provenReceiverCalls ?? provenCalls ?? []).map(spanKey)
-        ),
+        provenReceiverSpans: provenReceiverSpanKeys,
         resolvedCallArguments: new Map(
             (resolvedCallArguments ?? []).map((call) => [
                 spanKey(call.span),
@@ -142,7 +146,10 @@ export function compileTailwindestSource({
         runtimeMergerCallSpans: new Set(
             (runtimeMergerCalls ?? []).map(spanKey)
         ),
-        staticBindings: collectStaticBindings(sourceFile),
+        staticBindings: collectStaticBindings(
+            sourceFile,
+            provenReceiverSpanKeys
+        ),
         storedStylers: new Map(),
         receiverMergers: collectRuntimeReceiverMergers(sourceFile),
         variantTableLimit,
@@ -152,6 +159,8 @@ export function compileTailwindestSource({
     context.storedStylers = collectStoredStylerBindings(sourceFile, context)
     const plans: ReplacementPlan[] = []
     const candidates: string[] = []
+    const excludedCandidates: string[] = []
+    const excludedCandidateSpans: SourceSpan[] = []
     const diagnostics: RichCompilerDiagnostic[] = []
     const debugReplacements: TailwindestDebugReplacement[] = []
     const consumedCandidateOnlySpans = new Set<string>()
@@ -175,6 +184,10 @@ export function compileTailwindestSource({
             variantResolver: context.variantResolver,
         })
         candidates.push(...result.candidates)
+        excludedCandidates.push(...(result.excludedCandidates ?? []))
+        if ((result.excludedCandidates ?? []).length > 0) {
+            excludedCandidateSpans.push(compileInput.span)
+        }
 
         const richDiagnostics = result.diagnostics.map((diagnostic) =>
             diagnosticWithSource(
@@ -270,6 +283,8 @@ export function compileTailwindestSource({
     return {
         plans,
         candidates: unique(candidates),
+        excludedCandidates: unique(excludedCandidates),
+        excludedCandidateSpans,
         diagnostics,
         debugReplacements,
     }
@@ -306,7 +321,7 @@ function inputForCall(
         return undefined
     }
 
-    const directReceiver = expression.expression
+    const directReceiver = unwrapExpression(expression.expression)
     const directName = expression.name.text
     if (ts.isIdentifier(directReceiver)) {
         const storedInput = storedInputForCall(
@@ -353,7 +368,7 @@ function inputForCall(
     ) {
         return undefined
     }
-    const stylerReceiver = stylerExpression.expression
+    const stylerReceiver = unwrapExpression(stylerExpression.expression)
     if (!ts.isIdentifier(stylerReceiver)) {
         return undefined
     }
@@ -415,7 +430,7 @@ function composedStylerInputForCall(
         return undefined
     }
 
-    const baseCall = directReceiver.expression.expression
+    const baseCall = unwrapExpression(directReceiver.expression.expression)
     if (
         !ts.isCallExpression(baseCall) ||
         isOptionalCall(baseCall) ||
@@ -446,12 +461,9 @@ function composedStylerInputForCall(
         return undefined
     }
 
-    const merger = ts.isIdentifier(baseCall.expression.expression)
-        ? mergerForCall(
-              spanFor(context, baseCall),
-              baseCall.expression.expression,
-              context
-          )
+    const baseReceiver = unwrapExpression(baseCall.expression.expression)
+    const merger = ts.isIdentifier(baseReceiver)
+        ? mergerForCall(spanFor(context, baseCall), baseReceiver, context)
         : undefined
 
     return inputForStylerCall({
@@ -993,13 +1005,8 @@ function propsValueOf(
         }
     }
 
-    const entries: Array<{ axis: string; expression: string }> = []
-    const orderedEntries: Array<
-        | { kind: "static"; axis: string }
-        | { kind: "dynamic"; axis: string; expression: string }
-    > = []
-    const staticProps: Record<string, unknown> = {}
-    let hasDynamic = false
+    const propsByAxis = new Map<string, ParsedVariantPropEntry>()
+    let propertyIndex = 0
 
     for (const property of expression.properties) {
         if (ts.isSpreadAssignment(property)) {
@@ -1009,13 +1016,13 @@ function propsValueOf(
             }
         }
         if (ts.isShorthandPropertyAssignment(property)) {
-            hasDynamic = true
-            const entry = {
+            setParsedVariantPropEntry(propsByAxis, {
+                kind: "dynamic",
                 axis: property.name.text,
                 expression: property.name.text,
-            }
-            entries.push(entry)
-            orderedEntries.push({ kind: "dynamic", ...entry })
+                firstIndex: propertyIndex,
+            })
+            propertyIndex += 1
             continue
         }
         if (!ts.isPropertyAssignment(property)) {
@@ -1030,17 +1037,48 @@ function propsValueOf(
         }
         const value = literalValueOf(property.initializer, context)
         if (value.supported) {
-            staticProps[name] = value.value
-            orderedEntries.push({ kind: "static", axis: name })
+            setParsedVariantPropEntry(propsByAxis, {
+                kind: "static",
+                axis: name,
+                value: value.value,
+                firstIndex: propertyIndex,
+            })
+            propertyIndex += 1
+            continue
+        }
+        setParsedVariantPropEntry(propsByAxis, {
+            kind: "dynamic",
+            axis: name,
+            expression: property.initializer.getText(context.sourceFile),
+            firstIndex: propertyIndex,
+        })
+        propertyIndex += 1
+    }
+
+    const parsedEntries = [...propsByAxis.values()].sort(
+        (left, right) => left.firstIndex - right.firstIndex
+    )
+    const entries: Array<{ axis: string; expression: string }> = []
+    const orderedEntries: Array<
+        | { kind: "static"; axis: string }
+        | { kind: "dynamic"; axis: string; expression: string }
+    > = []
+    const staticProps: Record<string, unknown> = {}
+    let hasDynamic = false
+
+    for (const entry of parsedEntries) {
+        if (entry.kind === "static") {
+            staticProps[entry.axis] = entry.value
+            orderedEntries.push({ kind: "static", axis: entry.axis })
             continue
         }
         hasDynamic = true
-        const entry = {
-            axis: name,
-            expression: property.initializer.getText(context.sourceFile),
-        }
-        entries.push(entry)
-        orderedEntries.push({ kind: "dynamic", ...entry })
+        entries.push({ axis: entry.axis, expression: entry.expression })
+        orderedEntries.push({
+            kind: "dynamic",
+            axis: entry.axis,
+            expression: entry.expression,
+        })
     }
 
     return hasDynamic
@@ -1053,11 +1091,40 @@ function propsValueOf(
         : { kind: "static", value: staticProps }
 }
 
+type ParsedVariantPropEntry =
+    | {
+          kind: "static"
+          axis: string
+          value: unknown
+          firstIndex: number
+      }
+    | {
+          kind: "dynamic"
+          axis: string
+          expression: string
+          firstIndex: number
+      }
+
+function setParsedVariantPropEntry(
+    propsByAxis: Map<string, ParsedVariantPropEntry>,
+    entry: ParsedVariantPropEntry
+): void {
+    const previous = propsByAxis.get(entry.axis)
+    propsByAxis.set(entry.axis, {
+        ...entry,
+        firstIndex: previous?.firstIndex ?? entry.firstIndex,
+    })
+}
+
 function collectStaticBindings(
-    sourceFile: ts.SourceFile
+    sourceFile: ts.SourceFile,
+    ignoredCallSpans: ReadonlySet<string>
 ): Map<string, StaticBinding> {
     const bindings = new Map<string, StaticBinding>()
-    const mutatedBindings = collectMutatedBindingNames(sourceFile)
+    const mutatedBindings = collectMutatedBindingNames(
+        sourceFile,
+        ignoredCallSpans
+    )
     for (const statement of sourceFile.statements) {
         if (!ts.isVariableStatement(statement)) {
             continue
@@ -1096,7 +1163,10 @@ function collectStoredStylerBindings(
     context: CompileContext
 ): Map<ts.VariableDeclaration, StoredStylerBinding> {
     const bindings = new Map<ts.VariableDeclaration, StoredStylerBinding>()
-    const mutatedBindings = collectMutatedBindingNames(sourceFile)
+    const mutatedBindings = collectMutatedBindingNames(
+        sourceFile,
+        context.provenReceiverSpans
+    )
 
     const visit = (node: ts.Node): void => {
         if (
@@ -1445,17 +1515,7 @@ function literalValueOf(
         return { supported: true, value: Number(expression.text) }
     }
     if (ts.isIdentifier(expression)) {
-        const binding = context.staticBindings.get(expression.text)
-        if (
-            binding &&
-            findLexicalBinding(
-                context.sourceFile,
-                expression.text,
-                expression.getStart(context.sourceFile)
-            ) !== binding.declaration
-        ) {
-            return { supported: false }
-        }
+        const binding = staticBindingForIdentifier(expression, context)
         return binding
             ? { supported: true, value: binding.value }
             : { supported: false }
@@ -1498,7 +1558,10 @@ function literalValueOf(
                 return { supported: false }
             }
             if (ts.isShorthandPropertyAssignment(property)) {
-                const binding = context.staticBindings.get(property.name.text)
+                const binding = staticBindingForIdentifier(
+                    property.name,
+                    context
+                )
                 if (!binding) {
                     return { supported: false }
                 }
@@ -1521,6 +1584,29 @@ function literalValueOf(
         return { supported: true, value: record }
     }
     return { supported: false }
+}
+
+function staticBindingForIdentifier(
+    expression: ts.Identifier,
+    context: Pick<CompileContext, "sourceFile" | "staticBindings">
+): StaticBinding | undefined {
+    const binding = context.staticBindings.get(expression.text)
+    if (!binding) {
+        return undefined
+    }
+    const position = expression.getStart(context.sourceFile)
+    if (
+        findLexicalBinding(context.sourceFile, expression.text, position) !==
+            binding.declaration ||
+        !isBindingDeclaredBeforeUse(
+            context.sourceFile,
+            binding.declaration,
+            position
+        )
+    ) {
+        return undefined
+    }
+    return binding
 }
 
 function spanFor(context: CompileContext, node: ts.Node): SourceSpan {

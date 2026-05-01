@@ -162,12 +162,98 @@ const collectRemovableCreateToolStatements = (
             ts.isCallExpression(declaration.initializer) &&
             ts.isIdentifier(declaration.initializer.expression) &&
             declaration.initializer.expression.text === "createTools" &&
+            isCreateToolsCallSafeToErase(declaration.initializer) &&
             !isIdentifierUsed(sourceFile, declaration.name.text, statement)
         ) {
             removable.add(statement)
         }
     }
     return removable
+}
+
+const isCreateToolsCallSafeToErase = (call: ts.CallExpression): boolean => {
+    if (call.arguments.length === 0) {
+        return true
+    }
+    if (call.arguments.length !== 1) {
+        return false
+    }
+
+    const optionsArgument = call.arguments[0]
+    if (!optionsArgument) {
+        return false
+    }
+
+    const options = unwrapExpression(optionsArgument)
+    return (
+        ts.isObjectLiteralExpression(options) &&
+        isSideEffectFreeObjectLiteral(options)
+    )
+}
+
+const isSideEffectFreeObjectLiteral = (
+    expression: ts.ObjectLiteralExpression
+): boolean =>
+    expression.properties.every((property) => {
+        if (
+            !ts.isPropertyAssignment(property) ||
+            ts.isComputedPropertyName(property.name) ||
+            getPropertyNameText(property.name) === "merger"
+        ) {
+            return false
+        }
+
+        return isSideEffectFreeLiteralExpression(property.initializer)
+    })
+
+const isSideEffectFreeLiteralExpression = (
+    expression: ts.Expression
+): boolean => {
+    const unwrapped = unwrapExpression(expression)
+
+    if (ts.isObjectLiteralExpression(unwrapped)) {
+        return isSideEffectFreeObjectLiteral(unwrapped)
+    }
+    if (ts.isArrayLiteralExpression(unwrapped)) {
+        return unwrapped.elements.every(
+            (element) =>
+                !ts.isSpreadElement(element) &&
+                isSideEffectFreeLiteralExpression(element)
+        )
+    }
+    return (
+        ts.isStringLiteral(unwrapped) ||
+        ts.isNumericLiteral(unwrapped) ||
+        ts.isBigIntLiteral(unwrapped) ||
+        ts.isNoSubstitutionTemplateLiteral(unwrapped) ||
+        unwrapped.kind === ts.SyntaxKind.TrueKeyword ||
+        unwrapped.kind === ts.SyntaxKind.FalseKeyword ||
+        unwrapped.kind === ts.SyntaxKind.NullKeyword
+    )
+}
+
+const unwrapExpression = (expression: ts.Expression): ts.Expression => {
+    let current = expression
+    while (
+        ts.isAsExpression(current) ||
+        ts.isTypeAssertionExpression(current) ||
+        ts.isSatisfiesExpression(current) ||
+        ts.isParenthesizedExpression(current)
+    ) {
+        current = current.expression
+    }
+    return current
+}
+
+const getPropertyNameText = (name: ts.PropertyName): string | undefined => {
+    if (
+        ts.isIdentifier(name) ||
+        ts.isStringLiteral(name) ||
+        ts.isNumericLiteral(name)
+    ) {
+        return name.text
+    }
+    return undefined
 }
 
 const hasExportModifier = (node: ts.VariableStatement): boolean =>

@@ -153,6 +153,36 @@ describe("tailwindest Vite plugin", () => {
         expect(css.code).toContain(`@source inline("px-4 text-emerald-600");`)
     })
 
+    it("injects whitespace-separated join candidates without raw whitespace groups", () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: {},
+        })
+        context.transformJs(
+            [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `export const cls = tw.join("px-2\\npx-4", "py-1\\tmt-2")`,
+            ].join("\n"),
+            "/project/src/app.tsx"
+        )
+
+        const css = context.transformCss(
+            `@import "tailwindcss";`,
+            "/project/src/app.css"
+        ).code
+        const inlineCandidates = css.match(/@source inline\("([^"]*)"\);/)?.[1]
+
+        expect(context.getManifestCandidates()).toEqual([
+            "mt-2",
+            "px-2",
+            "px-4",
+            "py-1",
+        ])
+        expect(inlineCandidates).toBe("mt-2 px-2 px-4 py-1")
+        expect(inlineCandidates).not.toMatch(/\s{2,}|\n|\t/)
+    })
+
     it("compiles analyzer-resolved imported and wrapped static arguments", () => {
         const context = createCompilerContext({
             root: "/project",
@@ -190,6 +220,171 @@ describe("tailwindest Vite plugin", () => {
                     kind: "style",
                     status: "compiled",
                     fallback: false,
+                }),
+            ])
+        )
+    })
+
+    it("compiles local static arguments for imported tool receivers", () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        context.transformJs(
+            [
+                `import { createTools } from "tailwindest"`,
+                `export const tw = createTools()`,
+            ].join("\n"),
+            "/project/src/tools.ts"
+        )
+        const code = [
+            `import { tw } from "./tools"`,
+            `const style = { color: "text-red-500" }`,
+            `export const cls = tw.style(style).class()`,
+        ].join("\n")
+
+        const result = context.transformJs(code, "/project/src/app.ts")
+        const appDebugFile = context
+            .getDebugManifest()
+            .files.find((file) => file.id === "/project/src/app.ts")
+
+        expect(result.changed).toBe(true)
+        expect(result.code).toContain(`export const cls = "text-red-500"`)
+        expect(appDebugFile?.diagnostics).toEqual([])
+    })
+
+    it("compiles static object property access when string literal fallback collection is disabled", () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: {
+                debug: true,
+                collectStringLiteralCandidates: false,
+            },
+        })
+        context.transformJs(
+            [
+                `export const styles = {`,
+                `  primary: { color: "text-red-500" },`,
+                `} as const`,
+            ].join("\n"),
+            "/project/src/styles.ts"
+        )
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `import { styles } from "./styles"`,
+            `const tw = createTools()`,
+            `export const cls = tw.style(styles.primary).class()`,
+        ].join("\n")
+
+        const result = context.transformJs(code, "/project/src/app.ts")
+        const appDebugFile = context
+            .getDebugManifest()
+            .files.find((file) => file.id === "/project/src/app.ts")
+
+        expect(result.changed).toBe(true)
+        expect(result.code).toContain(`export const cls = "text-red-500"`)
+        expect(context.getManifestCandidates()).toEqual(["text-red-500"])
+        expect(appDebugFile?.replacements).toEqual([
+            expect.objectContaining({
+                kind: "style",
+                generatedText: `"text-red-500"`,
+                candidates: ["text-red-500"],
+                status: "compiled",
+                fallback: false,
+            }),
+        ])
+    })
+
+    it.each([
+        {
+            name: "same-file top-level const",
+            code: [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `export const cls = tw.style(style).class()`,
+                `const style = { display: "flex" }`,
+            ].join("\n"),
+            runtimeCall: `tw.style(style).class()`,
+        },
+        {
+            name: "same-file property access",
+            code: [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `export const cls = tw.style(styles.primary).class()`,
+                `const styles = { primary: { color: "text-red-500" } } as const`,
+            ].join("\n"),
+            runtimeCall: `tw.style(styles.primary).class()`,
+        },
+        {
+            name: "same-file var",
+            code: [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `export const cls = tw.style(style).class()`,
+                `var style = { display: "flex" }`,
+            ].join("\n"),
+            runtimeCall: `tw.style(style).class()`,
+        },
+    ])("preserves $name used before declaration", ({ code, runtimeCall }) => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+
+        const result = context.transformJs(code, "/project/src/tdz.ts")
+        const debugFile = context.getDebugManifest().files[0]
+
+        expect(result.changed).toBe(false)
+        expect(result.code).toBe(code)
+        expect(result.code).toContain(runtimeCall)
+        expect(debugFile?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNRESOLVED_STATIC_VALUE",
+                    fallbackBehavior: "runtime-fallback",
+                    message: expect.stringContaining(
+                        "is used before declaration"
+                    ),
+                }),
+            ])
+        )
+    })
+
+    it("preserves imported style whose exporting module has a forward reference", () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        context.transformJs(
+            [
+                `export const style = later`,
+                `const later = { display: "flex" } as const`,
+            ].join("\n"),
+            "/project/src/styles.ts"
+        )
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `import { style } from "./styles"`,
+            `const tw = createTools()`,
+            `export const cls = tw.style(style).class()`,
+        ].join("\n")
+
+        const result = context.transformJs(code, "/project/src/app.ts")
+        const debugFile = context
+            .getDebugManifest()
+            .files.find((file) => file.id === "/project/src/app.ts")
+
+        expect(result.changed).toBe(false)
+        expect(result.code).toBe(code)
+        expect(debugFile?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNRESOLVED_STATIC_VALUE",
+                    fallbackBehavior: "runtime-fallback",
+                    message: expect.stringContaining(
+                        "is used before declaration"
+                    ),
                 }),
             ])
         )
@@ -325,6 +520,65 @@ describe("tailwindest Vite plugin", () => {
         expect(result.code).toContain(`"surface:text-blue-500"`)
     })
 
+    it("preserves createTools setup with side-effectful options after exact Vite replacements", () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: {},
+        })
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools({ other: sideEffect() } as any)`,
+            `export const cls = tw.style({ display: "flex" }).class()`,
+        ].join("\n")
+
+        const result = context.transformJs(code, "/project/src/side-effect.ts")
+
+        expect(result.changed).toBe(true)
+        expect(result.code).toBe(
+            [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools({ other: sideEffect() } as any)`,
+                `export const cls = "flex"`,
+            ].join("\n")
+        )
+    })
+
+    it("reprocesses cached JS when CSS variant metadata changes", async () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const cls = tw.style({ surface: { color: "text-red-500" } }).class()`,
+        ].join("\n")
+
+        await context.transformCssAsync(tailwindCss, "/project/src/app.css")
+        context.transformJs(code, "/project/src/button.ts")
+
+        expect(context.getManifestCandidates()).toEqual(["text-red-500"])
+
+        await context.transformCssAsync(
+            surfaceTailwindCss,
+            "/project/src/app.css"
+        )
+
+        const debugFile = context
+            .getDebugManifest()
+            .files.find((file) => file.id === "/project/src/button.ts")
+
+        expect(context.getManifestCandidates()).toEqual([
+            "surface:text-red-500",
+        ])
+        expect(debugFile?.replacements[0]?.generatedText).toBe(
+            `"surface:text-red-500"`
+        )
+        expect(debugFile?.replacements[0]?.candidates).toEqual([
+            "surface:text-red-500",
+        ])
+    })
+
     it("loads CSS variant metadata before the first JS transform when CSS transform has not run", async () => {
         const root = await fs.mkdtemp(
             path.join(os.tmpdir(), "tailwindest-vite-race-")
@@ -368,6 +622,76 @@ describe("tailwindest Vite plugin", () => {
                 }),
             ])
         )
+    })
+
+    it("keeps resolver-less nested grouping fallback candidates in debug replacements", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const cls = tw.style({ hover: { color: "text-blue-500" } }).class()`,
+        ].join("\n")
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+
+        const result = context.transformJs(code, "/project/src/button.ts")
+        const manifest = context.getDebugManifest()
+        const replacement = manifest.files[0]?.replacements[0]
+
+        expect(result.changed).toBe(false)
+        expect(result.code).toBe(code)
+        expect(manifest.candidates).toEqual(["text-blue-500"])
+        expect(manifest.candidates).not.toContain("hover:text-blue-500")
+        expect(replacement).toEqual(
+            expect.objectContaining({
+                status: "runtime-fallback",
+                fallback: true,
+                candidates: ["text-blue-500"],
+            })
+        )
+        expect(replacement?.candidateRecords).toEqual([
+            expect.objectContaining({
+                candidate: "text-blue-500",
+                kind: "fallback-known",
+            }),
+        ])
+    })
+
+    it("keeps direct variant-looking leaves structural when CSS metadata is loaded", async () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const cls = tw.style({ dark: "bg-red-900" }).class()`,
+        ].join("\n")
+
+        const result = await compileAsync(code, {
+            fileName: "/project/src/button.ts",
+            cssSource: tailwindCss,
+        })
+
+        expect(result.changed).toBe(true)
+        expect(result.code).toContain(`"bg-red-900"`)
+        expect([...new Set(result.candidates)]).toEqual(["bg-red-900"])
+        expect(result.diagnostics).toEqual([])
+    })
+
+    it("compiles parenthesized nested variant styler class output", async () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const cls = (tw.style({ dark: { color: "text-white" } })).class()`,
+        ].join("\n")
+
+        const result = await compileAsync(code, {
+            fileName: "/project/src/parenthesized.ts",
+            cssSource: tailwindCss,
+        })
+
+        expect(result.changed).toBe(true)
+        expect(result.code).toContain(`export const cls = "dark:text-white"`)
+        expect([...new Set(result.candidates)]).toEqual(["dark:text-white"])
+        expect(result.diagnostics).toEqual([])
     })
 
     it("reports compile-required diagnostics for nested object-returning calls in programmatic compile", async () => {
@@ -446,6 +770,134 @@ describe("tailwindest Vite plugin", () => {
         ])
         expect(nextCss).toContain(`@source not inline("bg-red-950");`)
         expect(nextCss).not.toContain(`@source not inline("bg-red-900`)
+    })
+
+    it("keeps nested shorthand semantic candidates during dynamic extra class fallback", async () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `declare const dynamic: string`,
+            `export const cls = tw.style({ dark: { backgroundColor: "bg-red-900" } }).class(dynamic)`,
+        ].join("\n")
+
+        await context.transformCssAsync(tailwindCss, "/project/src/app.css")
+        const result = context.transformJs(code, "/project/src/dynamic.ts")
+        const css = context.transformCss(
+            `@import "tailwindcss";`,
+            "/project/src/app.css"
+        ).code
+        const inlineCandidates = css.match(/@source inline\("([^"]*)"\);/)?.[1]
+
+        expect(result.changed).toBe(false)
+        expect(context.getManifestCandidates()).toEqual(["dark:bg-red-900"])
+        expect(context.getDebugManifest().excludedCandidates).toEqual([
+            "bg-red-900",
+        ])
+        expect(inlineCandidates?.split(/\s+/)).toEqual(["dark:bg-red-900"])
+        expect(css).toContain(`@source not inline("bg-red-900");`)
+    })
+
+    it("keeps nested shorthand semantic candidates during dynamic mergeRecord fallback", async () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `declare const dynamicStyle: Record<string, string>`,
+            `export const record = tw.mergeRecord({ dark: { color: "text-white" } }, dynamicStyle)`,
+        ].join("\n")
+
+        await context.transformCssAsync(tailwindCss, "/project/src/app.css")
+        const result = context.transformJs(code, "/project/src/record.ts")
+        const css = context.transformCss(
+            `@import "tailwindcss";`,
+            "/project/src/app.css"
+        ).code
+
+        expect(result.changed).toBe(false)
+        expect(context.getManifestCandidates()).toEqual(["dark:text-white"])
+        expect(context.getDebugManifest().excludedCandidates).toEqual([
+            "text-white",
+        ])
+        expect(css).toContain(`@source inline("dark:text-white");`)
+        expect(css).toContain(`@source not inline("text-white");`)
+    })
+
+    it("keeps standalone string literal candidates beside nested shorthand fallback exclusions", async () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `declare const dynamic: string`,
+            `export const cls = tw.style({ dark: { backgroundColor: "bg-red-900" } }).class(dynamic)`,
+            `export const standalone = "px-4"`,
+        ].join("\n")
+
+        await context.transformCssAsync(tailwindCss, "/project/src/app.css")
+        const result = context.transformJs(code, "/project/src/mixed.ts")
+        const css = context.transformCss(
+            `@import "tailwindcss";`,
+            "/project/src/app.css"
+        ).code
+
+        expect(result.changed).toBe(false)
+        expect(context.getManifestCandidates()).toEqual([
+            "dark:bg-red-900",
+            "px-4",
+        ])
+        expect(context.getDebugManifest().excludedCandidates).toEqual([
+            "bg-red-900",
+        ])
+        expect(css).toContain(`@source inline("dark:bg-red-900 px-4");`)
+        expect(css).toContain(`@source not inline("bg-red-900");`)
+    })
+
+    it("does not exclude raw shorthand leaves when another file owns the raw candidate", async () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+
+        await context.transformCssAsync(tailwindCss, "/project/src/app.css")
+        context.transformJs(
+            [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `declare const dynamic: string`,
+                `export const cls = tw.style({ dark: { backgroundColor: "bg-red-900" } }).class(dynamic)`,
+            ].join("\n"),
+            "/project/src/dynamic.ts"
+        )
+        context.transformJs(
+            [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `export const cls = tw.join("bg-red-900")`,
+            ].join("\n"),
+            "/project/src/raw.ts"
+        )
+
+        const css = context.transformCss(
+            `@import "tailwindcss";`,
+            "/project/src/app.css"
+        ).code
+
+        expect(context.getManifestCandidates()).toEqual([
+            "bg-red-900",
+            "dark:bg-red-900",
+        ])
+        expect(context.getDebugManifest().excludedCandidates).toEqual([])
+        expect(css).toContain(`@source inline("bg-red-900 dark:bg-red-900");`)
+        expect(css).not.toContain(`@source not inline("bg-red-900");`)
     })
 
     it("injects the source bridge into Tailwind package CSS entries used by framework dev aggregators", async () => {
@@ -1121,6 +1573,33 @@ describe("tailwindest Vite plugin", () => {
         expect(result.changed).toBe(true)
         expect(before("danger")).toBe("inline-flex text-red-700 px-2")
         expect(after("danger")).toBe("inline-flex text-gray-500")
+    })
+
+    it("uses the last duplicate dynamic variants prop value like runtime object literals", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const cls = (first, second) => tw.variants({`,
+            `  variants: {`,
+            `    size: { sm: { padding: "p-1" }, lg: { padding: "p-2" } },`,
+            `  },`,
+            `}).class({ size: first ? "sm" : "lg", size: second ? "lg" : "sm" })`,
+        ].join("\n")
+
+        const result = compile(code, { fileName: "/project/src/duplicate.js" })
+        const before = evaluateModule<{
+            cls: (first: boolean, second: boolean) => string
+        }>(code, ["cls"])
+        const after = evaluateModule<{
+            cls: (first: boolean, second: boolean) => string
+        }>(result.code, ["cls"])
+
+        expect(result.changed).toBe(true)
+        for (const first of [false, true]) {
+            for (const second of [false, true]) {
+                expect(after.cls(first, second)).toBe(before.cls(first, second))
+            }
+        }
     })
 
     const classProducingExpressions = [
@@ -1960,12 +2439,13 @@ describe("tailwindest Vite plugin", () => {
 
         expect(result.changed).toBe(true)
         expect(result.code).not.toContain("createTools")
-        expect(result.code).toContain("a`b:")
+        expect(result.code).toContain("JSON.stringify")
+        expect(result.code).toContain('\\"a`b\\"')
         expectParsesAs("/project/src/invalid.ts", result.code)
         expect(manifest.files[0]?.replacements).toEqual([
             expect.objectContaining({
                 kind: "variants",
-                generatedText: expect.stringContaining("a`b:"),
+                generatedText: expect.stringContaining('\\"a`b\\"'),
                 status: "compiled",
                 fallback: false,
                 candidateRecords: expect.arrayContaining([
@@ -2252,6 +2732,42 @@ describe("tailwindest Vite plugin", () => {
         )
     })
 
+    it("runtime-incompatible style.class extra preserves runtime call and base candidates", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const cls = tw.style({ color: "text-red-500" }).class({ "px-2": true } as any)`,
+        ].join("\n")
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+
+        const result = context.transformJs(
+            code,
+            "/project/src/fallback-incompatible-extra.ts"
+        )
+        const manifest = context.getDebugManifest()
+
+        expect(result.changed).toBe(false)
+        expect(result.code).toContain(
+            `tw.style({ color: "text-red-500" }).class({ "px-2": true } as any)`
+        )
+        expect(manifest.candidates).toContain("text-red-500")
+        expect(manifest.candidates).not.toContain("px-2")
+        expect(manifest.files[0]?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNSUPPORTED_DYNAMIC_VALUE",
+                    fallbackBehavior: "runtime-fallback",
+                    message: expect.stringContaining(
+                        "runtime-incompatible class extra"
+                    ),
+                }),
+            ])
+        )
+    })
+
     it("does not compile a top-level static binding through a local shadow", () => {
         const code = [
             `import { createTools } from "tailwindest"`,
@@ -2318,6 +2834,31 @@ describe("tailwindest Vite plugin", () => {
                 `export const cls = tw.join(list)`,
             ].join("\n"),
             runtimeCall: `tw.join(list)`,
+        },
+        {
+            name: "unknown function escape",
+            code: [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `declare function mutate(value: unknown): void`,
+                `const style = { color: "text-red-500" }`,
+                `mutate(style)`,
+                `export const cls = tw.style(style).class()`,
+            ].join("\n"),
+            runtimeCall: `tw.style(style).class()`,
+        },
+        {
+            name: "nested alias escape",
+            code: [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `declare function mutate(value: unknown): void`,
+                `const style = { nested: { color: "text-red-500" } }`,
+                `const alias = style.nested`,
+                `mutate(alias)`,
+                `export const cls = tw.style(style).class()`,
+            ].join("\n"),
+            runtimeCall: `tw.style(style).class()`,
         },
     ])(
         "does not compile bindings mutated through $name",
@@ -2629,6 +3170,133 @@ describe("tailwindest Vite plugin", () => {
 
         expect(context.removeFile("/project/src/app.tsx")).toBe(true)
         expect(context.getDebugManifest().candidateRecords).toEqual([])
+    })
+
+    it("invalidates cached JS modules only when CSS variant metadata changes during hot update", async () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        const cssModule = { id: "/project/src/app.css" }
+        const jsModule = { id: "/project/src/button.ts" }
+        const invalidated: string[] = []
+        const server = {
+            moduleGraph: {
+                getModuleById: (id: string) =>
+                    id === cssModule.id
+                        ? cssModule
+                        : id === jsModule.id
+                          ? jsModule
+                          : undefined,
+                invalidateModule: (module: { id?: string | null }) => {
+                    if (module.id) {
+                        invalidated.push(module.id)
+                    }
+                },
+            },
+        }
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const cls = tw.style({ surface: { color: "text-red-500" } }).class()`,
+        ].join("\n")
+
+        await context.transformCssAsync(tailwindCss, cssModule.id)
+        context.transformJs(code, jsModule.id)
+
+        const affected = await createHotUpdateHandler(context)({
+            file: cssModule.id,
+            server,
+            read: async () => surfaceTailwindCss,
+        })
+
+        expect(affected).toEqual([cssModule, jsModule])
+        expect(invalidated).toEqual([cssModule.id, jsModule.id])
+        expect(context.getManifestCandidates()).toEqual([
+            "surface:text-red-500",
+        ])
+
+        invalidated.length = 0
+        const sameMetadataAffected = await createHotUpdateHandler(context)({
+            file: cssModule.id,
+            server,
+            read: async () =>
+                `${surfaceTailwindCss}\n.button { color: currentColor; }`,
+        })
+
+        expect(sameMetadataAffected).toEqual([cssModule])
+        expect(invalidated).toEqual([cssModule.id])
+    })
+
+    it("removes CSS variant metadata, reprocesses cached JS, and invalidates affected modules when CSS reads fail", async () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        const cssModule = { id: "/project/src/app.css" }
+        const jsModule = { id: "/project/src/button.ts" }
+        const invalidated: string[] = []
+        const server = {
+            moduleGraph: {
+                getModuleById: (id: string) =>
+                    id === cssModule.id
+                        ? cssModule
+                        : id === jsModule.id
+                          ? jsModule
+                          : undefined,
+                invalidateModule: (module: { id?: string | null }) => {
+                    if (module.id) {
+                        invalidated.push(module.id)
+                    }
+                },
+            },
+        }
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const cls = tw.style({ surface: { color: "text-red-500" } }).class()`,
+        ].join("\n")
+
+        await context.transformCssAsync(surfaceTailwindCss, cssModule.id)
+        context.transformJs(code, jsModule.id)
+
+        expect(context.getManifestCandidates()).toEqual([
+            "surface:text-red-500",
+        ])
+
+        const affected = await createHotUpdateHandler(context)({
+            file: cssModule.id,
+            server,
+            read: async () => {
+                throw new Error("file removed before read")
+            },
+        })
+        const debugFile = context
+            .getDebugManifest()
+            .files.find((file) => file.id === jsModule.id)
+
+        expect(context.getManifestCandidates()).toEqual(["text-red-500"])
+        expect(context.getDebugManifest().candidateRecords).toEqual([
+            expect.objectContaining({
+                candidate: "text-red-500",
+                kind: "fallback-known",
+            }),
+        ])
+        expect(debugFile?.replacements[0]).toEqual(
+            expect.objectContaining({
+                status: "runtime-fallback",
+                fallback: true,
+            })
+        )
+        expect(debugFile?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "MISSING_COMPILED_VARIANT_METADATA",
+                }),
+            ])
+        )
+        expect(affected).toEqual([cssModule, jsModule])
+        expect(invalidated).toEqual([cssModule.id, jsModule.id])
     })
 
     it("drops stale manifest candidates and over-invalidates when changed file reads fail", async () => {

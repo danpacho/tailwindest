@@ -28,6 +28,7 @@ export function createHotUpdateHandler(context: CompilerContext) {
         read,
     }: HotUpdateInput): Promise<ViteLikeModule[]> => {
         const changedFile = normalizeCandidateFileId(file)
+        context.takeReprocessedJsIds()
         if (isJsId(changedFile)) {
             if (read) {
                 try {
@@ -46,10 +47,12 @@ export function createHotUpdateHandler(context: CompilerContext) {
             }
         }
 
+        const reprocessedJsIds = context.takeReprocessedJsIds()
         const affectedIds = [
             ...new Set([
                 changedFile,
                 ...context.getReverseDependencies(changedFile),
+                ...reprocessedJsIds,
             ]),
         ]
         const affectedModules =
@@ -63,12 +66,17 @@ export function createHotUpdateHandler(context: CompilerContext) {
                 ? affectedModules
                 : getAllKnownModules(server)
 
-        if (context.shouldInvalidateCssForManifest()) {
-            invalidateCssEntries(context, server)
-        }
+        const invalidatedModules = new Set<ViteLikeModule>()
 
+        if (context.shouldInvalidateCssForManifest()) {
+            invalidateCssEntries(context, server, invalidatedModules)
+        }
         for (const module of modulesToInvalidate) {
+            if (invalidatedModules.has(module)) {
+                continue
+            }
             server.moduleGraph.invalidateModule(module)
+            invalidatedModules.add(module)
         }
 
         return modulesToInvalidate
@@ -77,12 +85,14 @@ export function createHotUpdateHandler(context: CompilerContext) {
 
 export function invalidateCssEntries(
     context: CompilerContext,
-    server: ViteLikeServer
+    server: ViteLikeServer,
+    invalidatedModules = new Set<ViteLikeModule>()
 ): void {
     for (const cssEntry of context.getCssEntries()) {
         const module = server.moduleGraph.getModuleById?.(cssEntry)
-        if (module) {
+        if (module && !invalidatedModules.has(module)) {
             server.moduleGraph.invalidateModule(module)
+            invalidatedModules.add(module)
         }
     }
 }

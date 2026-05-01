@@ -977,12 +977,13 @@ describe("Layer 8 release gate matrix", () => {
 
         expect(result.changed).toBe(true)
         expect(result.code).not.toContain("createTools")
-        expect(result.code).toContain("a`b:")
+        expect(result.code).toContain("JSON.stringify")
+        expect(result.code).toContain('\\"a`b\\"')
         expectParsesAs("/project/src/invalid-codegen.ts", result.code)
         expect(file.replacements).toEqual([
             expect.objectContaining({
                 kind: "variants",
-                generatedText: expect.stringContaining("a`b:"),
+                generatedText: expect.stringContaining('\\"a`b\\"'),
                 status: "compiled",
                 fallback: false,
                 candidateRecords: expect.arrayContaining([

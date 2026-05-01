@@ -161,6 +161,7 @@ export class CompilerContext {
     private variantResolverReadinessChecked = false
     private readonly debugFiles = new Map<string, TailwindestDebugFile>()
     private lastInvalidatedManifestRevision = 0
+    private readonly reprocessedJsIds = new Set<string>()
 
     public constructor(input: CompilerContextInput) {
         this.root = normalizeCandidateFileId(input.root)
@@ -299,10 +300,18 @@ export class CompilerContext {
                 fallbackSpan
             ),
         ]
+        const stringLiteralCandidates =
+            this.options.collectStringLiteralCandidates !== false
+                ? collectCandidateStringLiterals(code, [
+                      ...analysis.provenCalls,
+                      ...compiled.excludedCandidateSpans,
+                  ])
+                : []
         const candidates = [
             ...analysis.candidates,
             ...compiled.candidates,
             ...transform.candidates,
+            ...stringLiteralCandidates,
         ]
         const candidateRecords = candidateRecordsForTransform(
             candidates,
@@ -313,7 +322,10 @@ export class CompilerContext {
             hash,
             candidates,
             candidateRecords,
-            excludedCandidates: analysis.excludedCandidates,
+            excludedCandidates: [
+                ...analysis.excludedCandidates,
+                ...compiled.excludedCandidates,
+            ],
             diagnostics,
         })
         this.updateDebugFile(normalized, hash, {
@@ -332,13 +344,18 @@ export class CompilerContext {
 
     public removeFile(id: string): boolean {
         const normalized = normalizeCandidateFileId(id)
+        const previousGroups = this.getVariantGroups()
         this.cache.delete(normalized)
         this.clearDependencies(normalized)
         this.debugFiles.delete(normalized)
         this.cssEntries.delete(normalized)
         if (this.cssEntryGroups.delete(normalized)) {
             this.cssEntryHashes.delete(normalized)
-            this.rebuildVariantResolver()
+            const nextGroups = this.getVariantGroups()
+            if (!sameStringArray(previousGroups, nextGroups)) {
+                this.rebuildVariantResolver(nextGroups)
+                this.reprocessCachedJs()
+            }
         }
         this.writeDebugManifest()
         return removeFileCandidates(this.manifest, normalized)
@@ -431,6 +448,12 @@ export class CompilerContext {
             ...(this.reverseDependencies.get(normalizeCandidateFileId(id)) ??
                 []),
         ].sort()
+    }
+
+    public takeReprocessedJsIds(): string[] {
+        const ids = [...this.reprocessedJsIds].sort()
+        this.reprocessedJsIds.clear()
+        return ids
     }
 
     public shouldInvalidateCssForManifest(): boolean {
@@ -529,15 +552,6 @@ export class CompilerContext {
             }
         }
 
-        if (this.options.collectStringLiteralCandidates !== false) {
-            candidates.push(
-                ...collectCandidateStringLiterals(
-                    code,
-                    result.calls.map((call) => call.span)
-                )
-            )
-        }
-
         return {
             candidates: [...new Set(candidates)].sort(),
             excludedCandidates: [...new Set(excludedCandidates)].sort(),
@@ -563,13 +577,20 @@ export class CompilerContext {
         const hash = hashCode(code)
         if (this.cssEntryHashes.get(normalized) === hash) return
 
+        const previousGroups = this.getVariantGroups()
         const groups = await loadTailwindNestGroups({
             cssRoot: normalized,
             cssSource: code,
         })
         this.cssEntryHashes.set(normalized, hash)
         this.cssEntryGroups.set(normalized, groups)
-        this.rebuildVariantResolver()
+        const nextGroups = this.getVariantGroups()
+        if (sameStringArray(previousGroups, nextGroups)) {
+            return
+        }
+
+        this.rebuildVariantResolver(nextGroups)
+        this.reprocessCachedJs()
     }
 
     private async loadDiscoveredCssVariantResolvers(): Promise<void> {
@@ -598,7 +619,14 @@ export class CompilerContext {
         this.variantResolverReadinessChecked = true
     }
 
-    private rebuildVariantResolver(): void {
+    private rebuildVariantResolver(groups = this.getVariantGroups()): void {
+        this.variantResolver =
+            groups.length > 0
+                ? createCompiledVariantResolver(groups)
+                : undefined
+    }
+
+    private getVariantGroups(): string[] {
         const groups = [
             ...new Set(
                 [...this.cssEntryGroups.keys()]
@@ -606,10 +634,17 @@ export class CompilerContext {
                     .flatMap((id) => this.cssEntryGroups.get(id) ?? [])
             ),
         ]
-        this.variantResolver =
-            groups.length > 0
-                ? createCompiledVariantResolver(groups)
-                : undefined
+        return groups
+    }
+
+    private reprocessCachedJs(): void {
+        for (const cached of this.cache.entries()) {
+            if (!this.shouldTransformJs(cached.id)) {
+                continue
+            }
+            this.transformJs(cached.code, cached.id)
+            this.reprocessedJsIds.add(cached.id)
+        }
     }
 
     private updateDebugFile(
@@ -909,6 +944,13 @@ function normalizeOptions(
     options: TailwindestViteOptions
 ): TailwindestViteOptions {
     return options
+}
+
+function sameStringArray(left: string[], right: string[]): boolean {
+    return (
+        left.length === right.length &&
+        left.every((value, index) => value === right[index])
+    )
 }
 
 function collectCandidatesFromValues(values: unknown[]): string[] {

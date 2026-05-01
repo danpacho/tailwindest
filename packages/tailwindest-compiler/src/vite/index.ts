@@ -6,13 +6,16 @@ import {
 } from "./hmr"
 
 /**
+ * @deprecated Internal compiler experiment. `@tailwindest/compiler/vite` is
+ * private and must not be published.
+ * @internal
+ */
+
+/**
  * Structural Vite transform handler type used by the Tailwindest plugin.
  *
- * The compiler intentionally keeps this type structural instead of importing
- * Vite's runtime types so the published package can remain stable across minor
- * Vite API type changes while still targeting the Vite 8 object-hook shape.
- *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export type ViteTransformHandler = (
     this: unknown,
@@ -27,7 +30,8 @@ export type ViteTransformHandler = (
  * Structural watch-change hook used to remove deleted files from the manifest
  * bridge during development.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export type WatchChangeHandler = (
     this: unknown,
@@ -38,7 +42,8 @@ export type WatchChangeHandler = (
 /**
  * Structural hot-update handler exposed on the transform plugin.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export type ViteHotUpdateHandler = (input: {
     file: string
@@ -49,7 +54,7 @@ export type ViteHotUpdateHandler = (input: {
 }) => Promise<unknown[]>
 
 /**
- * Public plugin shape returned by `tailwindest()`.
+ * Internal plugin shape returned by `tailwindest()`.
  *
  * The tuple returned by `tailwindest()` contains two Vite plugins:
  *
@@ -58,7 +63,8 @@ export type ViteHotUpdateHandler = (input: {
  * 2. `tailwindest:source` injects the manifest into Tailwind CSS via
  *    `@source inline()`.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export interface TailwindestPlugin {
     name: string
@@ -80,27 +86,8 @@ export interface TailwindestPlugin {
 /**
  * Create the Tailwindest Vite plugin pair.
  *
- * Place this plugin before `@tailwindcss/vite`. The first plugin transforms
- * JavaScript/TypeScript modules and maintains the in-memory class candidate
- * manifest. The second plugin injects that manifest into Tailwind CSS v4 using
- * `@source inline()`, which keeps dev, debug, and production builds on the same
- * compiler output.
- *
- * @example
- * ```ts
- * import tailwindcss from "@tailwindcss/vite"
- * import { defineConfig } from "vite"
- * import { tailwindest } from "@tailwindest/compiler/vite"
- *
- * export default defineConfig({
- *   plugins: [
- *     tailwindest({ debug: true, sourceMap: true }),
- *     tailwindcss(),
- *   ],
- * })
- * ```
- *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export function tailwindest(
     options: TailwindestViteOptions = {}
@@ -168,4 +155,8 @@ export function tailwindest(
     return [transformPlugin, sourcePlugin]
 }
 
+/**
+ * @deprecated Internal compiler experiment.
+ * @internal
+ */
 export type { TailwindestViteOptions }

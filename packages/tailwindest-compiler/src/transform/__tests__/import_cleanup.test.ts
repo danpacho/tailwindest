@@ -105,6 +105,71 @@ describe("cleanupRuntimeImports", () => {
         expect(result.code).toBe(`const cls = "px-4"`)
     })
 
+    it("removes exact-only local createTools setup with side-effect-free options after replacements", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools({ other: true } as any)`,
+            `const cls = tw.join("px-4")`,
+        ].join("\n")
+
+        const result = substituteTailwindest({
+            fileName,
+            code,
+            cleanImports: true,
+            plans: [
+                {
+                    ...planFor(code, `tw.join("px-4")`, `"px-4"`, ["px-4"]),
+                    kind: "join",
+                },
+            ],
+        })
+
+        expect(result.code).toBe(`const cls = "px-4"`)
+    })
+
+    it.each([
+        `createTools({ other: sideEffect() } as any)`,
+        `createTools({ ...sideEffect() } as any)`,
+        `createTools({ [sideEffect()]: true } as any)`,
+        `createTools(getOptions() as any)`,
+        `createTools({ merger: maybeMerger } as any)`,
+        `createTools({ other } as any)`,
+        `createTools({ get other() { return true } } as any)`,
+        `createTools({ other() { return true } } as any)`,
+        `createTools({ other: count++ } as any)`,
+        `createTools({ other: new Thing() } as any)`,
+        "createTools({ other: tag`x` } as any)",
+    ])(
+        "preserves exact-only local createTools setup with runtime-observable options %s",
+        (createExpression) => {
+            const code = [
+                `import { createTools } from "tailwindest"`,
+                `const tw = ${createExpression}`,
+                `const cls = tw.join("px-4")`,
+            ].join("\n")
+
+            const result = substituteTailwindest({
+                fileName,
+                code,
+                cleanImports: true,
+                plans: [
+                    {
+                        ...planFor(code, `tw.join("px-4")`, `"px-4"`, ["px-4"]),
+                        kind: "join",
+                    },
+                ],
+            })
+
+            expect(result.code).toBe(
+                [
+                    `import { createTools } from "tailwindest"`,
+                    `const tw = ${createExpression}`,
+                    `const cls = "px-4"`,
+                ].join("\n")
+            )
+        }
+    )
+
     it("preserves createTools setup when exact and fallback calls are mixed", () => {
         const code = [
             `import { createTools } from "tailwindest"`,
