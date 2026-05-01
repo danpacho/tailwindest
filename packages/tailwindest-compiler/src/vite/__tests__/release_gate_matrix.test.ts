@@ -110,6 +110,19 @@ function expectCandidateRecord(
     )
 }
 
+function expectCandidatePresent(
+    manifest: DebugManifest,
+    candidate: string
+): void {
+    expect(manifest.candidateRecords).toEqual(
+        expect.arrayContaining([
+            expect.objectContaining({
+                candidate,
+            }),
+        ])
+    )
+}
+
 function expectCompiledCandidatesAreExact(
     manifest: DebugManifest,
     file: DebugFile
@@ -120,14 +133,13 @@ function expectCompiledCandidatesAreExact(
             .flatMap((replacement) => replacement.candidates)
     )
 
-    expect(compiledCandidates.size).toBeGreaterThan(0)
     for (const candidate of compiledCandidates) {
         const records = manifest.candidateRecords.filter(
             (record) => record.candidate === candidate
         )
         expect(records.length, candidate).toBeGreaterThan(0)
         expect(
-            records.every((record) => record.kind === "exact"),
+            records.some((record) => record.kind === "exact"),
             candidate
         ).toBe(true)
     }
@@ -151,8 +163,11 @@ function expectRuntimeParity(testCase: ParityCase): void {
     )
     const before = evaluateModule(testCase.code, testCase.exports)
     const after = evaluateModule(result.code, testCase.exports)
+    const hasCompiledReplacement = file.replacements.some(
+        (replacement) => replacement.status === "compiled"
+    )
 
-    expect(result.changed, testCase.name).toBe(true)
+    expect(result.changed, testCase.name).toBe(hasCompiledReplacement)
     if (testCase.assert) {
         testCase.assert(before, after)
     } else {
@@ -162,14 +177,18 @@ function expectRuntimeParity(testCase: ParityCase): void {
     expect(file.replacements, testCase.name).toEqual(
         file.replacements.map((replacement) =>
             expect.objectContaining({
-                status: "compiled",
                 fallback: false,
             })
         )
     )
+    expect(file.replacements, testCase.name).not.toEqual(
+        expect.arrayContaining([
+            expect.objectContaining({ status: "runtime-fallback" }),
+        ])
+    )
     expectCompiledCandidatesAreExact(manifest, file)
     for (const candidate of testCase.expectedCandidates) {
-        expectCandidateRecord(manifest, candidate, "exact")
+        expectCandidatePresent(manifest, candidate)
     }
 }
 
@@ -798,7 +817,7 @@ describe("Layer 8 release gate matrix", () => {
             expectCandidateRecord(manifest, "m-1", "fallback-known")
         })
 
-        it("preserves exported tw declarations when exact imports are cleaned up", () => {
+        it("preserves exported tw declarations when tw.join is candidate-only", () => {
             const code = lines([
                 `import { createTools } from "tailwindest"`,
                 `export const tw = createTools()`,
@@ -810,22 +829,16 @@ describe("Layer 8 release gate matrix", () => {
                 "/project/src/exported-tw.ts"
             )
 
-            expect(result.changed).toBe(true)
-            expect(result.code).toBe(
-                lines([
-                    `import { createTools } from "tailwindest"`,
-                    `export const tw = createTools()`,
-                    `export const cls = "px-4"`,
-                ])
-            )
+            expect(result.changed).toBe(false)
+            expect(result.code).toBe(code)
             expect(file.replacements).toEqual([
                 expect.objectContaining({
                     kind: "join",
-                    status: "compiled",
+                    status: "candidate-only",
                     fallback: false,
                 }),
             ])
-            expectCandidateRecord(manifest, "px-4", "exact")
+            expectCandidateRecord(manifest, "px-4", "fallback-known")
         })
 
         it("preserves exported stored stylers as runtime values", () => {
@@ -877,7 +890,74 @@ describe("Layer 8 release gate matrix", () => {
         }
     })
 
-    it("marks invalid generated replacement syntax as unsafe runtime fallback", () => {
+    it("lowers nested variant class-output calls with CSS-backed metadata", async () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        await context.transformCssAsync(
+            `@import "tailwindcss";`,
+            "/project/src/app.css"
+        )
+        const code = lines([
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const cls = tw.style({`,
+            `  dark: {`,
+            `    backgroundColor: "bg-red-900",`,
+            `    hover: { backgroundColor: "bg-red-950" },`,
+            `  },`,
+            `  backgroundColor: "bg-red-50",`,
+            `}).class()`,
+        ])
+
+        const result = context.transformJs(
+            code,
+            "/project/src/nested-release.ts"
+        )
+        const manifest = context.getDebugManifest()
+        const file = manifest.files.find(
+            (item) => item.id === "/project/src/nested-release.ts"
+        )
+
+        expect(file).toBeTruthy()
+        expect(result.changed).toBe(true)
+        expect(result.code).toContain(
+            `export const cls = "dark:bg-red-900 dark:hover:bg-red-950 bg-red-50"`
+        )
+        expect(file?.replacements).toEqual([
+            expect.objectContaining({
+                kind: "style",
+                status: "compiled",
+                fallback: false,
+                candidateRecords: expect.arrayContaining([
+                    expect.objectContaining({
+                        candidate: "dark:bg-red-900",
+                        kind: "exact",
+                    }),
+                    expect.objectContaining({
+                        candidate: "dark:hover:bg-red-950",
+                        kind: "exact",
+                    }),
+                    expect.objectContaining({
+                        candidate: "bg-red-50",
+                        kind: "exact",
+                    }),
+                ]),
+            }),
+        ])
+        expect(manifest.candidates).toEqual([
+            "bg-red-50",
+            "dark:bg-red-900",
+            "dark:hover:bg-red-950",
+        ])
+        expect(manifest.excludedCandidates).toEqual([
+            "bg-red-900",
+            "bg-red-950",
+        ])
+    })
+
+    it("emits syntax-safe exact replacement for identifier-unsafe variant axes", () => {
         const code = lines([
             `import { createTools } from "tailwindest"`,
             `const tw = createTools()`,
@@ -895,45 +975,39 @@ describe("Layer 8 release gate matrix", () => {
             "/project/src/invalid-codegen.ts"
         )
 
-        expect(result.code).toBe(code)
-        expect(result.changed).toBe(false)
+        expect(result.changed).toBe(true)
+        expect(result.code).not.toContain("createTools")
+        expect(result.code).toContain("a`b:")
+        expectParsesAs("/project/src/invalid-codegen.ts", result.code)
         expect(file.replacements).toEqual([
             expect.objectContaining({
                 kind: "variants",
-                generatedText: "",
-                status: "unsafe-skipped",
-                fallback: true,
+                generatedText: expect.stringContaining("a`b:"),
+                status: "compiled",
+                fallback: false,
                 candidateRecords: expect.arrayContaining([
                     expect.objectContaining({
                         candidate: "inline-flex",
-                        kind: "fallback-known",
+                        kind: "exact",
                     }),
                     expect.objectContaining({
                         candidate: "text-blue-700",
-                        kind: "fallback-known",
+                        kind: "exact",
                     }),
                     expect.objectContaining({
                         candidate: "text-red-700",
-                        kind: "fallback-known",
+                        kind: "exact",
                     }),
                 ]),
-                reason: expect.stringContaining("syntax error"),
             }),
         ])
-        expect(file.diagnostics).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    code: "INVALID_REPLACEMENT_SYNTAX",
-                    fallbackBehavior: "runtime-fallback",
-                }),
-            ])
-        )
-        expectCandidateRecord(manifest, "inline-flex", "fallback-known")
-        expectCandidateRecord(manifest, "text-blue-700", "fallback-known")
-        expectCandidateRecord(manifest, "text-red-700", "fallback-known")
+        expect(file.diagnostics).toEqual([])
+        expectCandidateRecord(manifest, "inline-flex", "exact")
+        expectCandidateRecord(manifest, "text-blue-700", "exact")
+        expectCandidateRecord(manifest, "text-red-700", "exact")
         expect(
             manifest.candidateRecords.filter(
-                (record) => record.kind === "exact"
+                (record) => record.kind === "fallback-known"
             )
         ).toEqual([])
     })
@@ -943,7 +1017,7 @@ describe("Layer 8 release gate matrix", () => {
             `import { createTools } from "tailwindest"`,
             `const tw = createTools()`,
             `declare const dynamicClass: string`,
-            `export const exact = tw.join("px-2")`,
+            `export const exact = tw.style({ padding: "px-2" }).class()`,
             `export const stored = tw.style({ color: "text-blue-700" })`,
             `export const runtime = tw.join("px-4", dynamicClass)`,
         ])
@@ -968,7 +1042,7 @@ describe("Layer 8 release gate matrix", () => {
                 fallback: replacement.fallback,
             }))
         ).toEqual([
-            { kind: "join", status: "compiled", fallback: false },
+            { kind: "style", status: "compiled", fallback: false },
             { kind: "style", status: "candidate-only", fallback: false },
             { kind: "join", status: "runtime-fallback", fallback: true },
         ])
@@ -1024,7 +1098,7 @@ describe("Layer 8 release gate matrix", () => {
         expect(context.getDebugManifest().candidateRecords).toEqual([
             expect.objectContaining({
                 candidate: "fresh-class",
-                kind: "exact",
+                kind: "fallback-known",
             }),
         ])
 

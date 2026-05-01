@@ -339,7 +339,7 @@ describe("variant optimizer conflict graph", () => {
 
         expect(serializedShape.length).toBeLessThan(420)
         expect(serializedShape).toMatchInlineSnapshot(
-            `"{"additiveAxes":["size"],"components":[{"axes":["intent","emphasis"],"classKeys":["intent:__missing|emphasis:__missing","intent:__missing|emphasis:weak","intent:__missing|emphasis:strong","intent:primary|emphasis:__missing","intent:primary|emphasis:weak","intent:primary|emphasis:strong","intent:danger|emphasis:__missing","intent:danger|emphasis:weak","intent:danger|emphasis:strong"]}]}"`
+            `"{"additiveAxes":["size"],"components":[{"axes":["intent","emphasis"],"classKeys":["intent:m|emphasis:m","intent:m|emphasis:v:weak","intent:m|emphasis:v:strong","intent:v:primary|emphasis:m","intent:v:primary|emphasis:v:weak","intent:v:primary|emphasis:v:strong","intent:v:danger|emphasis:m","intent:v:danger|emphasis:v:weak","intent:v:danger|emphasis:v:strong"]}]}"`
         )
     })
 })

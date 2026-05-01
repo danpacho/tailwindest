@@ -267,6 +267,7 @@ export class CompilerContext {
             code,
             provenCalls: analysis.provenCalls,
             provenReceiverCalls: analysis.provenReceiverCalls,
+            resolvedCallArguments: analysis.resolvedCallArguments,
             runtimeMergerCalls: analysis.runtimeMergerCalls,
             candidateOnlyCalls: analysis.candidateOnlyCalls,
             variantTableLimit: this.options.variantTableLimit,
@@ -451,6 +452,7 @@ export class CompilerContext {
         dependencies: string[]
         provenCalls: SourceSpan[]
         provenReceiverCalls: SourceSpan[]
+        resolvedCallArguments: Array<{ span: SourceSpan; arguments: unknown[] }>
         runtimeMergerCalls: SourceSpan[]
         candidateOnlyCalls: CandidateOnlyDebugCall[]
     } {
@@ -543,6 +545,10 @@ export class CompilerContext {
             dependencies: result.dependencies,
             provenCalls: result.calls.map((call) => call.span),
             provenReceiverCalls: result.provenReceiverSpans,
+            resolvedCallArguments: result.resolvedCallArguments.map((call) => ({
+                span: call.span,
+                arguments: call.arguments.map((argument) => argument.value),
+            })),
             runtimeMergerCalls: result.runtimeMergerCalls,
             candidateOnlyCalls,
         }

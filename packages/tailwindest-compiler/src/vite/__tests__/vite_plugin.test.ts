@@ -153,6 +153,48 @@ describe("tailwindest Vite plugin", () => {
         expect(css.code).toContain(`@source inline("px-4 text-emerald-600");`)
     })
 
+    it("compiles analyzer-resolved imported and wrapped static arguments", () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        context.transformJs(
+            [
+                `export const key = "color" as const`,
+                `export const shared = { display: "flex" } as const`,
+                `export const button = ({`,
+                `  [key]: "text-blue-700",`,
+                `  ...shared,`,
+                `} as const) satisfies Record<string, unknown>`,
+                `export const extra = "rounded" as const`,
+            ].join("\n"),
+            "/project/src/styles.ts"
+        )
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `import { button, extra } from "./styles"`,
+            `const tw = createTools()`,
+            `export const cls = tw.style(button).class(extra)`,
+        ].join("\n")
+
+        const result = context.transformJs(code, "/project/src/app.ts")
+        const appDebugFile = context
+            .getDebugManifest()
+            .files.find((file) => file.id === "/project/src/app.ts")
+
+        expect(result.changed).toBe(true)
+        expect(result.code).toContain(`"text-blue-700 flex rounded"`)
+        expect(appDebugFile?.replacements).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    kind: "style",
+                    status: "compiled",
+                    fallback: false,
+                }),
+            ])
+        )
+    })
+
     it("keeps unsupported Vite calls as runtime fallbacks", () => {
         const code = [
             `import { createTools } from "tailwindest"`,
@@ -182,6 +224,41 @@ describe("tailwindest Vite plugin", () => {
             ],
         })
     })
+
+    it.each([
+        "not-tailwindest/foo",
+        "@scope/not-tailwindest/foo",
+        "@tailwindest/fake",
+    ])(
+        "preserves createTools calls from non-tailwindest module %s",
+        (moduleSpecifier) => {
+            const code = [
+                `import { createTools } from "${moduleSpecifier}"`,
+                `const tw = createTools()`,
+                `export const cls = tw.join("px-4")`,
+            ].join("\n")
+            const context = createCompilerContext({
+                root: "/project",
+                options: { debug: true },
+            })
+
+            const result = context.transformJs(
+                code,
+                "/project/src/non-tailwindest.ts"
+            )
+            const manifest = context.getDebugManifest()
+
+            expect(result.code).toBe(code)
+            expect(result.changed).toBe(false)
+            expect(manifest.files[0]?.replacements).toEqual([])
+            expect(manifest.files[0]?.diagnostics).toEqual([
+                expect.objectContaining({
+                    code: "NOT_TAILWINDEST_SYMBOL",
+                    fallbackBehavior: "runtime-fallback",
+                }),
+            ])
+        }
+    )
 
     it("keeps unsupported programmatic compile() calls as runtime fallbacks", () => {
         const code = [
@@ -293,6 +370,28 @@ describe("tailwindest Vite plugin", () => {
         )
     })
 
+    it("reports compile-required diagnostics for nested object-returning calls in programmatic compile", async () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `export const rec = tw.style({ dark: { color: "text-white" } }).style()`,
+        ].join("\n")
+
+        const result = await compileAsync(code, {
+            fileName: "/project/src/unsafe-object.ts",
+            cssSource: tailwindCss,
+        })
+
+        expect(result.changed).toBe(false)
+        expect(result.code).toBe(code)
+        expect([...new Set(result.candidates)]).toEqual(["dark:text-white"])
+        expect(result.diagnostics).toEqual([
+            expect.objectContaining({
+                code: "COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT",
+            }),
+        ])
+    })
+
     it("injects not-inline exclusions for raw shorthand leaves unless another candidate owns them", async () => {
         const context = createCompilerContext({
             root: "/project",
@@ -379,7 +478,7 @@ describe("tailwindest Vite plugin", () => {
         expect(css).toContain(`@source not inline("bg-red-900");`)
     })
 
-    it("returns compiled JS, source maps, and debug replacements for exact calls", () => {
+    it("returns compiled JS, source maps, and debug replacements for exact class-output calls", () => {
         const context = createCompilerContext({
             root: "/project",
             options: { debug: true, sourceMap: true },
@@ -387,15 +486,17 @@ describe("tailwindest Vite plugin", () => {
         const code = [
             `import { createTools } from "tailwindest"`,
             `const tw = createTools()`,
-            `export const cls = tw.join("px-4", "py-2")`,
+            `export const cls = tw.style({ padding: "px-4", margin: "py-2" }).class()`,
         ].join("\n")
 
         const result = context.transformJs(code, "/project/src/app.ts")
         const manifest = context.getDebugManifest()
         const originalSpan = {
             fileName: "/project/src/app.ts",
-            start: code.indexOf(`tw.join`),
-            end: code.indexOf(`tw.join`) + `tw.join("px-4", "py-2")`.length,
+            start: code.indexOf(`tw.style`),
+            end:
+                code.indexOf(`tw.style`) +
+                `tw.style({ padding: "px-4", margin: "py-2" }).class()`.length,
         }
 
         expect(result.code).toContain(`"px-4 py-2"`)
@@ -403,7 +504,7 @@ describe("tailwindest Vite plugin", () => {
         expect(result.map?.sources).toEqual(["/project/src/app.ts"])
         expect(manifest.files[0]?.replacements).toEqual([
             {
-                kind: "join",
+                kind: "style",
                 originalSpan,
                 generatedText: `"px-4 py-2"`,
                 candidates: ["px-4", "py-2"],
@@ -564,6 +665,210 @@ describe("tailwindest Vite plugin", () => {
         ).toHaveLength(1)
     })
 
+    it.each([
+        {
+            name: "style.style",
+            kind: "style",
+            expression: `tw.style({ color: "text-blue-700" }).style()`,
+            candidates: ["text-blue-700"],
+        },
+        {
+            name: "style.compose",
+            kind: "style",
+            expression: `tw.style({ color: "text-blue-700" }).compose({ padding: "p-2" })`,
+            candidates: ["text-blue-700", "p-2"],
+        },
+        {
+            name: "toggle.style",
+            kind: "toggle",
+            expression: `tw.toggle({ truthy: { color: "text-green-600" }, falsy: { color: "text-red-600" } }).style(true)`,
+            candidates: ["text-green-600", "text-red-600"],
+        },
+        {
+            name: "toggle.compose",
+            kind: "toggle",
+            expression: `tw.toggle({ truthy: { color: "text-green-600" }, falsy: { color: "text-red-600" } }).compose({ padding: "p-2" })`,
+            candidates: ["text-green-600", "text-red-600", "p-2"],
+        },
+        {
+            name: "rotary.style",
+            kind: "rotary",
+            expression: `tw.rotary({ variants: { sm: { padding: "p-2" } } }).style("sm")`,
+            candidates: ["p-2"],
+        },
+        {
+            name: "rotary.compose",
+            kind: "rotary",
+            expression: `tw.rotary({ variants: { sm: { padding: "p-2" } } }).compose({ color: "text-blue-700" })`,
+            candidates: ["p-2", "text-blue-700"],
+        },
+        {
+            name: "variants.style",
+            kind: "variants",
+            expression: `tw.variants({ variants: { intent: { primary: { color: "text-blue-600" } } } }).style({ intent: "primary" })`,
+            candidates: ["text-blue-600"],
+        },
+        {
+            name: "variants.compose",
+            kind: "variants",
+            expression: `tw.variants({ variants: { intent: { primary: { color: "text-blue-600" } } } }).compose({ padding: "p-2" })`,
+            candidates: ["text-blue-600", "p-2"],
+        },
+        {
+            name: "mergeRecord",
+            kind: "mergeRecord",
+            expression: `tw.mergeRecord({ padding: "px-2" }, { color: "text-blue-700" })`,
+            candidates: ["px-2", "text-blue-700"],
+        },
+        {
+            name: "join",
+            kind: "join",
+            expression: `tw.join("px-2", "px-4")`,
+            candidates: ["px-2", "px-4"],
+        },
+    ])(
+        "keeps forbidden replacement API $name as candidate-only source",
+        ({ expression, kind, candidates }) => {
+            const code = [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `export const value = ${expression}`,
+            ].join("\n")
+            const context = createCompilerContext({
+                root: "/project",
+                options: { debug: true },
+            })
+
+            const result = context.transformJs(
+                code,
+                `/project/src/forbidden-${kind}.ts`
+            )
+            const replacements =
+                context.getDebugManifest().files[0]?.replacements ?? []
+
+            expect(result.code).toBe(code)
+            expect(result.changed).toBe(false)
+            expect(replacements).toHaveLength(1)
+            expect(replacements[0]).toEqual(
+                expect.objectContaining({
+                    kind,
+                    generatedText: "",
+                    status: "candidate-only",
+                    fallback: false,
+                })
+            )
+            expect(replacements[0]?.candidates).toHaveLength(candidates.length)
+            expect(replacements[0]?.candidates).toEqual(
+                expect.arrayContaining(candidates)
+            )
+            expect(
+                replacements.some(
+                    (replacement) => replacement.status === "compiled"
+                )
+            ).toBe(false)
+        }
+    )
+
+    it("preserves object-returning nested shorthand reuse as runtime source", async () => {
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        await context.transformCssAsync(tailwindCss, "/project/src/app.css")
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `const rec = tw.style({ dark: { color: "text-white" } }).style()`,
+            `export const cls = tw.style(rec).class()`,
+        ].join("\n")
+
+        const result = context.transformJs(code, "/project/src/nested-reuse.ts")
+        const replacements =
+            context.getDebugManifest().files[0]?.replacements ?? []
+
+        expect(result.code).toBe(code)
+        expect(result.changed).toBe(false)
+        expect(replacements).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    kind: "style",
+                    candidates: ["dark:text-white"],
+                    status: "runtime-fallback",
+                    fallback: true,
+                }),
+                expect.objectContaining({
+                    kind: "style",
+                    generatedText: "",
+                    status: "runtime-fallback",
+                    fallback: true,
+                }),
+            ])
+        )
+        expect(context.getDebugManifest().files[0]?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT",
+                }),
+            ])
+        )
+        expect(
+            replacements.some(
+                (replacement) => replacement.status === "compiled"
+            )
+        ).toBe(false)
+    })
+
+    it("keeps dynamic variants.style parent-child path collisions candidate-only", async () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `const variants = tw.variants({`,
+            `  variants: {`,
+            `    shape: { flat: { shadow: "shadow-sm" } },`,
+            `    tone: { red: { shadow: { color: "shadow-red-500" } } },`,
+            `  },`,
+            `})`,
+            `export const rec = (shape) => variants.style({ shape })`,
+        ].join("\n")
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+        await context.transformCssAsync(tailwindCss, "/project/src/app.css")
+
+        const result = context.transformJs(
+            code,
+            "/project/src/variants-style-collision.ts"
+        )
+        const replacements =
+            context.getDebugManifest().files[0]?.replacements ?? []
+
+        expect(result.code).toBe(code)
+        expect(result.changed).toBe(false)
+        expect(replacements).toEqual([
+            expect.objectContaining({
+                kind: "variants",
+                status: "runtime-fallback",
+                fallback: true,
+            }),
+        ])
+        expect(replacements[0]?.candidates).toEqual(
+            expect.arrayContaining(["shadow-sm", "shadow-red-500"])
+        )
+        expect(
+            replacements.some(
+                (replacement) => replacement.status === "compiled"
+            )
+        ).toBe(false)
+        expect(context.getDebugManifest().files[0]?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT",
+                }),
+            ])
+        )
+    })
+
     it("preserves fake tw.join calls instead of trusting the tw name", () => {
         const code = [
             "const tw = { join: (value: string) => `FAKE:${value}` }",
@@ -600,7 +905,7 @@ describe("tailwindest Vite plugin", () => {
         expect(context.getDebugManifest().files[0]?.replacements).toEqual([])
     })
 
-    it("still replaces proven direct tw.join calls", () => {
+    it("keeps proven direct tw.join calls candidate-only", () => {
         const code = [
             `import { createTools } from "tailwindest"`,
             `const tw = createTools()`,
@@ -613,18 +918,19 @@ describe("tailwindest Vite plugin", () => {
 
         const result = context.transformJs(code, "/project/src/proven-tw.ts")
 
-        expect(result.code).toContain(`"px-4"`)
-        expect(result.changed).toBe(true)
+        expect(result.code).toBe(code)
+        expect(result.changed).toBe(false)
         expect(context.getDebugManifest().files[0]?.replacements).toEqual([
             expect.objectContaining({
                 kind: "join",
-                generatedText: `"px-4"`,
+                generatedText: "",
+                status: "candidate-only",
                 fallback: false,
             }),
         ])
     })
 
-    it("still replaces proven direct non-tw tool identifiers", () => {
+    it("keeps proven direct non-tw tool identifiers candidate-only for tw.join", () => {
         const code = [
             `import { createTools } from "tailwindest"`,
             `const tools = createTools()`,
@@ -637,18 +943,19 @@ describe("tailwindest Vite plugin", () => {
 
         const result = context.transformJs(code, "/project/src/proven-tools.ts")
 
-        expect(result.code).toContain(`"px-4"`)
-        expect(result.changed).toBe(true)
+        expect(result.code).toBe(code)
+        expect(result.changed).toBe(false)
         expect(context.getDebugManifest().files[0]?.replacements).toEqual([
             expect.objectContaining({
                 kind: "join",
-                generatedText: `"px-4"`,
+                generatedText: "",
+                status: "candidate-only",
                 fallback: false,
             }),
         ])
     })
 
-    it("still replaces imported proven tw with the same local name", () => {
+    it("keeps imported proven tw.join candidate-only with the same local name", () => {
         const context = createCompilerContext({
             root: "/project",
             options: { debug: true },
@@ -670,12 +977,13 @@ describe("tailwindest Vite plugin", () => {
             .getDebugManifest()
             .files.find((file) => file.id === "/project/src/app.ts")
 
-        expect(result.code).toContain(`"px-4"`)
-        expect(result.changed).toBe(true)
+        expect(result.code).toBe(code)
+        expect(result.changed).toBe(false)
         expect(appDebug?.replacements).toEqual([
             expect.objectContaining({
                 kind: "join",
-                generatedText: `"px-4"`,
+                generatedText: "",
+                status: "candidate-only",
                 fallback: false,
             }),
         ])
@@ -726,7 +1034,7 @@ describe("tailwindest Vite plugin", () => {
         ).toHaveLength(2)
     })
 
-    it("compiles imported no-merger tw join and styler class calls", () => {
+    it("keeps imported no-merger tw.join candidate-only while compiling styler class calls", () => {
         const context = createCompilerContext({
             root: "/project",
             options: { debug: true },
@@ -749,18 +1057,22 @@ describe("tailwindest Vite plugin", () => {
             .getDebugManifest()
             .files.find((file) => file.id === "/project/src/app.ts")
 
-        expect(result.code).toContain(`export const joined = "px-2 px-4"`)
+        expect(result.code).toContain(
+            `export const joined = tw.join("px-2", "px-4")`
+        )
         expect(result.code).toContain(`export const styled = "px-2 px-4"`)
         expect(result.changed).toBe(true)
         expect(appDebug?.replacements).toEqual([
             expect.objectContaining({
                 kind: "join",
-                generatedText: `"px-2 px-4"`,
+                generatedText: "",
+                status: "candidate-only",
                 fallback: false,
             }),
             expect.objectContaining({
                 kind: "style",
                 generatedText: `"px-2 px-4"`,
+                status: "compiled",
                 fallback: false,
             }),
         ])
@@ -968,8 +1280,9 @@ describe("tailwindest Vite plugin", () => {
                 fileName: `/project/src/merger-free.ts`,
             })
 
-            expect(result.code).toContain(`"px-2 px-4"`)
-            expect(result.changed).toBe(true)
+            expect(result.code).toBe(code)
+            expect(result.changed).toBe(false)
+            expect(result.diagnostics).toEqual([])
         }
     })
 
@@ -1033,9 +1346,11 @@ describe("tailwindest Vite plugin", () => {
         )
         const manifest = context.getDebugManifest()
 
-        expect(result.changed).toBe(true)
+        expect(result.changed).toBe(false)
         expect(result.code).toContain(`return tw.join("px-2", "px-4")`)
-        expect(result.code).toContain(`export const outer = "px-2 px-4"`)
+        expect(result.code).toContain(
+            `export const outer = tw.join("px-2", "px-4")`
+        )
         expect(manifest.files[0]?.replacements).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
@@ -1045,7 +1360,8 @@ describe("tailwindest Vite plugin", () => {
                 }),
                 expect.objectContaining({
                     kind: "join",
-                    generatedText: `"px-2 px-4"`,
+                    generatedText: "",
+                    status: "candidate-only",
                     fallback: false,
                 }),
             ])
@@ -1079,8 +1395,8 @@ describe("tailwindest Vite plugin", () => {
         )
         const manifest = context.getDebugManifest()
 
-        expect(result.changed).toBe(true)
-        expect(result.code).toContain(`return "px-2 px-4"`)
+        expect(result.changed).toBe(false)
+        expect(result.code).toContain(`return tw.join("px-2", "px-4")`)
         expect(result.code).toContain(
             `export const outer = tw.join("px-2", "px-4")`
         )
@@ -1088,7 +1404,8 @@ describe("tailwindest Vite plugin", () => {
             expect.arrayContaining([
                 expect.objectContaining({
                     kind: "join",
-                    generatedText: `"px-2 px-4"`,
+                    generatedText: "",
+                    status: "candidate-only",
                     fallback: false,
                 }),
                 expect.objectContaining({
@@ -1176,7 +1493,7 @@ describe("tailwindest Vite plugin", () => {
         ])
     })
 
-    it("compiles stored primitive styler class and style calls with runtime parity and exact debug records", () => {
+    it("compiles stored primitive styler class calls and keeps style calls candidate-only", () => {
         const code = [
             `import { createTools } from "tailwindest"`,
             `const tw = createTools()`,
@@ -1230,7 +1547,8 @@ describe("tailwindest Vite plugin", () => {
             }),
             expect.objectContaining({
                 kind: "style",
-                status: "compiled",
+                generatedText: "",
+                status: "candidate-only",
                 fallback: false,
                 candidates: expect.arrayContaining([
                     "inline-flex",
@@ -1240,7 +1558,7 @@ describe("tailwindest Vite plugin", () => {
                 candidateRecords: expect.arrayContaining([
                     expect.objectContaining({
                         candidate: "text-red-700",
-                        kind: "exact",
+                        kind: "fallback-known",
                     }),
                 ]),
             }),
@@ -1249,10 +1567,10 @@ describe("tailwindest Vite plugin", () => {
             replacements.some(
                 (replacement) => replacement.status === "candidate-only"
             )
-        ).toBe(false)
+        ).toBe(true)
     })
 
-    it("compiles stored toggle, rotary, and variants stylers with bounded runtime parity", () => {
+    it("compiles stored class-output stylers and keeps style outputs candidate-only", () => {
         const code = [
             `import { createTools } from "tailwindest"`,
             `const tw = createTools()`,
@@ -1341,7 +1659,7 @@ describe("tailwindest Vite plugin", () => {
             }),
             expect.objectContaining({
                 kind: "variants",
-                status: "compiled",
+                status: "candidate-only",
                 fallback: false,
             }),
         ])
@@ -1351,12 +1669,7 @@ describe("tailwindest Vite plugin", () => {
                 .candidateRecords.filter((record) => record.kind === "exact")
                 .map((record) => record.candidate)
         ).toEqual(
-            expect.arrayContaining([
-                "text-green-700",
-                "p-2",
-                "text-blue-700",
-                "m-1",
-            ])
+            expect.arrayContaining(["text-green-700", "p-2", "text-blue-700"])
         )
     })
 
@@ -1625,7 +1938,7 @@ describe("tailwindest Vite plugin", () => {
         expectParsesAs("/project/src/lookup.tsx", tsxResult.code)
     })
 
-    it("marks invalid generated replacement syntax as a runtime fallback in debug output", () => {
+    it("emits syntax-safe replacement code for identifier-unsafe variant axes", () => {
         const code = [
             `import { createTools } from "tailwindest"`,
             `const tw = createTools()`,
@@ -1645,60 +1958,54 @@ describe("tailwindest Vite plugin", () => {
         const result = context.transformJs(code, "/project/src/invalid.ts")
         const manifest = context.getDebugManifest()
 
-        expect(result.code).toBe(code)
-        expect(result.changed).toBe(false)
+        expect(result.changed).toBe(true)
+        expect(result.code).not.toContain("createTools")
+        expect(result.code).toContain("a`b:")
+        expectParsesAs("/project/src/invalid.ts", result.code)
         expect(manifest.files[0]?.replacements).toEqual([
             expect.objectContaining({
                 kind: "variants",
-                generatedText: "",
-                status: "unsafe-skipped",
-                fallback: true,
+                generatedText: expect.stringContaining("a`b:"),
+                status: "compiled",
+                fallback: false,
                 candidateRecords: expect.arrayContaining([
                     expect.objectContaining({
                         candidate: "inline-flex",
-                        kind: "fallback-known",
+                        kind: "exact",
                     }),
                     expect.objectContaining({
                         candidate: "text-blue-700",
-                        kind: "fallback-known",
+                        kind: "exact",
                     }),
                     expect.objectContaining({
                         candidate: "text-red-700",
-                        kind: "fallback-known",
+                        kind: "exact",
                     }),
                 ]),
-                reason: expect.stringContaining("syntax error"),
             }),
         ])
         expect(manifest.candidateRecords).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
                     candidate: "inline-flex",
-                    kind: "fallback-known",
+                    kind: "exact",
                 }),
                 expect.objectContaining({
                     candidate: "text-blue-700",
-                    kind: "fallback-known",
+                    kind: "exact",
                 }),
                 expect.objectContaining({
                     candidate: "text-red-700",
-                    kind: "fallback-known",
+                    kind: "exact",
                 }),
             ])
         )
         expect(
             manifest.candidateRecords.filter(
-                (record) => record.kind === "exact"
+                (record) => record.kind === "fallback-known"
             )
         ).toEqual([])
-        expect(manifest.files[0]?.diagnostics).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    code: "INVALID_REPLACEMENT_SYNTAX",
-                    fallbackBehavior: "runtime-fallback",
-                }),
-            ])
-        )
+        expect(manifest.files[0]?.diagnostics).toEqual([])
     })
 
     it("preserves unresolved imported tw calls without replacement", () => {
@@ -1945,6 +2252,100 @@ describe("tailwindest Vite plugin", () => {
         )
     })
 
+    it("does not compile a top-level static binding through a local shadow", () => {
+        const code = [
+            `import { createTools } from "tailwindest"`,
+            `const tw = createTools()`,
+            `const style = { display: "flex" }`,
+            `export function cls(style: Record<string, string>) {`,
+            `  return tw.style(style).class()`,
+            `}`,
+        ].join("\n")
+        const context = createCompilerContext({
+            root: "/project",
+            options: { debug: true },
+        })
+
+        const result = context.transformJs(
+            code,
+            "/project/src/shadowed-style-argument.ts"
+        )
+        const manifest = context.getDebugManifest()
+
+        expect(result.changed).toBe(false)
+        expect(result.code).toContain(`tw.style(style).class()`)
+        expect(manifest.files[0]?.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNSUPPORTED_DYNAMIC_VALUE",
+                    fallbackBehavior: "runtime-fallback",
+                }),
+            ])
+        )
+    })
+
+    it.each([
+        {
+            name: "array push",
+            code: [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `const list = ["px-2"]`,
+                `list.push("px-4")`,
+                `export const cls = tw.join(list)`,
+            ].join("\n"),
+            runtimeCall: `tw.join(list)`,
+        },
+        {
+            name: "Object.assign",
+            code: [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `const style = { display: "flex" }`,
+                `Object.assign(style, { display: "grid" })`,
+                `export const cls = tw.style(style).class()`,
+            ].join("\n"),
+            runtimeCall: `tw.style(style).class()`,
+        },
+        {
+            name: "alias push",
+            code: [
+                `import { createTools } from "tailwindest"`,
+                `const tw = createTools()`,
+                `const list = ["px-2"]`,
+                `const alias = list`,
+                `alias.push("px-4")`,
+                `export const cls = tw.join(list)`,
+            ].join("\n"),
+            runtimeCall: `tw.join(list)`,
+        },
+    ])(
+        "does not compile bindings mutated through $name",
+        ({ code, runtimeCall }) => {
+            const context = createCompilerContext({
+                root: "/project",
+                options: { debug: true },
+            })
+
+            const result = context.transformJs(
+                code,
+                "/project/src/mutated-binding-method.ts"
+            )
+            const manifest = context.getDebugManifest()
+
+            expect(result.changed).toBe(false)
+            expect(result.code).toContain(runtimeCall)
+            expect(manifest.files[0]?.diagnostics).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        code: "MUTATED_BINDING",
+                        fallbackBehavior: "runtime-fallback",
+                    }),
+                ])
+            )
+        }
+    )
+
     it("runtime-generated variant key preserves runtime call, finite candidates, and fallback diagnostic", () => {
         const code = [
             `import { createTools } from "tailwindest"`,
@@ -2068,7 +2469,7 @@ describe("tailwindest Vite plugin", () => {
         ).toEqual([
             {
                 kind: "join",
-                status: "compiled",
+                status: "candidate-only",
                 start: code.indexOf(`tw.join("px-2")`),
             },
             {
@@ -2183,7 +2584,10 @@ describe("tailwindest Vite plugin", () => {
         )
         expect(context.getDebugManifest().candidateRecords).toEqual(
             expect.arrayContaining([
-                expect.objectContaining({ candidate: "py-2", kind: "exact" }),
+                expect.objectContaining({
+                    candidate: "py-2",
+                    kind: "fallback-known",
+                }),
             ])
         )
         context.recordDependencies("/project/src/app.tsx", [
@@ -2212,7 +2616,10 @@ describe("tailwindest Vite plugin", () => {
         expect(css).toContain("px-4")
         expect(css).not.toContain("py-2")
         expect(context.getDebugManifest().candidateRecords).toEqual([
-            expect.objectContaining({ candidate: "px-4", kind: "exact" }),
+            expect.objectContaining({
+                candidate: "px-4",
+                kind: "fallback-known",
+            }),
         ])
         expect(affected).toEqual([jsModule])
         expect(invalidated).toEqual([

@@ -7,8 +7,6 @@ import {
 import { candidatesFromClassName } from "./merger"
 import type { StaticStyleObject } from "./static_value"
 
-export const MISSING_VARIANT_VALUE = "__missing"
-
 export interface OptimizeVariantsInput {
     base?: StaticStyleObject
     variants: Record<string, Record<string, StaticStyleObject>>
@@ -145,8 +143,12 @@ export function optionalVariantStateCount(
     )
 }
 
-export function variantKey(values: [string, string][]): string {
-    return values.map(([axis, value]) => `${axis}:${value}`).join("|")
+export function variantKey(values: [string, string | undefined][]): string {
+    return values
+        .map(([axis, value]) =>
+            value === undefined ? `${axis}:m` : `${axis}:v:${value}`
+        )
+        .join("|")
 }
 
 function createAdditiveAxis(
@@ -178,8 +180,8 @@ function createComponent(
 ): OptimizedVariantComponent {
     const entries = cartesian(
         axes.map((axis) =>
-            [MISSING_VARIANT_VALUE, ...Object.keys(variants[axis] ?? {})].map(
-                (value) => [axis, value] as [string, string]
+            [undefined, ...Object.keys(variants[axis] ?? {})].map(
+                (value) => [axis, value] as [string, string | undefined]
             )
         )
     )
@@ -217,9 +219,9 @@ function createComponent(
     for (const combination of entries) {
         const styles = [
             componentBaseFallback,
-            ...combination
-                .filter(([, value]) => value !== MISSING_VARIANT_VALUE)
-                .map(([axis, value]) => variants[axis]?.[value] ?? {}),
+            ...combination.flatMap(([axis, value]) =>
+                value === undefined ? [] : [variants[axis]?.[value] ?? {}]
+            ),
         ]
         const style = deepMerge(styles)
         styleTable[variantKey(combination)] = style

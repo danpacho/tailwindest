@@ -2,6 +2,7 @@ import type { TailwindestCallKind, SourceSpan } from "../analyzer/symbols"
 import type { ReplacementPlan } from "../transform/replacement"
 import {
     createGeneratedSymbol,
+    emitIndexableReadonlyConst,
     emitReadonlyConst,
     emitStringLiteral,
     emitValueLiteral,
@@ -52,7 +53,6 @@ import {
     variantsStyleFor,
 } from "./styler_model"
 import {
-    MISSING_VARIANT_VALUE,
     optimizeVariants,
     type OptimizedVariants,
     styleWritePaths,
@@ -558,15 +558,25 @@ function compileRotaryClass(
         return exact(
             input,
             {
-                declarations: [emitReadonlyConst(symbol, table)],
-                expression: `${symbol}[${input.key.expression}]`,
+                declarations: [emitIndexableReadonlyConst(symbol, table)],
+                expression: `((key) => ${symbol}[key] !== undefined ? ${symbol}[key] : ${emitThrowExpression("Unknown rotary class key.")})(${input.key.expression})`,
+            },
+            candidates
+        )
+    }
+    if (table[String(staticValue(input.key))] === undefined) {
+        return exact(
+            input,
+            {
+                declarations: [],
+                expression: emitThrowExpression("Unknown rotary class key."),
             },
             candidates
         )
     }
     return exact(
         input,
-        emitStringLiteral(table[String(staticValue(input.key))] ?? ""),
+        emitStringLiteral(table[String(staticValue(input.key))]!),
         candidates
     )
 }
@@ -596,21 +606,22 @@ function compileRotaryStyle(
             rotaryStyleFor(model, key, extras),
         ])
     )
+    const missing = rotaryStyleFor(model, "__missing__", extras)
     const candidates = classCandidatesFromStyles(styles, options)
     if (isDynamic(input.key)) {
         const symbol = createGeneratedSymbol("rotary_style")
         return exact(
             input,
             {
-                declarations: [emitReadonlyConst(symbol, table)],
-                expression: `${symbol}[${input.key.expression}]`,
+                declarations: [emitIndexableReadonlyConst(symbol, table)],
+                expression: `((key) => ${symbol}[key] !== undefined ? ${symbol}[key] : ${literalExpression(missing)})(${input.key.expression})`,
             },
             candidates
         )
     }
     return exact(
         input,
-        emitValueLiteral(table[String(staticValue(input.key))] ?? {}),
+        emitValueLiteral(table[String(staticValue(input.key))] ?? missing),
         candidates
     )
 }
@@ -690,24 +701,16 @@ function compileVariantsClass(
             candidates,
             optimized.diagnostics
         )
-    const overflow = orderedVariantTableOverflow(input.props, optimized, input)
+    const overflow = dynamicVariantTableOverflow(input.props, optimized, input)
     if (overflow)
         return fallback(input, overflow.message, candidates, [overflow])
-    const generated = shouldUseOrderedVariantTable(input.props)
-        ? emitOrderedDynamicVariantsClass(
-              model,
-              input.props,
-              optimized,
-              extras,
-              options
-          )
-        : emitDynamicVariantsClass(
-              model.base,
-              input.props,
-              optimized,
-              extras,
-              options
-          )
+    const generated = emitOrderedDynamicVariantsClass(
+        model,
+        input.props,
+        optimized,
+        extras,
+        options
+    )
     return exact(input, generated, candidates)
 }
 
@@ -914,7 +917,7 @@ function emitOrderedDynamicVariantsClass(
     )
     const symbol = createGeneratedSymbol("variants_class")
     return {
-        declarations: [emitReadonlyConst(symbol, table)],
+        declarations: [emitIndexableReadonlyConst(symbol, table)],
         expression: `${symbol}[${dynamicVariantKeyExpression(entries)}]`,
     }
 }
@@ -933,122 +936,9 @@ function emitOrderedDynamicVariantsStyle(
     )
     const symbol = createGeneratedSymbol("variants_style")
     return {
-        declarations: [emitReadonlyConst(symbol, table)],
+        declarations: [emitIndexableReadonlyConst(symbol, table)],
         expression: `${symbol}[${dynamicVariantKeyExpression(entries)}]`,
     }
-}
-
-function emitDynamicVariantsClass(
-    base: StaticStyleObject,
-    props: DynamicVariantProps,
-    optimized: OptimizedVariants,
-    extras: unknown[],
-    options: ApiCompileOptions
-): GeneratedExpression {
-    const declarations: string[] = []
-    const baseResidual = omitStylePaths(base, [
-        ...optimized.additiveAxes.flatMap((axis) =>
-            Object.values(axis.styleMap).flatMap((style) =>
-                styleWritePaths(style)
-            )
-        ),
-        ...optimized.components.flatMap((component) =>
-            Object.values(component.axisStyleMaps).flatMap((axisMap) =>
-                Object.values(axisMap).flatMap((style) =>
-                    styleWritePaths(style)
-                )
-            )
-        ),
-    ])
-    const parts = [JSON.stringify(getClassName(baseResidual, options))]
-
-    for (const axis of optimized.additiveAxes) {
-        const prop = props.entries.find((entry) => entry.axis === axis.axis)
-        if (!prop) continue
-        const symbol = createGeneratedSymbol(`${axis.axis}_class`)
-        declarations.push(emitReadonlyConst(symbol, axis.classMap))
-        const fallback = JSON.stringify(axis.baseFallbackClass)
-        parts.push(
-            `(${prop.expression} ? ${symbol}[${prop.expression}] : ${fallback})`
-        )
-    }
-
-    for (const component of optimized.components) {
-        const componentProps = props.entries
-            .filter((entry) => component.axes.includes(entry.axis))
-            .filter((entry): entry is { axis: string; expression: string } =>
-                Boolean(entry)
-            )
-        if (componentProps.length !== component.axes.length) continue
-        const symbol = createGeneratedSymbol("component_class")
-        declarations.push(
-            emitReadonlyConst(
-                symbol,
-                createOrderedComponentClassTable(
-                    base,
-                    component,
-                    componentProps,
-                    options
-                )
-            )
-        )
-        const keyExpression = componentProps
-            .map(
-                (entry) =>
-                    `\`${entry.axis}:\${${entry.expression} ? ${entry.expression} : ${JSON.stringify(MISSING_VARIANT_VALUE)}}\``
-            )
-            .join(' + "|" + ')
-        parts.push(`${symbol}[${keyExpression}]`)
-    }
-
-    parts.push(...extras.map((extra) => JSON.stringify(String(extra))))
-
-    return {
-        declarations,
-        expression: `[${parts.join(",")}].filter(Boolean).join(" ")`,
-    }
-}
-
-function createOrderedComponentClassTable(
-    base: StaticStyleObject,
-    component: OptimizedVariants["components"][number],
-    componentProps: Array<{ axis: string; expression: string }>,
-    options: ApiCompileOptions
-): Record<string, string> {
-    const entries = cartesian(
-        componentProps.map((entry) =>
-            [
-                MISSING_VARIANT_VALUE,
-                ...Object.keys(component.axisStyleMaps[entry.axis] ?? {}),
-            ].map((value) => [entry.axis, value] as [string, string])
-        )
-    )
-    const componentBaseFallback = pickStylePaths(
-        base,
-        component.axes.flatMap((axis) =>
-            Object.values(component.axisStyleMaps[axis] ?? {}).flatMap(
-                (style) => styleWritePaths(style)
-            )
-        )
-    )
-
-    return Object.fromEntries(
-        entries.map((combination) => {
-            const styles = [
-                componentBaseFallback,
-                ...combination
-                    .filter(([, value]) => value !== MISSING_VARIANT_VALUE)
-                    .map(
-                        ([axis, value]) =>
-                            component.axisStyleMaps[axis]?.[value] ?? {}
-                    ),
-            ]
-            return [
-                variantKey(combination),
-                getClassName(deepMerge(styles), options),
-            ]
-        })
-    )
 }
 
 function emitDynamicVariantsStyle(
@@ -1060,6 +950,10 @@ function emitDynamicVariantsStyle(
 ): GeneratedExpression {
     void options
     const declarations: string[] = []
+    const dynamicEntries = props.entries.map((entry) => ({
+        ...entry,
+        valueSymbol: createGeneratedSymbol(`${entry.axis}_value`),
+    }))
     const leafPaths = collectDynamicStyleLeafPaths(
         base,
         props,
@@ -1070,7 +964,7 @@ function emitDynamicVariantsStyle(
 
     for (const path of leafPaths) {
         let expression = literalExpression(getStylePath(base, path))
-        for (const entry of props.entries) {
+        for (const entry of dynamicEntries) {
             const axisValues = optimized.axisValueKeys[entry.axis]
             if (!axisValues) continue
             const pathMap = Object.fromEntries(
@@ -1088,8 +982,8 @@ function emitDynamicVariantsStyle(
             const symbol = createGeneratedSymbol(
                 `${entry.axis}_${path.join("_")}`
             )
-            declarations.push(emitReadonlyConst(symbol, pathMap))
-            expression = `(${entry.expression} && ${symbol}[${entry.expression}] !== undefined ? ${symbol}[${entry.expression}] : ${expression})`
+            declarations.push(emitIndexableReadonlyConst(symbol, pathMap))
+            expression = `(${entry.valueSymbol} && ${symbol}[${entry.valueSymbol}] !== undefined ? ${symbol}[${entry.valueSymbol}] : ${expression})`
         }
         for (const extra of extras) {
             const leaf = getStylePath(extra, path)
@@ -1100,9 +994,13 @@ function emitDynamicVariantsStyle(
         leaves.push({ path, expression })
     }
 
+    const expression = emitNestedObjectFromLeaves(leaves)
     return {
         declarations,
-        expression: emitNestedObjectFromLeaves(leaves),
+        expression:
+            dynamicEntries.length === 0
+                ? expression
+                : `((${dynamicEntries.map((entry) => entry.valueSymbol).join(",")}) => ${expression})(${dynamicEntries.map((entry) => `(${entry.expression})`).join(",")})`,
     }
 }
 
@@ -1129,6 +1027,14 @@ function orderedVariantTableOverflow(
     input: ApiCompileInput
 ): CompilerDiagnostic | undefined {
     if (!shouldUseOrderedVariantTable(props)) return undefined
+    return dynamicVariantTableOverflow(props, optimized, input)
+}
+
+function dynamicVariantTableOverflow(
+    props: DynamicVariantProps,
+    optimized: OptimizedVariants,
+    input: ApiCompileInput
+): CompilerDiagnostic | undefined {
     const entries = dynamicVariantLookupEntries(props, optimized)
     const count = entries.reduce(
         (total, entry) => total * (entry.values.length + 1),
@@ -1150,10 +1056,7 @@ function createOrderedVariantResultTable<T>(
     entries: DynamicVariantLookupEntry[],
     evaluate: (props: Record<string, unknown>) => T
 ): Record<string, T> {
-    const groups = entries.map((entry) => [
-        MISSING_VARIANT_VALUE,
-        ...entry.values,
-    ])
+    const groups = entries.map((entry) => [undefined, ...entry.values])
     return Object.fromEntries(
         cartesian(groups).map((combination) => {
             const dynamicValues = Object.fromEntries(
@@ -1185,7 +1088,7 @@ function dynamicVariantLookupEntries(
 
 function orderedVariantProps(
     props: DynamicVariantProps,
-    dynamicValues: Record<string, string>
+    dynamicValues: Record<string, string | undefined>
 ): Record<string, unknown> {
     const result: Record<string, unknown> = {}
     const staticProps = staticVariantProps(props)
@@ -1195,8 +1098,7 @@ function orderedVariantProps(
             result[entry.axis] = staticProps[entry.axis]
             continue
         }
-        const value = dynamicValues[entry.axis] ?? MISSING_VARIANT_VALUE
-        result[entry.axis] = value === MISSING_VARIANT_VALUE ? undefined : value
+        result[entry.axis] = dynamicValues[entry.axis]
     }
 
     return result
@@ -1238,11 +1140,12 @@ function staticVariantProps(
 
 function dynamicVariantKey(
     entries: DynamicVariantLookupEntry[],
-    values: string[]
+    values: Array<string | undefined>
 ): string {
     return variantKey(
         entries.map(
-            (entry, index) => [entry.axis, values[index]!] as [string, string]
+            (entry, index) =>
+                [entry.axis, values[index]] as [string, string | undefined]
         )
     )
 }
@@ -1254,9 +1157,20 @@ function dynamicVariantKeyExpression(
     return entries
         .map((entry) => {
             const expression = `(${entry.expression})`
-            return `${JSON.stringify(`${entry.axis}:`)} + (${expression} ? String(${expression}) : ${JSON.stringify(MISSING_VARIANT_VALUE)})`
+            return `${JSON.stringify(`${entry.axis}:`)} + ((value) => value === undefined ? "m" : "v:" + value)(${dynamicVariantValueExpression(expression, entry.values)})`
         })
         .join(' + "|" + ')
+}
+
+function dynamicVariantValueExpression(
+    expression: string,
+    values: string[]
+): string {
+    return `((value) => value && ${JSON.stringify(values)}.includes(String(value)) ? String(value) : undefined)(${expression})`
+}
+
+function emitThrowExpression(message: string): string {
+    return `(() => { throw new TypeError(${JSON.stringify(message)}) })()`
 }
 
 function collectDynamicStyleLeafPaths(
@@ -1378,18 +1292,20 @@ function exact(
     candidates: string[],
     diagnostics: CompilerDiagnostic[] = []
 ): ApiCompileResult {
+    const finalDiagnostics =
+        diagnosticsWithCompiledVariantClassOutputRequirement(input, diagnostics)
     const result: ApiCompileResult = {
-        exact: diagnostics.length === 0,
+        exact: finalDiagnostics.length === 0,
         generated,
         candidates: unique(candidates),
-        diagnostics,
+        diagnostics: finalDiagnostics,
     }
-    if (diagnostics.length === 0) {
+    if (finalDiagnostics.length === 0 && canCreateReplacement(input.kind)) {
         result.replacement = replacement(
             input,
             generated.expression,
             candidates,
-            diagnostics
+            finalDiagnostics
         )
     }
     return result
@@ -1402,11 +1318,13 @@ function exactWithoutReplacement(
     diagnostics: CompilerDiagnostic[] = []
 ): ApiCompileResult {
     void input
+    const finalDiagnostics =
+        diagnosticsWithCompiledVariantClassOutputRequirement(input, diagnostics)
     return {
-        exact: diagnostics.length === 0,
+        exact: finalDiagnostics.length === 0,
         generated,
         candidates: unique(candidates),
-        diagnostics,
+        diagnostics: finalDiagnostics,
     }
 }
 
@@ -1461,6 +1379,8 @@ function fallback(
         },
     ]
 ): ApiCompileResult {
+    const finalDiagnostics =
+        diagnosticsWithCompiledVariantClassOutputRequirement(input, diagnostics)
     return {
         exact: false,
         generated: {
@@ -1468,8 +1388,140 @@ function fallback(
             expression: "",
         },
         candidates: unique(candidates),
-        diagnostics,
+        diagnostics: finalDiagnostics,
     }
+}
+
+function diagnosticsWithCompiledVariantClassOutputRequirement(
+    input: ApiCompileInput,
+    diagnostics: CompilerDiagnostic[]
+): CompilerDiagnostic[] {
+    if (
+        diagnostics.some(
+            (diagnostic) =>
+                diagnostic.code === "MISSING_COMPILED_VARIANT_METADATA" ||
+                diagnostic.code === "COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT"
+        )
+    ) {
+        return diagnostics
+    }
+    if (diagnostics.length === 0 && canCreateReplacement(input.kind)) {
+        return diagnostics
+    }
+    if (!inputContainsCompiledVariantShorthand(input)) {
+        return diagnostics
+    }
+    return [...diagnostics, compiledVariantRequiresClassOutputDiagnostic()]
+}
+
+function compiledVariantRequiresClassOutputDiagnostic(): CompilerDiagnostic {
+    return {
+        code: "COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT",
+        message:
+            "Nested compiled shorthand requires compilation to a final class string; preserving this call at runtime would emit unprefixed classes.",
+        severity: "error",
+    }
+}
+
+function inputContainsCompiledVariantShorthand(
+    input: ApiCompileInput
+): boolean {
+    return inputStaticStyles(input).some(styleNeedsCompiledVariantMetadata)
+}
+
+function inputStaticStyles(input: ApiCompileInput): unknown[] {
+    switch (input.kind) {
+        case "style.class":
+            return staticStyleValues([input.style])
+        case "style.style":
+            return staticStyleValues([input.style, ...input.extraStyles])
+        case "style.compose":
+            return staticStyleValues([input.style, ...input.styles])
+        case "toggle.class":
+            return toggleStaticStyles(input.config)
+        case "toggle.style":
+            return [
+                ...toggleStaticStyles(input.config),
+                ...staticStyleValues(input.extraStyles),
+            ]
+        case "toggle.compose":
+            return [
+                ...toggleStaticStyles(input.config),
+                ...staticStyleValues(input.styles),
+            ]
+        case "rotary.class":
+            return rotaryStaticStyles(input.config)
+        case "rotary.style":
+            return [
+                ...rotaryStaticStyles(input.config),
+                ...staticStyleValues(input.extraStyles),
+            ]
+        case "rotary.compose":
+            return [
+                ...rotaryStaticStyles(input.config),
+                ...staticStyleValues(input.styles),
+            ]
+        case "variants.class":
+            return variantsStaticStyles(input.config)
+        case "variants.style":
+            return [
+                ...variantsStaticStyles(input.config),
+                ...staticStyleValues(input.extraStyles),
+            ]
+        case "variants.compose":
+            return [
+                ...variantsStaticStyles(input.config),
+                ...staticStyleValues(input.styles),
+            ]
+        case "def":
+        case "mergeProps":
+        case "mergeRecord":
+            return staticStyleValues(input.styles)
+        case "join":
+            return []
+    }
+}
+
+function staticStyleValues(
+    values: Array<CompileValue<StaticStyleObject>>
+): unknown[] {
+    return values.flatMap((value) => (isStatic(value) ? [value.value] : []))
+}
+
+function toggleStaticStyles(
+    config: CompileValue<{
+        base?: StaticStyleObject
+        truthy: StaticStyleObject
+        falsy: StaticStyleObject
+    }>
+): unknown[] {
+    if (!isStatic(config)) return []
+    return [config.value.base, config.value.truthy, config.value.falsy]
+}
+
+function rotaryStaticStyles(
+    config: CompileValue<{
+        base?: StaticStyleObject
+        variants: Record<string, StaticStyleObject>
+    }>
+): unknown[] {
+    if (!isStatic(config)) return []
+    return [config.value.base, ...Object.values(config.value.variants)]
+}
+
+function variantsStaticStyles(
+    config: CompileValue<{
+        base?: StaticStyleObject
+        variants: Record<string, Record<string, StaticStyleObject>>
+    }>
+): unknown[] {
+    if (!isStatic(config)) return []
+    return [
+        config.value.base,
+        ...Object.values(config.value.variants).flatMap((axis) =>
+            Object.values(axis)
+        ),
+    ]
 }
 
 function replacement(
@@ -1490,6 +1542,17 @@ function replacement(
 
 function replacementKind(kind: ApiCompileInput["kind"]): TailwindestCallKind {
     return kind.split(".")[0] as TailwindestCallKind
+}
+
+function canCreateReplacement(kind: ApiCompileInput["kind"]): boolean {
+    return (
+        kind === "style.class" ||
+        kind === "toggle.class" ||
+        kind === "rotary.class" ||
+        kind === "variants.class" ||
+        kind === "def" ||
+        kind === "mergeProps"
+    )
 }
 
 function firstUnsupported(
@@ -1594,72 +1657,6 @@ function isStyleObjectMap(
             (item) => item && typeof item === "object" && !Array.isArray(item)
         )
     )
-}
-
-function omitStylePaths(
-    style: StaticStyleObject,
-    paths: string[]
-): StaticStyleObject {
-    const clone = deepMerge([style])
-    for (const path of paths) {
-        deletePath(clone, path.split("."))
-    }
-    return pruneEmpty(clone)
-}
-
-function pickStylePaths(
-    style: StaticStyleObject,
-    paths: string[]
-): StaticStyleObject {
-    const picked: StaticStyleObject = {}
-    for (const path of paths) {
-        const parts = path.split(".")
-        const value = getStylePath(style, parts)
-        if (value !== undefined) {
-            setStylePath(picked, parts, value)
-        }
-    }
-    return picked
-}
-
-function setStylePath(
-    style: StaticStyleObject,
-    path: string[],
-    value: unknown
-): void {
-    let current: Record<string, unknown> = style
-    for (let index = 0; index < path.length - 1; index += 1) {
-        const key = path[index]!
-        current[key] = (current[key] ?? {}) as Record<string, unknown>
-        current = current[key] as Record<string, unknown>
-    }
-    current[path[path.length - 1]!] = value
-}
-
-function deletePath(style: StaticStyleObject, path: string[]): void {
-    if (path.length === 0) return
-    const [head, ...tail] = path
-    if (tail.length === 0) {
-        delete style[head!]
-        return
-    }
-    const child = style[head!]
-    if (child && typeof child === "object" && !Array.isArray(child)) {
-        deletePath(child as StaticStyleObject, tail)
-    }
-}
-
-function pruneEmpty(style: StaticStyleObject): StaticStyleObject {
-    const next: StaticStyleObject = {}
-    for (const [key, value] of Object.entries(style)) {
-        if (value && typeof value === "object" && !Array.isArray(value)) {
-            const child = pruneEmpty(value as StaticStyleObject)
-            if (Object.keys(child).length > 0) next[key] = child
-            continue
-        }
-        next[key] = value
-    }
-    return next
 }
 
 function classCandidatesFromStrings(values: string[]): string[] {

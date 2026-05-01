@@ -41,6 +41,16 @@ export function emitReadonlyConst(name: string, value: unknown): string {
     return `const ${name} = ${literalExpression(value)} as const`
 }
 
+export function emitIndexableReadonlyConst(
+    name: string,
+    value: Record<string, unknown>
+): string {
+    const indexKey = `${name}_key`
+    const literal = literalExpression(value)
+    const entries = literal.slice(1, -1)
+    return `let ${indexKey} = ""; const ${name} = {[${indexKey}]:undefined${entries.length > 0 ? `,${entries}` : ""}} as const`
+}
+
 export function emitLookupExpression(
     prefix: string,
     table: Record<string, unknown>,

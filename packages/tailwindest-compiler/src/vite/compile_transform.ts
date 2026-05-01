@@ -1,4 +1,9 @@
 import * as ts from "typescript"
+import {
+    collectMutatedBindingNames,
+    findLexicalBinding,
+    findVisibleVariableDeclaration,
+} from "../analyzer/ast_bindings"
 import type { SourceSpan, TailwindestCallKind } from "../analyzer/symbols"
 import {
     compileTailwindestCall,
@@ -24,6 +29,7 @@ export interface CompileTransformInput {
     code: string
     provenCalls?: SourceSpan[] | undefined
     provenReceiverCalls?: SourceSpan[] | undefined
+    resolvedCallArguments?: ResolvedCallArguments[] | undefined
     runtimeMergerCalls?: SourceSpan[] | undefined
     candidateOnlyCalls?: CandidateOnlyDebugCall[] | undefined
     variantTableLimit?: number | undefined
@@ -38,8 +44,14 @@ export interface CompileTransformOutput {
     debugReplacements: TailwindestDebugReplacement[]
 }
 
+export interface ResolvedCallArguments {
+    span: SourceSpan
+    arguments: unknown[]
+}
+
 interface StaticBinding {
     value: unknown
+    declaration: ts.VariableDeclaration
 }
 
 type StoredStylerKind = "style" | "toggle" | "rotary" | "variants"
@@ -56,6 +68,7 @@ interface CompileContext {
     sourceFile: ts.SourceFile
     provenCallSpans: Set<string>
     provenReceiverSpans: Set<string>
+    resolvedCallArguments: Map<string, unknown[]>
     runtimeMergerCallSpans: Set<string>
     staticBindings: Map<string, StaticBinding>
     storedStylers: Map<ts.VariableDeclaration, StoredStylerBinding>
@@ -99,6 +112,7 @@ export function compileTailwindestSource({
     code,
     provenCalls,
     provenReceiverCalls,
+    resolvedCallArguments,
     runtimeMergerCalls,
     candidateOnlyCalls,
     variantTableLimit,
@@ -118,6 +132,12 @@ export function compileTailwindestSource({
         provenCallSpans: new Set((provenCalls ?? []).map(spanKey)),
         provenReceiverSpans: new Set(
             (provenReceiverCalls ?? provenCalls ?? []).map(spanKey)
+        ),
+        resolvedCallArguments: new Map(
+            (resolvedCallArguments ?? []).map((call) => [
+                spanKey(call.span),
+                call.arguments,
+            ])
         ),
         runtimeMergerCallSpans: new Set(
             (runtimeMergerCalls ?? []).map(spanKey)
@@ -361,7 +381,7 @@ function inputForCall(
 
     const span = spanFor(context, node)
     const first = directReceiver.arguments[0]
-    const styleOrConfig = valueOf(first, context)
+    const styleOrConfig = valueOfCallArgument(directReceiver, first, 0, context)
     const args = [...node.arguments]
     const merger = mergerForCall(eligibilitySpan, stylerReceiver, context)
 
@@ -371,6 +391,7 @@ function inputForCall(
         span,
         eligibilitySpan,
         styleOrConfig,
+        callNode: node,
         args,
         merger,
         context,
@@ -405,12 +426,20 @@ function composedStylerInputForCall(
         return undefined
     }
 
-    const baseStyle = valueOf(
+    const baseStyle = valueOfCallArgument(
+        baseCall,
         baseCall.arguments[0],
+        0,
         context
     ) as CompileValue<StaticStyleObject>
     const extraStyles = directReceiver.arguments.map(
-        (arg) => valueOf(arg, context) as CompileValue<StaticStyleObject>
+        (arg, index) =>
+            valueOfCallArgument(
+                directReceiver,
+                arg,
+                index,
+                context
+            ) as CompileValue<StaticStyleObject>
     )
     const style = composeStaticStyleValue(baseStyle, extraStyles)
     if (style.kind === "unsupported") {
@@ -431,6 +460,7 @@ function composedStylerInputForCall(
         span: spanFor(context, node),
         eligibilitySpan: spanFor(context, directReceiver),
         styleOrConfig: style,
+        callNode: node,
         args: [...node.arguments],
         merger,
         context,
@@ -507,6 +537,7 @@ function storedInputForCall(
         span: spanFor(context, node),
         eligibilitySpan: stored.initializerSpan,
         styleOrConfig: stored.styleOrConfig,
+        callNode: node,
         args: [...node.arguments],
         merger: stored.merger,
         context,
@@ -519,6 +550,7 @@ function inputForStylerCall({
     span,
     eligibilitySpan,
     styleOrConfig,
+    callNode,
     args,
     merger,
     context,
@@ -528,6 +560,7 @@ function inputForStylerCall({
     span: SourceSpan
     eligibilitySpan: SourceSpan
     styleOrConfig: CompileValue
+    callNode: ts.CallExpression
     args: ts.NodeArray<ts.Expression> | ts.Expression[]
     merger: MergerPolicy | undefined
     context: CompileContext
@@ -541,7 +574,9 @@ function inputForStylerCall({
                     kind: "style.class",
                     span,
                     style: styleOrConfig as CompileValue<StaticStyleObject>,
-                    extraClass: args.map((arg) => valueOf(arg, context)),
+                    extraClass: args.map((arg, index) =>
+                        valueOfCallArgument(callNode, arg, index, context)
+                    ),
                     ...optionalMerger(merger),
                 },
                 eligibilitySpan
@@ -554,9 +589,11 @@ function inputForStylerCall({
                     span,
                     style: styleOrConfig as CompileValue<StaticStyleObject>,
                     extraStyles: args.map(
-                        (arg) =>
-                            valueOf(
+                        (arg, index) =>
+                            valueOfCallArgument(
+                                callNode,
                                 arg,
+                                index,
                                 context
                             ) as CompileValue<StaticStyleObject>
                     ),
@@ -570,8 +607,13 @@ function inputForStylerCall({
                 span,
                 style: styleOrConfig as CompileValue<StaticStyleObject>,
                 styles: args.map(
-                    (arg) =>
-                        valueOf(arg, context) as CompileValue<StaticStyleObject>
+                    (arg, index) =>
+                        valueOfCallArgument(
+                            callNode,
+                            arg,
+                            index,
+                            context
+                        ) as CompileValue<StaticStyleObject>
                 ),
             },
             eligibilitySpan
@@ -579,7 +621,9 @@ function inputForStylerCall({
     }
 
     if (stylerKind === "toggle") {
-        const condition = valueOf(args[0], context, { allowDynamic: true })
+        const condition = valueOfCallArgument(callNode, args[0], 0, context, {
+            allowDynamic: true,
+        })
         if (directName === "class") {
             return withEligibility(
                 {
@@ -589,7 +633,14 @@ function inputForStylerCall({
                     condition: condition as never,
                     extraClass: args
                         .slice(1)
-                        .map((arg) => valueOf(arg, context)),
+                        .map((arg, index) =>
+                            valueOfCallArgument(
+                                callNode,
+                                arg,
+                                index + 1,
+                                context
+                            )
+                        ),
                     ...optionalMerger(merger),
                 },
                 eligibilitySpan
@@ -604,7 +655,15 @@ function inputForStylerCall({
                     condition: condition as never,
                     extraStyles: args
                         .slice(1)
-                        .map((arg) => valueOf(arg, context) as never),
+                        .map(
+                            (arg, index) =>
+                                valueOfCallArgument(
+                                    callNode,
+                                    arg,
+                                    index + 1,
+                                    context
+                                ) as never
+                        ),
                 },
                 eligibilitySpan
             )
@@ -614,14 +673,24 @@ function inputForStylerCall({
                 kind: "toggle.compose",
                 span,
                 config: styleOrConfig as never,
-                styles: args.map((arg) => valueOf(arg, context) as never),
+                styles: args.map(
+                    (arg, index) =>
+                        valueOfCallArgument(
+                            callNode,
+                            arg,
+                            index,
+                            context
+                        ) as never
+                ),
             },
             eligibilitySpan
         )
     }
 
     if (stylerKind === "rotary") {
-        const key = valueOf(args[0], context, { allowDynamic: true })
+        const key = valueOfCallArgument(callNode, args[0], 0, context, {
+            allowDynamic: true,
+        })
         if (directName === "class") {
             return withEligibility(
                 {
@@ -631,7 +700,14 @@ function inputForStylerCall({
                     key: key as never,
                     extraClass: args
                         .slice(1)
-                        .map((arg) => valueOf(arg, context)),
+                        .map((arg, index) =>
+                            valueOfCallArgument(
+                                callNode,
+                                arg,
+                                index + 1,
+                                context
+                            )
+                        ),
                     ...optionalMerger(merger),
                 },
                 eligibilitySpan
@@ -646,7 +722,15 @@ function inputForStylerCall({
                     key: key as never,
                     extraStyles: args
                         .slice(1)
-                        .map((arg) => valueOf(arg, context) as never),
+                        .map(
+                            (arg, index) =>
+                                valueOfCallArgument(
+                                    callNode,
+                                    arg,
+                                    index + 1,
+                                    context
+                                ) as never
+                        ),
                 },
                 eligibilitySpan
             )
@@ -656,14 +740,22 @@ function inputForStylerCall({
                 kind: "rotary.compose",
                 span,
                 config: styleOrConfig as never,
-                styles: args.map((arg) => valueOf(arg, context) as never),
+                styles: args.map(
+                    (arg, index) =>
+                        valueOfCallArgument(
+                            callNode,
+                            arg,
+                            index,
+                            context
+                        ) as never
+                ),
             },
             eligibilitySpan
         )
     }
 
     if (stylerKind === "variants") {
-        const props = propsValueOf(args[0], context)
+        const props = propsValueOfCallArgument(callNode, args[0], 0, context)
         if (directName === "class") {
             return withEligibility(
                 {
@@ -673,7 +765,14 @@ function inputForStylerCall({
                     props,
                     extraClass: args
                         .slice(1)
-                        .map((arg) => valueOf(arg, context)),
+                        .map((arg, index) =>
+                            valueOfCallArgument(
+                                callNode,
+                                arg,
+                                index + 1,
+                                context
+                            )
+                        ),
                     ...optionalVariantTableLimit(context.variantTableLimit),
                     ...optionalMerger(merger),
                 },
@@ -689,7 +788,15 @@ function inputForStylerCall({
                     props,
                     extraStyles: args
                         .slice(1)
-                        .map((arg) => valueOf(arg, context) as never),
+                        .map(
+                            (arg, index) =>
+                                valueOfCallArgument(
+                                    callNode,
+                                    arg,
+                                    index + 1,
+                                    context
+                                ) as never
+                        ),
                     ...optionalVariantTableLimit(context.variantTableLimit),
                 },
                 eligibilitySpan
@@ -700,7 +807,15 @@ function inputForStylerCall({
                 kind,
                 span,
                 config: styleOrConfig as never,
-                styles: args.map((arg) => valueOf(arg, context) as never),
+                styles: args.map(
+                    (arg, index) =>
+                        valueOfCallArgument(
+                            callNode,
+                            arg,
+                            index,
+                            context
+                        ) as never
+                ),
             } as ApiCompileInput,
             eligibilitySpan
         )
@@ -728,7 +843,13 @@ function directInputForCall(
             kind: "join",
             span,
             classList: [...node.arguments].map(
-                (arg) => valueOf(arg, context) as CompileValue<StaticClassValue>
+                (arg, index) =>
+                    valueOfCallArgument(
+                        node,
+                        arg,
+                        index,
+                        context
+                    ) as CompileValue<StaticClassValue>
             ),
             ...optionalMerger(merger),
         }
@@ -738,12 +859,20 @@ function directInputForCall(
         return {
             kind: "def",
             span,
-            classList: valueOf(classList, context) as CompileValue<
-                StaticClassValue[]
-            >,
+            classList: valueOfCallArgument(
+                node,
+                classList,
+                0,
+                context
+            ) as CompileValue<StaticClassValue[]>,
             styles: styles.map(
-                (arg) =>
-                    valueOf(arg, context) as CompileValue<StaticStyleObject>
+                (arg, index) =>
+                    valueOfCallArgument(
+                        node,
+                        arg,
+                        index + 1,
+                        context
+                    ) as CompileValue<StaticStyleObject>
             ),
             ...optionalMerger(merger),
         }
@@ -753,8 +882,13 @@ function directInputForCall(
             kind: "mergeProps",
             span,
             styles: [...node.arguments].map(
-                (arg) =>
-                    valueOf(arg, context) as CompileValue<StaticStyleObject>
+                (arg, index) =>
+                    valueOfCallArgument(
+                        node,
+                        arg,
+                        index,
+                        context
+                    ) as CompileValue<StaticStyleObject>
             ),
             ...optionalMerger(merger),
         }
@@ -764,12 +898,33 @@ function directInputForCall(
             kind: "mergeRecord",
             span,
             styles: [...node.arguments].map(
-                (arg) =>
-                    valueOf(arg, context) as CompileValue<StaticStyleObject>
+                (arg, index) =>
+                    valueOfCallArgument(
+                        node,
+                        arg,
+                        index,
+                        context
+                    ) as CompileValue<StaticStyleObject>
             ),
         }
     }
     return undefined
+}
+
+function valueOfCallArgument(
+    node: ts.CallExpression,
+    expression: ts.Expression | undefined,
+    index: number,
+    context: CompileContext,
+    options: { allowDynamic?: boolean } = {}
+): CompileValue {
+    const resolved = context.resolvedCallArguments.get(
+        spanKey(spanFor(context, node))
+    )
+    if (resolved && index < resolved.length) {
+        return { kind: "static", value: resolved[index] }
+    }
+    return valueOf(expression, context, options)
 }
 
 function valueOf(
@@ -797,6 +952,24 @@ function valueOf(
         kind: "unsupported",
         reason: `Unsupported dynamic value: ${expression.getText(context.sourceFile)}`,
     }
+}
+
+function propsValueOfCallArgument(
+    node: ts.CallExpression,
+    expression: ts.Expression | undefined,
+    index: number,
+    context: CompileContext
+): VariantPropsValue {
+    const resolved = context.resolvedCallArguments.get(
+        spanKey(spanFor(context, node))
+    )
+    if (resolved && index < resolved.length) {
+        return {
+            kind: "static",
+            value: resolved[index] as Record<string, unknown>,
+        }
+    }
+    return propsValueOf(expression, context)
 }
 
 function propsValueOf(
@@ -884,6 +1057,7 @@ function collectStaticBindings(
     sourceFile: ts.SourceFile
 ): Map<string, StaticBinding> {
     const bindings = new Map<string, StaticBinding>()
+    const mutatedBindings = collectMutatedBindingNames(sourceFile)
     for (const statement of sourceFile.statements) {
         if (!ts.isVariableStatement(statement)) {
             continue
@@ -897,7 +1071,8 @@ function collectStaticBindings(
         for (const declaration of statement.declarationList.declarations) {
             if (
                 !ts.isIdentifier(declaration.name) ||
-                !declaration.initializer
+                !declaration.initializer ||
+                mutatedBindings.has(declaration.name.text)
             ) {
                 continue
             }
@@ -906,7 +1081,10 @@ function collectStaticBindings(
                 staticBindings: bindings,
             })
             if (value.supported) {
-                bindings.set(declaration.name.text, { value: value.value })
+                bindings.set(declaration.name.text, {
+                    value: value.value,
+                    declaration,
+                })
             }
         }
     }
@@ -958,7 +1136,12 @@ function collectStoredStylerBindings(
             return
         }
 
-        const styleOrConfig = valueOf(initializer.arguments[0], context)
+        const styleOrConfig = valueOfCallArgument(
+            initializer,
+            initializer.arguments[0],
+            0,
+            context
+        )
         if (styleOrConfig.kind === "unsupported") {
             ts.forEachChild(node, visit)
             return
@@ -1019,55 +1202,6 @@ function isStoredStylerKind(kind: string): kind is StoredStylerKind {
         kind === "rotary" ||
         kind === "variants"
     )
-}
-
-function collectMutatedBindingNames(sourceFile: ts.SourceFile): Set<string> {
-    const names = new Set<string>()
-
-    const visit = (node: ts.Node): void => {
-        if (
-            ts.isBinaryExpression(node) &&
-            isAssignmentOperator(node.operatorToken.kind)
-        ) {
-            const root = getAssignmentRoot(node.left)
-            if (root) {
-                names.add(root)
-            }
-        } else if (
-            ts.isPrefixUnaryExpression(node) ||
-            ts.isPostfixUnaryExpression(node)
-        ) {
-            const root = getAssignmentRoot(node.operand)
-            if (root) {
-                names.add(root)
-            }
-        }
-
-        ts.forEachChild(node, visit)
-    }
-
-    visit(sourceFile)
-    return names
-}
-
-function isAssignmentOperator(kind: ts.SyntaxKind): boolean {
-    return (
-        kind >= ts.SyntaxKind.FirstAssignment &&
-        kind <= ts.SyntaxKind.LastAssignment
-    )
-}
-
-function getAssignmentRoot(expression: ts.Expression): string | undefined {
-    if (ts.isIdentifier(expression)) {
-        return expression.text
-    }
-    if (
-        ts.isPropertyAccessExpression(expression) ||
-        ts.isElementAccessExpression(expression)
-    ) {
-        return getAssignmentRoot(expression.expression)
-    }
-    return undefined
 }
 
 function isStoredStylerReferenceSafe(
@@ -1312,6 +1446,16 @@ function literalValueOf(
     }
     if (ts.isIdentifier(expression)) {
         const binding = context.staticBindings.get(expression.text)
+        if (
+            binding &&
+            findLexicalBinding(
+                context.sourceFile,
+                expression.text,
+                expression.getStart(context.sourceFile)
+            ) !== binding.declaration
+        ) {
+            return { supported: false }
+        }
         return binding
             ? { supported: true, value: binding.value }
             : { supported: false }
@@ -1423,191 +1567,8 @@ function mergerForReceiver(
     return context.receiverMergers.get(declaration) ?? context.merger
 }
 
-function findLexicalBinding(
-    sourceFile: ts.SourceFile,
-    name: string,
-    position: number
-): ts.Node | undefined {
-    let result: ts.Node | undefined
-    let resultScopeSize = Number.POSITIVE_INFINITY
-    let resultStart = Number.POSITIVE_INFINITY
-
-    const consider = (binding: ts.Node): void => {
-        const scope = bindingScope(sourceFile, binding)
-        if (!scope || !scopeContains(sourceFile, scope, position)) {
-            return
-        }
-        const scopeSize = scope.getEnd() - scope.getStart(sourceFile)
-        const bindingStart = binding.getStart(sourceFile)
-        if (
-            scopeSize < resultScopeSize ||
-            (scopeSize === resultScopeSize && bindingStart < resultStart)
-        ) {
-            result = binding
-            resultScopeSize = scopeSize
-            resultStart = bindingStart
-        }
-    }
-
-    const visit = (node: ts.Node): void => {
-        if (
-            ts.isVariableDeclaration(node) &&
-            ts.isIdentifier(node.name) &&
-            node.name.text === name
-        ) {
-            consider(node)
-        } else if (
-            ts.isBindingElement(node) &&
-            ts.isIdentifier(node.name) &&
-            node.name.text === name
-        ) {
-            consider(node)
-        } else if (
-            ts.isParameter(node) &&
-            ts.isIdentifier(node.name) &&
-            node.name.text === name
-        ) {
-            consider(node)
-        } else if (
-            (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) &&
-            node.name?.text === name
-        ) {
-            consider(node)
-        }
-
-        ts.forEachChild(node, visit)
-    }
-
-    visit(sourceFile)
-    return result
-}
-
 function spanKey(span: SourceSpan): string {
     return `${span.fileName}:${span.start}:${span.end}`
-}
-
-function findVisibleVariableDeclaration(
-    sourceFile: ts.SourceFile,
-    name: string,
-    position: number
-): ts.VariableDeclaration | undefined {
-    let result: ts.VariableDeclaration | undefined
-    let resultStart = -1
-
-    const visit = (node: ts.Node): void => {
-        if (node.getStart(sourceFile) >= position) {
-            return
-        }
-
-        if (
-            ts.isVariableDeclaration(node) &&
-            ts.isIdentifier(node.name) &&
-            node.name.text === name &&
-            node.getStart(sourceFile) > resultStart &&
-            declarationScopeContains(sourceFile, node, position)
-        ) {
-            result = node
-            resultStart = node.getStart(sourceFile)
-        }
-
-        ts.forEachChild(node, visit)
-    }
-
-    visit(sourceFile)
-    return result
-}
-
-function declarationScopeContains(
-    sourceFile: ts.SourceFile,
-    declaration: ts.Node,
-    position: number
-): boolean {
-    const scope = findDeclarationScope(declaration)
-    if (!scope || ts.isSourceFile(scope)) {
-        return true
-    }
-
-    return scope.getStart(sourceFile) <= position && position <= scope.getEnd()
-}
-
-function findDeclarationScope(node: ts.Node): ts.Node | undefined {
-    let current: ts.Node | undefined = node.parent
-    while (current) {
-        if (
-            ts.isBlock(current) ||
-            ts.isSourceFile(current) ||
-            ts.isFunctionLike(current)
-        ) {
-            return current
-        }
-        current = current.parent
-    }
-    return undefined
-}
-
-function bindingScope(
-    sourceFile: ts.SourceFile,
-    binding: ts.Node
-): ts.Node | undefined {
-    if (ts.isVariableDeclaration(binding)) {
-        return variableDeclarationScope(sourceFile, binding)
-    }
-    if (ts.isBindingElement(binding)) {
-        const declaration = findBindingVariableDeclaration(binding)
-        return declaration
-            ? variableDeclarationScope(sourceFile, declaration)
-            : findDeclarationScope(binding)
-    }
-    if (ts.isParameter(binding)) {
-        return findFunctionLikeScope(binding)
-    }
-    return findDeclarationScope(binding)
-}
-
-function variableDeclarationScope(
-    sourceFile: ts.SourceFile,
-    declaration: ts.VariableDeclaration
-): ts.Node | undefined {
-    const declarationList = declaration.parent
-    if (
-        ts.isVariableDeclarationList(declarationList) &&
-        (declarationList.flags & ts.NodeFlags.BlockScoped) === 0
-    ) {
-        return findFunctionLikeScope(declaration)
-    }
-    return findDeclarationScope(declaration) ?? sourceFile
-}
-
-function findFunctionLikeScope(node: ts.Node): ts.Node | undefined {
-    let current: ts.Node | undefined = node.parent
-    while (current) {
-        if (ts.isFunctionLike(current) || ts.isSourceFile(current)) {
-            return current
-        }
-        current = current.parent
-    }
-    return undefined
-}
-
-function findBindingVariableDeclaration(
-    binding: ts.BindingElement
-): ts.VariableDeclaration | undefined {
-    let current: ts.Node | undefined = binding.parent
-    while (current) {
-        if (ts.isVariableDeclaration(current)) {
-            return current
-        }
-        current = current.parent
-    }
-    return undefined
-}
-
-function scopeContains(
-    sourceFile: ts.SourceFile,
-    scope: ts.Node,
-    position: number
-): boolean {
-    return scope.getStart(sourceFile) <= position && position <= scope.getEnd()
 }
 
 function propertyNameOf(name: ts.PropertyName): string | undefined {
@@ -1649,7 +1610,7 @@ function isOptionalPropertyAccess(node: ts.PropertyAccessExpression): boolean {
 function isTailwindestModule(moduleSpecifier: string): boolean {
     return (
         moduleSpecifier === "tailwindest" ||
-        moduleSpecifier.includes("tailwindest/")
+        moduleSpecifier.startsWith("tailwindest/")
     )
 }
 

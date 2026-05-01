@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest"
+import * as ts from "typescript"
 import { compileTailwindestCall } from "../api_compile"
 import {
     createGeneratedSymbol,
+    emitIndexableReadonlyConst,
     emitReadonlyConst,
     emitRuntimeFreeModule,
     resetCodegenSymbolCounter,
@@ -26,6 +28,37 @@ function expectZeroRuntime(code: string) {
     for (const token of forbiddenRuntimeTokens) {
         expect(code).not.toContain(token)
     }
+}
+
+function expectTypeChecks(code: string): void {
+    const fileName = "/fixture.ts"
+    const options: ts.CompilerOptions = {
+        module: ts.ModuleKind.ESNext,
+        noEmit: true,
+        skipLibCheck: true,
+        strict: true,
+        target: ts.ScriptTarget.ESNext,
+    }
+    const defaultHost = ts.createCompilerHost(options)
+    const host: ts.CompilerHost = {
+        ...defaultHost,
+        fileExists: (name) => name === fileName || defaultHost.fileExists(name),
+        getSourceFile: (name, languageVersion) =>
+            name === fileName
+                ? ts.createSourceFile(name, code, languageVersion, true)
+                : defaultHost.getSourceFile(name, languageVersion),
+        readFile: (name) =>
+            name === fileName ? code : defaultHost.readFile(name),
+        writeFile: () => {},
+    }
+    const program = ts.createProgram([fileName], options, host)
+    const diagnostics = ts.getPreEmitDiagnostics(program)
+
+    expect(
+        diagnostics.map((diagnostic) =>
+            ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
+        )
+    ).toEqual([])
 }
 
 const runtimeTw = createTools()
@@ -70,6 +103,20 @@ describe("zero-runtime codegen", () => {
         expectZeroRuntime(declaration)
         expect(declaration).not.toContain("new ")
         expect(declaration).not.toContain("()")
+    })
+
+    it("emits strict-typecheckable readonly constants for dynamic lookup indexes", () => {
+        const declaration = emitIndexableReadonlyConst("__tw_lookup", {
+            sm: "grid p-2",
+            lg: "grid p-4",
+        })
+
+        expectTypeChecks(`
+${declaration}
+export function compiled(size: string) {
+    return __tw_lookup[size]
+}
+`)
     })
 
     it("sanitizes generated symbols for identifier-unsafe prefixes", () => {
@@ -173,5 +220,39 @@ describe("zero-runtime codegen", () => {
         expect(moduleCode).toMatch(/const __tw_[a-z_]+_\d+ = .* as const/)
         expect(moduleCode).not.toContain("import ")
         expect(moduleCode).not.toContain("require(")
+    })
+
+    it("emits strict-typecheckable modules for dynamic variants.class lookups", () => {
+        const result = compileTailwindestCall({
+            kind: "variants.class",
+            span,
+            config: {
+                kind: "static",
+                value: {
+                    base: { display: "inline-flex" },
+                    variants: {
+                        status: {
+                            ready: { color: "text-green-700" },
+                            blocked: { color: "text-red-700" },
+                        },
+                    },
+                },
+            },
+            props: {
+                kind: "dynamic-variant-props",
+                staticProps: {},
+                entries: [{ axis: "status", expression: "status" }],
+            },
+            extraClass: [],
+            variantTableLimit: 16,
+        })
+
+        expect(result.exact).toBe(true)
+        expectTypeChecks(`
+${result.generated.declarations.join("\n")}
+export function compiled(status: string) {
+    return ${result.generated.expression}
+}
+`)
     })
 })

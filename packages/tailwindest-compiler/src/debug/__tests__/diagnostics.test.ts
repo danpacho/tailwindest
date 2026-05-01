@@ -155,6 +155,7 @@ describe("rich diagnostics", () => {
             "OVERLAPPING_REPLACEMENT",
             "SOURCE_MAP_FAILED",
             "VARIANT_TABLE_LIMIT_EXCEEDED",
+            "COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT",
             "TAILWIND_SOURCE_INJECTION_FAILED",
             "HMR_INVALIDATION_UNCERTAIN",
         ])

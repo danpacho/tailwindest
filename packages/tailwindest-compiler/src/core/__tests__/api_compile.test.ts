@@ -3,7 +3,7 @@ import { createTools } from "../../../../tailwindest/src/tools/create_tools"
 import { compileTailwindestCall } from "../api_compile"
 import type { ApiCompileInput, CompileValue } from "../api_compile"
 import { createCompiledVariantResolver } from "../compiled_variant_resolver"
-import type { StaticClassValue } from "../static_value"
+import type { StaticClassValue, StaticStyleObject } from "../static_value"
 
 const runtimeTw = createTools()
 const commonVariantResolver = createCompiledVariantResolver([
@@ -538,6 +538,202 @@ describe("compileTailwindestCall API surface", () => {
         expect(result.candidates).toEqual(["surface:text-blue-500"])
     })
 
+    it("reports compile-required diagnostics for object-returning nested shorthand with metadata", () => {
+        const result = compileTailwindestCall(
+            {
+                kind: "style.style",
+                span,
+                style: {
+                    kind: "static",
+                    value: {
+                        dark: {
+                            color: "text-white",
+                        },
+                    },
+                },
+                extraStyles: [],
+            },
+            { variantResolver: commonVariantResolver }
+        )
+
+        expect(result.exact).toBe(false)
+        expect(result.replacement).toBeUndefined()
+        expect(result.candidates).toEqual(["dark:text-white"])
+        expect(result.diagnostics).toEqual([
+            expect.objectContaining({
+                code: "COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT",
+            }),
+        ])
+    })
+
+    it("reports compile-required diagnostics when nested dynamic variants.class overflows", () => {
+        const result = compileTailwindestCall(
+            {
+                kind: "variants.class",
+                span,
+                config: {
+                    kind: "static",
+                    value: {
+                        variants: {
+                            intent: {
+                                primary: {
+                                    hover: { color: "text-blue-500" },
+                                },
+                                danger: {
+                                    hover: { color: "text-red-500" },
+                                },
+                            },
+                            tone: {
+                                soft: {
+                                    hover: { color: "text-sky-500" },
+                                },
+                                loud: {
+                                    hover: { color: "text-orange-500" },
+                                },
+                            },
+                        },
+                    },
+                },
+                props: {
+                    kind: "dynamic-variant-props",
+                    entries: [
+                        { axis: "intent", expression: "intent" },
+                        { axis: "tone", expression: "tone" },
+                    ],
+                },
+                extraClass: [],
+                variantTableLimit: 1,
+            },
+            { variantResolver: commonVariantResolver }
+        )
+
+        expect(result.exact).toBe(false)
+        expect(result.replacement).toBeUndefined()
+        expect(result.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "VARIANT_TABLE_LIMIT_EXCEEDED",
+                }),
+                expect.objectContaining({
+                    code: "COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT",
+                }),
+            ])
+        )
+    })
+
+    it.each([
+        {
+            name: "style.style",
+            input: {
+                kind: "style.style",
+                span,
+                style: { kind: "static", value: baseStyle },
+                extraStyles: [{ kind: "static", value: extraStyle }],
+            },
+        },
+        {
+            name: "style.compose",
+            input: {
+                kind: "style.compose",
+                span,
+                style: { kind: "static", value: baseStyle },
+                styles: [{ kind: "static", value: extraStyle }],
+            },
+        },
+        {
+            name: "toggle.style",
+            input: {
+                kind: "toggle.style",
+                span,
+                config: { kind: "static", value: toggleConfig },
+                condition: { kind: "static", value: true },
+                extraStyles: [{ kind: "static", value: extraStyle }],
+            },
+        },
+        {
+            name: "toggle.compose",
+            input: {
+                kind: "toggle.compose",
+                span,
+                config: { kind: "static", value: toggleConfig },
+                styles: [{ kind: "static", value: extraStyle }],
+            },
+        },
+        {
+            name: "rotary.style",
+            input: {
+                kind: "rotary.style",
+                span,
+                config: { kind: "static", value: rotaryConfig },
+                key: { kind: "static", value: "sm" },
+                extraStyles: [{ kind: "static", value: extraStyle }],
+            },
+        },
+        {
+            name: "rotary.compose",
+            input: {
+                kind: "rotary.compose",
+                span,
+                config: { kind: "static", value: rotaryConfig },
+                styles: [{ kind: "static", value: extraStyle }],
+            },
+        },
+        {
+            name: "variants.style",
+            input: {
+                kind: "variants.style",
+                span,
+                config: { kind: "static", value: variantsConfig },
+                props: { kind: "static", value: { intent: "primary" } },
+                extraStyles: [{ kind: "static", value: extraStyle }],
+                variantTableLimit: 64,
+            },
+        },
+        {
+            name: "variants.compose",
+            input: {
+                kind: "variants.compose",
+                span,
+                config: { kind: "static", value: variantsConfig },
+                styles: [{ kind: "static", value: extraStyle }],
+            },
+        },
+        {
+            name: "mergeRecord",
+            input: {
+                kind: "mergeRecord",
+                span,
+                styles: [
+                    { kind: "static", value: baseStyle },
+                    { kind: "static", value: extraStyle },
+                ],
+            },
+        },
+        {
+            name: "join",
+            input: {
+                kind: "join",
+                span,
+                classList: [
+                    { kind: "static", value: "px-2" },
+                    { kind: "static", value: "px-4" },
+                ],
+            },
+        },
+    ] satisfies Array<{ name: string; input: ApiCompileInput }>)(
+        "does not create a replacement plan for forbidden exact API $name",
+        ({ input }) => {
+            const result = compileTailwindestCall(input, {
+                variantResolver: commonVariantResolver,
+            })
+
+            expect(result.exact).toBe(true)
+            expect(result.generated.expression).not.toBe("")
+            expect(result.candidates.length).toBeGreaterThan(0)
+            expect(result.replacement).toBeUndefined()
+        }
+    )
+
     it("compiles tw.style(obj).class(...extra) static output and candidates", () => {
         const result = compileTailwindestCall(
             {
@@ -702,6 +898,38 @@ describe("compileTailwindestCall API surface", () => {
         }
     })
 
+    it("compiles tw.toggle(config).style(condition, ...extraStyles) with runtime rest merge semantics", () => {
+        const secondExtra = { display: "grid", gap: "gap-2" }
+        const result = compileTailwindestCall({
+            kind: "toggle.style",
+            span,
+            config: { kind: "static", value: toggleConfig },
+            condition: { kind: "dynamic", expression: "condition" },
+            extraStyles: [
+                { kind: "static", value: extraStyle },
+                { kind: "static", value: secondExtra },
+            ],
+        })
+        const runtimeStyler = runtimeTw.toggle(toggleConfig)
+        const runtimeStyle = (
+            condition: boolean,
+            ...styles: StaticStyleObject[]
+        ) =>
+            (
+                runtimeStyler.style as (
+                    condition: boolean,
+                    ...styles: StaticStyleObject[]
+                ) => StaticStyleObject
+            ).call(runtimeStyler, condition, ...styles)
+
+        expect(result.exact).toBe(true)
+        for (const condition of [true, false]) {
+            expect(evaluateGenerated(result.generated, { condition })).toEqual(
+                runtimeStyle(condition, extraStyle, secondExtra)
+            )
+        }
+    })
+
     it("compiles tw.toggle(config).compose(...styles) base merge semantics", () => {
         const result = compileTailwindestCall({
             kind: "toggle.compose",
@@ -758,6 +986,39 @@ describe("compileTailwindestCall API surface", () => {
                 runtimeTw.rotary(rotaryConfig).style(key as never, extraStyle)
             )
         }
+    })
+
+    it("preserves tw.rotary(config).style(dynamicKey, ...extraStyles) missing-key runtime fallback", () => {
+        const result = compileTailwindestCall({
+            kind: "rotary.style",
+            span,
+            config: { kind: "static", value: rotaryConfig },
+            key: { kind: "dynamic", expression: "key" },
+            extraStyles: [{ kind: "static", value: extraStyle }],
+        })
+
+        expect(result.exact).toBe(true)
+        expect(evaluateGenerated(result.generated, { key: "xl" })).toEqual(
+            runtimeTw.rotary(rotaryConfig).style("xl" as never, extraStyle)
+        )
+    })
+
+    it("preserves tw.rotary(config).class(dynamicKey) missing-key runtime failure", () => {
+        const result = compileTailwindestCall({
+            kind: "rotary.class",
+            span,
+            config: { kind: "static", value: rotaryConfig },
+            key: { kind: "dynamic", expression: "key" },
+            extraClass: [],
+        })
+
+        expect(result.exact).toBe(true)
+        expect(evaluateGenerated(result.generated, { key: "sm" })).toBe(
+            runtimeTw.rotary(rotaryConfig).class("sm")
+        )
+        expect(() =>
+            evaluateGenerated(result.generated, { key: "xl" })
+        ).toThrow(TypeError)
     })
 
     it("compiles tw.rotary(config).compose(...styles) base merge semantics", () => {
@@ -1142,6 +1403,51 @@ describe("compileTailwindestCall API surface", () => {
         )
     })
 
+    it("allows __missing as a real dynamic variant value while preserving missing runtime behavior", () => {
+        const config = {
+            base: { color: "text-slate-900" },
+            variants: {
+                state: {
+                    __missing: { color: "text-purple-700" },
+                    "0": { color: "text-yellow-700" },
+                    false: { color: "text-red-700" },
+                },
+            },
+        }
+        const result = compileTailwindestCall({
+            kind: "variants.class",
+            span,
+            config: { kind: "static", value: config },
+            props: {
+                kind: "dynamic-variant-props",
+                entries: [{ axis: "state", expression: "state" }],
+            },
+            extraClass: [],
+        })
+        const runtimeClass = (state: unknown) =>
+            runtimeTw.variants(config).class({ state } as never)
+
+        expect(result.exact).toBe(true)
+        expect(
+            evaluateGenerated(result.generated, { state: "__missing" })
+        ).toBe(runtimeClass("__missing"))
+        expect(evaluateGenerated(result.generated, { state: "0" })).toBe(
+            runtimeClass("0")
+        )
+        expect(evaluateGenerated(result.generated, { state: 0 })).toBe(
+            runtimeClass(0)
+        )
+        expect(evaluateGenerated(result.generated, { state: false })).toBe(
+            runtimeClass(false)
+        )
+        expect(evaluateGenerated(result.generated, { state: undefined })).toBe(
+            runtimeClass(undefined)
+        )
+        expect(evaluateGenerated(result.generated, { state: "unknown" })).toBe(
+            runtimeClass("unknown")
+        )
+    })
+
     it("preserves mixed static and dynamic variants.class props in object entry order", () => {
         const config = {
             base: { display: "inline-flex", color: "text-gray-900" },
@@ -1392,6 +1698,129 @@ describe("compileTailwindestCall API surface", () => {
         expect(
             evaluateGenerated(result.generated, { tone: undefined })
         ).toEqual(runtimeTw.variants(config).style({}))
+    })
+
+    it("evaluates dynamic variants.style prop expressions once per axis", () => {
+        const config = {
+            base: {
+                display: "flex",
+                color: "text-gray-900",
+                padding: "px-1",
+            },
+            variants: {
+                size: {
+                    sm: {
+                        color: "text-red-700",
+                        padding: "px-2",
+                    },
+                },
+            },
+        }
+        const result = compileTailwindestCall({
+            kind: "variants.style",
+            span,
+            config: { kind: "static", value: config },
+            props: {
+                kind: "dynamic-variant-props",
+                entries: [{ axis: "size", expression: "nextSize()" }],
+            },
+            extraStyles: [],
+        })
+        let calls = 0
+        const nextSize = () => {
+            calls += 1
+            return "sm"
+        }
+
+        expect(result.exact).toBe(true)
+        expect(evaluateGenerated(result.generated, { nextSize })).toEqual(
+            runtimeTw.variants(config).style({ size: "sm" })
+        )
+        expect(calls).toBe(1)
+    })
+
+    it("preserves base fallback for unknown dynamic additive variant values", () => {
+        const config = {
+            base: { padding: "px-1", display: "flex" },
+            variants: {
+                size: {
+                    sm: { padding: "px-2" },
+                },
+            },
+        }
+        const result = compileTailwindestCall({
+            kind: "variants.class",
+            span,
+            config: { kind: "static", value: config },
+            props: {
+                kind: "dynamic-variant-props",
+                entries: [{ axis: "size", expression: "size" }],
+            },
+            extraClass: [],
+        })
+
+        expect(result.exact).toBe(true)
+        expect(evaluateGenerated(result.generated, { size: "xl" })).toBe(
+            runtimeTw.variants(config).class({ size: "xl" } as never)
+        )
+    })
+
+    it("preserves ordered variant fallback for unknown dynamic values", () => {
+        const config = {
+            base: { padding: "px-1", display: "flex" },
+            variants: {
+                intent: {
+                    danger: { color: "text-red-700" },
+                },
+                size: {
+                    sm: { padding: "px-2" },
+                },
+            },
+        }
+        const props = {
+            kind: "dynamic-variant-props" as const,
+            staticProps: { intent: "danger" },
+            entries: [{ axis: "size", expression: "size" }],
+            orderedEntries: [
+                { kind: "static" as const, axis: "intent" },
+                {
+                    kind: "dynamic" as const,
+                    axis: "size",
+                    expression: "size",
+                },
+            ],
+        }
+        const classResult = compileTailwindestCall({
+            kind: "variants.class",
+            span,
+            config: { kind: "static", value: config },
+            props,
+            extraClass: [],
+            variantTableLimit: 16,
+        })
+        const styleResult = compileTailwindestCall({
+            kind: "variants.style",
+            span,
+            config: { kind: "static", value: config },
+            props,
+            extraStyles: [],
+            variantTableLimit: 16,
+        })
+
+        expect(classResult.exact).toBe(true)
+        expect(styleResult.exact).toBe(true)
+        expect(evaluateGenerated(classResult.generated, { size: "xl" })).toBe(
+            runtimeTw
+                .variants(config)
+                .class({ intent: "danger", size: "xl" } as never)
+        )
+        expect(
+            evaluateGenerated(styleResult.generated, { size: "xl" })
+        ).toEqual(
+            runtimeTw
+                .variants(config)
+                .style({ intent: "danger", size: "xl" } as never)
+        )
     })
 
     it("compiles tw.variants(config).compose(...styles) base merge semantics", () => {
