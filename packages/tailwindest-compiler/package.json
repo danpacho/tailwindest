@@ -3,8 +3,8 @@
     "version": "0.0.1",
     "description": "Progressive Tailwindest compiler for static Tailwind candidates",
     "type": "module",
-    "main": "dist/index.mjs",
-    "module": "dist/index.mjs",
+    "main": "dist/index.js",
+    "module": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
         "dist",
@@ -29,11 +29,11 @@
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "import": "./dist/index.mjs"
+            "import": "./dist/index.js"
         },
         "./vite": {
             "types": "./dist/vite/index.d.ts",
-            "import": "./dist/vite/index.mjs"
+            "import": "./dist/vite/index.js"
         },
         "./package.json": {
             "default": "./package.json"

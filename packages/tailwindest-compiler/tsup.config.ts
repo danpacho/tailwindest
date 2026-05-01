@@ -9,7 +9,6 @@ export default defineConfig({
         "typescript",
     ],
     outDir: "dist",
-    outExtension: () => ({ js: ".mjs" }),
     dts: true,
     clean: true,
     target: "esnext",
