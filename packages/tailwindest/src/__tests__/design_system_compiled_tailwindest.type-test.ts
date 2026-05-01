@@ -1,8 +1,5 @@
-import {
-    createTools,
-    type CreateCompiledTailwindest,
-    type CreateTailwindest,
-} from "../index"
+import { createTools, type CreateTailwindest } from "../index"
+import type { CreateCompiledTailwindest } from "../create_compiled_tailwindest"
 
 type DesignTailwind = {
     backgroundColor:

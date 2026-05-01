@@ -1,4 +1,5 @@
-import type { CreateCompiledTailwindest, CreateTailwindest } from "../index"
+import type { CreateTailwindest } from "../index"
+import type { CreateCompiledTailwindest } from "../create_compiled_tailwindest"
 
 type TestTailwind = {
     backgroundColor: "bg-red-50" | "bg-red-900" | "bg-red-950"

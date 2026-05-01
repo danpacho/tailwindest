@@ -46,6 +46,12 @@ type CompiledNestKeys<
           >
       }
 
+/**
+ * @deprecated Internal compiler experiment. The Tailwindest compiler is
+ * deprecated and is not exposed through the public `tailwindest` package API.
+ * Use `CreateTailwindest` for published runtime authoring.
+ * @internal
+ */
 export type GetCompiledNestStyle<
     TailwindNestGroups extends string,
     Tailwind,
@@ -74,6 +80,11 @@ type _WithCompiledArbitraryVariant<
 
 /**
  * Create the compiler-oriented Tailwindest style type.
+ *
+ * @deprecated Internal compiler experiment. `@tailwindest/compiler` is
+ * deprecated, private, and must not be published. This type is retained only
+ * for internal compiler fixtures and historical validation. Use
+ * {@link CreateTailwindest} for published runtime Tailwindest authoring.
  *
  * Unlike {@link CreateTailwindest}, this type keeps variant prefixes in object
  * keys only. Nested leaf values remain raw Tailwind utility literals, because
