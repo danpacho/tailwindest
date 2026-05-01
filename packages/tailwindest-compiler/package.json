@@ -5,7 +5,7 @@
     "type": "module",
     "main": "dist/index.mjs",
     "module": "dist/index.mjs",
-    "types": "dist/index.d.mts",
+    "types": "dist/index.d.ts",
     "files": [
         "dist",
         "README.md"
@@ -28,11 +28,11 @@
     ],
     "exports": {
         ".": {
-            "types": "./dist/index.d.mts",
+            "types": "./dist/index.d.ts",
             "import": "./dist/index.mjs"
         },
         "./vite": {
-            "types": "./dist/vite/index.d.mts",
+            "types": "./dist/vite/index.d.ts",
             "import": "./dist/vite/index.mjs"
         },
         "./package.json": {
@@ -40,9 +40,9 @@
         }
     },
     "scripts": {
-        "build": "tsup && node -e \"const fs=require('node:fs'); for (const file of ['dist/index','dist/vite/index']) if (fs.existsSync(file+'.d.ts')) fs.copyFileSync(file+'.d.ts', file+'.d.mts')\"",
-        "test": "vitest run",
-        "test:e2e": "vitest run e2e",
+        "build": "tsup",
+        "test": "vitest run src && pnpm run test:e2e",
+        "test:e2e": "pnpm run e2e:vite-tailwind-v4 && pnpm run e2e:tanstack-start && pnpm run e2e:next && pnpm run e2e:design-system-vite && pnpm run e2e:design-system-tanstack-start && pnpm run e2e:design-system-next",
         "e2e:vite-tailwind-v4": "vitest run e2e/vite-tailwind-v4",
         "e2e:design-system-vite": "vitest run e2e/design-system-vite",
         "e2e:design-system-tanstack-start": "vitest run e2e/design-system-tanstack-start",
