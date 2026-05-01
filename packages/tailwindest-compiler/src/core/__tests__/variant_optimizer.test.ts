@@ -337,9 +337,9 @@ describe("variant optimizer conflict graph", () => {
             })),
         })
 
-        expect(serializedShape.length).toBeLessThan(420)
+        expect(serializedShape.length).toBeLessThan(600)
         expect(serializedShape).toMatchInlineSnapshot(
-            `"{"additiveAxes":["size"],"components":[{"axes":["intent","emphasis"],"classKeys":["intent:m|emphasis:m","intent:m|emphasis:v:weak","intent:m|emphasis:v:strong","intent:v:primary|emphasis:m","intent:v:primary|emphasis:v:weak","intent:v:primary|emphasis:v:strong","intent:v:danger|emphasis:m","intent:v:danger|emphasis:v:weak","intent:v:danger|emphasis:v:strong"]}]}"`
+            `"{"additiveAxes":["size"],"components":[{"axes":["intent","emphasis"],"classKeys":["[[\\"intent\\",0],[\\"emphasis\\",0]]","[[\\"intent\\",0],[\\"emphasis\\",1,\\"weak\\"]]","[[\\"intent\\",0],[\\"emphasis\\",1,\\"strong\\"]]","[[\\"intent\\",1,\\"primary\\"],[\\"emphasis\\",0]]","[[\\"intent\\",1,\\"primary\\"],[\\"emphasis\\",1,\\"weak\\"]]","[[\\"intent\\",1,\\"primary\\"],[\\"emphasis\\",1,\\"strong\\"]]","[[\\"intent\\",1,\\"danger\\"],[\\"emphasis\\",0]]","[[\\"intent\\",1,\\"danger\\"],[\\"emphasis\\",1,\\"weak\\"]]","[[\\"intent\\",1,\\"danger\\"],[\\"emphasis\\",1,\\"strong\\"]]"]}]}"`
         )
     })
 })

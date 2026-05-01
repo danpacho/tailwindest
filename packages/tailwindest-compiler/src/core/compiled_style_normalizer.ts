@@ -41,10 +41,7 @@ function flattenValue(
                 return flattenNestedRecord(key, item, variants, options)
             }
 
-            const nextVariants = isCompiledVariantKey(key, options)
-                ? [...variants, key]
-                : variants
-            return flattenValue(item, nextVariants, options)
+            return flattenValue(item, variants, options)
         })
     }
 
@@ -64,14 +61,14 @@ function flattenNestedRecord(
             : variants
 
     return Object.entries(value).flatMap(([childKey, item]) => {
-        const combined = options.variantResolver?.tryCombine(key, childKey)
-        if (combined) {
-            return flattenValue(item, [...variants, combined], options)
-        }
-        const nextVariants = isCompiledVariantKey(childKey, options)
-            ? [...parentVariants, childKey]
-            : parentVariants
         if (isStyleRecord(item)) {
+            const combined = options.variantResolver?.tryCombine(key, childKey)
+            if (combined) {
+                return flattenValue(item, [...variants, combined], options)
+            }
+            const nextVariants = isCompiledVariantKey(childKey, options)
+                ? [...parentVariants, childKey]
+                : parentVariants
             return flattenNestedRecord(
                 childKey,
                 item,
@@ -80,7 +77,7 @@ function flattenNestedRecord(
                 nextVariants !== parentVariants
             )
         }
-        return flattenValue(item, nextVariants, options)
+        return flattenValue(item, parentVariants, options)
     })
 }
 

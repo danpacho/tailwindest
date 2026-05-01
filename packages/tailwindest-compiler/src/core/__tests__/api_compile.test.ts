@@ -260,11 +260,90 @@ describe("compileTailwindestCall API surface", () => {
                 code: "MISSING_COMPILED_VARIANT_METADATA",
             }),
         ])
+        expect(result.candidates).toEqual(["text-blue-500"])
+        expect(result.candidates).not.toContain("hover:text-blue-500")
+    })
+
+    it("preserves arbitrary nested structural leaves when variant metadata is missing", () => {
+        const result = compileTailwindestCall({
+            kind: "style.class",
+            span,
+            style: {
+                kind: "static",
+                value: {
+                    nested: {
+                        color: "text-blue-500",
+                    },
+                },
+            },
+            extraClass: [],
+        })
+
+        expect(result.exact).toBe(false)
+        expect(result.diagnostics).toEqual([
+            expect.objectContaining({
+                code: "MISSING_COMPILED_VARIANT_METADATA",
+            }),
+        ])
+        expect(result.candidates).toEqual(["text-blue-500"])
+        expect(result.candidates).not.toContain("nested:text-blue-500")
+    })
+
+    it("preserves runtime-compatible class extras when variant metadata is missing", () => {
+        const result = compileTailwindestCall({
+            kind: "style.class",
+            span,
+            style: {
+                kind: "static",
+                value: {
+                    hover: {
+                        color: "text-blue-500",
+                    },
+                },
+            },
+            extraClass: [{ kind: "static", value: "px-2" }],
+        })
+
+        expect(result.exact).toBe(false)
+        expect(result.diagnostics).toEqual([
+            expect.objectContaining({
+                code: "MISSING_COMPILED_VARIANT_METADATA",
+            }),
+        ])
+        expect(result.candidates).toEqual(["text-blue-500", "px-2"])
+    })
+
+    it("does not collect runtime-incompatible class extras when variant metadata is missing", () => {
+        const result = compileTailwindestCall({
+            kind: "style.class",
+            span,
+            style: {
+                kind: "static",
+                value: {
+                    hover: {
+                        color: "text-blue-500",
+                    },
+                },
+            },
+            extraClass: [
+                { kind: "static", value: { "px-2": true } as StaticClassValue },
+            ],
+        })
+
+        expect(result.exact).toBe(false)
+        expect(result.diagnostics).toEqual([
+            expect.objectContaining({
+                code: "MISSING_COMPILED_VARIANT_METADATA",
+            }),
+        ])
+        expect(result.candidates).toEqual(["text-blue-500"])
+        expect(result.candidates).not.toContain("px-2")
     })
 
     it.each([
         {
             name: "style.style",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "style.style",
                 span,
@@ -277,6 +356,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "style.compose",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "style.compose",
                 span,
@@ -289,6 +369,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "toggle.class",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "toggle.class",
                 span,
@@ -305,6 +386,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "toggle.style",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "toggle.style",
                 span,
@@ -321,6 +403,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "toggle.compose",
+            expectedCandidate: "text-blue-600",
             input: {
                 kind: "toggle.compose",
                 span,
@@ -341,6 +424,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "rotary.class",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "rotary.class",
                 span,
@@ -358,6 +442,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "rotary.style",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "rotary.style",
                 span,
@@ -375,6 +460,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "rotary.compose",
+            expectedCandidate: "text-blue-600",
             input: {
                 kind: "rotary.compose",
                 span,
@@ -396,6 +482,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "variants.class",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "variants.class",
                 span,
@@ -417,6 +504,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "variants.style",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "variants.style",
                 span,
@@ -438,6 +526,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "variants.compose",
+            expectedCandidate: "text-blue-600",
             input: {
                 kind: "variants.compose",
                 span,
@@ -461,6 +550,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "def",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "def",
                 span,
@@ -475,6 +565,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "mergeProps",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "mergeProps",
                 span,
@@ -488,6 +579,7 @@ describe("compileTailwindestCall API surface", () => {
         },
         {
             name: "mergeRecord",
+            expectedCandidate: "text-blue-500",
             input: {
                 kind: "mergeRecord",
                 span,
@@ -499,9 +591,13 @@ describe("compileTailwindestCall API surface", () => {
                 ],
             },
         },
-    ] satisfies Array<{ name: string; input: ApiCompileInput }>)(
+    ] satisfies Array<{
+        name: string
+        expectedCandidate: string
+        input: ApiCompileInput
+    }>)(
         "fails closed for nested compiled shorthand without metadata in $name",
-        ({ input }) => {
+        ({ input, expectedCandidate }) => {
             const result = compileTailwindestCall(input)
 
             expect(result.exact).toBe(false)
@@ -510,6 +606,10 @@ describe("compileTailwindestCall API surface", () => {
                     code: "MISSING_COMPILED_VARIANT_METADATA",
                 }),
             ])
+            expect(result.candidates).toContain(expectedCandidate)
+            expect(result.candidates).not.toContain(
+                `hover:${expectedCandidate}`
+            )
         }
     )
 
@@ -537,6 +637,37 @@ describe("compileTailwindestCall API surface", () => {
         expect(result.generated.expression).toBe('"surface:text-blue-500"')
         expect(result.candidates).toEqual(["surface:text-blue-500"])
     })
+
+    it.each([
+        { name: "without resolver", options: undefined },
+        {
+            name: "with resolver",
+            options: { variantResolver: commonVariantResolver },
+        },
+    ])(
+        "compiles direct variant-looking leaves as structural classes $name",
+        ({ options }) => {
+            const result = compileTailwindestCall(
+                {
+                    kind: "style.class",
+                    span,
+                    style: {
+                        kind: "static",
+                        value: {
+                            dark: "bg-red-900",
+                        },
+                    },
+                    extraClass: [],
+                },
+                options
+            )
+
+            expect(result.exact).toBe(true)
+            expect(result.diagnostics).toEqual([])
+            expect(result.generated.expression).toBe('"bg-red-900"')
+            expect(result.candidates).toEqual(["bg-red-900"])
+        }
+    )
 
     it("reports compile-required diagnostics for object-returning nested shorthand with metadata", () => {
         const result = compileTailwindestCall(
@@ -760,6 +891,183 @@ describe("compileTailwindestCall API surface", () => {
             "shadow-sm",
         ])
     })
+
+    it.each([
+        {
+            name: "style.class",
+            input: {
+                kind: "style.class",
+                span,
+                style: { kind: "static", value: baseStyle },
+                extraClass: [
+                    { kind: "static", value: "rounded" },
+                    { kind: "static", value: ["px-4", "py-2"] },
+                ],
+            },
+            runtime: () =>
+                runtimeTw.style(baseStyle).class("rounded", ["px-4", "py-2"]),
+        },
+        {
+            name: "toggle.class",
+            input: {
+                kind: "toggle.class",
+                span,
+                config: { kind: "static", value: toggleConfig },
+                condition: { kind: "static", value: true },
+                extraClass: [
+                    { kind: "static", value: "rounded" },
+                    { kind: "static", value: ["px-4", "py-2"] },
+                ],
+            },
+            runtime: () =>
+                runtimeTw
+                    .toggle(toggleConfig)
+                    .class(true, "rounded", ["px-4", "py-2"]),
+        },
+        {
+            name: "rotary.class",
+            input: {
+                kind: "rotary.class",
+                span,
+                config: { kind: "static", value: rotaryConfig },
+                key: { kind: "static", value: "sm" },
+                extraClass: [
+                    { kind: "static", value: "rounded" },
+                    { kind: "static", value: ["px-4", "py-2"] },
+                ],
+            },
+            runtime: () =>
+                runtimeTw
+                    .rotary(rotaryConfig)
+                    .class("sm", "rounded", ["px-4", "py-2"]),
+        },
+        {
+            name: "variants.class",
+            input: {
+                kind: "variants.class",
+                span,
+                config: { kind: "static", value: variantsConfig },
+                props: { kind: "static", value: { intent: "primary" } },
+                extraClass: [
+                    { kind: "static", value: "rounded" },
+                    { kind: "static", value: ["px-4", "py-2"] },
+                ],
+                variantTableLimit: 64,
+            },
+            runtime: () =>
+                runtimeTw
+                    .variants(variantsConfig)
+                    .class({ intent: "primary" }, "rounded", ["px-4", "py-2"]),
+        },
+    ] satisfies Array<{
+        name: string
+        input: ApiCompileInput
+        runtime: () => string
+    }>)(
+        "compiles $name with runtime-compatible string and string-array extras",
+        ({ input, runtime }) => {
+            const result = compileTailwindestCall(input, {
+                variantResolver: commonVariantResolver,
+            })
+
+            expect(result.exact).toBe(true)
+            expect(evaluateGenerated(result.generated)).toBe(runtime())
+            expectContainsAll(result.candidates, ["rounded", "px-4", "py-2"])
+        }
+    )
+
+    it.each([
+        { label: "object", value: { "unsafe-object-extra": true } },
+        { label: "number", value: 1 },
+        { label: "boolean", value: true },
+        {
+            label: "array containing object",
+            value: ["safe-array-extra", { "unsafe-array-object-extra": true }],
+        },
+    ])(
+        "falls back for runtime-incompatible class extra $label across class-output APIs",
+        ({ value }) => {
+            const cases = [
+                {
+                    name: "style.class",
+                    input: {
+                        kind: "style.class",
+                        span,
+                        style: { kind: "static", value: baseStyle },
+                        extraClass: [{ kind: "static", value }],
+                    },
+                    baseCandidate: "text-gray-950",
+                },
+                {
+                    name: "toggle.class",
+                    input: {
+                        kind: "toggle.class",
+                        span,
+                        config: { kind: "static", value: toggleConfig },
+                        condition: { kind: "static", value: true },
+                        extraClass: [{ kind: "static", value }],
+                    },
+                    baseCandidate: "inline-flex",
+                },
+                {
+                    name: "rotary.class",
+                    input: {
+                        kind: "rotary.class",
+                        span,
+                        config: { kind: "static", value: rotaryConfig },
+                        key: { kind: "static", value: "sm" },
+                        extraClass: [{ kind: "static", value }],
+                    },
+                    baseCandidate: "grid",
+                },
+                {
+                    name: "variants.class",
+                    input: {
+                        kind: "variants.class",
+                        span,
+                        config: { kind: "static", value: variantsConfig },
+                        props: {
+                            kind: "static",
+                            value: { intent: "primary" },
+                        },
+                        extraClass: [{ kind: "static", value }],
+                        variantTableLimit: 64,
+                    },
+                    baseCandidate: "inline-flex",
+                },
+            ] satisfies Array<{
+                name: string
+                input: ApiCompileInput
+                baseCandidate: string
+            }>
+
+            for (const item of cases) {
+                const result = compileTailwindestCall(item.input, {
+                    variantResolver: commonVariantResolver,
+                })
+
+                expect(result.exact, item.name).toBe(false)
+                expect(result.replacement, item.name).toBeUndefined()
+                expect(result.candidates, item.name).toContain(
+                    item.baseCandidate
+                )
+                expect(result.candidates, item.name).not.toContain(
+                    "unsafe-object-extra"
+                )
+                expect(result.candidates, item.name).not.toContain(
+                    "unsafe-array-object-extra"
+                )
+                expect(result.diagnostics, item.name).toEqual([
+                    expect.objectContaining({
+                        code: "UNSUPPORTED_DYNAMIC_VALUE",
+                        message: expect.stringContaining(
+                            "runtime-incompatible class extra"
+                        ),
+                    }),
+                ])
+            }
+        }
+    )
 
     it("compiles nested variant style shorthand into prefixed class candidates", () => {
         const style = {
@@ -1448,6 +1756,52 @@ describe("compileTailwindestCall API surface", () => {
         )
     })
 
+    it("keeps ordered dynamic variants.class lookup keys collision-safe for delimiter-like values", () => {
+        const config = {
+            base: { display: "base" },
+            variants: {
+                a: {
+                    "x|b:v:y": { color: "a-long" },
+                    x: { color: "a-x" },
+                },
+                b: {
+                    "y|b:m": { background: "b-long" },
+                },
+            },
+        }
+        const result = compileTailwindestCall({
+            kind: "variants.class",
+            span,
+            config: { kind: "static", value: config },
+            props: {
+                kind: "dynamic-variant-props",
+                entries: [
+                    { axis: "a", expression: "a" },
+                    { axis: "b", expression: "b" },
+                ],
+            },
+            extraClass: [],
+        })
+        const runtimeVariants = runtimeTw.variants(config)
+        const runtimeClass = (
+            props: Parameters<typeof runtimeVariants.class>[0]
+        ) => runtimeVariants.class(props)
+
+        expect(result.exact).toBe(true)
+        expect(
+            evaluateGenerated(result.generated, {
+                a: "x|b:v:y",
+                b: undefined,
+            })
+        ).toBe(runtimeClass({ a: "x|b:v:y" }))
+        expect(
+            evaluateGenerated(result.generated, { a: "x", b: "y|b:m" })
+        ).toBe(runtimeClass({ a: "x", b: "y|b:m" }))
+        expect(runtimeClass({ a: "x|b:v:y" })).not.toBe(
+            runtimeClass({ a: "x", b: "y|b:m" })
+        )
+    })
+
     it("preserves mixed static and dynamic variants.class props in object entry order", () => {
         const config = {
             base: { display: "inline-flex", color: "text-gray-900" },
@@ -1521,6 +1875,52 @@ describe("compileTailwindestCall API surface", () => {
             expect(evaluateGenerated(result.generated, item.scope)).toBe(
                 runtimeTw.variants(config).class(runtimeProps)
             )
+        }
+    })
+
+    it("uses the last duplicate dynamic variants.class prop expression", () => {
+        const config = {
+            variants: {
+                size: {
+                    sm: { padding: "p-1" },
+                    lg: { padding: "p-2" },
+                },
+            },
+        }
+        const result = compileTailwindestCall({
+            kind: "variants.class",
+            span,
+            config: { kind: "static", value: config },
+            props: {
+                kind: "dynamic-variant-props",
+                entries: [
+                    { axis: "size", expression: "first" },
+                    { axis: "size", expression: "second" },
+                ],
+                orderedEntries: [
+                    {
+                        kind: "dynamic",
+                        axis: "size",
+                        expression: "first",
+                    },
+                    {
+                        kind: "dynamic",
+                        axis: "size",
+                        expression: "second",
+                    },
+                ],
+            },
+            extraClass: [],
+        })
+        const runtimeVariants = runtimeTw.variants(config)
+
+        expect(result.exact).toBe(true)
+        for (const first of ["sm", "lg"] as const) {
+            for (const second of ["sm", "lg"] as const) {
+                expect(
+                    evaluateGenerated(result.generated, { first, second })
+                ).toBe(runtimeVariants.class({ size: second }))
+            }
         }
     })
 
@@ -2115,6 +2515,31 @@ describe("compileTailwindestCall API surface", () => {
             )
         }
     )
+
+    it("falls back instead of throwing for non-array def classList values", () => {
+        const result = compileTailwindestCall({
+            kind: "def",
+            span,
+            classList: {
+                kind: "static",
+                value: { "px-2": true } as never,
+            },
+            styles: [
+                {
+                    kind: "static",
+                    value: { color: "text-red-500" },
+                },
+            ],
+        })
+
+        expect(result.exact).toBe(false)
+        expect(result.replacement).toBeUndefined()
+        expect(result.diagnostics).toEqual([
+            expect.objectContaining({
+                code: "UNSUPPORTED_DYNAMIC_VALUE",
+            }),
+        ])
+    })
 
     it("variant overflow fallback keeps every possible candidate in the replacement plan manifest", () => {
         const result = compileTailwindestCall({

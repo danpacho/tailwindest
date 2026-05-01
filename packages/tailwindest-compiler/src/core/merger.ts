@@ -43,6 +43,7 @@ export interface EvaluationResult<T> {
 }
 
 type MergerClassValue = string | readonly MergerClassValue[]
+const CLASS_TOKEN_SEPARATOR = /\s+/
 
 /**
  * Split a class string into non-empty Tailwind candidate tokens.
@@ -51,7 +52,7 @@ type MergerClassValue = string | readonly MergerClassValue[]
  */
 export function candidatesFromClassName(className: string): string[] {
     return className
-        .split(" ")
+        .split(CLASS_TOKEN_SEPARATOR)
         .map((token) => token.trim())
         .filter((token) => token.length > 0)
 }

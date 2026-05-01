@@ -47,6 +47,18 @@ describe("compiled style normalizer", () => {
         ).toBe("dark:text-white dark:hover:text-blue-500")
     })
 
+    it("does not infer variant prefixes for direct string or array leaves", () => {
+        expect(
+            className(
+                {
+                    dark: "bg-red-900",
+                    hover: ["bg-red-950", "text-white"],
+                },
+                ["dark", "hover"]
+            )
+        ).toBe("bg-red-900 bg-red-950 text-white")
+    })
+
     it("prefixes custom metadata variants and does not prefix them when missing", () => {
         expect(
             className(
@@ -95,6 +107,32 @@ describe("compiled style normalizer", () => {
                     },
                 },
                 ["group", "hover", "group-hover"]
+            )
+        ).toBe("group-hover:bg-blue-500")
+    })
+
+    it("combines compound variants only for object-valued shorthand paths", () => {
+        expect(
+            className(
+                {
+                    group: {
+                        hover: "bg-blue-500",
+                    },
+                },
+                ["hover", "group-hover"]
+            )
+        ).toBe("bg-blue-500")
+
+        expect(
+            className(
+                {
+                    group: {
+                        hover: {
+                            backgroundColor: "bg-blue-500",
+                        },
+                    },
+                },
+                ["hover", "group-hover"]
             )
         ).toBe("group-hover:bg-blue-500")
     })

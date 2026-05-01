@@ -1,12 +1,25 @@
 import { describe, expect, it } from "vitest"
 import { createTools } from "../../../../tailwindest/src/tools/create_tools"
-import { evaluateMergerPolicy } from "../merger"
+import { candidatesFromClassName, evaluateMergerPolicy } from "../merger"
 import type { MergerPolicy } from "../merger"
 import { createEvaluationEngine } from "../evaluator"
 
 const engine = createEvaluationEngine()
 
 describe("merger policy safety", () => {
+    it("splits candidates on all whitespace without changing class output", () => {
+        expect(candidatesFromClassName(" px-2\npx-4\tpy-1  mt-2 ")).toEqual([
+            "px-2",
+            "px-4",
+            "py-1",
+            "mt-2",
+        ])
+
+        const result = evaluateMergerPolicy(["px-2\npx-4"], { kind: "none" })
+        expect(result.value).toBe("px-2\npx-4")
+        expect(result.candidates).toEqual(["px-2", "px-4"])
+    })
+
     it("kind none uses the runtime default merge behavior", () => {
         const values = [" px-2  py-1 ", "px-4", ["mt-2 mb-2"]]
         const result = evaluateMergerPolicy(values, { kind: "none" })

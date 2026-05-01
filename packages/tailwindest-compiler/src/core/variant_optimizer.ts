@@ -144,11 +144,11 @@ export function optionalVariantStateCount(
 }
 
 export function variantKey(values: [string, string | undefined][]): string {
-    return values
-        .map(([axis, value]) =>
-            value === undefined ? `${axis}:m` : `${axis}:v:${value}`
+    return JSON.stringify(
+        values.map(([axis, value]) =>
+            value === undefined ? [axis, 0] : [axis, 1, value]
         )
-        .join("|")
+    )
 }
 
 function createAdditiveAxis(

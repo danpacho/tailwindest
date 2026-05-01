@@ -6,15 +6,17 @@ import { loadTailwindNestGroups } from "@tailwindest/tailwind-internal"
 import { createCompiledVariantResolver } from "./core/compiled_variant_resolver"
 
 /**
+ * @deprecated Internal compiler experiment. `@tailwindest/compiler` is private
+ * and must not be published.
+ * @internal
+ */
+
+/**
  * Options for compiling one TypeScript/JavaScript source string with the
  * Tailwindest progressive compiler.
  *
- * This API is intentionally file-local. Vite projects should prefer the
- * `tailwindest()` plugin from `@tailwindest/compiler/vite`, because the plugin
- * owns manifest state, HMR invalidation, and Tailwind CSS `@source inline()`
- * injection across the whole module graph.
- *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export interface CompileOptions {
     /**
@@ -54,6 +56,10 @@ export interface CompileOptions {
     merger?: MergerPolicy
 }
 
+/**
+ * @deprecated Internal compiler experiment.
+ * @internal
+ */
 export interface CompileAsyncOptions extends CompileOptions {
     /**
      * Tailwind CSS entry file used to load the project design system for
@@ -71,11 +77,8 @@ export interface CompileAsyncOptions extends CompileOptions {
 /**
  * Result of compiling a single source string.
  *
- * The returned `code` is safe to pass to a bundler. `candidates` must be fed to
- * Tailwind CSS, normally through the Vite manifest bridge, when this low-level
- * API is used outside the official plugin.
- *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export interface CompileResult {
     /**
@@ -111,23 +114,13 @@ export interface CompileResult {
 /**
  * Compile one source file with the Tailwindest progressive compiler.
  *
- * This is the stable programmatic entry point for build tools that cannot use
- * the Vite plugin. It performs the same evaluator and replacement pass used by
- * the plugin, but it does not write debug manifests and does not inject
- * Tailwind CSS `@source inline()` rules. Callers are responsible for forwarding
- * `result.candidates` into their CSS build pipeline.
+ * This was the programmatic entry point for internal build-tool experiments.
+ * It performs the same evaluator and replacement pass used by the plugin, but
+ * it does not write debug manifests and does not inject Tailwind CSS
+ * `@source inline()` rules.
  *
- * @example
- * ```ts
- * import { compile } from "@tailwindest/compiler"
- *
- * const result = compile(source, {
- *   fileName: "/repo/src/button.tsx",
- *   sourceMap: true,
- * })
- * ```
- *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export function compile(
     source: string,
@@ -136,6 +129,10 @@ export function compile(
     return compileWithResolver(source, options)
 }
 
+/**
+ * @deprecated Internal compiler experiment.
+ * @internal
+ */
 export async function compileAsync(
     source: string,
     options: CompileAsyncOptions = {}
@@ -196,7 +193,8 @@ function compileWithResolver(
  * Diagnostic codes, severities, and the minimal diagnostic shape shared by all
  * compiler entry points.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export type {
     CompilerDiagnostic,
@@ -208,7 +206,8 @@ export type {
  * Static style value shapes accepted by the low-level evaluator and compiler
  * APIs.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export type {
     StaticClassDictionary,
@@ -220,7 +219,8 @@ export type {
 /**
  * Build-time class merge configuration and evaluation result types.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export type {
     EvaluationFallback,
@@ -229,10 +229,11 @@ export type {
 } from "./core/merger"
 
 /**
- * Public evaluator helpers for deterministic Tailwind class flattening and
+ * Internal evaluator helpers for deterministic Tailwind class flattening and
  * style-object merging.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export {
     createEvaluationEngine,
@@ -244,10 +245,10 @@ export type { EvaluationEngine } from "./core/evaluator"
 export { defaultMerge, evaluateMergerPolicy } from "./core/merger"
 
 /**
- * Advanced per-call compiler API. Most integrations should use `compile()` or
- * the Vite plugin instead.
+ * Advanced per-call compiler API retained for internal compiler experiments.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export { compileTailwindestCall } from "./core/api_compile"
 export { createCompiledVariantResolver } from "./core/compiled_variant_resolver"
@@ -267,14 +268,16 @@ export type { CompiledVariantResolver } from "./core/compiled_variant_resolver"
 /**
  * Runtime-free generated expression shape returned by low-level compile APIs.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export type { GeneratedExpression } from "./core/codegen"
 
 /**
  * Source span and replacement-plan shapes used by advanced compiler APIs.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export type { SourceSpan } from "./analyzer/symbols"
 export type { ReplacementPlan } from "./transform/replacement"
@@ -283,7 +286,8 @@ export type { ReplacementPlan } from "./transform/replacement"
  * Rich diagnostic and debug manifest contracts used by the Vite plugin and
  * external debug tooling.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export type {
     DiagnosticFallbackBehavior,
@@ -298,6 +302,7 @@ export type {
 /**
  * Source-map shape emitted by the compiler.
  *
- * @public
+ * @deprecated Internal compiler experiment.
+ * @internal
  */
 export type { ViteSourceMap } from "./transform/replacement"
