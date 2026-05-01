@@ -71,6 +71,15 @@ export async function resolveOutputMode(
     const requestedMode = options.outputMode ?? "auto"
 
     if (requestedMode === "runtime" || requestedMode === "compiled") {
+        const diagnostics =
+            requestedMode === "compiled"
+                ? [
+                      createModeDiagnostic(
+                          "Compiled output mode is deprecated and reserved for internal compiler experiments. Use runtime output for published migrations."
+                      ),
+                  ]
+                : []
+
         return {
             requestedMode,
             mode: requestedMode,
@@ -81,7 +90,7 @@ export async function resolveOutputMode(
                     strength: "strong",
                 },
             ],
-            diagnostics: [],
+            diagnostics,
         }
     }
 
@@ -92,47 +101,55 @@ export async function resolveOutputMode(
     if (projectRoot) {
         const configEvidence = await detectTailwindestConfig(projectRoot)
         if (configEvidence) {
-            return autoResolution("compiled", requestedMode, [configEvidence])
+            recordDeprecatedCompilerEvidence(
+                evidence,
+                diagnostics,
+                configEvidence
+            )
         }
 
         const viteEvidence = await detectViteCompilerPlugin(projectRoot)
         if (viteEvidence) {
-            return autoResolution("compiled", requestedMode, [viteEvidence])
+            recordDeprecatedCompilerEvidence(
+                evidence,
+                diagnostics,
+                viteEvidence
+            )
         }
 
         const precompileEvidence =
             await detectCompilerPrecompileBridge(projectRoot)
         if (precompileEvidence) {
-            return autoResolution("compiled", requestedMode, [
-                precompileEvidence,
-            ])
+            recordDeprecatedCompilerEvidence(
+                evidence,
+                diagnostics,
+                precompileEvidence
+            )
         }
     }
 
     const sourceEvidence = await detectCompiledTypeImport(options)
     if (sourceEvidence) {
-        return autoResolution("compiled", requestedMode, [sourceEvidence])
+        recordDeprecatedCompilerEvidence(evidence, diagnostics, sourceEvidence)
     }
 
     if (projectRoot) {
         const artifactEvidence = await detectCompilerArtifacts(projectRoot)
         if (artifactEvidence) {
-            evidence.push(artifactEvidence)
-            diagnostics.push(
-                createModeDiagnostic(
-                    "Compiler artifacts are probable compiled-mode evidence, but they are not strong enough to switch output mode automatically."
-                )
+            recordDeprecatedCompilerEvidence(
+                evidence,
+                diagnostics,
+                artifactEvidence
             )
         }
 
         const packageEvidence =
             await detectCompilerPackageDependency(projectRoot)
         if (packageEvidence) {
-            evidence.push(packageEvidence)
-            diagnostics.push(
-                createModeDiagnostic(
-                    "The @tailwindest/compiler dependency is a weak signal only; keeping runtime output mode unless a stronger compiler signal is present."
-                )
+            recordDeprecatedCompilerEvidence(
+                evidence,
+                diagnostics,
+                packageEvidence
             )
         }
     }
@@ -145,17 +162,17 @@ export async function resolveOutputMode(
     }
 }
 
-function autoResolution(
-    mode: CssTransformerResolvedOutputMode,
-    requestedMode: CssTransformerOutputMode,
-    evidence: OutputModeEvidence[]
-): OutputModeResolution {
-    return {
-        requestedMode,
-        mode,
-        evidence,
-        diagnostics: [],
-    }
+function recordDeprecatedCompilerEvidence(
+    records: OutputModeEvidence[],
+    diagnostics: Diagnostic[],
+    record: OutputModeEvidence
+) {
+    records.push(record)
+    diagnostics.push(
+        createModeDiagnostic(
+            `Detected deprecated compiler-mode signal (${record.kind} from ${record.source}), but auto mode no longer emits compiled output. Keeping runtime output mode.`
+        )
+    )
 }
 
 async function detectTailwindestConfig(

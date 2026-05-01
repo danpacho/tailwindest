@@ -34,37 +34,41 @@ describe("resolveOutputMode", () => {
 
         expect(result.mode).toBe("compiled")
         expect(result.evidence[0]?.kind).toBe("explicit-option")
+        expect(result.diagnostics[0]?.message).toContain("deprecated")
     })
 
-    it("resolves compiler Vite plugin projects to compiled mode", async () => {
+    it("keeps compiler Vite plugin projects in runtime mode with a deprecation diagnostic", async () => {
         const projectRoot = await createProject({
             "vite.config.ts": `import { tailwindest } from "@tailwindest/compiler/vite"; export default { plugins: [tailwindest()] }`,
         })
 
         const result = await resolveOutputMode({ projectRoot })
 
-        expect(result.mode).toBe("compiled")
+        expect(result.mode).toBe("runtime")
         expect(result.evidence[0]?.kind).toBe("compiler-vite-plugin")
+        expect(result.diagnostics[0]?.message).toContain("deprecated")
     })
 
-    it("resolves Next precompile bridge projects to compiled mode", async () => {
+    it("keeps Next precompile bridge projects in runtime mode with a deprecation diagnostic", async () => {
         const projectRoot = await createProject({
             "precompile-tailwindest.ts": `import { createCompilerContext } from "@tailwindest/compiler";`,
         })
 
         const result = await resolveOutputMode({ projectRoot })
 
-        expect(result.mode).toBe("compiled")
+        expect(result.mode).toBe("runtime")
         expect(result.evidence[0]?.kind).toBe("compiler-precompile-bridge")
+        expect(result.diagnostics[0]?.message).toContain("deprecated")
     })
 
-    it("resolves CreateCompiledTailwindest source imports to compiled mode", async () => {
+    it("keeps CreateCompiledTailwindest source imports in runtime mode with a deprecation diagnostic", async () => {
         const result = await resolveOutputMode({
             sourceCode: `import type { CreateCompiledTailwindest } from "tailwindest";`,
         })
 
-        expect(result.mode).toBe("compiled")
+        expect(result.mode).toBe("runtime")
         expect(result.evidence[0]?.kind).toBe("compiled-tailwindest-type")
+        expect(result.diagnostics[0]?.message).toContain("deprecated")
     })
 
     it("keeps package dependency only projects in runtime mode with a diagnostic", async () => {
@@ -78,7 +82,7 @@ describe("resolveOutputMode", () => {
 
         expect(result.mode).toBe("runtime")
         expect(result.evidence[0]?.kind).toBe("compiler-package-dependency")
-        expect(result.diagnostics[0]?.message).toContain("weak signal")
+        expect(result.diagnostics[0]?.message).toContain("deprecated")
     })
 
     it("keeps artifact-only projects in runtime mode with a diagnostic", async () => {
@@ -90,7 +94,7 @@ describe("resolveOutputMode", () => {
 
         expect(result.mode).toBe("runtime")
         expect(result.evidence[0]?.kind).toBe("compiler-artifact")
-        expect(result.diagnostics[0]?.message).toContain("probable")
+        expect(result.diagnostics[0]?.message).toContain("deprecated")
     })
 
     it("defaults unknown projects to runtime mode", async () => {

@@ -47,6 +47,16 @@ async function runTUI(
     defaults: { outputMode?: CssTransformerOutputMode } = {}
 ) {
     p.intro(pc.bgCyan(pc.black(" Tailwindest CSS Transformer ")))
+    const defaultOutputMode =
+        defaults.outputMode === "compiled"
+            ? "runtime"
+            : (defaults.outputMode ?? "auto")
+
+    if (defaults.outputMode === "compiled") {
+        p.log.warn(
+            "Compiled output mode is deprecated and reserved for internal compiler experiments. Runtime mode will be used in the TUI."
+        )
+    }
 
     const detectedDef = await findTailwindestDefinition(process.cwd())
 
@@ -94,13 +104,8 @@ async function runTUI(
                             label: "Runtime",
                             hint: "CreateTailwindest",
                         },
-                        {
-                            value: "compiled",
-                            label: "Compiled",
-                            hint: "CreateCompiledTailwindest",
-                        },
                     ],
-                    initialValue: defaults.outputMode ?? "auto",
+                    initialValue: defaultOutputMode,
                 }),
             walkers: () =>
                 p.multiselect({
@@ -266,7 +271,11 @@ program
         "Print transformed code without writing to file",
         false
     )
-    .option("--mode <mode>", "Output mode: auto, runtime, or compiled", "auto")
+    .option(
+        "--mode <mode>",
+        "Output mode: auto or runtime. compiled is deprecated/internal.",
+        "auto"
+    )
     .action(async (targetPath, options) => {
         const outputMode = normalizeOutputMode(options.mode)
         if (!targetPath) {
