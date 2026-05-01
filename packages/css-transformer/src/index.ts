@@ -72,8 +72,6 @@ export async function transform(
     const analyzer = new TokenAnalyzerImpl(options.resolver)
     const contextOptions: Parameters<typeof createContext>[0] = {
         analyzer,
-        outputMode: outputMode.mode,
-        outputModeEvidence: outputMode.evidence,
         diagnostics: [...outputMode.diagnostics],
     }
     if (options.tailwindestIdentifier !== undefined) {
