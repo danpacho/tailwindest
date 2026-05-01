@@ -1,8 +1,7 @@
 # Analyzer Details
 
-The analyzer is the semantic core of `@tailwindest/css-transformer`. It converts
-static Tailwind class strings into Tailwindest style records while preserving
-enough token information to support both runtime and compiler-oriented output.
+The analyzer converts static Tailwind class strings into Tailwindest runtime
+style records.
 
 ## Data Model
 
@@ -16,35 +15,8 @@ interface ParsedToken {
 }
 ```
 
-Example:
-
-```ts
-{
-    original: "dark:hover:bg-red-950",
-    utility: "bg-red-950",
-    property: "backgroundColor",
-    variants: ["dark", "hover"],
-}
-```
-
-`original` and `utility` are both required:
-
-- `original` is required for `CreateTailwindest` runtime output.
-- `utility` is required for `CreateCompiledTailwindest` compiler output.
-
-## Tokenization
-
-The analyzer splits class strings by whitespace and preserves source order. It
-does not normalize, sort, or merge class tokens during tokenization.
-
-Supported inputs:
-
-```ts
-analyze("flex dark:hover:bg-red-950")
-analyze(["flex", "dark:hover:bg-red-950"])
-```
-
-Empty strings produce an empty token list.
+`utility` is used only for resolver lookup. Generated object leaves always use
+`original`.
 
 ## Variant Extraction
 
@@ -63,46 +35,11 @@ The object path is built from variants first and the resolved property key last:
 {
     dark: {
         hover: {
-            backgroundColor: "<leaf>",
-        },
-    },
-}
-```
-
-## Output Mode Leaf Selection
-
-`buildObjectTree()` is mode-aware:
-
-```ts
-buildObjectTree(tokens, { outputMode: "runtime" })
-buildObjectTree(tokens, { outputMode: "compiled" })
-```
-
-Runtime mode preserves the source token:
-
-```ts
-{
-    dark: {
-        hover: {
             backgroundColor: "dark:hover:bg-red-950",
         },
     },
 }
 ```
-
-Compiled mode stores only the raw utility:
-
-```ts
-{
-    dark: {
-        hover: {
-            backgroundColor: "bg-red-950",
-        },
-    },
-}
-```
-
-The default is `runtime` to preserve existing migrations.
 
 ## Group Prefixes
 
@@ -115,12 +52,10 @@ new TokenAnalyzerImpl(resolver, "$")
 ```ts
 {
     $hover: {
-        backgroundColor: "bg-accent",
+        backgroundColor: "hover:bg-accent",
     },
 }
 ```
-
-The group prefix must never be added to leaf class values.
 
 ## Collision Policy
 
@@ -128,45 +63,24 @@ When multiple tokens map to the same object leaf, the analyzer promotes the leaf
 to an array and preserves source order:
 
 ```ts
-hover:p-4 hover:p-2
-```
-
-Compiled mode:
-
-```ts
 {
     hover: {
-        padding: ["p-4", "p-2"],
+        padding: ["hover:p-4", "hover:p-2"],
     },
 }
 ```
 
-The analyzer does not run Tailwind merge. It preserves enough information for
-Tailwindest runtime or compiler stages to apply their own semantics.
+The analyzer does not run Tailwind merge.
 
 ## Diagnostics
 
 If a utility cannot be resolved, the parsed token receives a warning and is
-excluded from the generated object tree:
-
-```ts
-{
-    original: "unknown-xyz",
-    utility: "unknown-xyz",
-    property: null,
-    variants: [],
-    warning: "Could not resolve property for utility: unknown-xyz",
-}
-```
-
-Walkers collect these warnings and decide whether the surrounding source can be
-rewritten safely.
+excluded from the generated object tree.
 
 ## Required Tests
 
 - simple utility records
 - runtime nested variant leaves
-- compiled nested variant leaves
 - deeply nested variants
 - arbitrary variants
 - group-prefixed variants

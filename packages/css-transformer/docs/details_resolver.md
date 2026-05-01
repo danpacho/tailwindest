@@ -15,7 +15,8 @@ resolver input:     bg-red-950
 resolver output:    backgroundColor
 ```
 
-The analyzer, not the resolver, owns variant nesting and leaf-value selection.
+The analyzer, not the resolver, owns variant nesting. Leaves use the original
+source token.
 
 ```ts
 interface CSSPropertyResolver {
@@ -27,7 +28,7 @@ Resolver return values become Tailwindest object property keys:
 
 ```ts
 {
-    backgroundColor: "bg-red-950"
+    backgroundColor: "dark:hover:bg-red-950"
 }
 ```
 
@@ -40,7 +41,6 @@ Resolver return values become Tailwindest object property keys:
 
 ## Non-Responsibilities
 
-- Do not decide runtime vs compiled output mode.
 - Do not decide source-order conflict behavior.
 - Do not parse arbitrary value internals unless `create-tailwind-type` already
   supports that utility family.
