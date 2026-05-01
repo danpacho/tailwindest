@@ -72,6 +72,11 @@ const fieldFocusStyle = {
     },
 }
 
+const fieldFocusRuntimeStyle = {
+    borderColor: "focus:border-sky-500",
+    ring: "focus:ring-2",
+}
+
 const composedCardBase = {
     display: "inline-flex",
     alignItems: "items-center",
@@ -87,10 +92,10 @@ const composedCardBase = {
     color: "text-indigo-900",
 }
 
-const composedCardExtra = {
+const composedCardRuntimeExtra = {
     boxShadow: "shadow-md",
-    hover: { borderColor: "border-cyan-500" },
-    focus: { color: "text-sky-600" },
+    borderColor: "hover:border-cyan-500",
+    color: "focus:text-sky-600",
 }
 
 const toggleSwitch = tw.toggle({
@@ -159,6 +164,26 @@ const sizeRotary = tw.rotary({
         large: { height: "h-12", padding: ["px-5", "py-3"], fontSize: "text-base" },
         giant: { height: "h-14", padding: ["px-7", "py-4"], fontSize: "text-lg" },
     },
+})
+
+const checkboxRuntimeToggle = tw.toggle({
+    base: {
+        display: "inline-flex",
+        alignItems: "items-center",
+        justifyContent: "justify-center",
+        width: "w-5",
+        height: "h-5",
+        borderRadius: "rounded",
+        border: "border",
+        borderColor: [
+            "border-slate-400",
+            "aria-checked:border-emerald-600",
+        ],
+        backgroundColor: ["bg-white", "aria-checked:bg-emerald-600"],
+        ring: "focus:ring-2",
+    },
+    truthy: {},
+    falsy: {},
 })
 
 const radioToneRotary = tw.rotary({
@@ -340,10 +365,10 @@ const cardNested = {
 }
 
 const fieldStatusStyle = fieldStatusVariants.style({ status: "success" })
-const styleStyleRecord = tw.style(fieldBaseStyle).style(fieldFocusStyle)
-const checkboxStyleRecord = checkboxToggle.style(true)
+const styleStyleRecord = tw.style(fieldBaseStyle).style(fieldFocusRuntimeStyle)
+const checkboxStyleRecord = checkboxRuntimeToggle.style(true)
 const radioStyleRecord = radioToneRotary.style("primary")
-const mergeRecordStatic = tw.mergeRecord(cardBase, cardNested)
+const mergeRecordStatic = tw.mergeRecord(cardBase, cardOpen)
 
 type NativeSyncWindow = typeof window & {
     __tailwindestDesignSystemSync?: boolean
@@ -697,7 +722,7 @@ export function DesignSystemFixture() {
     const styleClass = tw.style(buttonBaseStyle).class()
     const styleComposeClass = tw
         .style(composedCardBase)
-        .compose(composedCardExtra)
+        .compose(composedCardRuntimeExtra)
         .class()
     const toggleClass = toggleSwitch.class(false)
     const toggleComposeClass = toggleSwitch

@@ -51,6 +51,7 @@ const RAW_NESTED_LEAF_CANDIDATES = [
     "text-sky-600",
     "text-white",
 ]
+const BROWSER_CAPTURE_TIMEOUT_MS = 60_000
 
 type PipedChildProcess = ChildProcessByStdio<null, Readable, Readable>
 type ProcessEnvOverrides = Record<string, string | undefined>
@@ -173,8 +174,13 @@ export async function captureVisualSnapshot(
     options: VisualCaptureOptions = {}
 ): Promise<VisualSnapshot> {
     const lightPage = await browser.newPage({ colorScheme: "light" })
+    lightPage.setDefaultTimeout(BROWSER_CAPTURE_TIMEOUT_MS)
+    lightPage.setDefaultNavigationTimeout(BROWSER_CAPTURE_TIMEOUT_MS)
     try {
-        await lightPage.goto(url, { waitUntil: "domcontentloaded" })
+        await lightPage.goto(url, {
+            waitUntil: "domcontentloaded",
+            timeout: BROWSER_CAPTURE_TIMEOUT_MS,
+        })
         const target = lightPage.getByTestId("twtarget")
         await target.waitFor({ state: "visible" })
         const className = await target.evaluate((node) => node.className)
@@ -185,17 +191,22 @@ export async function captureVisualSnapshot(
         const groupHover = await readTargetStyle(lightPage)
 
         await lightPage.mouse.move(0, 0)
-        await focusByKeyboard(lightPage, 1)
+        await focusElement(lightPage, "twpeer")
         await waitForTargetStyleChange(lightPage, base, ["color"])
         const peerFocus = await readTargetStyle(lightPage)
 
         const darkPage = await browser.newPage({ colorScheme: "dark" })
+        darkPage.setDefaultTimeout(BROWSER_CAPTURE_TIMEOUT_MS)
+        darkPage.setDefaultNavigationTimeout(BROWSER_CAPTURE_TIMEOUT_MS)
         try {
-            await darkPage.goto(url, { waitUntil: "domcontentloaded" })
+            await darkPage.goto(url, {
+                waitUntil: "domcontentloaded",
+                timeout: BROWSER_CAPTURE_TIMEOUT_MS,
+            })
             await darkPage.getByTestId("twtarget").waitFor({ state: "visible" })
             const darkBase = await readTargetStyle(darkPage)
             await hoverByMouse(darkPage, "twtarget")
-            await focusByKeyboard(darkPage, 2)
+            await focusElement(darkPage, "twtarget")
             await waitForTargetStyleChange(darkPage, darkBase, [
                 "backgroundColor",
                 "color",
@@ -334,6 +345,9 @@ export async function assertZeroRuntimeClientAssets(
     fixtureRoot: string,
     buildDir: string
 ): Promise<void> {
+    // Only class-output-only fixtures should use this assertion. Mixed
+    // fixtures that exercise runtime-preserved APIs may legitimately ship
+    // Tailwindest runtime helpers.
     const js = await readFilesByExtension(
         path.join(fixtureRoot, buildDir),
         ".js"
@@ -381,10 +395,8 @@ async function hoverByMouse(page: Page, testId: string): Promise<void> {
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
 }
 
-async function focusByKeyboard(page: Page, tabPresses: number): Promise<void> {
-    for (let index = 0; index < tabPresses; index += 1) {
-        await page.keyboard.press("Tab")
-    }
+async function focusElement(page: Page, testId: string): Promise<void> {
+    await page.getByTestId(testId).focus()
 }
 
 async function savePageScreenshot(

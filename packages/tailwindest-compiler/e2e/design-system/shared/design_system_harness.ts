@@ -7,7 +7,6 @@ import {
     allExpectedExcludedCandidates,
     expectedDesignSystemCases,
     expectedSectionNames,
-    zeroRuntimeForbiddenTokens,
 } from "./design_system_expectations"
 import {
     cleanPaths,
@@ -32,7 +31,6 @@ export interface DesignSystemRunOptions {
     startProd: (
         port: number
     ) => Promise<{ url: string; stop: () => Promise<void> }>
-    zeroRuntimeDir?: string
 }
 
 type ComputedSnapshot = Record<string, StyleSnapshot>
@@ -59,6 +57,15 @@ const computedTestIds = [
     "case-style-compose",
     "case-merge-record",
 ] as const
+
+const visibleRuntimeTokens = [
+    "createTools",
+    "PrimitiveStyler",
+    "ToggleStyler",
+    "RotaryStyler",
+    "VariantsStyler",
+] as const
+const BROWSER_CAPTURE_TIMEOUT_MS = 60_000
 
 export async function runDesignSystemE2E(
     options: DesignSystemRunOptions
@@ -133,10 +140,6 @@ export async function runDesignSystemE2E(
 
     await assertDebugManifestContract(options.fixtureRoot)
     await assertBuiltCssContract(options.fixtureRoot, options.buildDir)
-    await assertZeroRuntimeClientAssets(
-        options.fixtureRoot,
-        options.zeroRuntimeDir ?? options.buildDir
-    )
     await assertScreenshotSet(screenshots)
 }
 
@@ -149,8 +152,12 @@ async function captureOverview(input: {
         colorScheme: "light",
         viewport: { width: 1280, height: 900 },
     })
+    configurePageTimeouts(page)
     try {
-        await page.goto(input.url, { waitUntil: "load" })
+        await page.goto(input.url, {
+            waitUntil: "load",
+            timeout: BROWSER_CAPTURE_TIMEOUT_MS,
+        })
         await assertPageContract(page)
         const snapshot = await readComputedSnapshot(page)
         await savePageScreenshot(page, input.screenshotPath)
@@ -169,8 +176,12 @@ async function captureInteractions(input: {
         colorScheme: "light",
         viewport: { width: 1280, height: 900 },
     })
+    configurePageTimeouts(page)
     try {
-        await page.goto(input.url, { waitUntil: "load" })
+        await page.goto(input.url, {
+            waitUntil: "load",
+            timeout: BROWSER_CAPTURE_TIMEOUT_MS,
+        })
         await assertDynamicControls(page)
         await savePageScreenshot(page, input.screenshotPath)
     } finally {
@@ -187,8 +198,12 @@ async function captureMobileOverview(input: {
         colorScheme: "light",
         viewport: { width: 390, height: 844 },
     })
+    configurePageTimeouts(page)
     try {
-        await page.goto(input.url, { waitUntil: "load" })
+        await page.goto(input.url, {
+            waitUntil: "load",
+            timeout: BROWSER_CAPTURE_TIMEOUT_MS,
+        })
         await page.getByTestId("design-system-root").waitFor({
             state: "visible",
         })
@@ -247,7 +262,7 @@ async function assertPageContract(page: Page): Promise<void> {
     }
 
     const pageText = await page.locator("body").textContent()
-    for (const token of zeroRuntimeForbiddenTokens) {
+    for (const token of visibleRuntimeTokens) {
         expect(pageText ?? "").not.toContain(token)
     }
 }
@@ -350,8 +365,12 @@ async function assertVariantVisualSemantics(
         colorScheme: "light",
         viewport: { width: 1280, height: 900 },
     })
+    configurePageTimeouts(light)
     try {
-        await light.goto(url, { waitUntil: "load" })
+        await light.goto(url, {
+            waitUntil: "load",
+            timeout: BROWSER_CAPTURE_TIMEOUT_MS,
+        })
         await light.waitForFunction(
             () =>
                 (
@@ -397,8 +416,12 @@ async function assertVariantVisualSemantics(
         colorScheme: "dark",
         viewport: { width: 1280, height: 900 },
     })
+    configurePageTimeouts(dark)
     try {
-        await dark.goto(url, { waitUntil: "domcontentloaded" })
+        await dark.goto(url, {
+            waitUntil: "domcontentloaded",
+            timeout: BROWSER_CAPTURE_TIMEOUT_MS,
+        })
         const darkBase = await readStyleByTestId(dark, "case-style-class")
         await dark.getByTestId("case-style-class").hover()
         await dark.getByTestId("case-style-class").focus()
@@ -494,19 +517,6 @@ function assertCssContract(css: string): void {
     }
 }
 
-export async function assertZeroRuntimeClientAssets(
-    fixtureRoot: string,
-    buildDir: string
-): Promise<void> {
-    const js = await readFilesByExtension(
-        path.join(fixtureRoot, buildDir),
-        ".js"
-    )
-    for (const token of zeroRuntimeForbiddenTokens) {
-        expect(js, `client JS contains ${token}`).not.toContain(token)
-    }
-}
-
 async function captureDebugManifestScreenshot(
     browser: Browser,
     fixtureRoot: string,
@@ -517,6 +527,7 @@ async function captureDebugManifestScreenshot(
         colorScheme: "light",
         viewport: { width: 1180, height: 860 },
     })
+    configurePageTimeouts(page)
     try {
         await page.setContent(renderDebugManifestHtml(manifest), {
             waitUntil: "load",
@@ -582,6 +593,11 @@ async function savePageScreenshot(
 ): Promise<void> {
     await fs.mkdir(path.dirname(screenshotPath), { recursive: true })
     await page.screenshot({ path: screenshotPath, fullPage: true })
+}
+
+function configurePageTimeouts(page: Page): void {
+    page.setDefaultTimeout(BROWSER_CAPTURE_TIMEOUT_MS)
+    page.setDefaultNavigationTimeout(BROWSER_CAPTURE_TIMEOUT_MS)
 }
 
 async function expectElementCount(

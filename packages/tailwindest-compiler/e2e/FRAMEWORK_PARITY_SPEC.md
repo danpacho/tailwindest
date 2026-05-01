@@ -23,10 +23,12 @@ contract.
 
 - Hard gate: TanStack Start dev server, production build, production server,
   browser visual parity, dev style endpoint leakage, debug manifest, CSS
-  selector leakage, static replacement client asset checks.
+  selector leakage, and class-output client asset checks for the class-output
+  fixture.
 - Hard gate: Next App Router in webpack mode using `next dev --webpack`,
   `next build --webpack`, `next start`, browser visual parity, debug manifest,
-  CSS selector leakage, static replacement client asset checks.
+  CSS selector leakage, and class-output client asset checks for the
+  precompiled class-output fixture.
 - Experimental gate: Next Turbopack. Next 16 defaults to Turbopack, but the
   Tailwindest Vite plugin cannot run there and the webpack/precompile bridge is
   the current hard gate. Turbopack support requires a dedicated bridge and is
@@ -66,9 +68,11 @@ style must cover:
   `packages/tailwindest-compiler/e2e/.artifacts/framework-screenshots/<fixture>/` so the
   rendered dev page, debug manifest summary, and production page can be
   inspected after the test run.
-- Zero-runtime JS:
-  built client assets must not include `createTools`, `PrimitiveStyler`,
-  `ToggleStyler`, `RotaryStyler`, or `VariantsStyler`.
+- Class-output JS:
+  this fixture uses only compile-supported terminal class-output calls, so built
+  client assets must not include `createTools`, `PrimitiveStyler`,
+  `ToggleStyler`, `RotaryStyler`, or `VariantsStyler`. This is a scoped fixture
+  assertion, not a package-wide guarantee for runtime-preserved APIs.
 - DX type validation:
   `CreateCompiledTailwindest` must accept raw nested leaf utilities and reject
   nested synthesized prefixes such as `dark:bg-*`; `CreateTailwindest` must keep

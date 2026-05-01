@@ -18,7 +18,7 @@ const viteSourceConfigEnv = {
 }
 
 describe("Vite design-system E2E", () => {
-    it("compiles every createTools API across dev and production", async () => {
+    it("validates class-output lowering and runtime-preserved APIs across dev and production", async () => {
         await cleanPaths([
             path.join(fixtureRoot, "dist"),
             path.join(fixtureRoot, ".tailwindest"),

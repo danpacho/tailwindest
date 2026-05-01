@@ -2,11 +2,11 @@
 
 ## Goal
 
-Build a single-page design-system fixture that exercises every public
-`createTools()` feature through both static and dynamic compiler paths. The
-fixture must prove that development, debug, production, and release artifacts
-converge to the same result without shipping Tailwindest runtime tools to the
-browser.
+Build a single-page design-system fixture that exercises the reduced compiler
+contract across the public `createTools()` surface. The fixture must prove that
+development, debug, production, and release artifacts converge to the same
+result while allowing runtime-preserved Tailwindest APIs to remain runtime
+calls.
 
 This is a test specification, not an implementation document. The next
 implementer must satisfy every gate here before the critic can approve.
@@ -31,13 +31,19 @@ Target source API:
 
 Target compiler paths:
 
-- Static exact replacement.
-- Dynamic lookup replacement for statically known variant tables.
+- Exact nested variant lowering for terminal class-output calls.
+- Candidate-only manifest collection for runtime-preserved APIs.
+- Runtime fallback diagnostics for unsupported or unsafe inputs.
 - Unsupported dynamic fallback in unit/integration tests.
 - Manifest bridge to Tailwind v4 via `@source inline()` and
   `@source not inline()`.
 - Vite dev, Vite build, TanStack Start dev/build, and Next webpack
   precompile/build fixture behavior.
+
+Runtime-visible object or styler channels such as `*.style()`, `*.compose()`,
+and `tw.mergeRecord()` must use runtime-compatible style records. Raw nested
+compiled shorthand belongs on terminal class-output paths, or in dedicated
+negative tests that assert `COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT`.
 
 ## Fixture Page
 
@@ -140,13 +146,15 @@ also intentionally used as top-level non-nested utilities elsewhere.
 Static cases:
 
 - `styleRecord.class()` renders a button class string.
-- `styleRecord.style()` returns the original style object when compiled to a
-  static object.
+- `styleRecord.style()` returns a runtime-visible style object and must not use
+  raw nested compiled shorthand.
 - `styleRecord.class("extra", ["extra-2"], { "extra-3": true })` follows clsx
   semantics and appends extra tokens.
 - Nested raw variant shorthand compiles to prefixed candidates.
-- `.compose(extraStyle).class()` deep merges base and extra style.
-- `.compose(extraStyle).style()` returns the merged style object.
+- `.compose(extraStyle).class()` deep merges runtime-compatible base and extra
+  styles.
+- `.compose(extraStyle).style()` returns the merged runtime-visible style
+  object.
 
 Dynamic cases:
 
@@ -167,8 +175,9 @@ Visual assertions:
 Compiler assertions:
 
 - Static `.class()` call is replaced with a string literal.
-- Static `.style()` call is replaced with an object literal.
-- No `PrimitiveStyler` runtime token in client JS.
+- Static `.style()` calls are preserved as runtime-visible object channels.
+- Nested shorthand in object-returning `style` channels is absent from the
+  fixture or asserted as a diagnostic in negative tests.
 
 ### `tw.toggle`
 
@@ -195,8 +204,9 @@ Visual assertions:
 
 Compiler assertions:
 
-- Dynamic boolean call compiles to a finite branch expression or lookup with no
-  Tailwindest runtime imports.
+- Dynamic boolean class-output calls compile to a finite branch expression,
+  lookup, or remain runtime-preserved with manifest candidates according to the
+  reduced contract.
 - Both truthy and falsy candidates appear in the manifest.
 
 ### `tw.rotary`
@@ -224,9 +234,9 @@ Visual assertions:
 
 Compiler assertions:
 
-- Static calls replace to literals.
-- Dynamic calls compile to a lookup table whose keys exactly match the variant
-  keys plus `base`.
+- Static class-output calls replace to literals.
+- Dynamic class-output calls compile to a lookup table when statically proven
+  and otherwise remain runtime-preserved with manifest candidates.
 - Every variant candidate is present in the manifest.
 
 ### `tw.variants`
@@ -253,8 +263,8 @@ Dynamic cases:
     - size select
     - status select
     - disabled checkbox
-- Dynamic props must compile to a static finite lookup, not runtime
-  `VariantsStyler`.
+- Dynamic props must either compile to a static finite lookup or remain
+  runtime-preserved with manifest candidates.
 - The dynamic preview must match the corresponding static matrix cell.
 
 Visual assertions:
@@ -267,7 +277,6 @@ Compiler assertions:
 
 - Manifest includes every reachable axis candidate.
 - Debug manifest records replacement candidates for the variants call.
-- Client JS contains no `VariantsStyler`.
 - Lookup size is bounded and deterministic; if table limit is exceeded in a
   dedicated negative test, the runtime call is preserved and all static
   candidates remain in the manifest.
@@ -298,7 +307,8 @@ Visual assertions:
 
 Compiler assertions:
 
-- Static join replaces to one string literal.
+- Static join candidates are retained in the manifest; the call may remain a
+  runtime-preserved helper.
 - Candidate list includes all truthy static class candidates.
 - Falsy static branches do not appear in candidates.
 
@@ -357,24 +367,24 @@ Visual assertions:
 Compiler assertions:
 
 - Static `mergeProps` replaces to string.
-- Client JS contains no `Styler` or `createTools` token for static calls.
 - Dynamic finite map preserves every candidate in the manifest.
 
 ### `tw.mergeRecord`
 
 Static cases:
 
-- Later records override earlier records and return an object literal.
-- Nested variant records deep merge.
+- Later records override earlier records and return a runtime-visible object.
+- Runtime-visible records do not use raw nested compiled shorthand.
 - Arrays replace previous arrays.
-- The result can be fed into `tw.style(merged).class()` and compile exactly.
+- Class-output equivalents use `tw.mergeProps(...)` or terminal
+  `tw.style(...).class()` paths for nested shorthand coverage.
 
 Dynamic cases:
 
 - A form control builds a merged record from base + status map + state map.
-- The resulting `.class()` call must still compile to deterministic output or
-  remain runtime fallback if unsupported. The expected behavior must be
-  captured in the test.
+- The class-output equivalent must still compile to deterministic output or
+  remain runtime fallback if unsupported. The expected behavior must be captured
+  in the test.
 
 Visual assertions:
 
@@ -382,9 +392,10 @@ Visual assertions:
 
 Compiler assertions:
 
-- Static `mergeRecord` replacement is an object literal.
-- Chained `tw.style(tw.mergeRecord(...)).class()` output equals the direct
-  static equivalent.
+- Static `mergeRecord` remains runtime-visible and uses runtime-compatible
+  records.
+- Nested shorthand coverage for the same visual case is asserted through
+  class-output helpers.
 
 ## Design-System Section Requirements
 
@@ -457,7 +468,8 @@ Render a grid of small cards to prove composition and merge behavior:
 
 Every API must have both:
 
-- `static expected class`: exact literal string or object after compilation.
+- `static expected output`: exact class string for class-output paths, or
+  runtime-visible object for object-returning paths.
 - `dynamic expected class`: output for at least two runtime states.
 
 The test fixture must export an expectation table:
@@ -492,7 +504,7 @@ For each framework target, run:
 - computed style assertions
 - CSS artifact assertions
 - debug manifest assertions
-- static replacement JS assertions
+- client bundle assertions scoped to compile-supported class-output entries
 
 Required screenshots:
 
@@ -527,8 +539,8 @@ Required DOM assertions:
 - Dynamic preview className changes when controls change.
 - Static matrix cell and dynamic preview are identical for matching selected
   state.
-- No generated element contains `createTools`, `PrimitiveStyler`,
-  `ToggleStyler`, `RotaryStyler`, or `VariantsStyler` in text/script content.
+- No generated element exposes Tailwindest runtime implementation tokens in
+  visible text content.
 
 Required computed style assertions:
 
@@ -562,11 +574,11 @@ The test must inspect:
 - `.tailwindest/debug-manifest.json`
 - built CSS files
 - dev CSS endpoint for frameworks that expose one
-- client JS bundles
+- client JS bundles, only for entries that are intentionally class-output-only
 
-## Zero-Runtime Assertions
+## Client Bundle Assertions
 
-Client JS bundles must not contain:
+Client JS bundles for class-output-only fixtures must not contain:
 
 - `createTools`
 - `PrimitiveStyler`
@@ -582,6 +594,8 @@ Allowed:
 
 - Static class strings.
 - Static lookup objects or branch expressions generated by the compiler.
+- Runtime Tailwindest code in mixed design-system entries that intentionally
+  exercise `tw.join`, `*.style()`, `*.compose()`, or `tw.mergeRecord()`.
 - Framework runtime code.
 
 ## Type/DX Assertions
@@ -660,11 +674,12 @@ The critic must reject the implementation if any item below is missing:
 - Every styler instance method `.class`, `.style`, `.compose` is represented.
 - Every API has static and dynamic expected output assertions.
 - Deep nested variant shorthand is tested in at least three APIs.
+- Runtime-visible object/styler channels either avoid raw nested shorthand or
+  have dedicated diagnostic assertions.
 - Raw nested shorthand leakage is tested in manifest, dev CSS, and built CSS.
 - Dev/prod computed style snapshots are equal.
 - Screenshots are generated for dev/debug/prod and interaction/mobile states.
-- Static replacement bundle assertions include all runtime tool tokens for
-  fully compiled cases.
+- Bundle runtime-token assertions are scoped to class-output-only cases.
 - Type/DX tests cover `CreateCompiledTailwindest` and legacy
   `CreateTailwindest`.
 - Fallback negative tests exist.
@@ -683,9 +698,10 @@ The critic must inspect:
 2. The transformed output and debug manifest.
 3. Browser screenshots for dev/debug/prod/interaction/mobile.
 4. Final CSS selector presence and raw leakage absence.
-5. Client JS bundle for static replacement tokens.
+5. Client JS bundle assertions for class-output-only entries.
 6. Type tests for compiled-vs-legacy nested variant authoring.
 7. Negative fallback diagnostics.
 
 Approval is only allowed when the implementation proves semantic equivalence
-between runtime Tailwindest behavior and compiler output across all APIs.
+between runtime Tailwindest behavior and compiler output across class-output
+lowering, manifest bridging, and runtime-preserved APIs.

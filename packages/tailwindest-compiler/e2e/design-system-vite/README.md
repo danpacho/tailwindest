@@ -4,8 +4,9 @@ Vite baseline target for the shared Tailwindest design-system E2E page.
 
 ## Purpose
 
-This fixture proves that the Vite plugin pair compiles every public
-`createTools()` API and converges between development and production builds.
+This fixture proves that the Vite plugin pair lowers nested variant
+class-output calls, preserves runtime-visible Tailwindest APIs, and converges
+between development and production builds.
 
 ## Command
 
@@ -20,6 +21,7 @@ pnpm --filter @tailwindest/compiler e2e:design-system-vite
 - Dev and production computed-style parity.
 - Tailwind candidate and exclusion manifest.
 - Built CSS and dev CSS raw-leak checks.
-- Zero-runtime client bundle checks.
+- Runtime-preserved API behavior for `tw.join`, `*.style()`, `*.compose()`,
+  and `tw.mergeRecord()`.
 - Screenshot artifacts under
   `packages/tailwindest-compiler/e2e/.artifacts/design-system-screenshots/vite/`.

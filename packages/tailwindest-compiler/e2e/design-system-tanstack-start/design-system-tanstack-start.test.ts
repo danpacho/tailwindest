@@ -19,13 +19,12 @@ const viteSourceConfigEnv = {
 }
 
 describe("TanStack Start design-system E2E", () => {
-    it("compiles every createTools API across dev and production", async () => {
+    it("validates class-output lowering and runtime-preserved APIs across dev and production", async () => {
         await runDesignSystemE2E({
             buildDir: "dist",
             devCssPath: "@tanstack-start/styles.css?routes=__root__%2C%2F",
             fixtureRoot,
             framework: "tanstack-start",
-            zeroRuntimeDir: "dist/client",
             prepare: () =>
                 cleanPaths([
                     path.join(fixtureRoot, "dist"),

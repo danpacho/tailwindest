@@ -21,6 +21,7 @@ pnpm --filter @tailwindest/compiler e2e:design-system-next
 - Shared design-system page completeness.
 - Dev and production computed-style parity.
 - Tailwind candidate and exclusion manifest.
-- Zero-runtime client bundle checks.
+- Runtime-preserved API behavior for `tw.join`, `*.style()`, `*.compose()`,
+  and `tw.mergeRecord()`.
 - Screenshot artifacts under
   `packages/tailwindest-compiler/e2e/.artifacts/design-system-screenshots/next/`.

@@ -119,18 +119,6 @@ export const requiredExcludedCandidates = [
     raw("border", "violet", "600"),
 ] as const
 
-export const zeroRuntimeForbiddenTokens = [
-    "createTools",
-    "PrimitiveStyler",
-    "ToggleStyler",
-    "RotaryStyler",
-    "VariantsStyler",
-    "Styler.deepMerge",
-    "flattenStyleRecord",
-    "toClass",
-    "toDef",
-] as const
-
 export const expectedDesignSystemCases = {
     "button.style.class": {
         api: "style.class",
@@ -162,18 +150,15 @@ export const expectedDesignSystemCases = {
         staticClass: styleStyleClass,
         staticStyle: {
             display: "inline-flex",
-            borderColor: "border-slate-300",
-            focus: {
-                borderColor: "border-sky-500",
-                ring: "ring-2",
-            },
+            borderColor: "focus:border-sky-500",
+            ring: "focus:ring-2",
         },
         dynamicStates: {
             default: styleStyleClass,
             focus: styleStyleClass,
         },
         candidates: ["focus:border-sky-500", "focus:ring-2"],
-        excludedCandidates: [raw("border", "sky", "500"), raw("ring", "2")],
+        excludedCandidates: [],
         computed: ["borderColor", "outlineStyle", "paddingLeft"],
     },
     "card.style.compose": {
@@ -192,10 +177,7 @@ export const expectedDesignSystemCases = {
             "hover:border-cyan-500",
             "focus:text-sky-600",
         ],
-        excludedCandidates: [
-            raw("border", "cyan", "500"),
-            raw("text", "sky", "600"),
-        ],
+        excludedCandidates: [],
         computed: ["backgroundColor", "borderColor", "color"],
     },
     "toggle.toggle.class": {
@@ -220,10 +202,12 @@ export const expectedDesignSystemCases = {
         staticStyle: {
             width: "w-5",
             height: "h-5",
-            "aria-checked": {
-                backgroundColor: "bg-emerald-600",
-                borderColor: "border-emerald-600",
-            },
+            backgroundColor: ["bg-white", "aria-checked:bg-emerald-600"],
+            borderColor: [
+                "border-slate-400",
+                "aria-checked:border-emerald-600",
+            ],
+            ring: "focus:ring-2",
         },
         dynamicStates: {
             unchecked:
@@ -236,7 +220,7 @@ export const expectedDesignSystemCases = {
             "aria-checked:border-emerald-600",
             "focus:ring-2",
         ],
-        excludedCandidates: [raw("ring", "2")],
+        excludedCandidates: [],
         computed: ["backgroundColor", "borderColor", "width", "height"],
     },
     "toggle.toggle.compose": {
@@ -409,10 +393,9 @@ export const expectedDesignSystemCases = {
         tokenGroup: "merge-record",
         staticClass: mergeRecordDefaultClass,
         staticStyle: {
-            borderColor: "border-slate-300",
-            "data-open": {
-                backgroundColor: "bg-violet-50",
-            },
+            borderColor: "border-violet-500",
+            backgroundColor: "bg-violet-100",
+            color: "text-violet-900",
         },
         dynamicStates: {
             default: mergeRecordDefaultClass,

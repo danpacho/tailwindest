@@ -14,12 +14,11 @@ const nextBin = path.join(repoRoot, "node_modules/.bin/next")
 const tsxBin = path.join(repoRoot, "node_modules/.bin/tsx")
 
 describe("Next App Router design-system E2E", () => {
-    it("compiles every createTools API across webpack dev and production", async () => {
+    it("validates class-output lowering and runtime-preserved APIs across webpack dev and production", async () => {
         await runDesignSystemE2E({
             buildDir: ".next",
             fixtureRoot,
             framework: "next",
-            zeroRuntimeDir: ".next/static",
             prepare: async () => {
                 await cleanPaths([
                     path.join(fixtureRoot, "app"),
