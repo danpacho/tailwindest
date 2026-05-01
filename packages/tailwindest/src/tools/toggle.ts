@@ -57,10 +57,13 @@ export class ToggleStyler<
      * @param condition toggle condition
      * @param extraStyle extra stylesheet
      */
-    public style(condition: boolean, extraStyle?: StyleType): StyleType {
+    public style(
+        condition: boolean,
+        ...extraStyles: Array<StyleType>
+    ): StyleType {
         const inquired = this._rotary.style(condition ? "T" : "F")
-        if (!extraStyle) inquired
-        return Styler.deepMerge(inquired, extraStyle)!
+        if (extraStyles.length === 0) return inquired
+        return Styler.deepMerge(inquired, ...extraStyles)!
     }
 
     public compose(...styles: Array<StyleType>): ToggleStyler<StyleType> {
