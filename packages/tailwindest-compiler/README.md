@@ -1,41 +1,40 @@
 # @tailwindest/compiler
 
+> **Deprecated / internal experiment**
+>
+> `@tailwindest/compiler` is private and must not be published to npm. The
+> package is retained only for internal experiments and historical validation of
+> nested variant materialization. Public projects should use runtime
+> Tailwindest authoring with `CreateTailwindest`.
+
 <div align="center">
 <img src="../../images/tailwindest-compiler.png" width="550px" alt="tailwindest compiler banner" />
 </div>
 
-Tailwindest compiler for nested variant lowering and Tailwind CSS v4 candidate
-manifest bridging.
+Deprecated Tailwindest compiler experiment for nested variant lowering and
+Tailwind CSS v4 candidate manifest bridging.
 
-`@tailwindest/compiler` lowers `CreateCompiledTailwindest` nested variant
-authoring into exact Tailwind class candidates and class strings, then exposes
-those candidates to Tailwind through `@source inline()`. It is not a public
-contract for general static optimization of every Tailwindest runtime value.
-Calls that require runtime semantics remain Tailwindest runtime calls with
-diagnostics and manifest candidates where they can be known safely.
+`@tailwindest/compiler` was designed to lower `CreateCompiledTailwindest`
+nested variant authoring into exact Tailwind class candidates and class strings,
+then expose those candidates to Tailwind through `@source inline()`. It is no
+longer a release target or a public static optimization contract.
 
 ## Status
 
-This package is prepared for production packaging with a deliberately small
-public API surface:
+This package is deprecated and private:
 
-- `@tailwindest/compiler`
-- `@tailwindest/compiler/vite`
+- npm publish is blocked by `private: true`
+- `prepublishOnly` fails intentionally if publish is attempted
+- package APIs are internal and experimental
 
-Internal analyzer, resolver, transform, and Tailwind manifest modules are not
-public npm APIs.
+No compiler API should be documented or promoted as a stable npm surface.
 
 ## Installation
 
-```bash
-pnpm add -D @tailwindest/compiler
-pnpm add tailwindest tailwindcss @tailwindcss/vite vite
-```
+There is no public installation path. Keep any compiler usage inside this
+monorepo as an internal experiment.
 
-Tailwind CSS and Vite are peer dependencies because applications own their
-framework and Tailwind versions.
-
-## Vite Usage
+## Internal Vite Usage
 
 Place `tailwindest()` before `tailwindcss()`:
 
@@ -60,9 +59,11 @@ and injects the Tailwind CSS v4 `@source inline()` candidate manifest into CSS
 entries. During CSS processing it also loads Tailwind variant metadata through
 `@tailwindest/tailwind-internal`, the same internal Tailwind compiler layer used
 by `create-tailwind-type`. The compiler does not maintain a hard-coded variant
-key list.
+key list. When CSS variant metadata changes during dev, cached
+transform-eligible JavaScript modules are reprocessed before HMR invalidation so
+debug, dev, and build output stay aligned.
 
-## Programmatic Usage
+## Internal Programmatic Usage
 
 ```ts
 import { compile, compileAsync } from "@tailwindest/compiler"
@@ -100,6 +101,15 @@ manifest.
 There is no compiler policy switch. Production builds, development builds,
 debug manifests, and programmatic compilation all use this same contract.
 
+The manifest records Tailwind candidates as whitespace-delimited tokens. Runtime
+class output is preserved exactly, but candidate collection splits embedded
+newlines, tabs, and spaces before emitting `@source inline()`.
+
+Relative static imports are resolved only inside the local source graph. Exact
+paths are tried first, then `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`,
+`.mjs`, `.cjs`, and matching `index.*` files. Package, alias, and
+`package.json` resolution remain outside the compiler contract.
+
 ## Nested Variants
 
 Nested variant prefix generation is owned by the compiler. Normal Tailwindest
@@ -124,6 +134,21 @@ Explicitly prefixed class strings remain valid and are not double-prefixed, but
 new code should prefer nested variant keys for editor clarity and compiler
 diagnostics.
 
+Direct string and array leaves at variant-looking keys remain structural
+runtime-compatible leaves. They do not infer a variant prefix, even when CSS
+metadata is loaded:
+
+```ts
+tw.style({ dark: "bg-red-900" }).class()
+// "bg-red-900"
+
+tw.style({ dark: "dark:bg-red-900" }).class()
+// "dark:bg-red-900"
+
+tw.style({ dark: { backgroundColor: "bg-red-900" } }).class()
+// "dark:bg-red-900"
+```
+
 Nested shorthand is compile-required class-output syntax. Runtime-visible
 object or styler channels such as `*.style()`, `*.compose()`, and
 `tw.mergeRecord()` should use runtime-compatible records, including explicitly
@@ -147,6 +172,22 @@ release compile contract is intentionally smaller than the runtime API.
   `tw.mergeRecord(...)` are never release replacement targets
 
 Unsupported dynamic values remain runtime fallbacks with diagnostics.
+
+Exact replacement also fails closed for runtime-observable setup and ordering:
+
+- same-file static bindings must be declared before the use site
+- local static objects that are mutated or escape through unknown functions are
+  not treated as exact compile inputs
+- unused `createTools(...)` setup is removed only when erasing the initializer
+  cannot skip observable option evaluation
+- `.class(...extra)` accepts only the runtime-compatible extra token surface:
+  strings and one-level arrays of strings. Object dictionaries remain valid for
+  `tw.join()` and `tw.def()`, but not for styler `.class()` extras.
+
+When nested shorthand needs variant metadata and no resolver is available, the
+call remains a runtime fallback with `MISSING_COMPILED_VARIANT_METADATA`. The
+manifest still keeps the raw structural candidates that runtime would emit; the
+compiler does not synthesize guessed prefixes.
 
 ## Debug Artifacts
 

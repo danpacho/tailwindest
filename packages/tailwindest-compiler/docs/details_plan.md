@@ -1,8 +1,12 @@
 # Tailwindest Compiler Production Implementation Plan
 
-This plan is the release-oriented implementation contract for
-`@tailwindest/compiler`. It replaces earlier exploratory notes and is aligned
-with the final architecture in `ARCHITECTURE.md`.
+> **Deprecated / internal experiment**
+>
+> This plan is retained only as historical implementation context.
+> `@tailwindest/compiler` is private, deprecated, and must not be published.
+
+This plan was the release-oriented implementation contract for
+`@tailwindest/compiler`. It is no longer a public release plan.
 
 ## Goals
 
@@ -42,7 +46,8 @@ Requirements:
   `@tailwindest/core`.
 - Keep compiler-only nested variant prefixing in
   `compiled_style_normalizer.ts`, backed by Tailwind variant metadata rather
-  than a hard-coded allowlist.
+  than a hard-coded allowlist. Only object-valued variant keys infer prefixes;
+  direct string and array leaves at variant-looking keys stay structural.
 - Support `join`, `def`, `mergeProps`, and `mergeRecord`.
 - Separate exact compilation from unsupported runtime fallback.
 
@@ -68,15 +73,19 @@ Requirements:
 - Prove that receivers originate from `createTools()`.
 - Support aliases, imports, re-exports, exported constants, destructuring, and
   styler variables.
-- Parse `.ts`, `.tsx`, `.js`, and `.jsx` with the correct TypeScript script
-  kind.
+- Resolve local relative source imports by exact path, then `.ts`, `.tsx`,
+  `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, then matching `index.*`
+  files.
+- Parse TSX/JSX files with the correct TypeScript script kind and keep other
+  supported source extensions in the TS-compatible parse path.
 - Detect unsupported static values with actionable diagnostics.
 
 Verification:
 
 - Compile receivers that are not named `tw` when provenance is proven.
 - Reject fake receivers even when method names match Tailwindest methods.
-- Cover cross-file imports and circular reference protection.
+- Cover cross-file imports, extensionless source imports, directory `index.*`
+  imports, and circular reference protection.
 
 ## Phase 3: API Compile Surface
 
@@ -100,6 +109,8 @@ Dynamic strategy:
 - `rotary` emits lookup maps for dynamic keys.
 - `variants` emits additive maps and conflict tables when bounded by
   `variantTableLimit`.
+- Dynamic `variants().class()` conflict table keys use structural JSON tuples so
+  missing values and delimiter-like axis/value text cannot collide.
 - Overflow preserves the runtime call with manifest retention.
 
 Verification:
@@ -142,11 +153,15 @@ Files:
 Requirements:
 
 - Maintain per-file candidates, global candidates, and effective exclusions.
+- Split manifest candidates on all whitespace while preserving observable
+  runtime class output.
 - Inject exactly one Tailwindest block into each CSS entry.
 - Load Tailwind variant groups from the active CSS entry through
   `@tailwindest/tailwind-internal`.
 - Preserve arbitrary values, stacked variants, data/aria variants, and escaped
   characters.
+- Preserve escaped CSS string delimiters and avoid raw newline/tab candidate
+  groups in `@source inline()`.
 - Support `@import "tailwindcss" source(none);`.
 
 Verification:
@@ -173,6 +188,9 @@ Requirements:
 - Provide the `tailwindest()` plugin pair.
 - Run pre-scan during build and dev startup.
 - Invalidate dependent modules and CSS entries during HMR.
+- Reprocess cached transform-eligible JavaScript when CSS variant metadata
+  changes, is removed, or cannot be read; skip that reprocessing when CSS text
+  changes but effective variant metadata is unchanged.
 - Normalize paths to POSIX form before manifest operations.
 - Expose only documented public options.
 
@@ -220,7 +238,8 @@ Files:
 
 Requirements:
 
-- Export only `@tailwindest/compiler` and `@tailwindest/compiler/vite`.
+- Keep former `@tailwindest/compiler` and `@tailwindest/compiler/vite` exports
+  internal-only.
 - Generate `.d.mts` files for ESM consumers.
 - Keep internal modules private.
 - Document public options with TSDoc.
@@ -234,9 +253,9 @@ pnpm build
 pnpm --filter @tailwindest/compiler pack:dry
 ```
 
-## Release Acceptance Checklist
+## Historical Release Acceptance Checklist
 
-Run before publishing:
+Historical checklist retained for reference only. Do not publish this package:
 
 ```bash
 pnpm ts:typecheck

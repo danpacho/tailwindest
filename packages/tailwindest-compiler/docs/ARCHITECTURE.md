@@ -1,5 +1,11 @@
 # Tailwindest Compiler Architecture
 
+> **Deprecated / internal experiment**
+>
+> The compiler is no longer a public release target. This document is retained
+> as internal historical architecture context only. `@tailwindest/compiler` is
+> private and must not be published.
+
 `@tailwindest/compiler` is the Tailwindest compiler layer for nested variant
 lowering and Tailwind CSS v4 candidate manifest bridging. It lowers
 `CreateCompiledTailwindest` nested variant authoring into exact Tailwind class
@@ -7,8 +13,8 @@ candidates and class strings, then exposes those candidates to Tailwind through
 `@source inline()`. It is not a release contract for a general Tailwindest
 partial evaluator.
 
-This document defines the production architecture for Vite 8 and Tailwind CSS
-4.2.
+This document records the historical internal architecture for Vite 8 and
+Tailwind CSS 4.2.
 
 The compiler intentionally has no public policy switch. Its single production
 contract is nested variant lowering plus Tailwind CSS manifest bridging. Exact
@@ -180,6 +186,12 @@ detection enabled; Tailwindest still injects explicit candidates.
 also required as top-level classes. This prevents shorthand leaves such as
 `bg-red-900` from leaking when the semantic class is `dark:bg-red-900`.
 
+Candidate collection is token-based. Runtime class output keeps the authored
+string shape, but manifest candidates are split on all whitespace before they
+reach `@source inline()`. This prevents embedded newlines or tabs from becoming
+raw Tailwind candidate groups while preserving the observable JavaScript class
+string.
+
 ## Lowering Engine
 
 Dev and production parity requires more than sharing one helper function. The
@@ -237,7 +249,10 @@ Variant keys are loaded from the Tailwind CSS design system through
 `@tailwindest/tailwind-internal`. Built-in keys such as `dark`, `hover`,
 `focus`, responsive breakpoints, group/peer variants, data/aria variants, and
 arbitrary variants are therefore metadata-driven rather than hard-coded.
-Recognized variant keys accumulate prefixes for every string leaf below them.
+Recognized variant keys accumulate prefixes only when the key owns an object
+branch. Direct string or array leaves at variant-looking keys remain structural
+runtime-compatible leaves and do not infer a prefix, even when metadata is
+available.
 
 ```ts
 tw.style({
@@ -250,6 +265,20 @@ tw.style({
     backgroundColor: "bg-red-50",
 }).class()
 // "dark:bg-red-900 dark:hover:bg-red-950 bg-red-50"
+```
+
+Use explicit string prefixes or object-valued shorthand when a variant prefix is
+intended:
+
+```ts
+tw.style({ dark: "bg-red-900" }).class()
+// "bg-red-900"
+
+tw.style({ dark: "dark:bg-red-900" }).class()
+// "dark:bg-red-900"
+
+tw.style({ dark: { backgroundColor: "bg-red-900" } }).class()
+// "dark:bg-red-900"
 ```
 
 Explicitly prefixed leaves remain accepted for compatibility and are not
@@ -267,6 +296,11 @@ metadata, the compiler preserves the runtime call and emits
 `MISSING_COMPILED_VARIANT_METADATA`. Programmatic users should call
 `compileAsync({ cssRoot })` or `compileAsync({ cssSource })`; the Vite plugin
 loads this metadata automatically from CSS entries.
+
+Resolver-less fallback still records runtime-compatible structural candidates.
+For example, `{ hover: { color: "text-blue-500" } }` without metadata records
+`text-blue-500`, not `hover:text-blue-500`. This keeps debug, development, and
+build manifests aligned with the preserved runtime call.
 
 ## Release Compile Surface
 
@@ -302,12 +336,36 @@ Unsupported exact values:
 - function call results, getters, class instances, `Date`, `Math.random`, and
   environment values
 - mutated objects
+- objects that may escape through unknown function calls
 - unknown spreads
 - values that depend on runtime control flow
+- same-file bindings used before their declaration or initialization point
 - unproven receiver provenance
 
 Unsupported exact values preserve the runtime call and record every statically
 knowable candidate in the manifest.
+
+`createTools(...)` setup removal is also guarded by runtime observability. A
+now-unused local `const tw = createTools()` may be erased after exact
+replacement, but calls with side-effectful or unknown options, such as
+`createTools({ other: sideEffect() } as any)` or `createTools(options)`, are
+preserved with their imports.
+
+Styler `.class(...extra)` follows the runtime `AdditionalClassTokens` contract:
+extras are strings or one-level arrays of strings. Escaped object, number,
+boolean, and other unsupported extras are runtime fallbacks. `tw.join()` and
+`tw.def()` keep their broader static class-list object dictionary semantics.
+
+Local module resolution is intentionally narrow and source-graph only:
+
+1. Non-relative specifiers are not resolved by the compiler.
+2. Exact relative paths are tried first, preserving explicit-extension imports.
+3. Extensionless relative imports then try `.ts`, `.tsx`, `.mts`, `.cts`, `.js`,
+   `.jsx`, `.mjs`, and `.cjs`.
+4. Directory imports then try `index` with the same extension order.
+
+The compiler does not implement Vite aliases, tsconfig paths, package exports,
+or `package.json` main/module resolution.
 
 ## Replacement Safety
 
@@ -343,6 +401,12 @@ The dynamic class-output path uses a conflict graph:
 This preserves Tailwindest deep merge semantics while keeping lookup generation
 inside the class-output boundary.
 
+Dynamic `variants().class()` lookup keys are structural JSON tuples, not
+delimiter-joined strings. Each axis contributes either `[axis, 0]` for a missing
+runtime value or `[axis, 1, value]` for a present value. This keeps missing
+values distinct from real variant values and avoids collisions when axis names
+or values contain delimiter-like text.
+
 ## Debug Manifest
 
 Debug mode writes `.tailwindest/debug-manifest.json` with:
@@ -357,16 +421,22 @@ Debug mode writes `.tailwindest/debug-manifest.json` with:
 The debug manifest is the primary production support artifact for explaining
 why a call compiled or fell back.
 
-## Programmatic API Boundary
+## Historical Programmatic API Boundary
 
-The stable package exports are `@tailwindest/compiler` and
-`@tailwindest/compiler/vite`.
+The former package export targets were `@tailwindest/compiler` and
+`@tailwindest/compiler/vite`. They are now internal-only and must not be
+published.
 
 - `compile()` is a file-local transform. It does not read Tailwind CSS files.
 - `compileAsync()` loads Tailwind design-system variant metadata from `cssRoot`
   or `cssSource` before running the same transform.
 - The Vite plugin owns graph-wide manifest state, CSS `@source inline()`
   injection, debug manifest writing, and HMR invalidation.
+- When CSS variant metadata changes, is removed, or cannot be read during HMR,
+  cached transform-eligible JavaScript modules are reprocessed with the new
+  resolver state and included in invalidation. CSS edits with identical
+  effective variant metadata do not reprocess those JavaScript modules solely
+  because the CSS text changed.
 
 Build tools that use `compile()` or `compileAsync()` directly must forward
 returned candidates into their Tailwind CSS build themselves.

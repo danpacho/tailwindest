@@ -1,8 +1,12 @@
 # Tailwindest Compiler Architecture Decision Review
 
-This document records the production decisions behind
-`@tailwindest/compiler`. It is intentionally written as a release decision log,
-not as an exploratory brainstorming document.
+> **Deprecated / internal experiment**
+>
+> This review is retained only as historical decision context.
+> `@tailwindest/compiler` is private, deprecated, and must not be published.
+
+This document records the historical decisions behind `@tailwindest/compiler`.
+It is no longer a public release decision log.
 
 ## Executive Summary
 
@@ -112,39 +116,48 @@ The production algorithm:
 
 ## 6. Public API Coverage
 
-The compiler must cover every public `createTools()` API where exact static
-evaluation is possible:
+The compiler recognizes the public `createTools()` surface, but exact
+JavaScript replacement is intentionally limited to class-output positions where
+the final observable value can be proven.
 
-- `style`
-- `toggle`
-- `rotary`
-- `variants`
-- `join`
-- `def`
-- `mergeProps`
-- `mergeRecord`
+Release replacement targets are:
 
-Every styler method must be covered:
+- `tw.style(...).class()`
+- `tw.toggle(...).class()`
+- `tw.rotary(...).class()`
+- `tw.variants(...).class()`
+- `tw.def(...)`
+- `tw.mergeProps(...)`
 
-- `.class()`
-- `.style()`
-- `.compose()`
+`tw.join(...)` is candidate collection only. Runtime-visible object or styler
+channels such as `*.style()`, `*.compose()`, and `tw.mergeRecord(...)` are
+preserved as runtime calls while retaining statically knowable manifest
+candidates and diagnostics.
 
 The design-system E2E fixture exists to prove this coverage in a realistic page
 instead of only isolated unit snippets.
 
 ## 7. Risk Register
 
-| Risk                                              | Impact                           | Mitigation                                       |
-| ------------------------------------------------- | -------------------------------- | ------------------------------------------------ |
-| Tailwind does not scan transformed JS             | Missing CSS                      | Manifest bridge through CSS                      |
-| CSS transform runs before manifest initialization | Missing initial CSS              | Pre-scan and shared context                      |
-| HMR keeps stale candidates                        | Dev/prod divergence              | Reverse dependency invalidation                  |
-| Custom merger is not deterministic                | Wrong classes                    | Exact compile only for supported mergers         |
-| Variant table explosion                           | Bundle bloat                     | Conflict graph and table limit                   |
-| Unsupported value is silently skipped             | Runtime/CSS mismatch             | Fallback diagnostics and runtime preservation    |
-| Raw nested leaves leak                            | Extra CSS and semantic confusion | Effective exclusions with `@source not inline()` |
-| Next/TanStack adapter drift                       | Framework mismatch               | Dedicated E2E fixtures and screenshots           |
+| Risk                                              | Impact                            | Mitigation                                                                                       |
+| ------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Tailwind does not scan transformed JS             | Missing CSS                       | Manifest bridge through CSS                                                                      |
+| CSS transform runs before manifest initialization | Missing initial CSS               | Pre-scan and shared context                                                                      |
+| HMR keeps stale candidates                        | Dev/prod divergence               | Reverse dependency invalidation and CSS metadata-triggered JS reprocessing                       |
+| CSS text changes without metadata changes         | Unnecessary HMR churn             | Compare effective variant metadata before cached JS reprocessing                                 |
+| Extensionless local imports resolve differently   | Missed static values/provenance   | Exact-path-first local resolver with source extension and `index.*` matrix                       |
+| Dynamic variant lookup key collisions             | Wrong class table entry           | Structural JSON tuple keys for dynamic `variants().class()` lookups                              |
+| Whitespace inside class strings enters safelist   | Invalid `@source inline()` groups | Split manifest candidates on all whitespace while preserving runtime output                      |
+| Direct variant-looking string leaves drift        | Metadata-dependent class output   | Treat direct string/array leaves as structural; infer prefixes only from object-valued shorthand |
+| Missing variant metadata drops fallback CSS       | Dev/debug/build manifest drift    | Preserve runtime structural candidates while keeping `MISSING_COMPILED_VARIANT_METADATA`         |
+| Declaration-before-use is compiled away           | Runtime TDZ or ordering mismatch  | Require same-file bindings to be declared before each static use site                            |
+| Runtime setup side effects are cleaned up         | Removed observable behavior       | Erase unused `createTools()` setup only when the initializer is side-effect-free                 |
+| Escaped `.class(...extra)` inputs act like `join` | Runtime/compiler class mismatch   | Limit styler `.class()` extras to strings and one-level string arrays                            |
+| Custom merger is not deterministic                | Wrong classes                     | Exact compile only for supported mergers                                                         |
+| Variant table explosion                           | Bundle bloat                      | Conflict graph and table limit                                                                   |
+| Unsupported value is silently skipped             | Runtime/CSS mismatch              | Fallback diagnostics and runtime preservation                                                    |
+| Raw nested leaves leak                            | Extra CSS and semantic confusion  | Effective exclusions with `@source not inline()`                                                 |
+| Next/TanStack adapter drift                       | Framework mismatch                | Dedicated E2E fixtures and screenshots                                                           |
 
 ## Final Decision
 
@@ -159,4 +172,5 @@ shared evaluator
   + framework-specific adapter validation
 ```
 
-This is the release baseline for `@tailwindest/compiler`.
+This was the former release baseline for `@tailwindest/compiler`; it is now
+historical context only.
