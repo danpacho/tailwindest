@@ -1,7 +1,5 @@
-import {
-    createTools,
-    type CreateCompiledTailwindest,
-} from "tailwindest"
+import { createTools } from "tailwindest"
+import type { CreateCompiledTailwindest } from "../../../../tailwindest/src/create_compiled_tailwindest"
 import type { TailwindNestGroups } from "./tailwind"
 
 type FixtureTailwind = {
