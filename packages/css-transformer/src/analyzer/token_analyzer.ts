@@ -1,14 +1,10 @@
 import type { CSSPropertyResolver } from "create-tailwind-type"
 import type { ParsedToken } from "../types"
-import type { CssTransformerResolvedOutputMode } from "../context/output_mode"
 import { extractVariants, splitClassString } from "./split_utils"
 
 export interface TokenAnalyzer {
     analyze(classNames: string | string[]): ParsedToken[]
-    buildObjectTree(
-        tokens: ParsedToken[],
-        options?: { outputMode?: CssTransformerResolvedOutputMode }
-    ): Record<string, any>
+    buildObjectTree(tokens: ParsedToken[]): Record<string, any>
 }
 
 export class TokenAnalyzerImpl implements TokenAnalyzer {
@@ -43,12 +39,8 @@ export class TokenAnalyzerImpl implements TokenAnalyzer {
         })
     }
 
-    public buildObjectTree(
-        tokens: ParsedToken[],
-        options: { outputMode?: CssTransformerResolvedOutputMode } = {}
-    ): Record<string, any> {
+    public buildObjectTree(tokens: ParsedToken[]): Record<string, any> {
         const result: Record<string, any> = {}
-        const outputMode = options.outputMode ?? "runtime"
 
         for (const token of tokens) {
             if (!token.property) continue // Skip unresolved tokens
@@ -79,8 +71,7 @@ export class TokenAnalyzerImpl implements TokenAnalyzer {
 
             // Assign property at leaf level
             const propKey = token.property
-            const leafValue =
-                outputMode === "compiled" ? token.utility : token.original
+            const leafValue = token.original
             if (!(propKey in currentLevel)) {
                 currentLevel[propKey] = leafValue
             } else {
