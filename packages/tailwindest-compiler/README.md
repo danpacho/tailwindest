@@ -4,13 +4,15 @@
 <img src="../../images/tailwindest-compiler.png" width="550px" alt="tailwindest compiler banner" />
 </div>
 
-Progressive CSS-in-JS compiler for Tailwindest.
+Tailwindest compiler for nested variant lowering and Tailwind CSS v4 candidate
+manifest bridging.
 
-`@tailwindest/compiler` evaluates supported Tailwindest `createTools()` calls
-at build time and replaces them with static Tailwind class strings, style
-objects, or bounded lookup tables. Calls that cannot be proven static remain as
-runtime Tailwindest calls with diagnostics and manifest candidates where they
-can be known safely.
+`@tailwindest/compiler` lowers `CreateCompiledTailwindest` nested variant
+authoring into exact Tailwind class candidates and class strings, then exposes
+those candidates to Tailwind through `@source inline()`. It is not a public
+contract for general static optimization of every Tailwindest runtime value.
+Calls that require runtime semantics remain Tailwindest runtime calls with
+diagnostics and manifest candidates where they can be known safely.
 
 ## Status
 
@@ -53,9 +55,9 @@ export default defineConfig({
 })
 ```
 
-The plugin pair performs JavaScript/TypeScript replacement and injects the
-Tailwind CSS v4 `@source inline()` candidate manifest into CSS entries.
-During CSS processing it also loads Tailwind variant metadata through
+The plugin pair performs JavaScript/TypeScript nested variant class lowering
+and injects the Tailwind CSS v4 `@source inline()` candidate manifest into CSS
+entries. During CSS processing it also loads Tailwind variant metadata through
 `@tailwindest/tailwind-internal`, the same internal Tailwind compiler layer used
 by `create-tailwind-type`. The compiler does not maintain a hard-coded variant
 key list.
@@ -86,10 +88,11 @@ sites as runtime fallbacks instead of guessing variant keys.
 
 ## Progressive Runtime Fallback
 
-The compiler has one public behavior: exact calls are compiled when they can be
-proven statically, and unsupported calls are preserved for Tailwindest runtime.
-Fallback diagnostics explain why a call remained at runtime, and statically
-knowable Tailwind candidates are retained in the manifest.
+The compiler has one public behavior: nested variant class-output calls compile
+only when they can be proven exact, and unsupported calls are preserved for
+Tailwindest runtime. Fallback diagnostics explain why a call remained at
+runtime, and statically knowable Tailwind candidates are retained in the
+manifest.
 
 There is no compiler policy switch. Production builds, development builds,
 debug manifests, and programmatic compilation all use this same fallback-safe
@@ -119,26 +122,28 @@ Explicitly prefixed class strings remain valid and are not double-prefixed, but
 new code should prefer nested variant keys for editor clarity and compiler
 diagnostics.
 
-## Supported API Surface
+Nested shorthand is compile-required class-output syntax. Runtime-visible
+object or styler channels such as `*.style()`, `*.compose()`, and
+`tw.mergeRecord()` should use runtime-compatible records, including explicitly
+prefixed class strings when a runtime object needs variant behavior. If raw
+nested shorthand reaches those channels, the compiler preserves the call and
+reports `COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT`.
 
-The compiler targets the public Tailwindest `createTools()` API:
+## Release Compile Surface
+
+The compiler recognizes the public Tailwindest `createTools()` API, but the
+release compile contract is intentionally smaller than the runtime API. During
+this migration, implementation helpers may still cover broader APIs; those
+helpers are transitional and are not the public release objective.
 
 - `tw.style(...).class()`
-- `tw.style(...).style()`
-- `tw.style(...).compose()`
 - `tw.toggle(...).class()`
-- `tw.toggle(...).style()`
-- `tw.toggle(...).compose()`
 - `tw.rotary(...).class()`
-- `tw.rotary(...).style()`
-- `tw.rotary(...).compose()`
 - `tw.variants(...).class()`
-- `tw.variants(...).style()`
-- `tw.variants(...).compose()`
-- `tw.join(...)`
-- `tw.def(...)`
-- `tw.mergeProps(...)`
-- `tw.mergeRecord(...)`
+- `tw.def(...)` and `tw.mergeProps(...)` as exact class-output helpers
+- `tw.join(...)` as a candidate/class helper, not a standalone compiler goal
+- runtime-visible object/styler values such as `*.style()`, `*.compose()`, and
+  `tw.mergeRecord(...)` are not release replacement targets
 
 Unsupported dynamic values remain runtime fallbacks with diagnostics.
 

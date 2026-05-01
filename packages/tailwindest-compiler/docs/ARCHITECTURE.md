@@ -1,19 +1,19 @@
 # Tailwindest Compiler Architecture
 
-`@tailwindest/compiler` is the progressive compiler for Tailwindest. It
-evaluates type-safe `createTools()` style objects at build time and replaces
-statically proven calls with Tailwind class strings, static style records, or
-bounded lookup structures. Calls that cannot be proven exact remain Tailwindest
-runtime calls with diagnostics and manifest candidates where they can be known
-safely.
+`@tailwindest/compiler` is the Tailwindest compiler layer for nested variant
+lowering and Tailwind CSS v4 candidate manifest bridging. It lowers
+`CreateCompiledTailwindest` nested variant authoring into exact Tailwind class
+candidates and class strings, then exposes those candidates to Tailwind through
+`@source inline()`. It is not a release contract for a general Tailwindest
+partial evaluator.
 
 This document defines the production architecture for Vite 8 and Tailwind CSS
 4.2.
 
 The compiler intentionally has no public policy switch. Its single production
-contract is fallback-safe compilation: deterministic call sites are replaced,
-and call sites that require runtime semantics are preserved with diagnostics
-and manifest candidates.
+contract is fallback-safe nested variant compilation: exact class-output call
+sites may be replaced, and call sites that require runtime semantics are
+preserved with diagnostics and manifest candidates.
 
 ## Reference Targets
 
@@ -55,7 +55,7 @@ Project source files
         v
 Tailwindest pre-scan
   - scan configured source roots
-  - detect static createTools() usage
+  - detect Tailwindest createTools() provenance
   - initialize candidate and exclusion manifests
         |
         +------------------------------+
@@ -67,10 +67,10 @@ tailwindest:transform             tailwindest:source
   - include/exclude guard         - inject @source inline(...)
   - lexical gate                  - inject @source not inline(...)
   - TS/TSX semantic detection     - load Tailwind variant metadata
-  - static evaluation             - keep CSS source maps compatible
+  - nested variant lowering       - keep CSS source maps compatible
   - collect replacements
   - reverse apply with MagicString
-  - emit class literals, style objects, or lookups
+  - emit exact class literals or preserve runtime calls
         |                              |
         +--------------+---------------+
                        |
@@ -78,7 +78,7 @@ tailwindest:transform             tailwindest:source
               Tailwind CSS v4 build
                        |
                        v
-        Browser receives static class strings and objects
+        Browser receives exact class strings and Tailwindest runtime calls
 ```
 
 ## Vite 8 Integration
@@ -180,30 +180,30 @@ detection enabled; Tailwindest still injects explicit candidates.
 also required as top-level classes. This prevents shorthand leaves such as
 `bg-red-900` from leaking when the semantic class is `dark:bg-red-900`.
 
-## Evaluation Engine
+## Lowering Engine
 
-Dev and production parity requires more than sharing one evaluator function.
-The following components must be shared:
+Dev and production parity requires more than sharing one helper function. The
+shared compiler path is constrained to nested variant normalization, class
+candidate extraction, exact class-output replacement, and fallback policy. The
+following components must be shared:
 
 - static resolver and symbol provenance rules
-- evaluator semantics
+- nested variant lowering semantics
 - merger policy
 - candidate and exclusion manifest bridge
 - fallback diagnostic policy
 - source map and debug manifest policy
 
-The evaluator models the public `createTools()` API:
+The release lowerer boundary is intentionally narrower than the full
+Tailwindest runtime API:
 
 ```ts
-interface EvaluationEngine {
-    mergeRecord(styles: StaticStyleObject[]): StaticStyleObject
-    mergeProps(styles: StaticStyleObject[], merger: MergerPolicy): string
-    join(values: StaticClassValue[], merger: MergerPolicy): string
-    def(
-        classList: StaticClassValue[],
-        styles: StaticStyleObject[],
+interface LoweringEngine {
+    collectCandidates(call: TailwindestCall): CandidateRecord[]
+    compileClassOutput(
+        call: TailwindestClassOutputCall,
         merger: MergerPolicy
-    ): string
+    ): string | RuntimeFallback
 }
 ```
 
@@ -256,35 +256,35 @@ Explicitly prefixed leaves remain accepted for compatibility and are not
 double-prefixed, but new tests and documentation should prefer nested variant
 syntax.
 
+Nested shorthand is valid only where the compiler can lower to class output.
+Runtime-visible object and styler channels, including `*.style()`,
+`*.compose()`, and `tw.mergeRecord()`, must use runtime-compatible records. Raw
+nested shorthand in those channels is preserved and diagnosed with
+`COMPILED_VARIANT_REQUIRES_CLASS_OUTPUT`.
+
 When no variant resolver is available and nested compiled shorthand requires
 metadata, the compiler preserves the runtime call and emits
 `MISSING_COMPILED_VARIANT_METADATA`. Programmatic users should call
 `compileAsync({ cssRoot })` or `compileAsync({ cssSource })`; the Vite plugin
 loads this metadata automatically from CSS entries.
 
-## API Compile Surface
+## Release Compile Surface
 
-The compiler targets the public surface of
-`packages/tailwindest/src/tools/create_tools.ts`.
+The compiler recognizes the public surface of
+`packages/tailwindest/src/tools/create_tools.ts`, but the release compile
+contract is smaller than the runtime API. During this migration, implementation
+helpers may still cover broader APIs; those helpers are transitional and are
+not the release objective.
 
-| API                                      | Static output              | Dynamic output                   |
-| ---------------------------------------- | -------------------------- | -------------------------------- |
-| `tw.style(obj).class(...extra)`          | class string               | conditional or fallback          |
-| `tw.style(obj).style(...extra)`          | style record               | conditional object or fallback   |
-| `tw.style(obj).compose(...styles)`       | composed styler metadata   | composed lookup or fallback      |
-| `tw.toggle(config).class(condition)`     | selected class string      | ternary                          |
-| `tw.toggle(config).style(condition)`     | selected style record      | ternary object                   |
-| `tw.toggle(config).compose(...styles)`   | composed toggle metadata   | composed ternary                 |
-| `tw.rotary(config).class(key)`           | selected class string      | lookup                           |
-| `tw.rotary(config).style(key)`           | selected style record      | lookup object                    |
-| `tw.rotary(config).compose(...styles)`   | composed rotary metadata   | composed lookup                  |
-| `tw.variants(config).class(props)`       | class string               | bounded lookup or fallback       |
-| `tw.variants(config).style(props)`       | style record               | bounded lookup or fallback       |
-| `tw.variants(config).compose(...styles)` | composed variants metadata | bounded lookup or fallback       |
-| `tw.join(...)`                           | class string               | partial fold or fallback         |
-| `tw.def(...)`                            | class string               | partial fold or fallback         |
-| `tw.mergeProps(...)`                     | class string               | fallback if any style is unknown |
-| `tw.mergeRecord(...)`                    | style record               | fallback if any style is unknown |
+| API group                                      | Release role                                      |
+| ---------------------------------------------- | ------------------------------------------------- |
+| `tw.style(obj).class(...extra)`                | exact nested variant class-output lowering        |
+| `tw.toggle(config).class(condition)`           | exact class-output lowering when condition proves |
+| `tw.rotary(config).class(key)`                 | exact class-output lowering when key proves       |
+| `tw.variants(config).class(props)`             | exact class-output lowering when props prove      |
+| `tw.def(...)` and `tw.mergeProps(...)`         | class-output helpers when all inputs prove exact  |
+| `tw.join(...)`                                 | candidate/class helper, not a standalone goal     |
+| `*.style()`, `*.compose()`, `tw.mergeRecord()` | runtime-visible values; not release replacements  |
 
 Compile eligibility is based on symbol identity, not variable names. A variable
 named `tw` is not enough; the receiver must be proven to originate from
@@ -297,7 +297,7 @@ Supported static values:
 - literals and `as const` object/array structures
 - local `const` bindings
 - imported side-effect-free `const` objects and strings
-- static `compose`, `join`, `def`, `mergeProps`, and `mergeRecord` inputs
+- static class/style inputs needed by nested variant class-output lowering
 
 Unsupported exact values:
 
@@ -325,9 +325,15 @@ Target memory is `O(file size + replacement count + candidate count)` per file.
 Long-lived caches store source text, hashes, manifests, and dependency edges,
 not TypeScript node references.
 
-## Dynamic Variant Optimization
+## Dynamic Variant Boundary
 
-`tw.variants()` is optimized with a conflict graph:
+The release path does not require general lookup-table emission for dynamic
+variants. Exact nested variant class-output replacement is allowed only when the
+variant props can be proven. Otherwise the runtime call is preserved and
+statically knowable candidates are retained in the manifest.
+
+Existing implementation helpers may still use a conflict graph while the
+replacement surface is being narrowed:
 
 1. Compute the style path set touched by each variant axis.
 2. Emit independent axes as additive maps.
@@ -337,8 +343,8 @@ not TypeScript node references.
 5. When the table would exceed the limit, preserve the runtime call and still
    record all static candidates.
 
-This preserves Tailwindest deep merge semantics without forcing full cartesian
-tables for every variant group.
+This preserves Tailwindest deep merge semantics for transitional coverage, but
+general dynamic lookup generation is not the release goal.
 
 ## Debug Manifest
 
@@ -375,10 +381,11 @@ Release validation covers:
 - Vite + Tailwind v4 fixture
 - TanStack Start + Tailwind v4 fixture
 - Next.js App Router webpack fixture through the precompile bridge
-- dense design-system page using every public `createTools()` API
+- dense design-system page with legacy coverage across public `createTools()`
+  APIs
 - dev/prod computed-style parity
 - screenshot artifacts for dev, debug, prod, interactions, and mobile
-- static replacement bundle assertions for fully compiled cases
+- class-output bundle assertions for class-output-only cases
 - raw nested leaf leakage assertions
 - fallback negative tests
 - root Turbo test/build execution, with package-local Vitest configuration and
@@ -386,17 +393,18 @@ Release validation covers:
 
 ## Production Guarantees
 
-The compiler guarantees exact replacement only when all inputs are statically
-known and the merger policy is supported. It does not guarantee exact
-compilation for arbitrary runtime code. Unsupported cases are surfaced through
-runtime fallbacks with manifest retention.
+The compiler guarantees exact nested variant class-output replacement only when
+all inputs are statically known and the merger policy is supported. It does not
+guarantee exact compilation for arbitrary runtime code or runtime-visible
+object/styler values. Unsupported cases are surfaced through runtime fallbacks
+with manifest retention.
 
 The supported production architecture is:
 
 ```text
-shared evaluator
+shared lowering pipeline
   + semantic static resolver
-  + deterministic substitution
+  + deterministic class-output substitution
   + candidate/exclusion manifest
   + Tailwind @source inline() bridge
   + framework-specific adapter contract
