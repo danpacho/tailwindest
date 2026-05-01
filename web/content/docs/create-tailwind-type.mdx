@@ -3,12 +3,18 @@ title: create-tailwind-type
 description: Type generator CLI for tailwindcss.
 ---
 
-<img src="/images/create-tailwind-type-banner.png" width="550px" alt="tailwindest compiler banner" />
+<img
+    src="/images/create-tailwind-type-banner.png"
+    width="550px"
+    alt="create-tailwind-type banner"
+/>
 
 Generates TypeScript definitions from your `tailwind.css` file,
 which allows you to use all of your project's Tailwind CSS classes and variants with full type-safety.
 
-### Installation
+## Install
+
+Run the `create-tailwind-type` directly:
 
 ```bash /create-tailwind-type/
 npx create-tailwind-type
@@ -20,9 +26,8 @@ Tailwind package and active `tailwind.css` automatically.
 
 If your local Tailwind version is older than v4, the generator falls back to
 the internal Tailwind v4 engine for type generation.
-</Callout>
----
 
+</Callout>
 
 ## CLI Options
 
@@ -39,7 +44,7 @@ the internal Tailwind v4 engine for type generation.
 | `-k`           | `--string-kind-variants-only` | Limits the generated types to only string kind variants.                                                                                                   | `false`                |
 | `-o`           | `--optional-property`         | Generates optional properties in the output types, which can be useful for partial configurations.                                                         | `false`                |
 | `-N`           | `--disable-variants`          | Disable variant generation and types, can be increase performance.                                                                                         | `false`                |
-| `-v`           | `--arbitrary-variant`         | Enables arbitrary variant keys such as `data-[state=open]` and `[&_svg]`.                                                                                 | `false`                |
+| `-v`           | `--arbitrary-variant`         | Enables arbitrary variant keys such as `data-[state=open]` and `[&_svg]`.                                                                                  | `false`                |
 | N/A            | `--version`                   | Displays the current CLI version.                                                                                                                          | N/A                    |
 | N/A            | `--help`                      | Displays help and usage information for the CLI tool.                                                                                                      | N/A                    |
 

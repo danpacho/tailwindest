@@ -6,7 +6,7 @@ description: Migrate Tailwind class strings to Tailwindest object styles.
 <img
     src="/images/tailwind-transform.png"
     width="550px"
-    alt="tailwindest compiler banner"
+    alt="tailwindest css transformer banner"
 />
 
 `@tailwindest/css-transformer` is a migration tool. It rewrites supported
@@ -31,8 +31,7 @@ pnpm add -D @tailwindest/css-transformer
 ```
 
 The CLI opens an interactive prompt for target path, Tailwind CSS entry,
-Tailwindest import name, import path, enabled walkers, dry-run mode, and output
-mode.
+Tailwindest import name, import path, enabled walkers, and dry-run mode.
 
 ## What It Converts
 
@@ -53,7 +52,7 @@ export function Button() {
 }
 ```
 
-Compiled-mode output:
+Runtime-mode output:
 
 ```tsx
 import { tw } from "~/tw"
@@ -67,7 +66,7 @@ const buttonButton = tw.style({
     paddingTop: "py-2",
     dark: {
         hover: {
-            backgroundColor: "bg-red-950",
+            backgroundColor: "dark:hover:bg-red-950",
         },
     },
 })
@@ -91,17 +90,12 @@ tw.style({
 
 ## Output Modes
 
-The transformer supports three output modes:
+The transformer is runtime-first:
 
-| Mode       | Target                      | Leaf value                                      |
-| ---------- | --------------------------- | ----------------------------------------------- |
-| `runtime`  | `CreateTailwindest`         | original token, such as `dark:hover:bg-red-950` |
-| `compiled` | `CreateCompiledTailwindest` | raw utility, such as `bg-red-950`               |
-| `auto`     | detected project mode       | runtime unless strong compiler evidence exists  |
-
-Use `runtime` when you are migrating to normal Tailwindest runtime authoring.
-Use `compiled` when the transformed source will be consumed by
-`@tailwindest/compiler` and typed with `CreateCompiledTailwindest`.
+| Mode      | Target              | Leaf value                                      |
+| --------- | ------------------- | ----------------------------------------------- |
+| `runtime` | `CreateTailwindest` | original token, such as `dark:hover:bg-red-950` |
+| `auto`    | safe default        | runtime output                                  |
 
 ## Recommended Mode Selection
 
@@ -111,76 +105,13 @@ npx @tailwindest/css-transformer --mode auto
 
 # Runtime Tailwindest migration
 npx @tailwindest/css-transformer --mode runtime
-
-# Compiler-oriented migration
-npx @tailwindest/css-transformer --mode compiled
 ```
 
-`auto` switches to compiled output only from strong signals:
-
-- a Tailwindest config declaring compiler output
-- Vite config using `@tailwindest/compiler/vite`
-- a precompile bridge using `createCompilerContext`
-- source importing `CreateCompiledTailwindest`
-- explicit CLI/API mode
-
-Weak signals do not switch modes by themselves:
-
-- `.tailwindest/debug-manifest.json`
-- `@tailwindest/compiler` listed in `package.json`
-
-Weak signals produce diagnostics and keep runtime output so existing
-`CreateTailwindest` users are not broken by accident.
-
-## Compiler-Oriented Setup
-
-If you are migrating source for the nested variant compiler, define your
-Tailwindest type with `CreateCompiledTailwindest`:
-
-```ts filename="tw.ts"
-import {
-    createTools,
-    type CreateCompiledTailwindest,
-    type CreateTailwindLiteral,
-} from "tailwindest"
-import type { Tailwind, TailwindNestGroups } from "./tailwind"
-
-export type Tailwindest = CreateCompiledTailwindest<{
-    tailwind: Tailwind
-    tailwindNestGroups: TailwindNestGroups
-    useArbitrary: true
-}>
-
-export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
-
-export const tw = createTools<{
-    tailwindest: Tailwindest
-    tailwindLiteral: TailwindLiteral
-}>()
-```
-
-Then transform with compiled output:
-
-```bash
-npx @tailwindest/css-transformer --mode compiled
-```
-
-Nested variant leaf values will be raw utilities:
-
-```ts
-tw.style({
-    dark: {
-        backgroundColor: "bg-red-900",
-        hover: {
-            backgroundColor: "bg-red-950",
-        },
-    },
-})
-```
+`auto` keeps runtime output for unknown or mixed projects.
 
 ## Runtime Tailwindest Setup
 
-If you are not using the compiler, keep `CreateTailwindest`:
+Define your Tailwindest type with `CreateTailwindest`:
 
 ```ts filename="tw.ts"
 import {
@@ -271,7 +202,7 @@ npx @tailwindest/css-transformer --mode auto --dry-run
 | `--identifier <name>` | `-i`  | `tw`           | Tailwindest import identifier.                      |
 | `--module <path>`     | `-m`  | `~/tw`         | Tailwindest module import path.                     |
 | `--dry-run`           | `-d`  | `false`        | Preview without writing transformed files.          |
-| `--mode <mode>`       | none  | `auto`         | Output mode: `auto`, `runtime`, or `compiled`.      |
+| `--mode <mode>`       | none  | `auto`         | Output mode: `auto` or `runtime`.                   |
 
 ## Programmatic Usage
 
@@ -280,7 +211,7 @@ import { transform } from "@tailwindest/css-transformer"
 
 const result = await transform(source, {
     resolver,
-    outputMode: "compiled",
+    outputMode: "runtime",
     projectRoot: process.cwd(),
     sourcePath: "/repo/src/Button.tsx",
     tailwindestIdentifier: "tw",

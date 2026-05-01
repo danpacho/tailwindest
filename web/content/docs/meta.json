@@ -2,7 +2,6 @@
     "pages": [
         "index",
         "setup",
-        "compiler",
         "create-tailwind-type",
         "css-transformer",
         "recipe",
