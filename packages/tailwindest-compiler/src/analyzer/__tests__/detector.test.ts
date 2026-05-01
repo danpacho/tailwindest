@@ -56,6 +56,39 @@ describe("tailwindest symbol detector", () => {
     })
 
     it.each([
+        ".ts",
+        ".tsx",
+        ".mts",
+        ".cts",
+        ".js",
+        ".jsx",
+        ".mjs",
+        ".cjs",
+    ] as const)(
+        "detects createTools() provenance through extensionless directory imports from index%s",
+        (extension) => {
+            const dependency = `/src/toolbox/index${extension}`
+            const analyzer = createStaticAnalyzer({
+                [dependency]: `
+                    import { createTools } from "tailwindest"
+                    export const css = createTools()
+                `,
+                [app]: `
+                    import { css } from "./toolbox"
+                    css.style({ color: "text-red-500" })
+                `,
+            })
+
+            const result = analyzer.analyzeFile(app)
+
+            expect(result.calls).toHaveLength(1)
+            expect(result.calls[0]?.receiver.provenance).toBe("createTools")
+            expect(result.dependencies).toEqual([dependency])
+            expect(result.diagnostics).toEqual([])
+        }
+    )
+
+    it.each([
         "not-tailwindest/foo",
         "@scope/not-tailwindest/foo",
         "@tailwindest/fake",

@@ -37,6 +37,108 @@ describe("static resolver", () => {
         })
     })
 
+    it("resolves same-file static object property access", () => {
+        const analyzer = createStaticAnalyzer({
+            [app]: `
+                import { createTools } from "tailwindest"
+
+                const tw = createTools()
+                const styles = {
+                    primary: { color: "text-red-500" },
+                } as const
+
+                tw.style(styles.primary)
+            `,
+        })
+
+        const result = analyzer.analyzeFile(app)
+
+        expect(result.diagnostics).toEqual([])
+        expect(result.calls[0]?.arguments[0]?.value).toEqual({
+            color: "text-red-500",
+        })
+    })
+
+    it.each([
+        {
+            name: "top-level const",
+            source: `
+                tw.style(style)
+                const style = { display: "flex" } as const
+            `,
+        },
+        {
+            name: "property access",
+            source: `
+                tw.style(styles.primary)
+                const styles = {
+                    primary: { color: "text-red-500" },
+                } as const
+            `,
+        },
+        {
+            name: "var",
+            source: `
+                tw.style(style)
+                var style = { display: "flex" }
+            `,
+        },
+    ])("rejects same-file $name used before declaration", ({ source }) => {
+        const analyzer = createStaticAnalyzer({
+            [app]: `
+                import { createTools } from "tailwindest"
+
+                const tw = createTools()
+                ${source}
+            `,
+        })
+
+        const result = analyzer.analyzeFile(app)
+
+        expect(result.calls).toEqual([])
+        expect(result.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNRESOLVED_STATIC_VALUE",
+                    message: expect.stringContaining(
+                        "is used before declaration"
+                    ),
+                }),
+            ])
+        )
+    })
+
+    it("rejects imported exports with internal forward references", () => {
+        const analyzer = createStaticAnalyzer({
+            "/src/styles.ts": `
+                export const style = later
+                const later = { display: "flex" } as const
+            `,
+            [app]: `
+                import { createTools } from "tailwindest"
+                import { style } from "./styles"
+
+                const tw = createTools()
+                tw.style(style)
+            `,
+        })
+
+        const result = analyzer.analyzeFile(app)
+
+        expect(result.calls).toEqual([])
+        expect(result.dependencies).toEqual(["/src/styles.ts"])
+        expect(result.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    code: "UNRESOLVED_STATIC_VALUE",
+                    message: expect.stringContaining(
+                        "is used before declaration"
+                    ),
+                }),
+            ])
+        )
+    })
+
     it("resolves imported export const values through three modules and records dependency edges", () => {
         const analyzer = createStaticAnalyzer({
             "/src/base.ts": `
@@ -77,6 +179,72 @@ describe("static resolver", () => {
         ])
     })
 
+    it("resolves imported static object property access and records dependency edges", () => {
+        const analyzer = createStaticAnalyzer({
+            "/src/styles.ts": `
+                export const styles = {
+                    primary: { color: "text-blue-500" },
+                } as const
+            `,
+            [app]: `
+                import { createTools } from "tailwindest"
+                import { styles } from "./styles"
+
+                const tw = createTools()
+                tw.style(styles.primary)
+            `,
+        })
+
+        const result = analyzer.analyzeFile(app)
+        const graph = analyzer.getDependencyGraph()
+
+        expect(result.diagnostics).toEqual([])
+        expect(result.calls[0]?.arguments[0]?.value).toEqual({
+            color: "text-blue-500",
+        })
+        expect(result.dependencies).toEqual(["/src/styles.ts"])
+        expect(graph.getReverseDependencies("/src/styles.ts")).toEqual([
+            "/src/app.ts",
+        ])
+    })
+
+    it.each([
+        ".ts",
+        ".tsx",
+        ".mts",
+        ".cts",
+        ".js",
+        ".jsx",
+        ".mjs",
+        ".cjs",
+    ] as const)(
+        "resolves extensionless static imports from %s files",
+        (extension) => {
+            const dependency = `/src/styles${extension}`
+            const analyzer = createStaticAnalyzer({
+                [dependency]: `
+                    export const style = { color: "text-red-500", source: "${extension}" }
+                `,
+                [app]: `
+                    import { createTools } from "tailwindest"
+                    import { style } from "./styles"
+
+                    const tw = createTools()
+                    tw.style(style)
+                `,
+            })
+
+            const result = analyzer.analyzeFile(app)
+
+            expect(result.diagnostics).toEqual([])
+            expect(result.calls[0]?.arguments[0]?.value).toEqual({
+                color: "text-red-500",
+                source: extension,
+            })
+            expect(result.dependencies).toEqual([dependency])
+        }
+    )
+
     it("rejects unsupported values with explicit diagnostics", () => {
         const cases = [
             {
@@ -113,6 +281,11 @@ describe("static resolver", () => {
                 name: "process.env",
                 source: "const value = process.env.NODE_ENV",
                 code: "SIDE_EFFECTFUL_INITIALIZER",
+            },
+            {
+                name: "missing object property",
+                source: "const styles = { primary: { color: 'text-red-500' } }; const value = styles.missing",
+                code: "UNRESOLVED_STATIC_VALUE",
             },
             {
                 name: "unknown spreads",

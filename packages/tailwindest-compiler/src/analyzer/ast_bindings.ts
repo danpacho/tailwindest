@@ -1,11 +1,13 @@
 import * as ts from "typescript"
 
 export function collectMutatedBindingNames(
-    sourceFile: ts.SourceFile
+    sourceFile: ts.SourceFile,
+    ignoredCallSpans?: ReadonlySet<string>
 ): Set<string> {
     const names = new Set<string>()
     const referenceMutations = new Set<string>()
     const aliasRoots = collectAliasRoots(sourceFile)
+    const referenceLikeBindings = collectReferenceLikeBindingNames(sourceFile)
 
     const recordMutation = (root: string | undefined, propagates: boolean) => {
         if (!root) return
@@ -33,7 +35,12 @@ export function collectMutatedBindingNames(
                 !ts.isIdentifier(unwrapExpression(node.operand))
             )
         } else if (ts.isCallExpression(node)) {
-            for (const root of getReferenceMutationRootsFromCall(node)) {
+            for (const root of getReferenceMutationRootsFromCall(
+                node,
+                sourceFile,
+                referenceLikeBindings,
+                ignoredCallSpans
+            )) {
                 recordMutation(root, true)
             }
         }
@@ -136,6 +143,14 @@ export function findVisibleVariableDeclaration(
     return result
 }
 
+export function isBindingDeclaredBeforeUse(
+    sourceFile: ts.SourceFile,
+    binding: ts.Node,
+    position: number
+): boolean {
+    return binding.getStart(sourceFile) < position
+}
+
 function collectAliasRoots(sourceFile: ts.SourceFile): Map<string, string> {
     const aliases = new Map<string, string>()
 
@@ -157,6 +172,64 @@ function collectAliasRoots(sourceFile: ts.SourceFile): Map<string, string> {
     return aliases
 }
 
+function collectReferenceLikeBindingNames(
+    sourceFile: ts.SourceFile
+): Set<string> {
+    const names = new Set<string>()
+    const pending: Array<{ name: string; initializer: ts.Expression }> = []
+
+    const visit = (node: ts.Node): void => {
+        if (ts.isImportDeclaration(node) && node.importClause) {
+            const clause = node.importClause
+            if (clause.name) {
+                names.add(clause.name.text)
+            }
+            const namedBindings = clause.namedBindings
+            if (namedBindings && ts.isNamedImports(namedBindings)) {
+                for (const element of namedBindings.elements) {
+                    names.add(element.name.text)
+                }
+            } else if (namedBindings && ts.isNamespaceImport(namedBindings)) {
+                names.add(namedBindings.name.text)
+            }
+        } else if (
+            ts.isVariableDeclaration(node) &&
+            ts.isIdentifier(node.name) &&
+            node.initializer
+        ) {
+            const initializer = unwrapExpression(node.initializer)
+            if (
+                ts.isObjectLiteralExpression(initializer) ||
+                ts.isArrayLiteralExpression(initializer)
+            ) {
+                names.add(node.name.text)
+            } else {
+                pending.push({ name: node.name.text, initializer })
+            }
+        }
+        ts.forEachChild(node, visit)
+    }
+
+    visit(sourceFile)
+
+    let changed = true
+    while (changed) {
+        changed = false
+        for (const item of pending) {
+            if (names.has(item.name)) {
+                continue
+            }
+            const root = getAccessRoot(item.initializer)
+            if (root && names.has(root)) {
+                names.add(item.name)
+                changed = true
+            }
+        }
+    }
+
+    return names
+}
+
 function propagateAliasMutations(
     names: Set<string>,
     referenceMutations: Set<string>,
@@ -172,7 +245,12 @@ function propagateAliasMutations(
     }
 }
 
-function getReferenceMutationRootsFromCall(node: ts.CallExpression): string[] {
+function getReferenceMutationRootsFromCall(
+    node: ts.CallExpression,
+    sourceFile: ts.SourceFile,
+    referenceLikeBindings: Set<string>,
+    ignoredCallSpans: ReadonlySet<string> | undefined
+): string[] {
     const expression = node.expression
     if (ts.isPropertyAccessExpression(expression)) {
         if (
@@ -191,7 +269,17 @@ function getReferenceMutationRootsFromCall(node: ts.CallExpression): string[] {
             return root ? [root] : []
         }
     }
-    return []
+    if (ignoredCallSpans?.has(callSpanKey(sourceFile, node))) {
+        return []
+    }
+    const roots: string[] = []
+    for (const argument of node.arguments) {
+        const root = getAccessRoot(argument)
+        if (root && referenceLikeBindings.has(root)) {
+            roots.push(root)
+        }
+    }
+    return roots
 }
 
 const mutatingMethodNames = new Set([
@@ -205,6 +293,13 @@ const mutatingMethodNames = new Set([
     "splice",
     "unshift",
 ])
+
+function callSpanKey(
+    sourceFile: ts.SourceFile,
+    node: ts.CallExpression
+): string {
+    return `${sourceFile.fileName}:${node.getStart(sourceFile)}:${node.getEnd()}`
+}
 
 function isAssignmentOperator(kind: ts.SyntaxKind): boolean {
     return (

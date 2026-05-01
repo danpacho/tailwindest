@@ -1,6 +1,6 @@
 import * as ts from "typescript"
 import type { CompilerDiagnostic } from "../core/diagnostic_types"
-import { findLexicalBinding } from "./ast_bindings"
+import { findLexicalBinding, isBindingDeclaredBeforeUse } from "./ast_bindings"
 import type { DependencyGraph } from "./dependency_graph"
 import {
     createAnalyzerDiagnostic,
@@ -298,11 +298,8 @@ export class StaticResolver {
         const info = this.host.getModuleInfo(context.currentFile)
         const sourceFile = this.host.getSourceFile(context.currentFile)
         const declaration = info.topLevelDeclarations.get(name)
-        const lexicalBinding = findLexicalBinding(
-            sourceFile,
-            name,
-            identifier.getStart(sourceFile)
-        )
+        const position = identifier.getStart(sourceFile)
+        const lexicalBinding = findLexicalBinding(sourceFile, name, position)
 
         if (info.mutatedBindings.has(name)) {
             this.addDiagnostic(
@@ -327,6 +324,16 @@ export class StaticResolver {
                     context,
                     "UNRESOLVED_STATIC_VALUE",
                     `Binding ${name} is shadowed by a local runtime value.`
+                )
+                return { ok: false }
+            }
+            if (
+                !isBindingDeclaredBeforeUse(sourceFile, declaration, position)
+            ) {
+                this.addDiagnostic(
+                    context,
+                    "UNRESOLVED_STATIC_VALUE",
+                    `Binding ${name} is used before declaration.`
                 )
                 return { ok: false }
             }
@@ -483,6 +490,24 @@ export class StaticResolver {
                 "process.env is runtime state."
             )
             return { ok: false }
+        }
+
+        const resolvedLeft = this.resolveExpression(left, context)
+        if (!resolvedLeft.ok) {
+            return { ok: false }
+        }
+
+        if (
+            this.isPlainObject(resolvedLeft.value) &&
+            Object.prototype.hasOwnProperty.call(
+                resolvedLeft.value,
+                expression.name.text
+            )
+        ) {
+            return {
+                ok: true,
+                value: resolvedLeft.value[expression.name.text],
+            }
         }
 
         this.addDiagnostic(

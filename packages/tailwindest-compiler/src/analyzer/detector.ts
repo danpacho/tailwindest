@@ -25,6 +25,7 @@ interface ToolResolutionContext {
     currentFile: string
     dependencies: Set<string>
     visiting: Set<string>
+    recordDependencies?: boolean
 }
 
 type TailwindestPropertyName =
@@ -279,11 +280,15 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
             }
         }
 
-        for (const name of collectMutatedBindingNames(sourceFile)) {
+        this.moduleInfos.set(normalized, info)
+
+        for (const name of collectMutatedBindingNames(
+            sourceFile,
+            this.collectProvenReceiverSpanKeys(normalized, sourceFile)
+        )) {
             info.mutatedBindings.add(name)
         }
 
-        this.moduleInfos.set(normalized, info)
         return info
     }
 
@@ -298,10 +303,22 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
         const basePath = normalizeFileName(
             path.posix.join(path.posix.dirname(fromFile), moduleSpecifier)
         )
+        const sourceExtensions = [
+            ".ts",
+            ".tsx",
+            ".mts",
+            ".cts",
+            ".js",
+            ".jsx",
+            ".mjs",
+            ".cjs",
+        ]
         const candidates = [
             basePath,
-            `${basePath}.ts`,
-            path.posix.join(basePath, "index.ts"),
+            ...sourceExtensions.map((extension) => `${basePath}${extension}`),
+            ...sourceExtensions.map((extension) =>
+                path.posix.join(basePath, `index${extension}`)
+            ),
         ]
 
         return candidates.find((candidate) => this.files.has(candidate))
@@ -778,9 +795,86 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
         consumer: string,
         dependency: string
     ): void {
+        if (context.recordDependencies === false) {
+            return
+        }
         this.dependencyGraph.addEdge(consumer, dependency)
         this.dependencyGraph.addEdge(context.rootFile, dependency)
         context.dependencies.add(dependency)
+    }
+
+    private collectProvenReceiverSpanKeys(
+        fileName: string,
+        sourceFile: ts.SourceFile
+    ): Set<string> {
+        const spans = new Set<string>()
+
+        const visit = (node: ts.Node): void => {
+            if (!ts.isCallExpression(node)) {
+                ts.forEachChild(node, visit)
+                return
+            }
+
+            const propertyName = this.getTailwindestCallKind(node.expression)
+            if (!propertyName) {
+                ts.forEachChild(node, visit)
+                return
+            }
+
+            const receiverExpression = ts.isPropertyAccessExpression(
+                node.expression
+            )
+                ? node.expression.expression
+                : undefined
+            const receiverName = ts.isIdentifier(node.expression)
+                ? node.expression.text
+                : propertyName
+            const isToolCallKind = TAILWINDEST_CALL_KINDS.has(
+                propertyName as TailwindestCallKind
+            )
+            const isStylerMethodKind =
+                ts.isPropertyAccessExpression(node.expression) &&
+                (propertyName === "class" ||
+                    propertyName === "style" ||
+                    propertyName === "compose")
+
+            if (!isToolCallKind && !isStylerMethodKind) {
+                ts.forEachChild(node, visit)
+                return
+            }
+
+            const receiver = receiverExpression
+                ? this.resolveToolExpression(receiverExpression, fileName, {
+                      rootFile: fileName,
+                      currentFile: fileName,
+                      dependencies: new Set(),
+                      visiting: new Set(),
+                      recordDependencies: false,
+                  })
+                : this.resolveDestructuredToolIdentifier(
+                      receiverName,
+                      fileName,
+                      node.expression.getStart(sourceFile),
+                      {
+                          rootFile: fileName,
+                          currentFile: fileName,
+                          dependencies: new Set(),
+                          visiting: new Set(),
+                          recordDependencies: false,
+                      }
+                  )
+
+            if (receiver) {
+                spans.add(
+                    `${fileName}:${node.getStart(sourceFile)}:${node.getEnd()}`
+                )
+            }
+
+            ts.forEachChild(node, visit)
+        }
+
+        visit(sourceFile)
+        return spans
     }
 
     private getTailwindestCallKind(
