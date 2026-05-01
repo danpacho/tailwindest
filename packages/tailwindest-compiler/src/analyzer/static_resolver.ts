@@ -1,5 +1,6 @@
 import * as ts from "typescript"
 import type { CompilerDiagnostic } from "../core/diagnostic_types"
+import { findLexicalBinding } from "./ast_bindings"
 import type { DependencyGraph } from "./dependency_graph"
 import {
     createAnalyzerDiagnostic,
@@ -139,7 +140,7 @@ export class StaticResolver {
             return this.resolveObjectLiteral(unwrapped, context)
         }
         if (ts.isIdentifier(unwrapped)) {
-            return this.resolveIdentifier(unwrapped.text, context)
+            return this.resolveIdentifier(unwrapped, context)
         }
         if (ts.isPropertyAccessExpression(unwrapped)) {
             return this.resolvePropertyAccess(unwrapped, context)
@@ -219,10 +220,7 @@ export class StaticResolver {
             }
 
             if (ts.isShorthandPropertyAssignment(property)) {
-                const shorthand = this.resolveIdentifier(
-                    property.name.text,
-                    context
-                )
+                const shorthand = this.resolveIdentifier(property.name, context)
                 if (!shorthand.ok) {
                     return { ok: false }
                 }
@@ -284,9 +282,10 @@ export class StaticResolver {
     }
 
     private resolveIdentifier(
-        name: string,
+        identifier: ts.Identifier,
         context: ResolveContext
     ): ResolveResult {
+        const name = identifier.text
         if (name === "Date") {
             this.addDiagnostic(
                 context,
@@ -297,6 +296,13 @@ export class StaticResolver {
         }
 
         const info = this.host.getModuleInfo(context.currentFile)
+        const sourceFile = this.host.getSourceFile(context.currentFile)
+        const declaration = info.topLevelDeclarations.get(name)
+        const lexicalBinding = findLexicalBinding(
+            sourceFile,
+            name,
+            identifier.getStart(sourceFile)
+        )
 
         if (info.mutatedBindings.has(name)) {
             this.addDiagnostic(
@@ -315,14 +321,30 @@ export class StaticResolver {
             return { ok: false }
         }
 
-        const declaration = info.topLevelDeclarations.get(name)
         if (declaration?.initializer) {
+            if (lexicalBinding !== declaration) {
+                this.addDiagnostic(
+                    context,
+                    "UNRESOLVED_STATIC_VALUE",
+                    `Binding ${name} is shadowed by a local runtime value.`
+                )
+                return { ok: false }
+            }
             return this.resolveNamedExpression(
                 context.currentFile,
                 name,
                 declaration.initializer,
                 context
             )
+        }
+
+        if (lexicalBinding) {
+            this.addDiagnostic(
+                context,
+                "UNRESOLVED_STATIC_VALUE",
+                `Binding ${name} is not a top-level static value.`
+            )
+            return { ok: false }
         }
 
         const imported = info.imports.get(name)

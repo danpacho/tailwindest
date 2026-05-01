@@ -45,9 +45,15 @@ export interface TailwindestCallSite {
     arguments: ResolvedStaticArgument[]
 }
 
+export interface ResolvedCallArguments {
+    span: SourceSpan
+    arguments: ResolvedStaticArgument[]
+}
+
 export interface DetectionResult {
     calls: TailwindestCallSite[]
     provenReceiverSpans: SourceSpan[]
+    resolvedCallArguments: ResolvedCallArguments[]
     runtimeMergerCalls: SourceSpan[]
     dependencies: string[]
     diagnostics: CompilerDiagnostic[]

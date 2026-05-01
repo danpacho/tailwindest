@@ -1,5 +1,6 @@
 import path from "node:path"
 import * as ts from "typescript"
+import { collectMutatedBindingNames } from "./ast_bindings"
 import { DependencyGraph } from "./dependency_graph"
 import { hasTailwindestSentinel } from "./lexical_gate"
 import { StaticResolver, type StaticResolverHost } from "./static_resolver"
@@ -25,6 +26,12 @@ interface ToolResolutionContext {
     dependencies: Set<string>
     visiting: Set<string>
 }
+
+type TailwindestPropertyName =
+    | TailwindestCallKind
+    | "class"
+    | "style"
+    | "compose"
 
 export interface StaticAnalyzer {
     analyzeFile(fileName: string): DetectionResult
@@ -60,6 +67,8 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
         const source = this.files.get(normalized) ?? ""
         const calls: DetectionResult["calls"] = []
         const provenReceiverSpans: DetectionResult["provenReceiverSpans"] = []
+        const resolvedCallArguments: DetectionResult["resolvedCallArguments"] =
+            []
         const runtimeMergerCalls: DetectionResult["runtimeMergerCalls"] = []
         const diagnostics: DetectionResult["diagnostics"] = []
         const dependencies = new Set<string>()
@@ -70,6 +79,7 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
             return {
                 calls,
                 provenReceiverSpans,
+                resolvedCallArguments,
                 runtimeMergerCalls,
                 dependencies: [],
                 diagnostics,
@@ -100,9 +110,15 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
                 ? node.expression.text
                 : propertyName
 
-            if (
-                !TAILWINDEST_CALL_KINDS.has(propertyName as TailwindestCallKind)
-            ) {
+            const isToolCallKind = TAILWINDEST_CALL_KINDS.has(
+                propertyName as TailwindestCallKind
+            )
+            const isStylerMethodKind =
+                ts.isPropertyAccessExpression(node.expression) &&
+                (propertyName === "class" ||
+                    propertyName === "style" ||
+                    propertyName === "compose")
+            if (!isToolCallKind && !isStylerMethodKind) {
                 ts.forEachChild(node, visit)
                 return
             }
@@ -127,12 +143,14 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
                   )
 
             if (!receiver) {
-                diagnostics.push(
-                    createAnalyzerDiagnostic(
-                        "NOT_TAILWINDEST_SYMBOL",
-                        `${propertyName} receiver is not proven to come from createTools().`
+                if (isToolCallKind) {
+                    diagnostics.push(
+                        createAnalyzerDiagnostic(
+                            "NOT_TAILWINDEST_SYMBOL",
+                            `${propertyName} receiver is not proven to come from createTools().`
+                        )
                     )
-                )
+                }
                 ts.forEachChild(node, visit)
                 return
             }
@@ -154,15 +172,22 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
             for (const dependency of resolvedArguments.dependencies) {
                 dependencies.add(dependency)
             }
-            diagnostics.push(...resolvedArguments.diagnostics)
 
             if (resolvedArguments.diagnostics.length === 0) {
-                calls.push({
-                    kind: propertyName as TailwindestCallKind,
+                resolvedCallArguments.push({
                     span,
-                    receiver,
                     arguments: resolvedArguments.arguments,
                 })
+                if (isToolCallKind) {
+                    calls.push({
+                        kind: propertyName as TailwindestCallKind,
+                        span,
+                        receiver,
+                        arguments: resolvedArguments.arguments,
+                    })
+                }
+            } else if (isToolCallKind) {
+                diagnostics.push(...resolvedArguments.diagnostics)
             }
 
             ts.forEachChild(node, visit)
@@ -173,6 +198,7 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
         return {
             calls,
             provenReceiverSpans,
+            resolvedCallArguments,
             runtimeMergerCalls,
             dependencies: [...dependencies],
             diagnostics,
@@ -253,19 +279,9 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
             }
         }
 
-        const collectMutations = (node: ts.Node): void => {
-            if (
-                ts.isBinaryExpression(node) &&
-                isAssignmentOperator(node.operatorToken.kind)
-            ) {
-                const root = getAssignmentRoot(node.left)
-                if (root) {
-                    info.mutatedBindings.add(root)
-                }
-            }
-            ts.forEachChild(node, collectMutations)
+        for (const name of collectMutatedBindingNames(sourceFile)) {
+            info.mutatedBindings.add(name)
         }
-        collectMutations(sourceFile)
 
         this.moduleInfos.set(normalized, info)
         return info
@@ -769,9 +785,11 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
 
     private getTailwindestCallKind(
         expression: ts.Expression
-    ): TailwindestCallKind | undefined {
+    ): TailwindestPropertyName | undefined {
         if (ts.isPropertyAccessExpression(expression)) {
-            return expression.name.text as TailwindestCallKind
+            const name = expression.name.text
+            if (isTailwindestPropertyName(name)) return name
+            return undefined
         }
 
         if (
@@ -783,6 +801,17 @@ class StaticAnalyzerImpl implements StaticAnalyzer, StaticResolverHost {
 
         return undefined
     }
+}
+
+function isTailwindestPropertyName(
+    value: string
+): value is TailwindestPropertyName {
+    return (
+        TAILWINDEST_CALL_KINDS.has(value as TailwindestCallKind) ||
+        value === "class" ||
+        value === "style" ||
+        value === "compose"
+    )
 }
 
 const normalizeFileName = (fileName: string): string => {
@@ -803,7 +832,7 @@ const sourceKindForFileName = (fileName: string): ts.ScriptKind => {
 const isTailwindestModule = (moduleSpecifier: string): boolean => {
     return (
         moduleSpecifier === "tailwindest" ||
-        moduleSpecifier.includes("tailwindest/")
+        moduleSpecifier.startsWith("tailwindest/")
     )
 }
 
@@ -864,26 +893,6 @@ const propertyNameOf = (name: ts.PropertyName): string | undefined => {
     }
     if (ts.isNumericLiteral(name)) {
         return name.text
-    }
-    return undefined
-}
-
-const isAssignmentOperator = (kind: ts.SyntaxKind): boolean => {
-    return (
-        kind >= ts.SyntaxKind.FirstAssignment &&
-        kind <= ts.SyntaxKind.LastAssignment
-    )
-}
-
-const getAssignmentRoot = (expression: ts.Expression): string | undefined => {
-    if (ts.isIdentifier(expression)) {
-        return expression.text
-    }
-    if (
-        ts.isPropertyAccessExpression(expression) ||
-        ts.isElementAccessExpression(expression)
-    ) {
-        return getAssignmentRoot(expression.expression)
     }
     return undefined
 }

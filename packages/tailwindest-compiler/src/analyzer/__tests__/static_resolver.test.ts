@@ -124,6 +124,11 @@ describe("static resolver", () => {
                 source: "const value = { color: 'text-red-500' }; value.color = 'text-blue-500'",
                 code: "MUTATED_BINDING",
             },
+            {
+                name: "mutated nested aliases",
+                source: "const value = { nested: { color: 'text-red-500' } }; const alias = value.nested; alias.color = 'text-blue-500'",
+                code: "MUTATED_BINDING",
+            },
         ] as const
 
         for (const testCase of cases) {

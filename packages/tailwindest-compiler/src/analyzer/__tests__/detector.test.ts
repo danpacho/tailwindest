@@ -55,6 +55,47 @@ describe("tailwindest symbol detector", () => {
         ])
     })
 
+    it.each([
+        "not-tailwindest/foo",
+        "@scope/not-tailwindest/foo",
+        "@tailwindest/fake",
+    ])(
+        "rejects createTools imports from non-tailwindest module %s",
+        (moduleSpecifier) => {
+            const analyzer = createStaticAnalyzer({
+                [app]: `
+                    import { createTools } from "${moduleSpecifier}"
+
+                    const tw = createTools()
+                    tw.join("px-4")
+                `,
+            })
+
+            const result = analyzer.analyzeFile(app)
+
+            expect(result.calls).toEqual([])
+            expect(
+                result.diagnostics.map((diagnostic) => diagnostic.code)
+            ).toEqual(["NOT_TAILWINDEST_SYMBOL"])
+        }
+    )
+
+    it("accepts createTools imports from a tailwindest package subpath", () => {
+        const analyzer = createStaticAnalyzer({
+            [app]: `
+                import { createTools } from "tailwindest/tools"
+
+                const tw = createTools()
+                tw.join("px-4")
+            `,
+        })
+
+        const result = analyzer.analyzeFile(app)
+
+        expect(result.calls.map((call) => call.kind)).toEqual(["join"])
+        expect(result.diagnostics).toEqual([])
+    })
+
     it("marks imported runtime-merger receivers and preserves no-merger aliases", () => {
         const analyzer = createStaticAnalyzer({
             "/src/tools.ts": `
