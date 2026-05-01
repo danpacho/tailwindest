@@ -5,7 +5,7 @@
     "description": "Tailwindest CSS Transformer",
     "type": "module",
     "main": "dist/index.mjs",
-    "types": "dist/index.d.mts",
+    "types": "dist/index.d.ts",
     "bin": {
         "tailwindest-transform": "dist/cli.mjs"
     },
