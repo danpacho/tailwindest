@@ -4,7 +4,6 @@ export default defineConfig({
     entry: ["src/index.ts", "src/cli.ts"],
     format: ["esm"],
     outDir: "dist",
-    outExtension: () => ({ js: ".mjs" }),
     dts: true,
     splitting: false,
     sourcemap: true,

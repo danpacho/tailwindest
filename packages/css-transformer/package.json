@@ -4,10 +4,10 @@
     "private": true,
     "description": "Tailwindest CSS Transformer",
     "type": "module",
-    "main": "dist/index.mjs",
+    "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "bin": {
-        "tailwindest-transform": "dist/cli.mjs"
+        "tailwindest-transform": "dist/cli.js"
     },
     "scripts": {
         "build": "tsup",
