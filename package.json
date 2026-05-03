@@ -22,7 +22,7 @@
         "web": "pnpm run --filter=web",
         "test:watch": "turbo watch test",
         "test:coverage": "turbo run test -- --coverage",
-        "test:ci": "pnpm ts:typecheck && pnpm prettier && pnpm eslint:fix && pnpm build && pnpm test:coverage",
+        "test:ci": "pnpm prettier && pnpm eslint:fix && pnpm build && pnpm ts:typecheck && pnpm test:coverage",
         "ts:typecheck": "tsc --noEmit",
         "ts:performance": "rimraf ts-perf && tsc --noEmit --generateTrace ts-perf",
         "reset": "npx rimraf node_modules dist .turbo \"packages/*/node_modules\" \"packages/*/dist\" \"web/node_modules\" \"web/dist\"",
