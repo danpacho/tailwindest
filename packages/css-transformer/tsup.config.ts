@@ -2,14 +2,13 @@ import { defineConfig } from "tsup"
 
 export default defineConfig({
     entry: ["src/index.ts", "src/cli.ts"],
-    format: ["cjs", "esm"],
+    format: ["esm"],
     outDir: "dist",
     dts: true,
     splitting: false,
     sourcemap: false,
     clean: true,
     bundle: true,
-    shims: true,
     treeshake: true,
     platform: "node",
     // Mark ALL dependencies as external to avoid bundling issues with dynamic requires

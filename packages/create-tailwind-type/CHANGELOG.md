@@ -1,5 +1,21 @@
 # create-tailwind-type
 
+## 1.1.4
+
+### Patch Changes
+
+- cd2cea3: Fix CLI production entry points so npm `npx` installs execute the correct CJS binaries.
+- af6c568: Fix CLI runtime errors in CJS execution by avoiding `createRequire` with an undefined meta URL during bundling.
+- Fix cjs build
+- Updated dependencies [af6c568]
+    - tailwindest-tailwind-internal@1.0.2
+
+## 1.1.3
+
+### Patch Changes
+
+- Fix cli pub configs
+
 ## 1.1.2
 
 ### Patch Changes
