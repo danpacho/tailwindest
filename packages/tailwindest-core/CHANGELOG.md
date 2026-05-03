@@ -1,5 +1,11 @@
 # tailwindest-core
 
+## 1.0.1
+
+### Patch Changes
+
+- Fix pub deps error
+
 ## 1.0.0
 
 ### Major Changes

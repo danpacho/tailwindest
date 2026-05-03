@@ -1,5 +1,13 @@
 # create-tailwind-type
 
+## 1.1.2
+
+### Patch Changes
+
+- Fix pub deps error
+- Updated dependencies
+    - tailwindest-tailwind-internal@1.0.1
+
 ## 1.1.1
 
 ### Patch Changes

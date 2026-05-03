@@ -1,5 +1,13 @@
 # tailwindest
 
+## 3.2.6
+
+### Patch Changes
+
+- Fix pub deps error
+- Updated dependencies
+    - tailwindest-core@1.0.1
+
 ## 3.2.5
 
 ### Patch Changes

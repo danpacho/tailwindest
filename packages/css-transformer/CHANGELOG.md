@@ -1,5 +1,13 @@
 # tailwindest-css-transform
 
+## 1.0.3
+
+### Patch Changes
+
+- Fix pub deps error
+- Updated dependencies
+    - create-tailwind-type@1.1.2
+
 ## 1.0.2
 
 ### Patch Changes
