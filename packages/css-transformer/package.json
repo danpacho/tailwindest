@@ -10,7 +10,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "bin": {
-        "tailwindest-transform": "dist/cli.js"
+        "tailwindest-transform": "dist/cli.cjs"
     },
     "scripts": {
         "build": "tsup",

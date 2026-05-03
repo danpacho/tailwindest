@@ -11,6 +11,6 @@ export default defineConfig((options) => ({
     dts: true,
     outDir: "dist",
     target: "esnext",
-    format: ["esm"],
+    format: ["cjs", "esm"],
     sourcemap: false,
 }))
