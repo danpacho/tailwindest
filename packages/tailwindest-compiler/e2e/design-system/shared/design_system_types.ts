@@ -1,4 +1,4 @@
-import type { CreateCompiledTailwindest } from "../../../../tailwindest/src/create_compiled_tailwindest"
+import type { CreateCompiledTailwindest } from "tailwindest"
 
 type DesignTailwind = {
     alignItems: string

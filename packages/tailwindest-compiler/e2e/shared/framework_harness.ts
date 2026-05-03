@@ -36,6 +36,7 @@ export interface VisualCaptureOptions {
     screenshotPath?: string
 }
 
+const TARGET_SELECTOR = '[data-testid="twtarget"]'
 const RUNTIME_TOKENS = [
     "createTools",
     "PrimitiveStyler",
@@ -181,9 +182,11 @@ export async function captureVisualSnapshot(
             waitUntil: "domcontentloaded",
             timeout: BROWSER_CAPTURE_TIMEOUT_MS,
         })
-        const target = lightPage.getByTestId("twtarget")
-        await target.waitFor({ state: "visible" })
-        const className = await target.evaluate((node) => node.className)
+        await lightPage.waitForSelector(TARGET_SELECTOR, { state: "visible" })
+        const className = await lightPage.$eval(
+            TARGET_SELECTOR,
+            (node) => node.className
+        )
         const base = await readTargetStyle(lightPage)
 
         await hoverByMouse(lightPage, "twpeer")
@@ -203,7 +206,9 @@ export async function captureVisualSnapshot(
                 waitUntil: "domcontentloaded",
                 timeout: BROWSER_CAPTURE_TIMEOUT_MS,
             })
-            await darkPage.getByTestId("twtarget").waitFor({ state: "visible" })
+            await darkPage.waitForSelector(TARGET_SELECTOR, {
+                state: "visible",
+            })
             const darkBase = await readTargetStyle(darkPage)
             await hoverByMouse(darkPage, "twtarget")
             await focusElement(darkPage, "twtarget")
@@ -358,7 +363,7 @@ export async function assertZeroRuntimeClientAssets(
 }
 
 async function readTargetStyle(page: Page): Promise<StyleSnapshot> {
-    return page.getByTestId("twtarget").evaluate((node) => {
+    return page.$eval(TARGET_SELECTOR, (node) => {
         const style = getComputedStyle(node)
         return {
             backgroundColor: style.backgroundColor,
@@ -388,7 +393,11 @@ async function waitForTargetStyleChange(
 }
 
 async function hoverByMouse(page: Page, testId: string): Promise<void> {
-    const box = await page.getByTestId(testId).boundingBox()
+    const element = await page.$(`[data-testid="${testId}"]`)
+    if (!element) {
+        throw new Error(`Unable to locate visible test id: ${testId}`)
+    }
+    const box = await element.boundingBox()
     if (!box) {
         throw new Error(`Unable to locate visible test id: ${testId}`)
     }
@@ -396,7 +405,11 @@ async function hoverByMouse(page: Page, testId: string): Promise<void> {
 }
 
 async function focusElement(page: Page, testId: string): Promise<void> {
-    await page.getByTestId(testId).focus()
+    const element = await page.$(`[data-testid="${testId}"]`)
+    if (!element) {
+        throw new Error(`Unable to locate visible test id: ${testId}`)
+    }
+    await element.focus()
 }
 
 async function savePageScreenshot(
