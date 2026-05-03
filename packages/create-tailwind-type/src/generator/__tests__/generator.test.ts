@@ -1,7 +1,7 @@
 import path from "node:path"
 import { describe, expect, it } from "vitest"
 import { TailwindTypeGenerator } from "../generator"
-import { TailwindCompiler } from "@tailwindest/tailwind-internal"
+import { TailwindCompiler } from "tailwindest-tailwind-internal"
 import { CSSAnalyzer } from "../css_analyzer"
 import { TypeSchemaGenerator } from "../../type_tools"
 

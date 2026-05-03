@@ -4,7 +4,7 @@ import {
     type ClassEntry,
     TailwindCompiler,
     type VariantEntry,
-} from "@tailwindest/tailwind-internal"
+} from "tailwindest-tailwind-internal"
 import { CSSAnalyzer } from "../generator/css_analyzer"
 
 describe("TailwindCompiler - Internal", () => {

@@ -30,7 +30,7 @@
     "author": "danpacho",
     "license": "MIT",
     "dependencies": {
-        "@tailwindest/tailwind-internal": "workspace:*",
+        "tailwindest-tailwind-internal": "workspace:*",
         "boxen": "^8.0.1",
         "chalk": "^5.4.1",
         "commander": "^14.0.3",

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest"
 import {
     checkFileForImport,
     findTailwindCSSRoot,
-} from "@tailwindest/tailwind-internal"
+} from "tailwindest-tailwind-internal"
 
 const tempDirs: string[] = []
 

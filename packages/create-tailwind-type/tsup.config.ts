@@ -6,7 +6,7 @@ export default defineConfig((options) => ({
         cli: "src/cli.ts",
     },
     watch: options.watch ? ["src/**/*"] : false,
-    noExternal: ["@tailwindest/tailwind-internal"],
+    noExternal: ["tailwindest-tailwind-internal"],
     clean: false,
     dts: true,
     outDir: "dist",

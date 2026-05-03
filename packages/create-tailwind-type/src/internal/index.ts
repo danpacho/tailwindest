@@ -1,1 +1,1 @@
-export * from "@tailwindest/tailwind-internal"
+export * from "tailwindest-tailwind-internal"

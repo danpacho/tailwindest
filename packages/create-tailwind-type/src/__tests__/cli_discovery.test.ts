@@ -3,7 +3,7 @@ import {
     resolveTailwindNodeDir,
     getTailwindVersion,
     isVersionSufficient,
-} from "@tailwindest/tailwind-internal"
+} from "tailwindest-tailwind-internal"
 import { existsSync, readFileSync } from "fs"
 import { join } from "path"
 import { createRequire } from "module"

@@ -8,7 +8,7 @@ import {
     isVersionSufficient,
     resolveTailwindNodeDir,
     TailwindCompiler,
-} from "@tailwindest/tailwind-internal"
+} from "tailwindest-tailwind-internal"
 import { TypeSchemaGenerator } from "./type_tools"
 import { existsSync } from "fs"
 import { resolve } from "path"

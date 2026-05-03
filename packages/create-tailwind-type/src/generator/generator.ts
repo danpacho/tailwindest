@@ -4,8 +4,8 @@ import type {
     TailwindCompiler,
     VariantEntry,
     DesignSystem,
-} from "@tailwindest/tailwind-internal"
-import { extractTailwindNestGroups } from "@tailwindest/tailwind-internal"
+} from "tailwindest-tailwind-internal"
+import { extractTailwindNestGroups } from "tailwindest-tailwind-internal"
 import { Logger } from "../logger"
 import type { TypeSchemaGenerator } from "../type_tools"
 import * as t from "../type_tools"

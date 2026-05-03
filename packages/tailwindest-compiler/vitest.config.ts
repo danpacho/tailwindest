@@ -7,7 +7,7 @@ export default defineConfig({
             "@tailwindest/core": fileURLToPath(
                 new URL("../tailwindest-core/src/index.ts", import.meta.url)
             ),
-            "@tailwindest/tailwind-internal": fileURLToPath(
+            "tailwindest-tailwind-internal": fileURLToPath(
                 new URL("../tailwind-internal/src/index.ts", import.meta.url)
             ),
         },

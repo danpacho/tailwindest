@@ -3,7 +3,7 @@ import fsSync from "node:fs"
 import fs from "node:fs/promises"
 import path from "node:path"
 import * as ts from "typescript"
-import { loadTailwindNestGroups } from "@tailwindest/tailwind-internal"
+import { loadTailwindNestGroups } from "tailwindest-tailwind-internal"
 import { createStaticAnalyzer } from "../analyzer/detector"
 import type { TailwindestCallKind, SourceSpan } from "../analyzer/symbols"
 import {

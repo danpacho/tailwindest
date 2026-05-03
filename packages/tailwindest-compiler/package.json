@@ -59,7 +59,7 @@
     },
     "dependencies": {
         "@tailwindest/core": "workspace:*",
-        "@tailwindest/tailwind-internal": "workspace:*",
+        "tailwindest-tailwind-internal": "workspace:*",
         "typescript": "^5.5.0"
     },
     "peerDependencies": {
