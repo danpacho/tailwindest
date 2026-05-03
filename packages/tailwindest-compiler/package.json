@@ -1,6 +1,6 @@
 {
     "name": "@tailwindest/compiler",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "private": true,
     "description": "Deprecated internal Tailwindest compiler experiment; not published",
     "type": "module",
