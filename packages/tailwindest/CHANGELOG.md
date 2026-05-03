@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.2.5
+
+### Patch Changes
+
+- Fix internal deps error
+
 ## 3.2.4
 
 ### Patch Changes
