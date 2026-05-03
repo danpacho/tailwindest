@@ -1,5 +1,16 @@
 # create-tailwind-type
 
+## 1.1.0
+
+### Minor Changes
+
+- Upgrade CLI interface and creation process
+
+### Patch Changes
+
+- Updated dependencies
+    - @tailwindest/tailwind-internal@1.0.0
+
 ## 1.0.9
 
 ### Patch Changes
