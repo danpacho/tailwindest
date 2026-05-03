@@ -1,12 +1,19 @@
 import { existsSync, readFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join, parse } from "node:path"
+import { fileURLToPath } from "node:url"
+
+declare const __filename: string
 
 export async function resolveTailwindNodeDir(
     cssRoot?: string,
     options: { skipLocal?: boolean } = {}
 ): Promise<string> {
-    const require = createRequire(import.meta.url)
+    const filename =
+        typeof import.meta.url === "string"
+            ? fileURLToPath(import.meta.url)
+            : __filename
+    const require = createRequire(filename)
     const searchPaths: string[] = []
     if (!options.skipLocal) {
         searchPaths.push(process.cwd())

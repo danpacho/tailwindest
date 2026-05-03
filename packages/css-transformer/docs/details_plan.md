@@ -1,7 +1,7 @@
 # CSS Transformer Production Implementation Plan
 
 This plan is the runtime-only implementation contract for
-`@tailwindest/css-transformer`.
+`tailwindest-css-transform`.
 
 ## Goals
 

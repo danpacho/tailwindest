@@ -4,8 +4,8 @@
     "commit": false,
     "fixed": [],
     "linked": [],
-    "ignore": ["web"],
-    "access": "restricted",
+    "ignore": ["web", "@tailwindest/compiler"],
+    "access": "public",
     "baseBranch": "master",
     "updateInternalDependencies": "patch"
 }

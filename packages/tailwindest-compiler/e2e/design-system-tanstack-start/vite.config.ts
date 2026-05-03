@@ -15,7 +15,7 @@ export default defineConfig({
     logLevel: "error",
     resolve: {
         alias: {
-            "@tailwindest/core": path.resolve(
+            "tailwindest-core": path.resolve(
                 fixtureRoot,
                 "../../../tailwindest-core/src/index.ts"
             ),

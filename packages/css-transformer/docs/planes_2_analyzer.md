@@ -23,5 +23,5 @@ preserving variant semantics and override order.
 ## Verification
 
 ```bash
-pnpm --filter @tailwindest/css-transformer test
+pnpm --filter tailwindest-css-transform test
 ```

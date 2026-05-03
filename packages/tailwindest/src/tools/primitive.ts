@@ -4,7 +4,7 @@ import {
     primitiveClass,
     primitiveStyle,
     type PrimitiveStyleModel,
-} from "@tailwindest/core"
+} from "tailwindest-core"
 import type { AdditionalClassTokens } from "./merger_interface"
 import { Styler } from "./styler"
 

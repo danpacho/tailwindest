@@ -58,8 +58,8 @@
         "pack:dry": "npm pack --dry-run"
     },
     "dependencies": {
-        "@tailwindest/core": "workspace:*",
-        "@tailwindest/tailwind-internal": "workspace:*",
+        "tailwindest-core": "workspace:*",
+        "tailwindest-tailwind-internal": "workspace:*",
         "typescript": "^5.5.0"
     },
     "peerDependencies": {

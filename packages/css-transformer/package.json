@@ -1,8 +1,11 @@
 {
-    "name": "@tailwindest/css-transformer",
-    "version": "1.0.0",
-    "private": true,
+    "name": "tailwindest-css-transform",
+    "version": "1.0.5",
+    "private": false,
     "description": "Tailwindest CSS Transformer",
+    "files": [
+        "dist"
+    ],
     "type": "module",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -11,13 +14,16 @@
     },
     "scripts": {
         "build": "tsup",
+        "prepack": "pnpm build",
         "test": "vitest run",
+        "prepublishOnly": "pnpm test",
+        "publish:verify": "pnpm prepublishOnly && pnpm pack --json && npm publish --dry-run --ignore-scripts --access public",
         "fixture:download": "tsx scripts/download_shadcn.ts"
     },
     "dependencies": {
         "@clack/prompts": "^1.2.0",
         "commander": "^14.0.3",
-        "create-tailwind-type": "workspace:*",
+        "create-tailwind-type": "^1.1.4",
         "picocolors": "^1.1.0",
         "ts-morph": "^28.0.0"
     },

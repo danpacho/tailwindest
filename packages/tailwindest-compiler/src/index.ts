@@ -2,7 +2,7 @@ import type { CompilerDiagnostic } from "./core/diagnostic_types"
 import type { MergerPolicy } from "./core/merger"
 import type { ViteSourceMap } from "./transform/replacement"
 import { createCompilerContext } from "./vite/context"
-import { loadTailwindNestGroups } from "@tailwindest/tailwind-internal"
+import { loadTailwindNestGroups } from "tailwindest-tailwind-internal"
 import { createCompiledVariantResolver } from "./core/compiled_variant_resolver"
 
 /**

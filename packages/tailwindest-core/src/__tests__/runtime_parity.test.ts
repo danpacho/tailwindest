@@ -53,7 +53,7 @@ const baseStyle: Style = {
     },
 }
 
-describe("@tailwindest/core runtime parity", () => {
+describe("tailwindest-core runtime parity", () => {
     test("join, def, mergeRecord, and mergeProps match runtime semantics", () => {
         const engine = createEvaluationEngine()
         const classList = [

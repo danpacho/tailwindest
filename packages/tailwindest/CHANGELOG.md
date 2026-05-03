@@ -1,5 +1,19 @@
 # tailwindest
 
+## 3.2.6
+
+### Patch Changes
+
+- Fix pub deps error
+- Updated dependencies
+    - tailwindest-core@1.0.1
+
+## 3.2.5
+
+### Patch Changes
+
+- Fix internal deps error
+
 ## 3.2.4
 
 ### Patch Changes
@@ -12,7 +26,7 @@
 
 - Upgrade CLI interface and creation process
 - Updated dependencies
-    - @tailwindest/core@1.0.0
+    - tailwindest-core@1.0.0
 
 ## 3.2.2
 

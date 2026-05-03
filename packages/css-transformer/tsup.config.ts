@@ -6,10 +6,9 @@ export default defineConfig({
     outDir: "dist",
     dts: true,
     splitting: false,
-    sourcemap: true,
+    sourcemap: false,
     clean: true,
     bundle: true,
-    shims: true,
     treeshake: true,
     platform: "node",
     // Mark ALL dependencies as external to avoid bundling issues with dynamic requires

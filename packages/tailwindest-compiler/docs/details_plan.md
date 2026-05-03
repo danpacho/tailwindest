@@ -43,7 +43,7 @@ Requirements:
 
 - Match Tailwindest runtime behavior for `flattenRecord`, `deepMerge`, class
   joining, and structural style object normalization through
-  `@tailwindest/core`.
+  `tailwindest-core`.
 - Keep compiler-only nested variant prefixing in
   `compiled_style_normalizer.ts`, backed by Tailwind variant metadata rather
   than a hard-coded allowlist. Only object-valued variant keys infer prefixes;

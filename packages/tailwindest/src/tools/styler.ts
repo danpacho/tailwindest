@@ -3,7 +3,7 @@ import {
     flattenRecord,
     getClassName,
     mergeClassNames,
-} from "@tailwindest/core"
+} from "tailwindest-core"
 import type { AdditionalClassTokens, Merger } from "./merger_interface"
 
 export abstract class Styler<Args, Out, Literal extends string = string> {

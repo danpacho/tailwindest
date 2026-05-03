@@ -14,5 +14,5 @@ tests.
 ## Required Verification
 
 ```bash
-pnpm --filter @tailwindest/css-transformer test
+pnpm --filter tailwindest-css-transform test
 ```

@@ -1,8 +1,8 @@
 {
-    "name": "@tailwindest/core",
-    "version": "1.0.0",
+    "name": "tailwindest-core",
+    "version": "1.0.1",
     "description": "Pure semantic helpers for Tailwindest runtime behavior",
-    "private": true,
+    "private": false,
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -22,7 +22,8 @@
     },
     "scripts": {
         "build": "tsup",
-        "test": "vitest run"
+        "test": "vitest run",
+        "prepack": "pnpm build"
     },
     "dependencies": {
         "clsx": "^2.1.1"

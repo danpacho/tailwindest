@@ -14,5 +14,5 @@ Approved when registry, walker, import collector, and golden-file tests pass.
 ## Required Verification
 
 ```bash
-pnpm --filter @tailwindest/css-transformer test
+pnpm --filter tailwindest-css-transform test
 ```

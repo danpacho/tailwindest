@@ -1,5 +1,10 @@
 import { fileURLToPath } from "url"
 import { dirname } from "path"
 
-const filename = fileURLToPath(import.meta.url)
+declare const __filename: string
+
+const filename =
+    typeof import.meta.url === "string"
+        ? fileURLToPath(import.meta.url)
+        : __filename
 export const baseDir = dirname(filename)

@@ -16,7 +16,7 @@ import {
     type RotaryStyleModel as CoreRotaryStyleModel,
     type ToggleStyleModel as CoreToggleStyleModel,
     type VariantsStyleModel as CoreVariantsStyleModel,
-} from "@tailwindest/core"
+} from "tailwindest-core"
 import { getClassName, type EvaluationEngineOptions } from "./evaluator"
 import { candidatesFromClassName } from "./merger"
 import type { StaticClassValue, StaticStyleObject } from "./static_value"
