@@ -1,5 +1,6 @@
 {
     "name": "web",
+    "private": true,
     "description": "tailwindest documentation for v3",
     "type": "module",
     "version": "1.0.0",
