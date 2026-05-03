@@ -1,6 +1,6 @@
 {
     "name": "@tailwindest/core",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "description": "Pure semantic helpers for Tailwindest runtime behavior",
     "type": "module",
     "main": "./dist/index.js",
