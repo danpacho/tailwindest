@@ -2,6 +2,7 @@
     "name": "@tailwindest/tailwind-internal",
     "version": "1.0.0",
     "description": "Shared internal Tailwind CSS integration utilities for Tailwindest packages",
+    "private": true,
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",

@@ -2,6 +2,7 @@
     "name": "@tailwindest/core",
     "version": "1.0.0",
     "description": "Pure semantic helpers for Tailwindest runtime behavior",
+    "private": true,
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
