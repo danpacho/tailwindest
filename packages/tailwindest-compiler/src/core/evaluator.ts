@@ -1,7 +1,7 @@
 import {
     deepMerge as coreDeepMerge,
     toClass as coreToClass,
-} from "@tailwindest/core"
+} from "tailwindest-core"
 import {
     flattenCompiledStyleRecord,
     type CompiledStyleNormalizationOptions,

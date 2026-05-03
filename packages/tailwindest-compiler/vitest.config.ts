@@ -4,7 +4,7 @@ import { defineConfig } from "vitest/config"
 export default defineConfig({
     resolve: {
         alias: {
-            "@tailwindest/core": fileURLToPath(
+            "tailwindest-core": fileURLToPath(
                 new URL("../tailwindest-core/src/index.ts", import.meta.url)
             ),
             "tailwindest-tailwind-internal": fileURLToPath(

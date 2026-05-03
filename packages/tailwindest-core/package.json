@@ -1,5 +1,5 @@
 {
-    "name": "@tailwindest/core",
+    "name": "tailwindest-core",
     "version": "1.0.0",
     "description": "Pure semantic helpers for Tailwindest runtime behavior",
     "private": true,

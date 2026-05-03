@@ -18,7 +18,7 @@
 
 - Upgrade CLI interface and creation process
 - Updated dependencies
-    - @tailwindest/core@1.0.0
+    - tailwindest-core@1.0.0
 
 ## 3.2.2
 

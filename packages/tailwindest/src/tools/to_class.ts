@@ -1,1 +1,1 @@
-export { toClass, type ClassList } from "@tailwindest/core"
+export { toClass, type ClassList } from "tailwindest-core"

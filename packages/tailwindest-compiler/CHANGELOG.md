@@ -10,4 +10,4 @@
 
 - Updated dependencies
     - @tailwindest/tailwind-internal@1.0.0
-    - @tailwindest/core@1.0.0
+    - tailwindest-core@1.0.0

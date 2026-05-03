@@ -1,1 +1,1 @@
-export { flattenStyleRecord } from "@tailwindest/core"
+export { flattenStyleRecord } from "tailwindest-core"

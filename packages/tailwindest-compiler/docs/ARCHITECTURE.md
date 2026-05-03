@@ -240,7 +240,7 @@ merger can be proven.
 ## Nested Variant Semantics
 
 Nested variant prefix generation is a compiler-layer normalization step for
-`CreateCompiledTailwindest` authoring. It is not `@tailwindest/core` runtime
+`CreateCompiledTailwindest` authoring. It is not `tailwindest-core` runtime
 behavior; the runtime package structurally flattens authored leaf strings.
 
 Tailwind variant keys in style objects are semantic prefixes. Property keys such

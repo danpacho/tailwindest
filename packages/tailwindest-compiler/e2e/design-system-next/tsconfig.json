@@ -8,7 +8,7 @@
         "skipLibCheck": true,
         "baseUrl": ".",
         "paths": {
-            "@tailwindest/core": ["../../../tailwindest-core/src/index.ts"],
+            "tailwindest-core": ["../../../tailwindest-core/src/index.ts"],
             "tailwindest": ["../../../tailwindest/src/index.ts"]
         },
         "plugins": [
