@@ -1,0 +1,61 @@
+"use client"
+
+import * as React from "react"
+import * as RadioGroupPrimitive from "@radix-ui/react-radio-group"
+import { Circle } from "lucide-react"
+import { tw } from "~/tw";
+
+const RadioGroup = React.forwardRef<
+  React.ElementRef<typeof RadioGroupPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
+>(({ className, ...props }, ref) => {
+  return (
+    <RadioGroupPrimitive.Root
+      className={tw.join("grid gap-2", className)}
+      {...props}
+      ref={ref}
+    />
+  )
+})
+RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
+
+
+const radioGroupItemRadioGroupPrimitiveItem = tw.style({
+    aspectRatio: "aspect-square",
+    height: "h-4",
+    width: "w-4",
+    borderRadius: "rounded-full",
+    borderWidth: ["border", "border-primary"],
+    color: "text-primary",
+    boxShadow: "shadow",
+    focus: {
+        outlineStyle: "focus:outline-none",
+    },
+    "focus-visible": {
+        boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring"],
+    },
+    disabled: {
+        cursor: "disabled:cursor-not-allowed",
+        opacity: "disabled:opacity-50",
+    },
+});
+
+const RadioGroupItem = React.forwardRef<
+  React.ElementRef<typeof RadioGroupPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
+>(({ className, ...props }, ref) => {
+  return (
+    <RadioGroupPrimitive.Item
+      ref={ref}
+      className={radioGroupItemRadioGroupPrimitiveItem.class(className)}
+      {...props}
+    >
+      <RadioGroupPrimitive.Indicator className={tw.join("flex items-center justify-center")}>
+        <Circle className={tw.join("h-3.5 w-3.5 fill-primary")} />
+      </RadioGroupPrimitive.Indicator>
+    </RadioGroupPrimitive.Item>
+  )
+})
+RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName
+
+export { RadioGroup, RadioGroupItem }

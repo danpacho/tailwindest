@@ -1,0 +1,10 @@
+export type TailwindNestGroups =
+    | "dark"
+    | "data-open"
+    | "aria-checked"
+    | "focus"
+    | "group"
+    | "group-hover"
+    | "hover"
+    | "peer"
+    | "peer-focus"

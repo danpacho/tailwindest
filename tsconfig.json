@@ -4,15 +4,28 @@
         "target": "esnext",
         "module": "esnext",
         "lib": ["dom", "dom.iterable", "esnext"],
-        "baseUrl": ".",
         "esModuleInterop": true,
         "moduleResolution": "bundler",
         "noUncheckedIndexedAccess": true,
         "exactOptionalPropertyTypes": true,
         "forceConsistentCasingInFileNames": true,
+        "ignoreDeprecations": "6.0",
         "noEmit": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "jsx": "react-jsx",
+        "paths": {
+            "@tailwindest/core": ["./packages/tailwindest-core/src/index.ts"],
+            "@tailwindest/core/*": ["./packages/tailwindest-core/src/*"],
+            "@tailwindest/tailwind-internal": [
+                "./packages/tailwind-internal/src/index.ts"
+            ],
+            "@tailwindest/tailwind-internal/*": [
+                "./packages/tailwind-internal/src/*"
+            ],
+            "tailwindest": ["./packages/tailwindest/src/index.ts"],
+            "tailwindest/*": ["./packages/tailwindest/src/*"]
+        }
     },
     "include": ["packages"],
-    "exclude": ["node_modules", "dist", "site", "examples"]
+    "exclude": ["node_modules", "dist", "**/dist", "site", "examples"]
 }

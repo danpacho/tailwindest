@@ -1,0 +1,36 @@
+{
+    "name": "@tailwindest/tailwind-internal",
+    "version": "1.0.0",
+    "description": "Shared internal Tailwind CSS integration utilities for Tailwindest packages",
+    "private": true,
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./package.json": {
+            "default": "./package.json"
+        }
+    },
+    "scripts": {
+        "build": "tsup",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "@tailwindcss/node": "^4.2.4",
+        "glob": "^13.0.6",
+        "lightningcss": "^1.29.1",
+        "tailwindcss": "^4.2.4"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}

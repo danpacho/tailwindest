@@ -50,7 +50,9 @@ export interface ShortTailwindBorders<
         ringColor: ""
         ringWidth: ""
     },
-> extends ShortTailwindBorderWidthType<Pluggable<BordersPlug["borderWidth"]>>,
+>
+    extends
+        ShortTailwindBorderWidthType<Pluggable<BordersPlug["borderWidth"]>>,
         ShortTailwindBorderRadiusType<BordersPlug["borderRadius"]>,
         ShortTailwindBorderColorType<
             TailwindColor | Pluggable<BordersPlug["borderColor"]>

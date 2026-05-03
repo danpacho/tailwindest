@@ -12,7 +12,9 @@ export interface TailwindTables<
     TablesPlug extends TailwindTablesPlug = {
         borderSpacing: ""
     },
-> extends TailwindBorderCollapseType,
+>
+    extends
+        TailwindBorderCollapseType,
         TailwindBorderSpacingType<
             TailwindSpacing | Pluggable<TablesPlug["borderSpacing"]>
         >,

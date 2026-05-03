@@ -54,15 +54,15 @@ type TailwindestTypeSet<
  * type FontSize = Custom["fontSize"]
  */
 export type Tailwindest<
-    TailwindGlobal extends
-        TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
+    TailwindGlobal extends TailwindGlobalPlugOption =
+        TailwindDefaultGlobalPlugOption,
     TailwindStyle extends TailwindStylePlugOption = TailwindDefaultStylePlug,
-    TailwindNestConditionPrefix extends
-        TailwindNestConditionIdentifierOption = {
-        breakIdentifier: "@"
-        pseudoClassIdentifier: ":"
-        pseudoElementIdentifier: "::"
-    },
+    TailwindNestConditionPrefix extends TailwindNestConditionIdentifierOption =
+        {
+            breakIdentifier: "@"
+            pseudoClassIdentifier: ":"
+            pseudoElementIdentifier: "::"
+        },
 > = TailwindestTypeSet<
     TailwindestNestKeys<
         TailwindNestConditionPrefix,

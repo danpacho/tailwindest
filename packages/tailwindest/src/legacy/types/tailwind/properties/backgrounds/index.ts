@@ -26,7 +26,9 @@ export interface TailwindBackgrounds<
         backgroundPosition: ""
         gradientColorStops: ""
     },
-> extends TailwindBackgroundClipType,
+>
+    extends
+        TailwindBackgroundClipType,
         TailwindBackgroundRepeatType,
         TailwindBackgroundOriginType,
         TailwindBackgroundAttachmentType,

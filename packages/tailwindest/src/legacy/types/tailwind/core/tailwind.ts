@@ -28,10 +28,12 @@ import type {
 } from "../properties"
 
 export interface Tailwind<
-    GlobalPlugOption extends
-        TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
+    GlobalPlugOption extends TailwindGlobalPlugOption =
+        TailwindDefaultGlobalPlugOption,
     StylePlugOption extends TailwindStylePlugOption = TailwindDefaultStylePlug,
-> extends TailwindAccessibility,
+>
+    extends
+        TailwindAccessibility,
         TailwindGrid<StylePlugOption>,
         TailwindFilters<StylePlugOption>,
         TailwindTransitionAnimation<StylePlugOption>,

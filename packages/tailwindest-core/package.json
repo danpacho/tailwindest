@@ -1,0 +1,33 @@
+{
+    "name": "@tailwindest/core",
+    "version": "1.0.0",
+    "description": "Pure semantic helpers for Tailwindest runtime behavior",
+    "private": true,
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./package.json": {
+            "default": "./package.json"
+        }
+    },
+    "scripts": {
+        "build": "tsup",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "clsx": "^2.1.1"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "pages": [
+        "index",
+        "setup",
+        "create-tailwind-type",
+        "css-transformer",
+        "recipe",
+        "apis",
+        "examples"
+    ]
+}

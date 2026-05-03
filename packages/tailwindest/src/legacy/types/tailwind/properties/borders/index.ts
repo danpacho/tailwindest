@@ -52,7 +52,9 @@ export interface TailwindBorders<
         ringColor: ""
         ringWidth: ""
     },
-> extends TailwindOutlineStyleType,
+>
+    extends
+        TailwindOutlineStyleType,
         TailwindDivideStyleType,
         TailwindBorderStyleType,
         TailwindBorderWidthType<Pluggable<BordersPlug["borderWidth"]>>,

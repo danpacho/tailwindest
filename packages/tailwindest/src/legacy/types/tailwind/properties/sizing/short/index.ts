@@ -21,7 +21,9 @@ export interface ShortTailwindSizing<
         maxHeight: ""
         minHeight: ""
     },
-> extends ShortTailwindMinHeightType<SizingPlug["minHeight"]>,
+>
+    extends
+        ShortTailwindMinHeightType<SizingPlug["minHeight"]>,
         ShortTailwindHeightType<TailwindSpacing, SizingPlug["height"]>,
         ShortTailwindMaxHeightType<TailwindSpacing, SizingPlug["maxHeight"]>,
         ShortTailwindMinWidthType<SizingPlug["minWidth"]>,

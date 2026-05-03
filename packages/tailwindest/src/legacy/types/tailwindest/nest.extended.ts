@@ -53,5 +53,7 @@ export interface TailwindestExtendedNest<
     Nest extends string,
     Tailwind,
     Identifier extends string,
-> extends TailwindestGroup<Nest, Tailwind, Identifier>,
+>
+    extends
+        TailwindestGroup<Nest, Tailwind, Identifier>,
         TailwindestPeer<Nest, Tailwind, Identifier> {}

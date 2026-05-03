@@ -1,0 +1,243 @@
+---
+title: css-transformer
+description: Migrate Tailwind class strings to Tailwindest object styles.
+---
+
+<img
+    src="/images/tailwind-transform.png"
+    width="550px"
+    alt="tailwindest css transformer banner"
+/>
+
+`@tailwindest/css-transformer` is a migration tool. It rewrites supported
+Tailwind class-string patterns into Tailwindest object-style calls, while
+preserving source code when exact conversion is not proven.
+
+Use it when you are moving an existing Tailwind codebase from `className`,
+`cn`, `clsx`, `classNames`, or `cva` strings into Tailwindest styles.
+
+## Install
+
+Run the transformer directly:
+
+```bash
+npx @tailwindest/css-transformer
+```
+
+Or install it for repeated local use:
+
+```bash
+pnpm add -D @tailwindest/css-transformer
+```
+
+The CLI opens an interactive prompt for target path, Tailwind CSS entry,
+Tailwindest import name, import path, enabled walkers, and dry-run mode.
+
+## What It Converts
+
+Input:
+
+```tsx
+import { cn } from "@/lib/utils"
+
+export function Button() {
+    return (
+        <button
+            className={cn(
+                "flex items-center rounded-md bg-red-50 px-4 py-2",
+                "dark:hover:bg-red-950"
+            )}
+        />
+    )
+}
+```
+
+Runtime-mode output:
+
+```tsx
+import { tw } from "~/tw"
+
+const buttonButton = tw.style({
+    display: "flex",
+    alignItems: "items-center",
+    borderRadius: "rounded-md",
+    backgroundColor: "bg-red-50",
+    paddingLeft: "px-4",
+    paddingTop: "py-2",
+    dark: {
+        hover: {
+            backgroundColor: "dark:hover:bg-red-950",
+        },
+    },
+})
+
+export function Button() {
+    return <button className={buttonButton.class()} />
+}
+```
+
+Runtime-mode output keeps prefixed nested leaves:
+
+```ts
+tw.style({
+    dark: {
+        hover: {
+            backgroundColor: "dark:hover:bg-red-950",
+        },
+    },
+})
+```
+
+## Output Modes
+
+The transformer is runtime-first:
+
+| Mode      | Target              | Leaf value                                      |
+| --------- | ------------------- | ----------------------------------------------- |
+| `runtime` | `CreateTailwindest` | original token, such as `dark:hover:bg-red-950` |
+| `auto`    | safe default        | runtime output                                  |
+
+## Recommended Mode Selection
+
+```bash
+# Safe default for mixed or unknown projects
+npx @tailwindest/css-transformer --mode auto
+
+# Runtime Tailwindest migration
+npx @tailwindest/css-transformer --mode runtime
+```
+
+`auto` keeps runtime output for unknown or mixed projects.
+
+## Runtime Tailwindest Setup
+
+Define your Tailwindest type with `CreateTailwindest`:
+
+```ts filename="tw.ts"
+import {
+    createTools,
+    type CreateTailwindest,
+    type CreateTailwindLiteral,
+} from "tailwindest"
+import type { Tailwind, TailwindNestGroups } from "./tailwind"
+
+export type Tailwindest = CreateTailwindest<{
+    tailwind: Tailwind
+    tailwindNestGroups: TailwindNestGroups
+    useArbitrary: true
+}>
+
+export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
+
+export const tw = createTools<{
+    tailwindest: Tailwindest
+    tailwindLiteral: TailwindLiteral
+}>()
+```
+
+Transform with runtime output:
+
+```bash
+npx @tailwindest/css-transformer --mode runtime
+```
+
+Nested variant leaves preserve the original prefixed class:
+
+```ts
+tw.style({
+    dark: {
+        hover: {
+            backgroundColor: "dark:hover:bg-red-950",
+        },
+    },
+})
+```
+
+## Supported Patterns
+
+The transformer currently supports static class strings in:
+
+- `className="..."`
+- `className={"..."}`
+- `cn("...")`
+- `clsx("...")`
+- `classNames("...")`
+- `cva("...")`
+- `cva(..., { variants: { ... } })` static string options
+
+Dynamic arguments are preserved when the surrounding call can still be
+represented safely.
+
+```tsx
+cn("flex px-4", isActive && "bg-red-500", props.className)
+```
+
+The static part can become a Tailwindest style constant, while dynamic arguments
+remain in the generated `.class(...)` call.
+
+## Conservative Fallback
+
+The transformer does not rewrite code it cannot prove safe.
+
+Common fallback cases:
+
+- template literals with substitutions
+- computed class strings
+- unknown or ambiguous Tailwind utilities
+- runtime-generated `cva` variant maps
+- unsupported `compoundVariants` conversion
+- helper imports still used elsewhere
+
+Run dry-run first and inspect diagnostics before writing files.
+
+## CLI Options
+
+```bash
+npx @tailwindest/css-transformer --mode auto --dry-run
+```
+
+| Option                | Alias | Default        | Description                                         |
+| --------------------- | ----- | -------------- | --------------------------------------------------- |
+| `--css <path>`        | `-c`  | `tailwind.css` | Tailwind CSS entry used to initialize the resolver. |
+| `--identifier <name>` | `-i`  | `tw`           | Tailwindest import identifier.                      |
+| `--module <path>`     | `-m`  | `~/tw`         | Tailwindest module import path.                     |
+| `--dry-run`           | `-d`  | `false`        | Preview without writing transformed files.          |
+| `--mode <mode>`       | none  | `auto`         | Output mode: `auto` or `runtime`.                   |
+
+## Programmatic Usage
+
+```ts
+import { transform } from "@tailwindest/css-transformer"
+
+const result = await transform(source, {
+    resolver,
+    outputMode: "runtime",
+    projectRoot: process.cwd(),
+    sourcePath: "/repo/src/Button.tsx",
+    tailwindestIdentifier: "tw",
+    tailwindestModulePath: "~/tw",
+    walkers: ["cva", "cn", "classname"],
+    config: {
+        objectThreshold: 2,
+    },
+})
+
+console.log(result.code)
+console.log(result.diagnostics)
+```
+
+You normally do not need the programmatic API unless you are building custom
+migration tooling.
+
+## Safety Model
+
+The transformer uses Collect -> Reverse Execute:
+
+1. Parse source with `ts-morph`.
+2. Collect supported transform targets.
+3. Analyze static class strings.
+4. Apply replacements from the end of the file to the beginning.
+5. Apply import edits once.
+6. Return transformed code and diagnostics.
+
+This avoids stale AST ranges and keeps unrelated source code untouched.

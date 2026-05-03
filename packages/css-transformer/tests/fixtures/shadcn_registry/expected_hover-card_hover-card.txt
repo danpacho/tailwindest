@@ -1,0 +1,39 @@
+"use client"
+
+import * as React from "react"
+import * as HoverCardPrimitive from "@radix-ui/react-hover-card"
+import { tw } from "~/tw";
+
+const HoverCard = HoverCardPrimitive.Root
+
+const HoverCardTrigger = HoverCardPrimitive.Trigger
+
+
+const hoverCardContentHoverCardPrimitiveContent = tw.style({
+    zIndex: "z-50",
+    width: "w-64",
+    borderRadius: "rounded-md",
+    borderWidth: "border",
+    backgroundColor: "bg-popover",
+    padding: "p-4",
+    color: "text-popover-foreground",
+    boxShadow: "shadow-md",
+    outlineStyle: "outline-none",
+    transformOrigin: "origin-[--radix-hover-card-content-transform-origin]",
+});
+
+const HoverCardContent = React.forwardRef<
+  React.ElementRef<typeof HoverCardPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Content>
+>(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
+  <HoverCardPrimitive.Content
+    ref={ref}
+    align={align}
+    sideOffset={sideOffset}
+    className={hoverCardContentHoverCardPrimitiveContent.class(className)}
+    {...props}
+  />
+))
+HoverCardContent.displayName = HoverCardPrimitive.Content.displayName
+
+export { HoverCard, HoverCardTrigger, HoverCardContent }

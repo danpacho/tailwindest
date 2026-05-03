@@ -1,0 +1,10 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "dist",
+        "jsx": "react-jsx",
+        "ignoreDeprecations": "6.0",
+        "types": ["node"]
+    },
+    "include": ["src/**/*", "tests/**/*"]
+}

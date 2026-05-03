@@ -1,3 +1,10 @@
+import {
+    composePrimitive,
+    createPrimitiveModel,
+    primitiveClass,
+    primitiveStyle,
+    type PrimitiveStyleModel,
+} from "@tailwindest/core"
 import type { AdditionalClassTokens } from "./merger_interface"
 import { Styler } from "./styler"
 
@@ -5,13 +12,13 @@ export class PrimitiveStyler<
     StyleType,
     StyleLiteral extends string = string,
 > extends Styler<never, StyleType, StyleLiteral> {
+    private _model: PrimitiveStyleModel<StyleType>
     private _class: string
-    private _style: StyleType
 
     public constructor(style: StyleType) {
         super()
-        this._class = Styler.getClassName(style)
-        this._style = style
+        this._model = createPrimitiveModel(style)
+        this._class = primitiveClass(this._model)
     }
 
     /**
@@ -31,14 +38,12 @@ export class PrimitiveStyler<
      * @param extraStyle extra stylesheet
      */
     public style(...extraStyles: Array<StyleType>): StyleType {
-        const inquired = this._style
-        if (extraStyles.length === 0) return inquired
-        return Styler.deepMerge(inquired, ...extraStyles)
+        return primitiveStyle(this._model, extraStyles)
     }
 
     public compose(...styles: Array<StyleType>): PrimitiveStyler<StyleType> {
         return new PrimitiveStyler<StyleType>(
-            Styler.deepMerge(this._style, ...styles)!
+            composePrimitive(this._model, styles).style
         )
     }
 }

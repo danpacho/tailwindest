@@ -1,0 +1,44 @@
+import * as React from "react"
+import { tw } from "~/tw";
+
+const textareaTextarea = tw.style({
+    display: "flex",
+    minHeight: "min-h-[60px]",
+    width: "w-full",
+    borderRadius: "rounded-md",
+    borderWidth: ["border", "border-input"],
+    backgroundColor: "bg-transparent",
+    padding: ["px-3", "py-2"],
+    fontSize: "text-base",
+    boxShadow: "shadow-sm",
+    placeholder: {
+        color: "placeholder:text-muted-foreground",
+    },
+    "focus-visible": {
+        outlineStyle: "focus-visible:outline-none",
+        boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring"],
+    },
+    disabled: {
+        cursor: "disabled:cursor-not-allowed",
+        opacity: "disabled:opacity-50",
+    },
+    md: {
+        fontSize: "md:text-sm",
+    },
+});
+
+const Textarea = React.forwardRef<
+  HTMLTextAreaElement,
+  React.ComponentProps<"textarea">
+>(({ className, ...props }, ref) => {
+  return (
+    <textarea
+      className={textareaTextarea.class(className)}
+      ref={ref}
+      {...props}
+    />
+  )
+})
+Textarea.displayName = "Textarea"
+
+export { Textarea }

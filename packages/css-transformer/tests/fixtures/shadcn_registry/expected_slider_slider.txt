@@ -1,0 +1,62 @@
+"use client"
+
+import * as React from "react"
+import * as SliderPrimitive from "@radix-ui/react-slider"
+import { tw } from "~/tw";
+
+const sliderSliderPrimitiveThumb = tw.style({
+    display: "block",
+    height: "h-4",
+    width: "w-4",
+    borderRadius: "rounded-full",
+    borderWidth: ["border", "border-primary/50"],
+    backgroundColor: "bg-background",
+    boxShadow: "shadow",
+    transitionProperty: "transition-colors",
+    "focus-visible": {
+        outlineStyle: "focus-visible:outline-none",
+        boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring"],
+    },
+    disabled: {
+        pointerEvents: "disabled:pointer-events-none",
+        opacity: "disabled:opacity-50",
+    },
+});
+
+const sliderSliderPrimitiveTrack = tw.style({
+    position: "relative",
+    height: "h-1.5",
+    width: "w-full",
+    flexGrow: "grow",
+    overflow: "overflow-hidden",
+    borderRadius: "rounded-full",
+    backgroundColor: "bg-primary/20",
+});
+
+const sliderSliderPrimitiveRoot = tw.style({
+    position: "relative",
+    display: "flex",
+    width: "w-full",
+    touchAction: "touch-none",
+    userSelect: "select-none",
+    alignItems: "items-center",
+});
+
+const Slider = React.forwardRef<
+  React.ElementRef<typeof SliderPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <SliderPrimitive.Root
+    ref={ref}
+    className={sliderSliderPrimitiveRoot.class(className)}
+    {...props}
+  >
+    <SliderPrimitive.Track className={sliderSliderPrimitiveTrack.class()}>
+      <SliderPrimitive.Range className={tw.join("absolute h-full bg-primary")} />
+    </SliderPrimitive.Track>
+    <SliderPrimitive.Thumb className={sliderSliderPrimitiveThumb.class()} />
+  </SliderPrimitive.Root>
+))
+Slider.displayName = SliderPrimitive.Root.displayName
+
+export { Slider }

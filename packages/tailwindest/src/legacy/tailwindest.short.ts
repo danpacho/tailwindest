@@ -50,15 +50,15 @@ type ShortTailwindestTypeSet<
  * type FontSize = Custom["fontSize"]
  */
 export type ShortTailwindest<
-    TailwindGlobal extends
-        TailwindGlobalPlugOption = TailwindDefaultGlobalPlugOption,
+    TailwindGlobal extends TailwindGlobalPlugOption =
+        TailwindDefaultGlobalPlugOption,
     TailwindStyle extends TailwindStylePlugOption = TailwindDefaultStylePlug,
-    TailwindNestConditionPrefix extends
-        TailwindNestConditionIdentifierOption = {
-        breakIdentifier: "$"
-        pseudoClassIdentifier: "$"
-        pseudoElementIdentifier: "$"
-    },
+    TailwindNestConditionPrefix extends TailwindNestConditionIdentifierOption =
+        {
+            breakIdentifier: "$"
+            pseudoClassIdentifier: "$"
+            pseudoElementIdentifier: "$"
+        },
 > = ShortTailwindestTypeSet<
     TailwindestNestKeys<
         TailwindNestConditionPrefix,

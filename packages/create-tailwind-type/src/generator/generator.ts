@@ -3,11 +3,14 @@ import type {
     ClassEntry,
     TailwindCompiler,
     VariantEntry,
-} from "../internal/compiler"
+    DesignSystem,
+} from "@tailwindest/tailwind-internal"
+import { extractTailwindNestGroups } from "@tailwindest/tailwind-internal"
 import { Logger } from "../logger"
 import type { TypeSchemaGenerator } from "../type_tools"
 import * as t from "../type_tools"
 import { CSSAnalyzer } from "./css_analyzer"
+import { CSSPropertyResolver } from "./css_property_resolver"
 import { access, constants, mkdir, readFile, writeFile } from "fs/promises"
 import { dirname } from "path"
 
@@ -41,121 +44,16 @@ async function writeIfNotExists(
     }
 }
 
-const capitalize = (...text: string[]): string =>
-    text
-        .map((word) => {
-            if (word.length === 1) {
-                return word.toUpperCase()
-            } else if (word.length === 2) {
-                return word[0]!.toUpperCase() + word[1]!.toLowerCase()
-            } else {
-                if (!word[0]) return word[0]
-                return word[0]!.toUpperCase() + word.slice(1)
-            }
-        })
-        .join("")
-
-const kebabToCamelCase = (str: string): string => {
-    return str.replace(/-./g, (match) => match[1]?.toUpperCase() ?? "")
-}
-
-const camelToKebabCase = (str: string): string => {
-    return str.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)
-}
-
-const toValidCSSProperty = (property: string): string => {
-    const withoutPrefix = property.replace(/^-(webkit|moz|ms|o)-/, "")
-
-    return withoutPrefix.replace(/-([a-z])/g, (_, char) => char.toUpperCase())
-}
-
-const isTwClassPure = (text: string): boolean => {
-    return /^[A-Za-z\s]+$/.test(text.replaceAll("-", ""))
-}
-
-const sanitizeTwClass = (className: string): string => {
-    const nonSigned = className.startsWith("-") ? className.slice(1) : className
-    const direction = new Set(["x", "y", "z", "t", "l", "b", "r", "e", "s"])
-    const tokens = nonSigned.split("-")
-    const nonDirection = tokens.filter(
-        (e) =>
-            direction.has(e) === false ||
-            (e.length === 2 && direction.has(e[1] ?? ""))
-    )
-
-    return nonDirection.join("-")
-}
-
-const isNumericString = (str: string): boolean => {
-    if (str.trim() === "") {
-        return false
-    }
-    const num = Number(str)
-    const parsed = parseFloat(str)
-    return !isNaN(num) && isFinite(num) && !isNaN(parsed)
-}
-
-/**
- * Generates a RegExp to validate strings matching a template that contains a token.
- */
-const generateValidator = (rawText: string): RegExp | null => {
-    const escapeRegex = (str: string): string =>
-        str.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")
-
-    // "${string}" kinda pattern
-    const tokenPattern = /\$\{([^}]+)\}/g
-
-    if (!tokenPattern.test(rawText)) {
-        return null
-    }
-
-    tokenPattern.lastIndex = 0
-
-    let regexStr = "^"
-    let lastIndex = 0
-    let match: RegExpExecArray | null
-
-    while ((match = tokenPattern.exec(rawText)) !== null) {
-        const tokenStart = match.index
-        const tokenEnd = tokenPattern.lastIndex
-
-        // Look at the literal text before the token.
-        let literalBefore = rawText.slice(lastIndex, tokenStart)
-        // Remove any trailing whitespace.
-        const trimmedBefore = literalBefore.replace(/\s+$/, "")
-        let parenLeft = false
-        if (trimmedBefore.endsWith("(")) {
-            parenLeft = true
-        }
-
-        // Look at what comes immediately after the token.
-        const afterText = rawText.slice(tokenEnd)
-        // Match any leading whitespace followed by a ")".
-        const afterMatch = afterText.match(/^(\s*\))/)
-        const parenRight = !!afterMatch
-
-        if (parenLeft && parenRight) {
-            // Remove the left parenthesis from the literal.
-            literalBefore = trimmedBefore.slice(0, -1)
-            regexStr += escapeRegex(literalBefore)
-            // Insert a capture group that matches one or more characters.
-            regexStr += "(.+)"
-            // Skip over the token and the matched whitespace and closing ")".
-            lastIndex = tokenEnd + (afterMatch ? afterMatch[0].length : 0)
-        } else {
-            // No surrounding parentheses to ignore – use the literal parts as is.
-            regexStr += escapeRegex(rawText.slice(lastIndex, tokenStart))
-            regexStr += "(.+)"
-            lastIndex = tokenEnd
-        }
-    }
-
-    // Append any remaining literal text (escaped) after the last token.
-    regexStr += escapeRegex(rawText.slice(lastIndex))
-    regexStr += "$"
-
-    return new RegExp(regexStr)
-}
+import {
+    sanitizeTwClass,
+    kebabToCamelCase,
+    capitalize,
+    toValidCSSProperty,
+    isTwClassPure,
+    isNumericString,
+    generateValidator,
+    camelToKebabCase,
+} from "./css_property_utils"
 
 interface TailwindDocs {
     title: string
@@ -191,7 +89,7 @@ type TailwindCollection = Record<
     Omit<TailwindCollectionRecord, "propertyName">
 >
 
-type TailwindTypeAliasMap = Map<
+export type TailwindTypeAliasMap = Map<
     TailwindDocs["uniqueIdentifier"][number],
     Map<Set<TailwindDocs["classNames"][number]>, TailwindDocs["title"]>
 >
@@ -232,6 +130,11 @@ interface TailwindTypeGenerationOptions {
      * @default false
      */
     disableVariants?: boolean
+    /**
+     * Supports arbitrary variants (e.g. data-[...], aria-[...])
+     * @default false
+     */
+    useArbitraryVariant?: boolean
 }
 
 interface TailwindTypeGeneratorDeps {
@@ -244,13 +147,10 @@ interface TailwindTypeGeneratorOptions extends TailwindTypeGenerationOptions {
 }
 
 interface TailwindTypeGeneratorConstructor
-    extends TailwindTypeGeneratorDeps,
-        TailwindTypeGeneratorOptions {}
+    extends TailwindTypeGeneratorDeps, TailwindTypeGeneratorOptions {}
 export class TailwindTypeGenerator {
-    private _ds: Awaited<
-        ReturnType<(typeof this.compiler)["getDesignSystem"]>
-    > | null = null
-    public get ds() {
+    private _ds: DesignSystem | null = null
+    public get ds(): DesignSystem {
         if (!this._ds)
             throw new Error("Design system is not created, call init first")
         return this._ds
@@ -312,6 +212,7 @@ export class TailwindTypeGenerator {
         useStringKindVariantsOnly: false,
         // optional
         useOptionalProperty: true,
+        useArbitraryVariant: false,
     }
     public setGenOptions(newOptions: TailwindTypeGenerationOptions): this {
         if (newOptions.useExactVariants === newOptions.useSoftVariants) {
@@ -336,6 +237,7 @@ export class TailwindTypeGenerator {
             useExactVariants: opt.useExactVariants ?? false,
             useStringKindVariantsOnly: opt.useStringKindVariantsOnly ?? false,
             disableVariants: opt.disableVariants ?? false,
+            useArbitraryVariant: opt.useArbitraryVariant ?? false,
         }
     }
 
@@ -377,7 +279,7 @@ export class TailwindTypeGenerator {
             this._ds = await this.compiler.getDesignSystem()
             this._classList = this._ds.getClassList()
             this._variantsEntry = this._ds.getVariants()
-            this.variants = this.extractVariants()
+            this.variants = extractTailwindNestGroups(this.variantsEntry)
 
             await this.prepareTypeAliasMap()
 
@@ -395,29 +297,6 @@ export class TailwindTypeGenerator {
             this.$.error("initialization failed")
             console.error(e)
         }
-    }
-
-    private extractVariants(): Array<string> {
-        // exception lists
-        const exception = new Set(["group", "peer", "not"])
-
-        const fullVariants: Array<string> = this.variantsEntry
-            .map((e) => {
-                const merged = e.values.map((value) => {
-                    if (exception.has(value)) {
-                        return null
-                    }
-                    return `${e.name}${e.hasDash ? "-" : ""}${value}`
-                })
-                if (e.values.length === 0) {
-                    merged.push(e.name)
-                }
-                return merged
-            })
-            .flat()
-            .filter((e) => e !== null)
-
-        return fullVariants
     }
 
     private hash(str: string, seed: number = 0): string {
@@ -526,6 +405,9 @@ export class TailwindTypeGenerator {
         return possibleKey.trim()
     }
 
+    /**
+     * @deprecated Use CSSPropertyResolver.resolveFallback() instead. Kept for backward compatibility.
+     */
     private getPropertyNameTailwindKeyNotFounded(
         className: string
     ): string | null {
@@ -696,6 +578,9 @@ export class TailwindTypeGenerator {
         ],
     ])
 
+    /**
+     * @deprecated Use CSSPropertyResolver.resolve() instead. Kept for backward compatibility.
+     */
     private getPropertyName(
         className: string,
         uniqueKeySet: Set<string>,
@@ -950,6 +835,35 @@ export class TailwindTypeGenerator {
         return distinguishSimilarNames(className, similarNames)
     }
 
+    /**
+     * Creates a CSSPropertyResolver instance using the generator's initialized state.
+     * The resolver can be used independently to map Tailwind class names to CSS property names.
+     * @throws Error if the generator has not been initialized.
+     */
+    public createPropertyResolver(
+        colorVariableSet?: Set<string>
+    ): CSSPropertyResolver {
+        if (!this._initialized) {
+            throw new Error(
+                "Generator must be initialized before creating resolver"
+            )
+        }
+        return new CSSPropertyResolver(
+            {
+                candidatesToCss: (candidates) =>
+                    this.ds.candidatesToCss(candidates),
+                parseStyleBlock: (css) => this.cssAnalyzer.parseStyleBlock(css),
+                typeAliasMap: this.typeAliasMap,
+                variants: this.variants,
+                colorVariableSet: colorVariableSet ?? new Set(),
+            },
+            {
+                warn: (msg) => this.$.warn(msg),
+                error: (msg) => this.$.error(msg),
+            }
+        )
+    }
+
     private legacyRulePrefixes = ["bg-gradient"] as const
     private shouldSkip(className: string): boolean {
         if (
@@ -987,6 +901,22 @@ export class TailwindTypeGenerator {
             )
             const colorVariables: Array<string> = Array.from(colorVariableSet)
 
+            const resolver = new CSSPropertyResolver(
+                {
+                    candidatesToCss: (candidates) =>
+                        this.ds.candidatesToCss(candidates),
+                    parseStyleBlock: (css) =>
+                        this.cssAnalyzer.parseStyleBlock(css),
+                    typeAliasMap: this.typeAliasMap,
+                    variants: this.variants,
+                    colorVariableSet,
+                },
+                {
+                    warn: (msg) => this.$.warn(msg),
+                    error: (msg) => this.$.error(msg),
+                }
+            )
+
             for (const entry of this.classList) {
                 const [className, variants] = entry
 
@@ -995,11 +925,7 @@ export class TailwindTypeGenerator {
                     continue
                 }
 
-                let property = this.getPropertyName(
-                    className,
-                    uniqueKeySet,
-                    colorVariableSet
-                )
+                let property = resolver.resolve(className)
 
                 if (!property) {
                     const isUserDefined =
@@ -2044,18 +1970,6 @@ export class TailwindTypeGenerator {
             }
         )
 
-        const tailwindNestGroups = t
-            .union(
-                this.variants.map((variant) => t.literal(variant)),
-                capitalize("tailwind", "nest", "groups")
-            )
-            .addDoc("@description", "Tailwind nest groups")
-            .addDoc(
-                "@see",
-                `{@link https://tailwindcss.com/docs Tailwind docs}`
-            )
-            .setExport(true)
-
         const tailwindSchema = t
             .record(
                 "Tailwind",
@@ -2067,15 +1981,33 @@ export class TailwindTypeGenerator {
             .setExport(true)
             .setExtends(interfaceList.tailwindInterface)
 
-        const typeString = await this.generator.generateAll([
-            ...this.extractTypeFromMap(this.globalMap),
-            ...this.extractTypeFromMap(this.variantsMap),
-            ...interfaceList.referenceTypeMap,
-            ...interfaceList.tailwindInterface,
-            tailwindSchema,
-            tailwindNestGroups,
-        ])
+        const tailwindNestGroups = await this.generateTailwindNestGroups()
+        const typeString =
+            tailwindNestGroups +
+            (await this.generator.generateAll([
+                ...this.extractTypeFromMap(this.globalMap),
+                ...this.extractTypeFromMap(this.variantsMap),
+                ...interfaceList.referenceTypeMap,
+                ...interfaceList.tailwindInterface,
+                tailwindSchema,
+            ]))
 
         return typeString
+    }
+
+    private async generateTailwindNestGroups(): Promise<string> {
+        const variants =
+            this.variants.length === 0
+                ? "never"
+                : this.variants
+                      .map((variant) => JSON.stringify(variant))
+                      .join(" | ")
+        return await this.generator.prettify(`
+            /**
+             * @description Tailwind nest groups
+             * @see {@link https://tailwindcss.com/docs Tailwind docs}
+             */
+            export type TailwindNestGroups = ${variants}
+        `)
     }
 }

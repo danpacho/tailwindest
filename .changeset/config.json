@@ -4,7 +4,7 @@
     "commit": false,
     "fixed": [],
     "linked": [],
-    "ignore": ["tailwindest-documentation"],
+    "ignore": ["web"],
     "access": "restricted",
     "baseBranch": "master",
     "updateInternalDependencies": "patch"

@@ -15,9 +15,9 @@ export interface TailwindSpacing<
         margin: ""
         space: ""
     },
-> extends TailwindMarginType<
-            TailwindSpacing | Pluggable<SpacingPlug["margin"]>
-        >,
+>
+    extends
+        TailwindMarginType<TailwindSpacing | Pluggable<SpacingPlug["margin"]>>,
         TailwindPaddingType<
             TailwindSpacing | Pluggable<SpacingPlug["padding"]>
         >,

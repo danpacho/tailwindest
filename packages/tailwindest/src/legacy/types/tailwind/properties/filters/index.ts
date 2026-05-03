@@ -60,7 +60,9 @@ export interface TailwindFilters<
         backdropSepia: ""
         brightness: ""
     },
-> extends TailwindBlurType<FiltersPlug["blur"]>,
+>
+    extends
+        TailwindBlurType<FiltersPlug["blur"]>,
         TailwindBrightnessType<FiltersPlug["brightness"]>,
         TailwindContrastType<FiltersPlug["contrast"]>,
         TailwindDropShadowType<FiltersPlug["dropShadow"]>,

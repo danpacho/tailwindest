@@ -19,7 +19,9 @@ export interface TailwindEffects<
         boxShadow: ""
         boxShadowColor: ""
     },
-> extends TailwindOpacityType<TailwindOpacity>,
+>
+    extends
+        TailwindOpacityType<TailwindOpacity>,
         TailwindBoxShadowColorType<
             TailwindColor,
             EffectsPlug["boxShadowColor"]

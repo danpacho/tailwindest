@@ -1,0 +1,84 @@
+"use client"
+
+import { GripVertical } from "lucide-react"
+import * as ResizablePrimitive from "react-resizable-panels"
+import { tw } from "~/tw";
+
+const ResizablePanelGroup = ({
+  className,
+  ...props
+}: React.ComponentProps<typeof ResizablePrimitive.PanelGroup>) => (
+  <ResizablePrimitive.PanelGroup
+    className={tw.join("flex h-full w-full data-[panel-group-direction=vertical]:flex-col", className)}
+    {...props}
+  />
+)
+
+const ResizablePanel = ResizablePrimitive.Panel
+
+
+const resizableHandleDiv = tw.style({
+    zIndex: "z-10",
+    display: "flex",
+    height: "h-4",
+    width: "w-3",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    borderRadius: "rounded-sm",
+    borderWidth: "border",
+    backgroundColor: "bg-border",
+});
+
+const resizableHandleResizablePrimitivePanelResizeHandle = tw.style({
+    position: "relative",
+    display: "flex",
+    width: "w-px",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    backgroundColor: "bg-border",
+    after: {
+        position: "after:absolute",
+        inset: "after:inset-y-0",
+        left: "after:left-1/2",
+        width: "after:w-1",
+        translate: "after:-translate-x-1/2",
+    },
+    "focus-visible": {
+        outlineStyle: "focus-visible:outline-none",
+        boxShadow: ["focus-visible:ring-1", "focus-visible:ring-ring", "focus-visible:ring-offset-1"],
+    },
+    "data-[panel-group-direction=vertical]": {
+        height: "data-[panel-group-direction=vertical]:h-px",
+        width: "data-[panel-group-direction=vertical]:w-full",
+        after: {
+            left: "data-[panel-group-direction=vertical]:after:left-0",
+            height: "data-[panel-group-direction=vertical]:after:h-1",
+            width: "data-[panel-group-direction=vertical]:after:w-full",
+            translate: ["data-[panel-group-direction=vertical]:after:-translate-y-1/2", "data-[panel-group-direction=vertical]:after:translate-x-0"],
+        },
+    },
+    "[&[data-panel-group-direction=vertical]>div]": {
+        rotate: "[&[data-panel-group-direction=vertical]>div]:rotate-90",
+    },
+});
+
+const ResizableHandle = ({
+  withHandle,
+  className,
+  ...props
+}: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
+  withHandle?: boolean
+}) => (
+  <ResizablePrimitive.PanelResizeHandle
+    className={resizableHandleResizablePrimitivePanelResizeHandle.class(className)}
+    {...props}
+  >
+    {withHandle && (
+      <div className={resizableHandleDiv.class()}>
+        <GripVertical className={tw.join("h-2.5 w-2.5")} />
+      </div>
+    )}
+  </ResizablePrimitive.PanelResizeHandle>
+)
+
+export { ResizablePanelGroup, ResizablePanel, ResizableHandle }

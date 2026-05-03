@@ -113,6 +113,22 @@ describe("Styler", () => {
         it("handles empty style", () => {
             expect(Styler.getClassName({})).toBe("")
         })
+
+        it("uses nested keys structurally and preserves authored prefixes", () => {
+            const style = {
+                dark: {
+                    backgroundColor: "bg-red-900",
+                    hover: {
+                        backgroundColor: "dark:hover:bg-red-950",
+                    },
+                },
+                backgroundColor: "bg-red-50",
+            }
+
+            expect(Styler.getClassName(style)).toBe(
+                "bg-red-900 dark:hover:bg-red-950 bg-red-50"
+            )
+        })
     })
 
     describe("TestStyler implementation", () => {

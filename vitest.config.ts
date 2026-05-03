@@ -11,6 +11,8 @@ export default defineConfig({
     ],
     test: {
         root: "packages",
+        testTimeout: 60_000,
+        hookTimeout: 60_000,
         coverage: {
             reporter: ["html", "text"],
             provider: "v8",

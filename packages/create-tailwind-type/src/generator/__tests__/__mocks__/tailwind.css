@@ -24,6 +24,32 @@
         black
     );
 
+    /* Shadcn/UI common colors */
+    --color-background: #ffffff;
+    --color-foreground: #020817;
+    --color-card: #ffffff;
+    --color-card-foreground: #020817;
+    --color-popover: #ffffff;
+    --color-popover-foreground: #020817;
+    --color-primary: #0f172a;
+    --color-primary-foreground: #f8fafc;
+    --color-secondary: #f1f5f9;
+    --color-secondary-foreground: #0f172a;
+    --color-muted: #f1f5f9;
+    --color-muted-foreground: #64748b;
+    --color-accent: #f1f5f9;
+    --color-accent-foreground: #0f172a;
+    --color-destructive: #ff0000;
+    --color-destructive-foreground: #f8fafc;
+    --color-border: #e2e8f0;
+    --color-input: #e2e8f0;
+    --color-ring: #020817;
+    --color-chart-1: #e76e50;
+    --color-chart-2: #2a9d8f;
+    --color-chart-3: #264653;
+    --color-chart-4: #e9c46a;
+    --color-chart-5: #f4a261;
+
     /* Font stacks with variable fonts */
     --font-sans:
         "Inter var", "Inter", "ui-sans-serif", "system-ui", "-apple-system",
@@ -153,8 +179,6 @@
 /* Dark mode strategy with custom selector */
 @custom-variant dark (&:where(.dark-theme, .dark-theme *));
 
-/* Prefix for all classes */
-@prefix "app-";
 
 /* Accessibility enhancements */
 @layer base {
