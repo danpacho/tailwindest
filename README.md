@@ -6,8 +6,6 @@
 
 <br />
 
-> Build type-safe, production grade tailwind stack software.
-
 ## Documentation
 
 Visit [tailwindest](https://tailwindest.vercel.app/) to read the documentation.
