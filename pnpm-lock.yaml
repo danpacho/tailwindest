@@ -77,9 +77,6 @@ importers:
 
   packages/create-tailwind-type:
     dependencies:
-      '@tailwindest/tailwind-internal':
-        specifier: workspace:*
-        version: link:../tailwind-internal
       boxen:
         specifier: ^8.0.1
         version: 8.0.1
@@ -101,6 +98,9 @@ importers:
       tailwindcss:
         specifier: ^4.2.4
         version: 4.2.4
+      tailwindest-tailwind-internal:
+        specifier: workspace:*
+        version: link:../tailwind-internal
     devDependencies:
       '@types/jsdom':
         specifier: ^28.0.1
@@ -157,12 +157,12 @@ importers:
 
   packages/tailwindest:
     dependencies:
-      '@tailwindest/core':
-        specifier: workspace:*
-        version: link:../tailwindest-core
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      tailwindest-core:
+        specifier: workspace:*
+        version: link:../tailwindest-core
     devDependencies:
       tailwind-merge:
         specifier: latest
@@ -170,10 +170,10 @@ importers:
 
   packages/tailwindest-compiler:
     dependencies:
-      '@tailwindest/core':
+      tailwindest-core:
         specifier: workspace:*
         version: link:../tailwindest-core
-      '@tailwindest/tailwind-internal':
+      tailwindest-tailwind-internal:
         specifier: workspace:*
         version: link:../tailwind-internal
       typescript:

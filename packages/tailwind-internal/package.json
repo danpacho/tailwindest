@@ -22,7 +22,8 @@
     },
     "scripts": {
         "build": "tsup",
-        "test": "vitest run"
+        "test": "vitest run",
+        "prepack": "pnpm build"
     },
     "dependencies": {
         "@tailwindcss/node": "^4.2.4",
