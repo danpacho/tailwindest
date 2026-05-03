@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.2.4
+
+### Patch Changes
+
+- Fix build deps
+
 ## 3.2.3
 
 ### Patch Changes
