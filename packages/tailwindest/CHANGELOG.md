@@ -1,5 +1,13 @@
 # tailwindest
 
+## 3.2.3
+
+### Patch Changes
+
+- Upgrade CLI interface and creation process
+- Updated dependencies
+    - @tailwindest/core@1.0.0
+
 ## 3.2.2
 
 ### Patch Changes
