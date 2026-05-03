@@ -1,5 +1,11 @@
 # tailwindest-css-transform
 
+## 1.0.2
+
+### Patch Changes
+
+- Fix files for dist only
+
 ## 1.0.1
 
 ### Patch Changes
