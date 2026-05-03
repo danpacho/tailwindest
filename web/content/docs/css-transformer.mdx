@@ -9,7 +9,7 @@ description: Migrate Tailwind class strings to Tailwindest object styles.
     alt="tailwindest css transformer banner"
 />
 
-`@tailwindest/css-transformer` is a migration tool. It rewrites supported
+`tailwindest-css-transform` is a migration tool. It rewrites supported
 Tailwind class-string patterns into Tailwindest object-style calls, while
 preserving source code when exact conversion is not proven.
 
@@ -21,13 +21,13 @@ Use it when you are moving an existing Tailwind codebase from `className`,
 Run the transformer directly:
 
 ```bash
-npx @tailwindest/css-transformer
+npx tailwindest-css-transform
 ```
 
 Or install it for repeated local use:
 
 ```bash
-pnpm add -D @tailwindest/css-transformer
+pnpm add -D tailwindest-css-transform
 ```
 
 The CLI opens an interactive prompt for target path, Tailwind CSS entry,
@@ -101,10 +101,10 @@ The transformer is runtime-first:
 
 ```bash
 # Safe default for mixed or unknown projects
-npx @tailwindest/css-transformer --mode auto
+npx tailwindest-css-transform --mode auto
 
 # Runtime Tailwindest migration
-npx @tailwindest/css-transformer --mode runtime
+npx tailwindest-css-transform --mode runtime
 ```
 
 `auto` keeps runtime output for unknown or mixed projects.
@@ -138,7 +138,7 @@ export const tw = createTools<{
 Transform with runtime output:
 
 ```bash
-npx @tailwindest/css-transformer --mode runtime
+npx tailwindest-css-transform --mode runtime
 ```
 
 Nested variant leaves preserve the original prefixed class:
@@ -193,7 +193,7 @@ Run dry-run first and inspect diagnostics before writing files.
 ## CLI Options
 
 ```bash
-npx @tailwindest/css-transformer --mode auto --dry-run
+npx tailwindest-css-transform --mode auto --dry-run
 ```
 
 | Option                | Alias | Default        | Description                                         |
@@ -207,7 +207,7 @@ npx @tailwindest/css-transformer --mode auto --dry-run
 ## Programmatic Usage
 
 ```ts
-import { transform } from "@tailwindest/css-transformer"
+import { transform } from "tailwindest-css-transform"
 
 const result = await transform(source, {
     resolver,

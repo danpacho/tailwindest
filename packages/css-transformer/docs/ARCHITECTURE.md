@@ -1,6 +1,6 @@
 # CSS Transformer Architecture
 
-`@tailwindest/css-transformer` migrates supported Tailwind class-string source
+`tailwindest-css-transform` migrates supported Tailwind class-string source
 patterns into Tailwindest runtime object-style calls. It is not a runtime
 dependency.
 

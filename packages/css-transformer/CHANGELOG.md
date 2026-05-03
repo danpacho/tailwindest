@@ -1,4 +1,12 @@
-# @tailwindest/css-transformer
+# tailwindest-css-transform
+
+## 1.0.1
+
+### Patch Changes
+
+- Fix internal deps error
+- Updated dependencies
+    - create-tailwind-type@1.1.1
 
 ## 1.0.0
 

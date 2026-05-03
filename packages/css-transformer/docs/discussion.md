@@ -1,6 +1,6 @@
 # CSS Transformer Production Discussion
 
-`@tailwindest/css-transformer` is a migration tool. It rewrites supported
+`tailwindest-css-transform` is a migration tool. It rewrites supported
 class-string source patterns into Tailwindest runtime authoring.
 
 ## Runtime Output Only

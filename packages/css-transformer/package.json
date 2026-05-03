@@ -1,6 +1,6 @@
 {
-    "name": "@tailwindest/css-transformer",
-    "version": "1.0.0",
+    "name": "tailwindest-css-transform",
+    "version": "1.0.1",
     "private": true,
     "description": "Tailwindest CSS Transformer",
     "type": "module",

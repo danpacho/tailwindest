@@ -26,5 +26,5 @@ handling, and golden-file tests.
 ## Verification
 
 ```bash
-pnpm --filter @tailwindest/css-transformer test
+pnpm --filter tailwindest-css-transform test
 ```

@@ -1,4 +1,4 @@
-# @tailwindest/css-transformer
+# tailwindest-css-transform
 
 <div align="center">
 <img src="../../images/tailwind-transform.png" width="550px" alt="tailwindest-transformer-banner" />
@@ -17,23 +17,23 @@ Automate your migration from standard Tailwind CSS to type-safe **Tailwindest** 
 
 ```bash
 # Run directly with npx
-npx @tailwindest/css-transformer <target> [options]
+npx tailwindest-css-transform <target> [options]
 
 # Or install globally
-npm install -g @tailwindest/css-transformer
+npm install -g tailwindest-css-transform
 ```
 
 ## Usage
 
 ```bash
 # Transform a single file
-npx @tailwindest/css-transformer src/components/Button.tsx
+npx tailwindest-css-transform src/components/Button.tsx
 
 # Transform an entire directory recursively
-npx @tailwindest/css-transformer src/pages --recursive
+npx tailwindest-css-transform src/pages --recursive
 
 # Preview changes without modifying files
-npx @tailwindest/css-transformer src --dry-run
+npx tailwindest-css-transform src --dry-run
 ```
 
 ## CLI Options
