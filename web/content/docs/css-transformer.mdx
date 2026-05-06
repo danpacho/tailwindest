@@ -21,7 +21,7 @@ Use it when you are moving an existing Tailwind codebase from `className`,
 Run the transformer directly:
 
 ```bash
-npx tailwindest-css-transform
+npx tailwindest-css-transform src/components
 ```
 
 Or install it for repeated local use:
@@ -30,8 +30,10 @@ Or install it for repeated local use:
 pnpm add -D tailwindest-css-transform
 ```
 
-The CLI opens an interactive prompt for target path, Tailwind CSS entry,
-Tailwindest import name, import path, enabled walkers, and dry-run mode.
+The CLI needs only the file or directory to transform. If you omit the target,
+it opens an interactive prompt that asks only for that path, then prints the
+detected Tailwind CSS entry, Tailwindest import, mode, walkers, and dry-run
+setting.
 
 ## What It Converts
 
@@ -101,10 +103,10 @@ The transformer is runtime-first:
 
 ```bash
 # Safe default for mixed or unknown projects
-npx tailwindest-css-transform --mode auto
+npx tailwindest-css-transform src/components --mode auto
 
 # Runtime Tailwindest migration
-npx tailwindest-css-transform --mode runtime
+npx tailwindest-css-transform src/components --mode runtime
 ```
 
 `auto` keeps runtime output for unknown or mixed projects.
@@ -138,7 +140,7 @@ export const tw = createTools<{
 Transform with runtime output:
 
 ```bash
-npx tailwindest-css-transform --mode runtime
+npx tailwindest-css-transform src/components --mode runtime
 ```
 
 Nested variant leaves preserve the original prefixed class:
@@ -193,16 +195,29 @@ Run dry-run first and inspect diagnostics before writing files.
 ## CLI Options
 
 ```bash
-npx tailwindest-css-transform --mode auto --dry-run
+npx tailwindest-css-transform src/components --mode auto --dry-run
 ```
 
-| Option                | Alias | Default        | Description                                         |
-| --------------------- | ----- | -------------- | --------------------------------------------------- |
-| `--css <path>`        | `-c`  | `tailwind.css` | Tailwind CSS entry used to initialize the resolver. |
-| `--identifier <name>` | `-i`  | `tw`           | Tailwindest import identifier.                      |
-| `--module <path>`     | `-m`  | `~/tw`         | Tailwindest module import path.                     |
-| `--dry-run`           | `-d`  | `false`        | Preview without writing transformed files.          |
-| `--mode <mode>`       | none  | `auto`         | Output mode: `auto` or `runtime`.                   |
+| Option                | Alias | Default        | Description                                     |
+| --------------------- | ----- | -------------- | ----------------------------------------------- |
+| `--css <path>`        | `-c`  | auto-detected  | Tailwind CSS entry used to initialize Tailwind. |
+| `--identifier <name>` | `-i`  | auto or `tw`   | Tailwindest import identifier.                  |
+| `--module <path>`     | `-m`  | auto or `~/tw` | Tailwindest module import path.                 |
+| `--dry-run`           | `-d`  | `false`        | Preview without writing transformed files.      |
+| `--mode <mode>`       | none  | `auto`         | Output mode: `auto` or `runtime`.               |
+
+Auto discovery uses the same Tailwind CSS root and Tailwind package resolution
+helpers as `create-tailwind-type`. If no Tailwindest `createTools` export can be
+found, the CLI warns and falls back to `tw` from `~/tw`. Explicit flags always
+override discovered values:
+
+```bash
+npx tailwindest-css-transform src/components \
+    --css src/styles/tailwind.css \
+    --identifier tw \
+    --module @/styles/tailwind \
+    --mode runtime
+```
 
 ## Programmatic Usage
 

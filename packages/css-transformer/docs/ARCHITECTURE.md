@@ -70,14 +70,41 @@ interface TransformOptions {
 }
 ```
 
-The CLI mirrors the output mode option:
+Programmatic `transform()` callers provide their own resolver and retain the
+same defaults as before. CLI-only discovery lives outside the transformer core.
+
+## CLI Resolution
+
+Normal CLI use requires only a target path:
 
 ```bash
-tailwindest-transform src --mode auto
-tailwindest-transform src --mode runtime
+tailwindest-transform src/components
 ```
 
-`auto` is the default and resolves to runtime output.
+If no target is provided, the interactive prompt asks only for that target path.
+Afterward the CLI resolves:
+
+- Tailwind CSS entry with `findTailwindCSSRoot(process.cwd())`, unless
+  `--css` is provided.
+- Tailwind package base with `resolveTailwindNodeDir(cssPath)`,
+  `getTailwindVersion`, and `isVersionSufficient`; older local Tailwind
+  versions warn and fall back to the internal v4 engine.
+- Tailwindest identifier from an exported `createTools(...)` constant in common
+  `tailwind.ts` or `tw.ts` locations, then project TypeScript files.
+- Tailwindest import path from `tsconfig.json` or `jsconfig.json` aliases when
+  possible, otherwise a relative module path.
+- Output mode `auto`, walkers `cva`, `cn`, and `classname`, and dry-run `false`.
+
+Explicit CLI flags override discovery:
+
+```bash
+tailwindest-transform src \
+    --css src/styles/tailwind.css \
+    --identifier tw \
+    --module @/styles/tailwind \
+    --mode runtime \
+    --dry-run
+```
 
 ## Safety Model
 

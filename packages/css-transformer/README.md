@@ -30,21 +30,38 @@ npm install -g tailwindest-css-transform
 npx tailwindest-css-transform src/components/Button.tsx
 
 # Transform an entire directory recursively
-npx tailwindest-css-transform src/pages --recursive
+npx tailwindest-css-transform src/pages
 
 # Preview changes without modifying files
 npx tailwindest-css-transform src --dry-run
+
+# Override auto-discovered config when needed
+npx tailwindest-css-transform src \
+    --css src/styles/tailwind.css \
+    --identifier tw \
+    --module @/styles/tailwind \
+    --mode runtime
 ```
+
+Running `npx tailwindest-css-transform` without a target opens an interactive
+prompt that asks only for the file or directory to transform. The CLI then
+detects the Tailwind CSS entry, Tailwindest `createTools` export, import path,
+mode, walkers, and dry-run setting.
 
 ## CLI Options
 
-| Option        | Alias | Default | Description                                    |
-| :------------ | :---- | :------ | :--------------------------------------------- |
-| `--recursive` | `-r`  | `false` | Recursively transform files in subdirectories. |
-| `--dry-run`   | `-d`  | `false` | Preview changes without modifying files.       |
-| `--exclude`   | `-e`  | `[]`    | List of patterns or directories to exclude.    |
-| `--version`   | `-V`  | -       | Output the version number.                     |
-| `--help`      | `-h`  | -       | Display help for command.                      |
+| Option                | Alias | Default        | Description                                     |
+| :-------------------- | :---- | :------------- | :---------------------------------------------- |
+| `--css <path>`        | `-c`  | auto-detected  | Tailwind CSS entry used to initialize Tailwind. |
+| `--identifier <name>` | `-i`  | auto or `tw`   | Tailwindest import identifier.                  |
+| `--module <path>`     | `-m`  | auto or `~/tw` | Tailwindest module import path.                 |
+| `--dry-run`           | `-d`  | `false`        | Preview changes without modifying files.        |
+| `--mode <mode>`       | -     | `auto`         | Output mode: `auto` or `runtime`.               |
+| `--help`              | `-h`  | -              | Display help for command.                       |
+
+Auto discovery uses the same Tailwind CSS root and Tailwind package resolution
+helpers as `create-tailwind-type`. If a local Tailwind package is older than v4,
+the CLI warns and falls back to the internal Tailwind v4 engine.
 
 ## Example
 

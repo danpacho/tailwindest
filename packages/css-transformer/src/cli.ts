@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 import { Command } from "commander"
-import path from "path"
-import fs from "fs/promises"
+import { realpathSync } from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+import fs from "node:fs/promises"
 import * as p from "@clack/prompts"
 import pc from "picocolors"
 import { transform } from "./index"
@@ -11,47 +13,36 @@ import {
     TailwindCompiler,
     CSSAnalyzer,
     TypeSchemaGenerator,
-    Logger,
+    resolveTailwindNodeDir,
+    getTailwindVersion,
+    isVersionSufficient,
 } from "create-tailwind-type"
+import {
+    resolveCssTransformerCliConfig,
+    resolveTailwindestModulePath,
+    type ResolveCssTransformerCliConfigInput,
+} from "./cli/auto_discovery"
 
-const program = new Command()
-const logger = new Logger({ name: "css-transformer" })
-
-async function findTailwindestDefinition(
-    startDir: string
-): Promise<{ path: string; identifier: string } | null> {
-    const searchFiles = [
-        "tailwind.ts",
-        "src/tailwind.ts",
-        "src/styles/tailwind.ts",
-    ]
-    for (const file of searchFiles) {
-        const fullPath = path.resolve(startDir, file)
-        try {
-            const content = await fs.readFile(fullPath, "utf-8")
-            if (content.includes("CreateTailwindest")) {
-                const match = content.match(/export const (\w+) = createTools/)
-                return {
-                    path: file,
-                    identifier: match ? match[1] || "tw" : "tw",
-                }
-            }
-        } catch {
-            continue
-        }
-    }
-    return null
+interface CliOptions {
+    css?: string
+    identifier?: string
+    module?: string
+    mode?: string
+    dryRun?: boolean
 }
 
-async function runTUI(
-    defaults: { outputMode?: CssTransformerOutputMode } = {}
-) {
+export interface RunTransformInput {
+    cwd?: string
+    targetPath: string
+    options: CliOptions
+}
+
+const program = new Command()
+
+async function runTUI(options: CliOptions = {}, cwd = process.cwd()) {
     p.intro(pc.bgCyan(pc.black(" Tailwindest CSS Transformer ")))
-    const defaultOutputMode = defaults.outputMode ?? "auto"
 
-    const detectedDef = await findTailwindestDefinition(process.cwd())
-
-    const config = await p.group(
+    const promptResult = await p.group(
         {
             targetPath: () =>
                 p.text({
@@ -60,70 +51,6 @@ async function runTUI(
                     validate: (value) => {
                         if (!value) return "Path is required"
                     },
-                }),
-            cssPath: () =>
-                p.text({
-                    message: "Path to your tailwind.css file?",
-                    placeholder: "./src/tailwind.css",
-                    initialValue: "tailwind.css",
-                }),
-            identifier: () =>
-                p.text({
-                    message: "What is your tailwindest identifier?",
-                    placeholder: "tw",
-                    initialValue: (detectedDef?.identifier ?? "tw") as string,
-                }),
-            modulePath: () =>
-                p.text({
-                    message: "What is the import path for tailwindest?",
-                    placeholder: "~/tw",
-                    initialValue: (detectedDef
-                        ? `@/${detectedDef.path.replace(".ts", "")}`
-                        : "~/tw") as string,
-                }),
-            outputMode: () =>
-                p.select({
-                    message: "Which Tailwindest output mode should be used?",
-                    options: [
-                        {
-                            value: "auto",
-                            label: "Auto",
-                            hint: "recommended",
-                        },
-                        {
-                            value: "runtime",
-                            label: "Runtime",
-                            hint: "CreateTailwindest",
-                        },
-                    ],
-                    initialValue: defaultOutputMode,
-                }),
-            walkers: () =>
-                p.multiselect({
-                    message: "Which walkers would you like to enable?",
-                    options: [
-                        {
-                            value: "cva",
-                            label: "CvaWalker (cva() calls)",
-                            hint: "recommended",
-                        },
-                        {
-                            value: "cn",
-                            label: "CnWalker (cn(), clsx() calls)",
-                            hint: "recommended",
-                        },
-                        {
-                            value: "classname",
-                            label: "ClassNameWalker (JSX className)",
-                            hint: "recommended",
-                        },
-                    ],
-                    initialValues: ["cva", "cn", "classname"],
-                }),
-            dryRun: () =>
-                p.confirm({
-                    message: "Dry run? (No files will be overwritten)",
-                    initialValue: false,
                 }),
         },
         {
@@ -134,115 +61,182 @@ async function runTUI(
         }
     )
 
+    await runTransform({
+        cwd,
+        targetPath: promptResult.targetPath as string,
+        options,
+    })
+}
+
+export async function runTransform(input: RunTransformInput) {
+    const cwd = path.resolve(input.cwd ?? process.cwd())
+    const outputMode =
+        input.options.mode === undefined
+            ? undefined
+            : normalizeOutputMode(input.options.mode)
+
+    const configInput: ResolveCssTransformerCliConfigInput = {
+        cwd,
+        targetPath: input.targetPath,
+    }
+    if (input.options.css !== undefined) configInput.cssPath = input.options.css
+    if (input.options.identifier !== undefined) {
+        configInput.tailwindestIdentifier = input.options.identifier
+    }
+    if (input.options.module !== undefined) {
+        configInput.tailwindestModulePath = input.options.module
+    }
+    if (outputMode !== undefined) configInput.outputMode = outputMode
+    if (input.options.dryRun !== undefined) {
+        configInput.dryRun = input.options.dryRun
+    }
+
+    const config = await resolveCssTransformerCliConfig(configInput)
+
+    for (const warning of config.warnings) {
+        p.log.warn(warning)
+    }
+
+    p.note(
+        [
+            `Tailwind CSS: ${path.relative(cwd, config.cssPath)}`,
+            `Tailwindest: ${config.tailwindestIdentifier} from ${config.tailwindestModulePath}`,
+            `Mode: ${config.outputMode}`,
+            `Walkers: ${config.walkers.join(", ")}`,
+            `Dry run: ${config.dryRun}`,
+        ].join("\n"),
+        "Detected config"
+    )
+
     const s = p.spinner()
     s.start("Initializing Tailwind engine...")
 
+    let initialized:
+        | {
+              stats: Awaited<ReturnType<typeof fs.stat>>
+              resolver: Awaited<ReturnType<typeof createTailwindResolver>>
+          }
+        | undefined
     try {
-        const absoluteTargetPath = path.resolve(
-            process.cwd(),
-            config.targetPath as string
-        )
-        const stats = await fs.stat(absoluteTargetPath)
-
-        const absoluteCssPath = path.resolve(
-            process.cwd(),
-            config.cssPath as string
-        )
-        const compiler = new TailwindCompiler({
-            cssRoot: absoluteCssPath,
-            base: "node_modules/tailwindcss",
-        })
-        const cssAnalyzer = new CSSAnalyzer()
-        const schemaGenerator = new TypeSchemaGenerator()
-
-        const storePath = path.join(process.cwd(), ".tailwindest/store.json")
-        await fs.mkdir(path.dirname(storePath), { recursive: true })
-
-        const generator = new TailwindTypeGenerator({
-            compiler,
-            cssAnalyzer,
-            generator: schemaGenerator,
-            storeRoot: storePath,
-        }).setGenOptions({
-            useDocs: true,
-            useExactVariants: false,
-            useArbitraryValue: true,
-            useSoftVariants: true,
-            useStringKindVariantsOnly: false,
-            useOptionalProperty: false,
-            disableVariants: false,
-            useArbitraryVariant: true,
-        })
-
-        await generator.init()
-        const resolver = generator.createPropertyResolver()
+        initialized = {
+            stats: await fs.stat(config.targetPath),
+            resolver: await createTailwindResolver(config.cssPath),
+        }
         s.stop("Tailwind engine initialized.")
-
-        // Process Files
-        const files: string[] = []
-        if (stats.isDirectory()) {
-            const readDir = async (dir: string) => {
-                const entries = await fs.readdir(dir, { withFileTypes: true })
-                for (const entry of entries) {
-                    const res = path.resolve(dir, entry.name)
-                    if (entry.isDirectory()) {
-                        if (
-                            entry.name !== "node_modules" &&
-                            entry.name !== "dist"
-                        ) {
-                            await readDir(res)
-                        }
-                    } else if (/\.(tsx|ts|js|jsx)$/.test(entry.name)) {
-                        files.push(res)
-                    }
-                }
-            }
-            await readDir(absoluteTargetPath)
-        } else {
-            files.push(absoluteTargetPath)
-        }
-
-        p.note(`Found ${files.length} files to process.`)
-
-        for (const file of files) {
-            const content = await fs.readFile(file, "utf-8")
-            const result = await transform(content, {
-                resolver,
-                tailwindestIdentifier: config.identifier as string,
-                tailwindestModulePath: config.modulePath as string,
-                outputMode: config.outputMode as CssTransformerOutputMode,
-                projectRoot: process.cwd(),
-                sourcePath: file,
-                walkers: config.walkers as any,
-            })
-
-            if (config.dryRun) {
-                // In TUI mode, dry run might be too verbose for all files
-            } else {
-                await fs.writeFile(file, result.code, "utf-8")
-            }
-
-            if (result.diagnostics.length > 0) {
-                result.diagnostics.forEach((d) => {
-                    if (d.level === "error") {
-                        p.log.error(
-                            `[${d.walkerName}] ${d.message} in ${path.relative(process.cwd(), file)}`
-                        )
-                    }
-                })
-            }
-        }
-
-        p.outro(
-            pc.green(
-                `✨ Transformation complete! Processed ${files.length} files.`
-            )
-        )
     } catch (error) {
         s.stop("Initialization failed.")
-        p.log.error(error instanceof Error ? error.message : String(error))
-        process.exit(1)
+        throw error
     }
+
+    const { stats, resolver } = initialized!
+
+    const files = stats.isDirectory()
+        ? await collectSourceFiles(config.targetPath)
+        : [config.targetPath]
+
+    p.note(`Found ${files.length} files to process.`)
+
+    for (const file of files) {
+        const content = await fs.readFile(file, "utf-8")
+        const tailwindestModulePath =
+            input.options.module !== undefined ||
+            config.tailwindestToolsPath === undefined
+                ? config.tailwindestModulePath
+                : await resolveTailwindestModulePath({
+                      cwd,
+                      sourcePath: file,
+                      toolsPath: config.tailwindestToolsPath,
+                  })
+        const result = await transform(content, {
+            resolver,
+            tailwindestIdentifier: config.tailwindestIdentifier,
+            tailwindestModulePath,
+            outputMode: config.outputMode,
+            projectRoot: cwd,
+            sourcePath: file,
+            walkers: config.walkers,
+        })
+
+        if (!config.dryRun) {
+            await fs.writeFile(file, result.code, "utf-8")
+        }
+
+        for (const diagnostic of result.diagnostics) {
+            if (diagnostic.level === "error") {
+                p.log.error(
+                    `[${diagnostic.walkerName}] ${diagnostic.message} in ${path.relative(cwd, file)}`
+                )
+            }
+        }
+    }
+
+    p.outro(
+        pc.green(`Transformation complete. Processed ${files.length} files.`)
+    )
+}
+
+async function createTailwindResolver(cssPath: string) {
+    let tailwindNodeDir = await resolveTailwindNodeDir(cssPath)
+    const tailwindVersion = getTailwindVersion(tailwindNodeDir)
+
+    if (!isVersionSufficient(tailwindVersion)) {
+        const warning = `Tailwind CSS v${tailwindVersion} detected. Requires v4.0.0+ for precise local transforms.`
+        p.log.warn(
+            `${pc.yellow(warning)} ${pc.dim("Using internal Tailwind v4 engine.")}`
+        )
+        tailwindNodeDir = await resolveTailwindNodeDir(undefined, {
+            skipLocal: true,
+        })
+    }
+
+    const compiler = new TailwindCompiler({
+        cssRoot: cssPath,
+        base: tailwindNodeDir,
+    })
+    const cssAnalyzer = new CSSAnalyzer()
+    const schemaGenerator = new TypeSchemaGenerator()
+
+    const generator = new TailwindTypeGenerator({
+        compiler,
+        cssAnalyzer,
+        generator: schemaGenerator,
+    }).setGenOptions({
+        useDocs: true,
+        useExactVariants: false,
+        useArbitraryValue: true,
+        useSoftVariants: true,
+        useStringKindVariantsOnly: false,
+        useOptionalProperty: false,
+        disableVariants: false,
+        useArbitraryVariant: true,
+    })
+
+    await generator.init()
+    return generator.createPropertyResolver()
+}
+
+async function collectSourceFiles(targetDir: string): Promise<string[]> {
+    const files: string[] = []
+
+    async function readDir(dir: string) {
+        const entries = await fs.readdir(dir, { withFileTypes: true })
+        for (const entry of entries) {
+            const nextPath = path.resolve(dir, entry.name)
+            if (entry.isDirectory()) {
+                if (entry.name !== "node_modules" && entry.name !== "dist") {
+                    await readDir(nextPath)
+                }
+                continue
+            }
+
+            if (/\.(tsx|ts|js|jsx)$/.test(entry.name)) {
+                files.push(nextPath)
+            }
+        }
+    }
+
+    await readDir(targetDir)
+    return files
 }
 
 program
@@ -254,26 +248,31 @@ program
         "[path]",
         "Path to file or directory to transform (triggers TUI if omitted)"
     )
-    .option("-c, --css <path>", "Path to tailwind.css file", "tailwind.css")
-    .option("-i, --identifier <name>", "Tailwindest identifier", "tw")
-    .option("-m, --module <path>", "Tailwindest module path", "~/tw")
-    .option(
-        "-d, --dry-run",
-        "Print transformed code without writing to file",
-        false
-    )
-    .option("--mode <mode>", "Output mode: auto or runtime.", "auto")
-    .action(async (targetPath, options) => {
-        const outputMode = normalizeOutputMode(options.mode)
-        if (!targetPath) {
-            await runTUI({ outputMode })
-            return
-        }
+    .option("-c, --css <path>", "Path to tailwind.css file")
+    .option("-i, --identifier <name>", "Tailwindest identifier")
+    .option("-m, --module <path>", "Tailwindest module path")
+    .option("-d, --dry-run", "Print transformed code without writing to file")
+    .option("--mode <mode>", "Output mode: auto or runtime.")
+    .action(async (targetPath, options: CliOptions) => {
+        try {
+            if (!targetPath) {
+                await runTUI(options)
+                return
+            }
 
-        await runTUI({ outputMode })
+            await runTransform({
+                targetPath,
+                options,
+            })
+        } catch (error) {
+            p.log.error(error instanceof Error ? error.message : String(error))
+            process.exit(1)
+        }
     })
 
-program.parse()
+if (isDirectRun()) {
+    program.parse(process.argv)
+}
 
 function normalizeOutputMode(mode: string): CssTransformerOutputMode {
     if (mode === "runtime" || mode === "auto") {
@@ -281,4 +280,18 @@ function normalizeOutputMode(mode: string): CssTransformerOutputMode {
     }
 
     throw new Error(`Invalid output mode: ${mode}`)
+}
+
+export function isDirectRun(
+    entry = process.argv[1],
+    moduleUrl = import.meta.url
+): boolean {
+    if (!entry) return false
+    const modulePath = fileURLToPath(moduleUrl)
+
+    try {
+        return realpathSync(entry) === realpathSync(modulePath)
+    } catch {
+        return path.resolve(entry) === path.resolve(modulePath)
+    }
 }
