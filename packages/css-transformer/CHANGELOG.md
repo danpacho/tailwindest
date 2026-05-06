@@ -1,5 +1,11 @@
 # tailwindest-css-transform
 
+## 1.0.6
+
+### Patch Changes
+
+- Update CLI auto config inference
+
 ## 1.0.5
 
 ### Patch Changes
