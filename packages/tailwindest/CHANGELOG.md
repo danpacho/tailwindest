@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.2.8
+
+### Patch Changes
+
+- Support arbitrary nested group types, fix minor css transformation errors
+
 ## 3.2.7
 
 ### Patch Changes

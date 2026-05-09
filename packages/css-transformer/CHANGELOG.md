@@ -1,5 +1,11 @@
 # tailwindest-css-transform
 
+## 1.0.7
+
+### Patch Changes
+
+- Support arbitrary nested group types, fix minor css transformation errors
+
 ## 1.0.6
 
 ### Patch Changes
