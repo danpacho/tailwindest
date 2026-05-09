@@ -44,7 +44,7 @@ const tw = createTools<{
 
 - **`Type`**: A generic parameter that extends `TailwindestInterface`. This is where you plug in your generated types to make the tools type-safe.
 - **`Type.tailwindest`**: Your main style type, created with `CreateTailwindest`.
-- **`Type.tailwindLiteral`**: A literal union of all your classes, created with `CreateTailwindLiteral`.
+- **`Type.tailwindLiteral`**: A precomputed literal union of generated class names. Prefer the generated `TailwindLiteral` from `tailwind_literal.ts`.
 - **`Type.useArbitrary`**: Set to `true` to allow arbitrary values.
 - **`Type.useTypedClassLiteral`**: Set to `true` to type `classList` arguments with `TailwindLiteral`.
 

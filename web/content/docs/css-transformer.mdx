@@ -116,12 +116,9 @@ npx tailwindest-css-transform src/components --mode runtime
 Define your Tailwindest type with `CreateTailwindest`:
 
 ```ts filename="tw.ts"
-import {
-    createTools,
-    type CreateTailwindest,
-    type CreateTailwindLiteral,
-} from "tailwindest"
+import { createTools, type CreateTailwindest } from "tailwindest"
 import type { Tailwind, TailwindNestGroups } from "./tailwind"
+import type { TailwindLiteral } from "./tailwind_literal"
 
 export type Tailwindest = CreateTailwindest<{
     tailwind: Tailwind
@@ -129,11 +126,11 @@ export type Tailwindest = CreateTailwindest<{
     useArbitrary: true
 }>
 
-export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
-
 export const tw = createTools<{
     tailwindest: Tailwindest
     tailwindLiteral: TailwindLiteral
+    useArbitrary: true
+    useTypedClassLiteral: true
 }>()
 ```
 
