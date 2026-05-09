@@ -5,8 +5,10 @@
 ### 1. Create tailwind types
 
 ```bash
-npx create-tailwind-type -A # disable arbitrary values
+npx create-tailwind-type
 ```
+
+This creates `tailwind.ts` and `tailwind_literal.ts`.
 
 ### 2. Install package
 
@@ -17,13 +19,10 @@ npm i tailwindest@latest
 ### 3. Create tools
 
 ```ts
-import {
-    createTools,
-    type CreateTailwindest,
-    type CreateTailwindLiteral,
-} from "tailwindest"
+import { createTools, type CreateTailwindest } from "tailwindest"
 
 import type { Tailwind, TailwindNestGroups } from "./tailwind"
+import type { TailwindLiteral } from "./tailwind_literal"
 import { twMerge } from "tailwind-merge"
 
 export type Tailwindest = CreateTailwindest<{
@@ -32,12 +31,12 @@ export type Tailwindest = CreateTailwindest<{
     groupPrefix: "$" // prefix for nest groups, [optional]
     useArbitrary: true // enable arbitrary values, [optional]
 }>
-export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
 
 export const tw = createTools<{
     tailwindest: Tailwindest
     tailwindLiteral: TailwindLiteral
     useArbitrary: true // enable arbitrary values, [optional]
+    useTypedClassLiteral: true // enable typed class literal arguments, [optional]
 }>({
     merger: twMerge, // set tailwind-merge as merger, [optional]
 })

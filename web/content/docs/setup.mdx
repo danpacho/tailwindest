@@ -32,27 +32,30 @@ Install `tailwindest` for core functionalities, and `create-tailwind-type` to ge
 
 ## 2. Generate Tailwind types
 
-Run the following command to generate a `tailwind.ts` file in your project root. This file will contain all the necessary types based on your `tailwind.css`.
+Run the following command to generate Tailwind type files in your project root.
 
 ```bash
 npx create-tailwind-type
 ```
 
+This creates:
+
+- `tailwind.ts`: `Tailwind` and `TailwindNestGroups` for typed style objects.
+- `tailwind_literal.ts`: `TailwindLiteral` for typed class string arguments.
+
 <Callout>
 You can customize the output path and other options. Check out the [`create-tailwind-type` documentation](/create-tailwind-type) for more details.
 </Callout>
+
 ## 3. Create styling tools
 
 Create a `tw.ts` (or `tw.js`) file to define your `tailwindest` tools.
 
 ```ts filename="tw.ts"
-import {
-    createTools,
-    type CreateTailwindest,
-    type CreateTailwindLiteral,
-} from "tailwindest"
+import { createTools, type CreateTailwindest } from "tailwindest"
 
 import type { Tailwind, TailwindNestGroups } from "./tailwind" // Adjust path if needed
+import type { TailwindLiteral } from "./tailwind_literal" // Generated literal file
 
 import { twMerge } from "tailwind-merge"
 
@@ -64,18 +67,15 @@ export type Tailwindest = CreateTailwindest<{
     // Optional: customize prefix for screen/variant groups
 
     // groupPrefix: "$" <-- prefix for group variants
-    // useArbitrary: true <-- enable arbitrary values, type-hinting is available for this option
+    useArbitrary: true // enable arbitrary values, type-hinting is available for this option
 }>
-
-// Create a literal type for all possible Tailwind classes
-export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
 
 // Create the tools
 export const tw = createTools<{
     tailwindest: Tailwindest
     tailwindLiteral: TailwindLiteral
-    // useArbitrary: true
-    // useTypedLiteral: true <-- enables typed literal classes at tw.style().class(...typed literals)
+    useArbitrary: true
+    useTypedClassLiteral: true // enables typed literal classes at tw.style().class(...typed literals)
 }>({
     // Optional: if you use tailwind-merge
     merger: twMerge, // <-- tailwind-merge as classname merger
@@ -85,13 +85,15 @@ export const tw = createTools<{
 ## 4. Exclude generated types from your `tailwind.css`
 
 <Callout type="error">
-Make sure to exclude the generated `tailwind.ts` from your `tailwind.css` file to **prevent all-css from being included in the generated CSS.**
+Make sure to exclude the generated type files from your `tailwind.css` file to **prevent all-css from being included in the generated CSS.**
 </Callout>
+
 ```css filename="tailwind.css"
 @import "tailwindcss";
 /* IMPORTANT */
 /* Specify not-include generated type definitions */
 @source not "tailwind.ts";
+@source not "tailwind_literal.ts";
 
 /* Your Tailwind CSS styles here */
 ```

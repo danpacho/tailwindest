@@ -6,6 +6,15 @@ Generate TypeScript definitions for your Tailwind CSS configuration.
 npx create-tailwind-type
 ```
 
+By default this writes both `tailwind.ts` and `tailwind_literal.ts`.
+
+- `tailwind.ts` exports `Tailwind` and `TailwindNestGroups`.
+- `tailwind_literal.ts` exports the precomputed `TailwindLiteral` union for
+  typed class string arguments.
+
+Arbitrary strings are still controlled by `useArbitrary: true` in your
+`CreateTailwindest` and `createTools` setup.
+
 ---
 
 ## Usage Examples
@@ -30,7 +39,8 @@ npx create-tailwind-type -S
 
 - Change output filename
 
-**Will generate types in `src/types/tailwind.d.ts` file.**
+**Will generate types in `src/types/tailwind.d.ts` and
+`src/types/tailwind_literal.d.ts`.**
 
 ```bash
 npx create-tailwind-type -f src/types/tailwind.d.ts
@@ -41,7 +51,7 @@ npx create-tailwind-type -f src/types/tailwind.d.ts
 | Option (Short) | Option (Long)                 | Description                                                                                                                                                | Default Value          | Example Usage                                                                 |
 | -------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------- |
 | `-b`           | `--base <path>`               | Specifies the base directory for @tailwindcss/node package. If omitted, the tool automatically resolves to the installed `@tailwindcss` package directory. | _None_ (auto-resolved) | `npx create-tailwind-type -b ./custom`                                        |
-| `-f`           | `--filename <filename>`       | Sets the output filename for the generated types.                                                                                                          | `tailwind.ts`          | `npx create-tailwind-type -f customTypes.ts`                                  |
+| `-f`           | `--filename <filename>`       | Sets the output filename for `Tailwind`/`TailwindNestGroups`. The `TailwindLiteral` file is emitted next to it with `_literal` suffix.                     | `tailwind.ts`          | `npx create-tailwind-type -f customTypes.ts`                                  |
 | `-d`           | `--docs`                      | Enables documentation comments in the generated types. Use the inverse flag to disable them.                                                               | `true`                 | `npx create-tailwind-type` or `npx create-tailwind-type --docs`               |
 | `-D`           | `--no-docs`                   | Disables documentation comments in the generated types.                                                                                                    | N/A                    | `npx create-tailwind-type --no-docs`                                          |
 | `-a`           | `--arbitrary-value`           | Allows the generation of arbitrary values in the output types. Use the inverse flag to disable this feature.                                               | `true`                 | `npx create-tailwind-type` or `npx create-tailwind-type --no-arbitrary-value` |
@@ -71,13 +81,16 @@ Specifies a custom base directory for locating `@tailwindcss/node`.
 
 ### `-f, --filename <filename>`
 
-Determines the output filename for the generated TypeScript types.
+Determines the output filename for the generated `Tailwind` and
+`TailwindNestGroups` TypeScript types. A sibling `TailwindLiteral` file is
+generated automatically.
 
 - **Default:** `tailwind.ts`
 - **Example:**
     ```bash
     npx create-tailwind-type -f customTypes.ts
     ```
+    This also writes `customTypes_literal.ts`.
 
 ### `-d, --docs` / `--no-docs`
 
@@ -183,6 +196,8 @@ Generate types using all the default settings:
 ```bash
 npx create-tailwind-type
 ```
+
+This creates `tailwind.ts` and `tailwind_literal.ts`.
 
 ### Specify a Custom Base Directory and Output Filename
 

@@ -29,12 +29,55 @@ the internal Tailwind v4 engine for type generation.
 
 </Callout>
 
+## Generated Files
+
+By default, `create-tailwind-type` writes two files:
+
+```txt
+tailwind.ts
+tailwind_literal.ts
+```
+
+- `tailwind.ts` exports `Tailwind` and `TailwindNestGroups`. Use these with
+  `CreateTailwindest` for typed style objects and nested variant keys.
+- `tailwind_literal.ts` exports `TailwindLiteral`. Use this with `createTools`
+  for typed class string arguments such as `tw.join(...)`, `tw.def(...)`, and
+  `tw.style(...).class(...)`.
+
+`TailwindLiteral` is generated as a precomputed static union so your app does
+not need to evaluate `Tailwind[keyof Tailwind]` during type-checking.
+Arbitrary strings are still controlled by `useArbitrary: true` in
+`CreateTailwindest` and `createTools`.
+
+```ts filename="tw.ts"
+import { createTools, type CreateTailwindest } from "tailwindest"
+import type { Tailwind, TailwindNestGroups } from "./tailwind"
+import type { TailwindLiteral } from "./tailwind_literal"
+
+export type Tailwindest = CreateTailwindest<{
+    tailwind: Tailwind
+    tailwindNestGroups: TailwindNestGroups
+    useArbitrary: true
+}>
+
+export const tw = createTools<{
+    tailwindest: Tailwindest
+    tailwindLiteral: TailwindLiteral
+    useArbitrary: true
+    useTypedClassLiteral: true
+}>()
+```
+
+If you change the main output filename, the literal filename follows it. For
+example, `-f src/types/tailwind.d.ts` also creates
+`src/types/tailwind_literal.d.ts`.
+
 ## CLI Options
 
 | Option (Short) | Option (Long)                 | Description                                                                                                                                                | Default Value          |
 | :------------- | :---------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- |
 | `-b`           | `--base <path>`               | Specifies the base directory for @tailwindcss/node package. If omitted, the tool automatically resolves to the installed `@tailwindcss` package directory. | _None_ (auto-resolved) |
-| `-f`           | `--filename <filename>`       | Sets the output filename for the generated types.                                                                                                          | `tailwind.ts`          |
+| `-f`           | `--filename <filename>`       | Sets the output filename for the generated `Tailwind`/`TailwindNestGroups` types. The `TailwindLiteral` file is emitted next to it with `_literal` suffix. | `tailwind.ts`          |
 | `-d`           | `--docs`                      | Enables documentation comments in the generated types. Use the inverse flag to disable them.                                                               | `true`                 |
 | `-D`           | `--no-docs`                   | Disables documentation comments in the generated types.                                                                                                    | N/A                    |
 | `-a`           | `--arbitrary-value`           | Allows the generation of arbitrary values in the output types. Use the inverse flag to disable this feature.                                               | `true`                 |
@@ -64,13 +107,14 @@ Specifies a custom base directory for locating `@tailwindcss/node`.
 
 ### `-f, --filename <filename>`
 
-Determines the output filename for the generated TypeScript types.
+Determines the output filename for the generated `Tailwind` and `TailwindNestGroups` TypeScript types. A sibling `TailwindLiteral` file is generated automatically.
 
 - **Default:** `tailwind.ts`
 - **Example:**
     ```bash
     npx create-tailwind-type -f customTypes.ts
     ```
+    This also writes `customTypes_literal.ts`.
 
 ### `-d, --docs` / `--no-docs`
 
