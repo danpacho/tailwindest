@@ -30,7 +30,7 @@ interface ToolOptions {
  *
  * @description Run `npx create-tailwind-type` to generate tailwind type defs.
  * ```bash
- * npx create-tailwind-type --base node_modules/tailwindcss --no-arbitrary-value --disable-variants
+ * npx create-tailwind-type
  * ```
  * @see {@link https://github.com/danpacho/tailwindest#create-tailwind-type create-tailwind-type}
  *
@@ -38,6 +38,7 @@ interface ToolOptions {
  * ```ts
  * // 1. import generated types via
  * import type { Tailwind, TailwindNestGroups } from "~/tailwind.ts"
+ * import type { TailwindLiteral } from "~/tailwind_literal.ts"
  *
  * // 2. create type
  * export type Tailwindest = CreateTailwindest<{
@@ -47,15 +48,13 @@ interface ToolOptions {
  *      groupPrefix: "#"
  * }>
  *
- * export type TailwindLiteral = CreateTailwindLiteral<Tailwind>
- *
  * // 3. create tools
  * export const tw = createTools<{
  *      tailwindest: Tailwindest
  *      tailwindLiteral: TailwindLiteral
  *      useArbitrary: true  // enable arbitrary strings
  *      useTypedClassLiteral: true // enable typed class literal
- * >({
+ * }>({
  *      merger: twMerge // set tailwind-merge as merger, [optional]
  * })
  * ```

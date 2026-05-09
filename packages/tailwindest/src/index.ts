@@ -15,7 +15,6 @@ export type {
     CreateTailwindest,
     CreateTailwindLiteral,
 } from "./create_tailwindest"
-export type { CreateCompiledTailwindest } from "./create_compiled_tailwindest"
 export type { TailwindestConfig, TailwindestInterface } from "./types/core"
 
 // Export styler interfaces
