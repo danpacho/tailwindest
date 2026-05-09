@@ -1,12 +1,12 @@
 import type {
     FirstDepthNestCondition,
     NestIdentifierSymbols,
+    PrefixedArbitraryNestGroups,
     PrefixedNestGroups,
     RemoveIdentifier,
     TailwindestConfig,
     TailwindIdentifier,
     UseArbitraryValue,
-    UseArbitraryVariant,
     With,
 } from "./types/core"
 export type { TailwindestConfig, TailwindestInterface } from "./types/core"
@@ -27,11 +27,32 @@ type CombineNestConditionAtCurrentNestStyleProperty<
         : never
 }
 
+type CombineArbitraryNestConditionAtCurrentNestStyleProperty<
+    TailwindNestGroups extends string,
+    Tailwind,
+    Identifier extends string = TailwindIdentifier,
+    UseArbitrary extends true | false = true,
+    ArbitraryNestGroups extends string = never,
+    $$Nest$$ extends string = FirstDepthNestCondition,
+> = [ArbitraryNestGroups] extends [never]
+    ? {}
+    : {
+          [CurrentNestCondition in ArbitraryNestGroups]?: GetNestStyle<
+              TailwindNestGroups,
+              Tailwind,
+              Identifier,
+              UseArbitrary,
+              ArbitraryNestGroups,
+              `${$$Nest$$}:${RemoveIdentifier<CurrentNestCondition, Identifier>}`
+          >
+      }
+
 export type GetNestStyle<
     TailwindNestGroups extends string,
     Tailwind,
     Identifier extends string = TailwindIdentifier,
     UseArbitrary extends true | false = true,
+    ArbitraryNestGroups extends string = never,
     $$Nest$$ extends string = FirstDepthNestCondition,
 > = {
     [CurrentNestCondition in Exclude<
@@ -42,14 +63,23 @@ export type GetNestStyle<
         Tailwind,
         Identifier,
         UseArbitrary,
+        ArbitraryNestGroups,
         `${$$Nest$$}:${RemoveIdentifier<CurrentNestCondition, Identifier>}`
     >
-} & CombineNestConditionAtCurrentNestStyleProperty<
+} & CombineArbitraryNestConditionAtCurrentNestStyleProperty<
+    Exclude<TailwindNestGroups, $$Nest$$>,
     Tailwind,
     Identifier,
     UseArbitrary,
+    ArbitraryNestGroups,
     $$Nest$$
->
+> &
+    CombineNestConditionAtCurrentNestStyleProperty<
+        Tailwind,
+        Identifier,
+        UseArbitrary,
+        $$Nest$$
+    >
 
 /**
  * Create tailwindest typeset
@@ -70,6 +100,7 @@ export type GetNestStyle<
  *      tailwind: Tailwind
  *      tailwindNestGroups: TailwindNestGroups
  *      useArbitrary: true
+ *      useArbitraryNestGroups: true
  *      groupPrefix: "#" // optional
  * }>
  * ```
@@ -78,28 +109,12 @@ type _BaseNestStyle<Config extends TailwindestConfig> = GetNestStyle<
     PrefixedNestGroups<Config>,
     Config["tailwind"],
     NestIdentifierSymbols<Config>,
-    UseArbitraryValue<Config>
+    UseArbitraryValue<Config>,
+    PrefixedArbitraryNestGroups<Config>
 >
 
-/**
- * Template literal index signature `${string}[${string}]` matches ONLY keys
- * that contain brackets — the Tailwind arbitrary variant pattern:
- *   O "`data-[state=active]`", "`[&_svg]`", "`aria-[expanded=true]`"
- *   X "backgroundColor", "hover", "dark"  (no brackets → unaffected)
- *
- * This preserves exact type inference for all known properties in Base,
- * while allowing arbitrary variant keys with proper nested style type hints.
- * Applied once at the output level — zero recursion cost.
- */
-type _WithArbitraryVariant<
-    Base,
-    Enable extends true | false,
-> = Enable extends true
-    ? Base & { [K: `${string}[${string}]`]: Base | undefined }
-    : Base
-
 export type CreateTailwindest<Config extends TailwindestConfig> =
-    _WithArbitraryVariant<_BaseNestStyle<Config>, UseArbitraryVariant<Config>>
+    _BaseNestStyle<Config>
 
 /**
  * Create tailwind literal typeset

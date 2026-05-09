@@ -9,6 +9,12 @@ npx create-tailwind-type
 ```
 
 This creates `tailwind.ts` and `tailwind_literal.ts`.
+Generated arbitrary value template types and slash modifier variant template
+types are disabled by default; use `useArbitrary: true` below to allow
+arbitrary class strings at the tool level.
+Use `useArbitraryNestGroups: true` when you want arbitrary or dynamic variant
+object keys such as `[&_p]`, `data-[size=large]`, `aria-invalid`,
+`data-state`, `group-[.is-published]`, or `group-aria-invalid`.
 
 ### 2. Install package
 
@@ -30,6 +36,7 @@ export type Tailwindest = CreateTailwindest<{
     tailwindNestGroups: TailwindNestGroups
     groupPrefix: "$" // prefix for nest groups, [optional]
     useArbitrary: true // enable arbitrary values, [optional]
+    useArbitraryNestGroups: true // enable arbitrary/dynamic variant object keys, [optional]
 }>
 
 export const tw = createTools<{

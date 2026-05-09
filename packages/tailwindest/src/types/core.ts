@@ -1,5 +1,18 @@
 export type TailwindIdentifier = ":"
 export type FirstDepthNestCondition = ""
+type TailwindDynamicNestGroupPrefix = "aria" | "data"
+type TailwindCompoundDynamicNestGroupPrefix =
+    | "group"
+    | "peer"
+    | "not"
+    | "has"
+    | "in"
+export type TailwindArbitraryNestGroup =
+    | `[${string}]${string}`
+    | `@[${string}]${string}`
+    | `${string}-[${string}]${string}`
+    | `${TailwindDynamicNestGroupPrefix}-${string}`
+    | `${TailwindCompoundDynamicNestGroupPrefix}-${TailwindDynamicNestGroupPrefix}-${string}`
 
 export type RemoveIdentifier<
     ClassName extends string,
@@ -35,12 +48,13 @@ export interface TailwindestConfig {
      */
     useArbitrary?: true | false
     /**
-     * Enables arbitrary variants such as `data-[state=active]`,
-     * `[&_svg]`, or `aria-[expanded=true]` as object keys.
+     * Enables arbitrary variants and dynamic named variants such as
+     * `data-[state=active]`, `[&_svg]`, `aria-[expanded=true]`,
+     * `aria-invalid`, or `group-aria-invalid` as object keys.
      *
      * @defaultValue `false`
      */
-    useArbitraryVariant?: true | false
+    useArbitraryNestGroups?: true | false
 }
 
 export interface TailwindestInterface {
@@ -67,6 +81,13 @@ export type PrefixedNestGroups<Config extends TailwindestConfig> =
         ? `${Config["groupPrefix"]}${Config["tailwindNestGroups"]}`
         : Config["tailwindNestGroups"]
 
+export type PrefixedArbitraryNestGroups<Config extends TailwindestConfig> =
+    UseArbitraryNestGroups<Config> extends true
+        ? Config["groupPrefix"] extends string
+            ? `${Config["groupPrefix"]}${TailwindArbitraryNestGroup}`
+            : TailwindArbitraryNestGroup
+        : never
+
 export type NestIdentifierSymbols<Config extends TailwindestConfig> =
     Config["groupPrefix"] extends string
         ? Config["groupPrefix"] | TailwindIdentifier
@@ -75,5 +96,5 @@ export type NestIdentifierSymbols<Config extends TailwindestConfig> =
 export type UseArbitraryValue<Config extends TailwindestConfig> =
     Config["useArbitrary"] extends boolean ? Config["useArbitrary"] : false
 
-export type UseArbitraryVariant<Config extends TailwindestConfig> =
-    Config["useArbitraryVariant"] extends true ? true : false
+export type UseArbitraryNestGroups<Config extends TailwindestConfig> =
+    Config["useArbitraryNestGroups"] extends true ? true : false
