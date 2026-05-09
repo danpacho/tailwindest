@@ -124,6 +124,7 @@ export type Tailwindest = CreateTailwindest<{
     tailwind: Tailwind
     tailwindNestGroups: TailwindNestGroups
     useArbitrary: true
+    useArbitraryNestGroups: true
 }>
 
 export const tw = createTools<{
@@ -173,6 +174,52 @@ cn("flex px-4", isActive && "bg-red-500", props.className)
 
 The static part can become a Tailwindest style constant, while dynamic arguments
 remain in the generated `.class(...)` call.
+
+### CVA Output
+
+Static `cva(..., { variants: ... })` declarations become `tw.variants(...)`.
+The generated call sites use `.class(...)`, and `VariantProps` is replaced with
+Tailwindest's `GetVariants` type.
+
+```tsx
+import { type GetVariants } from "tailwindest"
+import { tw } from "~/tw"
+
+const buttonVariants = tw.variants({
+    base: {
+        display: "inline-flex",
+        alignItems: "items-center",
+    },
+    variants: {
+        variant: {
+            default: {
+                backgroundColor: "bg-primary",
+            },
+            outline: {
+                borderWidth: "border",
+            },
+        },
+    },
+})
+
+interface ButtonProps extends GetVariants<typeof buttonVariants> {
+    className?: string
+}
+
+function Button({ className, variant }: ButtonProps) {
+    return (
+        <button
+            className={tw.join(
+                buttonVariants.class({ variant }),
+                className
+            )}
+        />
+    )
+}
+```
+
+If a `cva(...)` declaration has no variant map, the transformer emits
+`tw.style(...)` and rewrites call sites to `.class(...)`.
 
 ## Conservative Fallback
 

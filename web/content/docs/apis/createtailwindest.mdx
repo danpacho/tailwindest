@@ -18,6 +18,7 @@ export type Tailwindest = CreateTailwindest<{
     tailwindNestGroups: TailwindNestGroups
     groupPrefix?: string
     useArbitrary?: boolean
+    useArbitraryNestGroups?: boolean
 }>
 ```
 
@@ -31,6 +32,7 @@ export type Tailwindest = CreateTailwindest<{
 - **`tailwindNestGroups`** (required): The `TailwindNestGroups` type imported from the generated file. This is a string literal union of all possible variant names (e.g., `"hover"`, `"focus"`, `"md"`, `"dark"`).
 - **`groupPrefix`** (optional): A string literal to prefix variant groups. For example, if you set it to `"$"` you would write `"$hover": { ... }`.
 - **`useArbitrary`** (optional, `boolean`): If set to `true`, allows any string for class values, enabling arbitrary values. Defaults to `false`.
+- **`useArbitraryNestGroups`** (optional, `boolean`): If set to `true`, allows Tailwind arbitrary and dynamic variant object keys such as `[&.is-dragging]`, `[@supports(display:grid)]`, `data-[size=large]`, `aria-invalid`, `data-state`, `group-aria-invalid`, `peer-data-state`, `group-[.is-published]`, `peer-[:nth-of-type(3)_&]`, `min-[712px]`, `@[618px]`, and custom dynamic variants such as `placement-[top-start]`. Defaults to `false`.
 
 ### Example
 
@@ -46,6 +48,7 @@ export type Tailwindest = CreateTailwindest<{
     tailwind: Tailwind
     tailwindNestGroups: TailwindNestGroups
     useArbitrary: true
+    useArbitraryNestGroups: true
 }>
 
 // 2. Create the tools
@@ -65,9 +68,18 @@ const myStyle: Tailwindest = {
     padding: ["p-2", "md:p-4"],
     hover: {
         backgroundColor: "hover:bg-blue-500",
+        "[&.is-dragging]": {
+            cursor: "hover:[&.is-dragging]:cursor-grabbing",
+        },
     },
     dark: {
         color: "dark:text-white",
+    },
+    "[&_p]": {
+        margin: "[&_p]:mt-4",
+    },
+    "aria-invalid": {
+        borderColor: "aria-invalid:border-red-500",
     },
 }
 ```

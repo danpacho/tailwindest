@@ -43,6 +43,13 @@ This creates:
 - `tailwind.ts`: `Tailwind` and `TailwindNestGroups` for typed style objects.
 - `tailwind_literal.ts`: `TailwindLiteral` for typed class string arguments.
 
+Generated arbitrary value template types and slash modifier variant template
+types are disabled by default for TypeScript performance. You can still allow
+arbitrary class strings through `useArbitrary: true` in your `tw.ts` setup.
+Use `useArbitraryNestGroups: true` when you want arbitrary or dynamic variant
+object keys such as `[&_p]`, `data-[size=large]`, `aria-invalid`,
+`data-state`, `group-[.is-published]`, or `group-aria-invalid`.
+
 <Callout>
 You can customize the output path and other options. Check out the [`create-tailwind-type` documentation](/create-tailwind-type) for more details.
 </Callout>
@@ -68,6 +75,7 @@ export type Tailwindest = CreateTailwindest<{
 
     // groupPrefix: "$" <-- prefix for group variants
     useArbitrary: true // enable arbitrary values, type-hinting is available for this option
+    useArbitraryNestGroups: true // enable arbitrary/dynamic variant object keys like "[&_p]" or "aria-invalid"
 }>
 
 // Create the tools
