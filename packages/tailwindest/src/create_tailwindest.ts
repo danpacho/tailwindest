@@ -27,23 +27,46 @@ type CombineNestConditionAtCurrentNestStyleProperty<
         : never
 }
 
+type CombineArbitraryNestStyleProperty<NestStyle> = {
+    [NestKey in keyof NestStyle]?: NestStyle[NestKey] extends string
+        ? With<NestStyle[NestKey], true>
+        : never
+}
+
+// Arbitrary nest keys cannot safely form exact `${key}:${value}` unions for
+// large generated Tailwind types without triggering TS2590.
+type GetArbitraryNestStyle<
+    TailwindNestGroups extends string,
+    Tailwind,
+    ArbitraryNestGroups extends string = never,
+> = {
+    [CurrentNestCondition in TailwindNestGroups]?: GetArbitraryNestStyle<
+        Exclude<TailwindNestGroups, CurrentNestCondition>,
+        Tailwind,
+        ArbitraryNestGroups
+    >
+} & ([ArbitraryNestGroups] extends [never]
+    ? {}
+    : {
+          [CurrentNestCondition in ArbitraryNestGroups]?: GetArbitraryNestStyle<
+              TailwindNestGroups,
+              Tailwind,
+              ArbitraryNestGroups
+          >
+      }) &
+    CombineArbitraryNestStyleProperty<Tailwind>
+
 type CombineArbitraryNestConditionAtCurrentNestStyleProperty<
     TailwindNestGroups extends string,
     Tailwind,
-    Identifier extends string = TailwindIdentifier,
-    UseArbitrary extends true | false = true,
     ArbitraryNestGroups extends string = never,
-    $$Nest$$ extends string = FirstDepthNestCondition,
 > = [ArbitraryNestGroups] extends [never]
     ? {}
     : {
-          [CurrentNestCondition in ArbitraryNestGroups]?: GetNestStyle<
+          [CurrentNestCondition in ArbitraryNestGroups]?: GetArbitraryNestStyle<
               TailwindNestGroups,
               Tailwind,
-              Identifier,
-              UseArbitrary,
-              ArbitraryNestGroups,
-              `${$$Nest$$}:${RemoveIdentifier<CurrentNestCondition, Identifier>}`
+              ArbitraryNestGroups
           >
       }
 
@@ -69,10 +92,7 @@ export type GetNestStyle<
 } & CombineArbitraryNestConditionAtCurrentNestStyleProperty<
     Exclude<TailwindNestGroups, $$Nest$$>,
     Tailwind,
-    Identifier,
-    UseArbitrary,
-    ArbitraryNestGroups,
-    $$Nest$$
+    ArbitraryNestGroups
 > &
     CombineNestConditionAtCurrentNestStyleProperty<
         Tailwind,

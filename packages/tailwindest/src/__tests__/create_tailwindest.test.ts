@@ -75,6 +75,12 @@ describe("CreateTailwindest arbitrary nest groups", () => {
             "data-[size=large]": {
                 margin: "data-[size=large]:mt-4",
             },
+            "data-[state=checked]": {
+                backgroundColor: "data-[state=checked]:bg-red-500",
+                hover: {
+                    backgroundColor: "data-[state=checked]:hover:bg-red-500",
+                },
+            },
             "data-state": {
                 backgroundColor: "data-state:bg-red-500",
             },
