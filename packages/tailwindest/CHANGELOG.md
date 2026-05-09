@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.2.9
+
+### Patch Changes
+
+- Fix TS2590 infinite recursion error problem
+
 ## 3.2.8
 
 ### Patch Changes
