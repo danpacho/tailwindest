@@ -479,9 +479,73 @@ describe("TypeGenerator", () => {
         })
 
         const tailwindLiteral = await readFile(tailwindLiteralRoot, "utf-8")
+        const tailwind = await readFile(tailwindRoot, "utf-8")
 
         expect(tailwindLiteral).toContain("export type TailwindLiteral =")
         expect(tailwindLiteral).toContain('| "bg-red-500"')
         expect(tailwindLiteral).toContain('| "text-red-500"')
+        expect(tailwind).not.toContain("${string}/${Variants")
+        expect(tailwind).not.toContain("& {}")
+    })
+
+    it("does not emit arbitrary value or slash modifier patterns by default", async () => {
+        const defaultGenerator = new TailwindTypeGenerator({
+            compiler,
+            cssAnalyzer,
+            generator: schemaGenerator,
+            storeRoot: `${__dirname}/__mocks__/store/docs.json`,
+        })
+        const tailwindRoot = `${__dirname}/__mocks__/dist/default_tailwind.ts`
+        const tailwindLiteralRoot = `${__dirname}/__mocks__/dist/default_tailwind_literal.ts`
+
+        await rm(tailwindRoot, { force: true })
+        await rm(tailwindLiteralRoot, { force: true })
+
+        try {
+            await defaultGenerator.buildTypes({
+                tailwind: tailwindRoot,
+            })
+
+            const tailwind = await readFile(tailwindRoot, "utf-8")
+
+            expect(tailwind).not.toContain("Arbitrary support")
+            expect(tailwind).not.toContain("[${string}]")
+            expect(tailwind).not.toContain("(${string})")
+            expect(tailwind).not.toContain("${string}/${Variants")
+            expect(tailwind).not.toContain("& {}")
+        } finally {
+            await rm(tailwindRoot, { force: true })
+            await rm(tailwindLiteralRoot, { force: true })
+        }
+    })
+
+    it("keeps slash modifier patterns disabled with partial options", async () => {
+        const partialOptionsGenerator = new TailwindTypeGenerator({
+            compiler,
+            cssAnalyzer,
+            generator: schemaGenerator,
+            storeRoot: `${__dirname}/__mocks__/store/docs.json`,
+        }).setGenOptions({
+            useDocs: false,
+        })
+        const tailwindRoot = `${__dirname}/__mocks__/dist/partial_options_tailwind.ts`
+        const tailwindLiteralRoot = `${__dirname}/__mocks__/dist/partial_options_tailwind_literal.ts`
+
+        await rm(tailwindRoot, { force: true })
+        await rm(tailwindLiteralRoot, { force: true })
+
+        try {
+            await partialOptionsGenerator.buildTypes({
+                tailwind: tailwindRoot,
+            })
+
+            const tailwind = await readFile(tailwindRoot, "utf-8")
+
+            expect(tailwind).not.toContain("${string}/${Variants")
+            expect(tailwind).not.toContain("& {}")
+        } finally {
+            await rm(tailwindRoot, { force: true })
+            await rm(tailwindLiteralRoot, { force: true })
+        }
     })
 })

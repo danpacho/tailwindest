@@ -98,7 +98,7 @@ export type TailwindTypeAliasMap = Map<
 interface TailwindTypeGenerationOptions {
     /**
      * Supports arbitrary values.
-     * @default true
+     * @default false
      */
     useArbitraryValue?: boolean
     /**
@@ -107,7 +107,8 @@ interface TailwindTypeGenerationOptions {
      */
     useExactVariants?: boolean
     /**
-     * Supports soft variant groups with performance optimization. However, it does not suggest exact literal values.
+     * Supports soft slash modifier groups when variant modifier generation is enabled.
+     * However, it does not suggest exact literal values.
      * @default true
      */
     useSoftVariants?: boolean
@@ -127,15 +128,10 @@ interface TailwindTypeGenerationOptions {
      */
     useOptionalProperty?: boolean
     /**
-     * Disable variants typing
-     * @default false
+     * Disable slash modifier variant typing.
+     * @default true
      */
     disableVariants?: boolean
-    /**
-     * Supports arbitrary variants (e.g. data-[...], aria-[...])
-     * @default false
-     */
-    useArbitraryVariant?: boolean
 }
 
 interface TailwindTypeGeneratorDeps {
@@ -206,23 +202,25 @@ export class TailwindTypeGenerator {
 
     private genOptions: TailwindTypeGenerationOptions = {
         useDocs: true,
-        useArbitraryValue: true,
+        useArbitraryValue: false,
         // variants options
         useExactVariants: false,
         useSoftVariants: true,
         useStringKindVariantsOnly: false,
         // optional
         useOptionalProperty: true,
-        useArbitraryVariant: false,
+        disableVariants: true,
     }
     public setGenOptions(newOptions: TailwindTypeGenerationOptions): this {
-        if (newOptions.useExactVariants === newOptions.useSoftVariants) {
+        const nextOptions = { ...this.genOptions, ...newOptions }
+
+        if (nextOptions.useExactVariants === nextOptions.useSoftVariants) {
             this.$.error(
-                `Invalid generation option, useExactVariants can't be same as useSoftVariants(${newOptions.useSoftVariants}). Skipped.`
+                `Invalid generation option, useExactVariants can't be same as useSoftVariants(${nextOptions.useSoftVariants}). Skipped.`
             )
             return this
         }
-        this.genOptions = newOptions
+        this.genOptions = nextOptions
         return this
     }
 
@@ -233,12 +231,11 @@ export class TailwindTypeGenerator {
         this._storeRoot = opt.storeRoot ?? null
         this.genOptions = {
             useDocs: opt.useDocs ?? true,
-            useArbitraryValue: opt.useArbitraryValue ?? true,
+            useArbitraryValue: opt.useArbitraryValue ?? false,
             useSoftVariants: opt.useSoftVariants ?? true,
             useExactVariants: opt.useExactVariants ?? false,
             useStringKindVariantsOnly: opt.useStringKindVariantsOnly ?? false,
-            disableVariants: opt.disableVariants ?? false,
-            useArbitraryVariant: opt.useArbitraryVariant ?? false,
+            disableVariants: opt.disableVariants ?? true,
         }
     }
 

@@ -59,20 +59,15 @@ async function runTUI() {
                         {
                             value: "arbitrary",
                             label: "Arbitrary Values",
-                            hint: "recommended",
-                        },
-                        {
-                            value: "arbitraryVariant",
-                            label: "Arbitrary Variants",
-                            hint: "data-[...], [&...]",
+                            hint: "slower, opt-in",
                         },
                         {
                             value: "soft",
-                            label: "Soft Variants",
-                            hint: "flexible completion",
+                            label: "Soft Modifier Shape",
+                            hint: "used with slash modifiers",
                         },
                     ],
-                    initialValues: ["docs", "arbitrary", "soft"],
+                    initialValues: ["docs", "soft"],
                 }),
             advanced: () =>
                 p.multiselect({
@@ -87,7 +82,11 @@ async function runTUI() {
                             value: "stringOnly",
                             label: "String-kind Variants Only",
                         },
-                        { value: "noVariants", label: "Disable Variants" },
+                        {
+                            value: "variants",
+                            label: "Variant Modifiers",
+                            hint: "slash modifiers, slower",
+                        },
                     ],
                     initialValues: [],
                     required: false,
@@ -144,8 +143,7 @@ async function runTUI() {
             useSoftVariants: selectedOptions.includes("soft"),
             useStringKindVariantsOnly: advancedOptions.includes("stringOnly"),
             useOptionalProperty: advancedOptions.includes("optional"),
-            disableVariants: advancedOptions.includes("noVariants"),
-            useArbitraryVariant: selectedOptions.includes("arbitraryVariant"),
+            disableVariants: !advancedOptions.includes("variants"),
         })
 
         const fileRoot = resolve(process.cwd(), config.filename as string)
@@ -177,20 +175,24 @@ program
     .option("-f, --filename <name>", "Output filename", "tailwind.ts")
     .option("-d, --docs", "Enable documentation comments", true)
     .option("-D, --no-docs", "Disable documentation comments")
-    .option("-a, --arbitrary-value", "Enable arbitrary value support", true)
+    .option("-a, --arbitrary-value", "Enable arbitrary value support", false)
     .option("-A, --no-arbitrary-value", "Disable arbitrary value support")
-    .option("-s, --soft-variants", "Enable soft variant generation", true)
-    .option("-S, --no-soft-variants", "Disable soft variant generation")
+    .option("-s, --soft-variants", "Use soft slash modifier templates", true)
+    .option("-S, --no-soft-variants", "Use exact slash modifier templates")
     .option(
         "-k, --string-kind-variants-only",
         "Use string-kind variants only",
         false
     )
     .option("-o, --optional-property", "Use optional properties", false)
-    .option("-N, --disable-variants", "Disable variant generation", false)
     .option(
-        "-v, --arbitrary-variant",
-        "Enable arbitrary variant support",
+        "-N, --disable-variants",
+        "Disable slash modifier template generation",
+        false
+    )
+    .option(
+        "--enable-variants",
+        "Enable slash modifier template generation",
         false
     )
     .action(async (opts) => {
@@ -238,8 +240,7 @@ program
             useSoftVariants: opts.softVariants,
             useStringKindVariantsOnly: opts.stringKindVariantsOnly,
             useOptionalProperty: opts.optionalProperty,
-            disableVariants: opts.disableVariants,
-            useArbitraryVariant: opts.arbitraryVariant,
+            disableVariants: opts.disableVariants || !opts.enableVariants,
         })
 
         const fileRoot = resolve(process.cwd(), opts.filename)
