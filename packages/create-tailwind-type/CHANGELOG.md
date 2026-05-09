@@ -1,5 +1,11 @@
 # create-tailwind-type
 
+## 1.1.5
+
+### Patch Changes
+
+- Update tailwindest type generation process
+
 ## 1.1.4
 
 ### Patch Changes

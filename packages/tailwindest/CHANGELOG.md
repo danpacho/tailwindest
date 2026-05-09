@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.2.7
+
+### Patch Changes
+
+- Update tailwindest type generation process
+
 ## 3.2.6
 
 ### Patch Changes
