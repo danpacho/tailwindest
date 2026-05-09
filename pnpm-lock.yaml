@@ -105,8 +105,11 @@ importers:
         specifier: ^4.2.4
         version: 4.2.4
       tailwindest-tailwind-internal:
-        specifier: ^1.0.1
+        specifier: ^1.0.2
         version: link:../tailwind-internal
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
     devDependencies:
       '@types/jsdom':
         specifier: ^28.0.1
@@ -124,7 +127,7 @@ importers:
         specifier: ^14.0.3
         version: 14.0.3
       create-tailwind-type:
-        specifier: ^1.1.3
+        specifier: ^1.1.4
         version: link:../create-tailwind-type
       picocolors:
         specifier: ^1.1.0

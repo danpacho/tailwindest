@@ -1,4 +1,5 @@
 import path from "node:path"
+import { readFile, rm } from "node:fs/promises"
 import { describe, expect, it } from "vitest"
 import { TailwindTypeGenerator } from "../generator"
 import { TailwindCompiler } from "tailwindest-tailwind-internal"
@@ -468,8 +469,19 @@ describe("TypeGenerator", () => {
     })
 
     it("should build types", async () => {
+        const tailwindRoot = `${__dirname}/__mocks__/dist/tailwind.ts`
+        const tailwindLiteralRoot = `${__dirname}/__mocks__/dist/tailwind_literal.ts`
+
+        await rm(tailwindLiteralRoot, { force: true })
+
         await generator.buildTypes({
-            tailwind: `${__dirname}/__mocks__/dist/tailwind.ts`,
+            tailwind: tailwindRoot,
         })
+
+        const tailwindLiteral = await readFile(tailwindLiteralRoot, "utf-8")
+
+        expect(tailwindLiteral).toContain("export type TailwindLiteral =")
+        expect(tailwindLiteral).toContain('| "bg-red-500"')
+        expect(tailwindLiteral).toContain('| "text-red-500"')
     })
 })

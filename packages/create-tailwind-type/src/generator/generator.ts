@@ -12,7 +12,8 @@ import * as t from "../type_tools"
 import { CSSAnalyzer } from "./css_analyzer"
 import { CSSPropertyResolver } from "./css_property_resolver"
 import { access, constants, mkdir, readFile, writeFile } from "fs/promises"
-import { dirname } from "path"
+import { basename, dirname, extname, join } from "path"
+import * as ts from "typescript"
 
 async function writeIfNotExists(
     filePath: string,
@@ -876,7 +877,143 @@ export class TailwindTypeGenerator {
         return false
     }
 
-    public async buildTypes(saveRoot: { tailwind: string }) {
+    private resolveTailwindLiteralRoot(tailwindRoot: string): string {
+        const ext = extname(tailwindRoot) || ".ts"
+        const name = basename(tailwindRoot, ext)
+        return join(dirname(tailwindRoot), `${name}_literal${ext}`)
+    }
+
+    private createTailwindLiteralSource(tailwindSource: string): string {
+        const fileName = "/__tailwindest_generated_tailwind.ts"
+        const compilerOptions: ts.CompilerOptions = {
+            strict: true,
+            target: ts.ScriptTarget.ESNext,
+            module: ts.ModuleKind.ESNext,
+            moduleResolution: ts.ModuleResolutionKind.Bundler,
+            noEmit: true,
+            skipLibCheck: true,
+        }
+        const baseHost = ts.createCompilerHost(compilerOptions, true)
+        const host: ts.CompilerHost = {
+            ...baseHost,
+            fileExists: (requestedFileName) =>
+                requestedFileName === fileName ||
+                baseHost.fileExists(requestedFileName),
+            readFile: (requestedFileName) =>
+                requestedFileName === fileName
+                    ? tailwindSource
+                    : baseHost.readFile(requestedFileName),
+            getSourceFile: (
+                requestedFileName,
+                languageVersion,
+                onError,
+                shouldCreateNewSourceFile
+            ) => {
+                if (requestedFileName === fileName) {
+                    return ts.createSourceFile(
+                        requestedFileName,
+                        tailwindSource,
+                        languageVersion,
+                        true
+                    )
+                }
+                return baseHost.getSourceFile(
+                    requestedFileName,
+                    languageVersion,
+                    onError,
+                    shouldCreateNewSourceFile
+                )
+            },
+        }
+
+        const program = ts.createProgram([fileName], compilerOptions, host)
+        const diagnostics = program.getSemanticDiagnostics()
+        if (diagnostics.length > 0) {
+            const message = diagnostics
+                .slice(0, 5)
+                .map((diagnostic) =>
+                    ts.flattenDiagnosticMessageText(
+                        diagnostic.messageText,
+                        "\n"
+                    )
+                )
+                .join("\n")
+            throw new Error(`Tailwind literal generation failed:\n${message}`)
+        }
+
+        const sourceFile = program.getSourceFile(fileName)
+        if (!sourceFile) {
+            throw new Error(
+                "Tailwind literal generation failed: missing source"
+            )
+        }
+
+        const tailwindDeclaration = sourceFile.statements.find(
+            (statement): statement is ts.InterfaceDeclaration =>
+                ts.isInterfaceDeclaration(statement) &&
+                statement.name.text === "Tailwind"
+        )
+        if (!tailwindDeclaration) {
+            throw new Error(
+                "Tailwind literal generation failed: Tailwind interface not found"
+            )
+        }
+
+        const checker = program.getTypeChecker()
+        const tailwindType = checker.getTypeAtLocation(tailwindDeclaration.name)
+        const literalSet = new Set<string>()
+
+        const collectLiteral = (type: ts.Type): void => {
+            if (type.isUnion()) {
+                type.types.forEach(collectLiteral)
+                return
+            }
+
+            if (type.isIntersection()) {
+                type.types.forEach(collectLiteral)
+                return
+            }
+
+            if (
+                (type.flags & ts.TypeFlags.StringLiteral) !== 0 &&
+                typeof (type as ts.StringLiteralType).value === "string"
+            ) {
+                literalSet.add((type as ts.StringLiteralType).value)
+            }
+        }
+
+        checker.getPropertiesOfType(tailwindType).forEach((property) => {
+            collectLiteral(
+                checker.getTypeOfSymbolAtLocation(
+                    property,
+                    property.valueDeclaration ?? tailwindDeclaration
+                )
+            )
+        })
+
+        const literals = Array.from(literalSet).sort()
+        const union =
+            literals.length === 0
+                ? "never"
+                : literals
+                      .map((literal) => `    | ${JSON.stringify(literal)}`)
+                      .join("\n")
+
+        return [
+            "/**",
+            " * Generated from tailwind.ts.",
+            " * Finite string literal members extracted from Tailwind property value types.",
+            " */",
+            "export type TailwindLiteral =",
+            union,
+            "",
+        ].join("\n")
+    }
+
+    public async buildTypes(saveRoot: {
+        tailwind: string
+        tailwindLiteral?: string
+    }) {
         await this.init()
 
         const uniqueKeySet = new Set<string>(
@@ -994,8 +1131,13 @@ export class TailwindTypeGenerator {
                 globalReference: { color: colorVariables },
                 optimizationList: optimizedMapList,
             })
+            const tailwindLiteral = this.createTailwindLiteralSource(tailwind)
+            const tailwindLiteralRoot =
+                saveRoot.tailwindLiteral ??
+                this.resolveTailwindLiteralRoot(saveRoot.tailwind)
 
             await writeIfNotExists(saveRoot.tailwind, tailwind)
+            await writeIfNotExists(tailwindLiteralRoot, tailwindLiteral)
         } catch (e) {
             this.$.error("build type error occurred")
             console.error(e)
@@ -1003,6 +1145,9 @@ export class TailwindTypeGenerator {
 
         this.$.success("build type finished")
         this.$.log(`tailwind : ${saveRoot.tailwind}`)
+        this.$.log(
+            `tailwind literal : ${saveRoot.tailwindLiteral ?? this.resolveTailwindLiteralRoot(saveRoot.tailwind)}`
+        )
     }
 
     private createOptimizableMap(
