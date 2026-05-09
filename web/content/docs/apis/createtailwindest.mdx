@@ -34,6 +34,11 @@ export type Tailwindest = CreateTailwindest<{
 - **`useArbitrary`** (optional, `boolean`): If set to `true`, allows any string for class values, enabling arbitrary values. Defaults to `false`.
 - **`useArbitraryNestGroups`** (optional, `boolean`): If set to `true`, allows Tailwind arbitrary and dynamic variant object keys such as `[&.is-dragging]`, `[@supports(display:grid)]`, `data-[size=large]`, `aria-invalid`, `data-state`, `group-aria-invalid`, `peer-data-state`, `group-[.is-published]`, `peer-[:nth-of-type(3)_&]`, `min-[712px]`, `@[618px]`, and custom dynamic variants such as `placement-[top-start]`. Defaults to `false`.
 
+Known generated nest groups keep exact prefixed value checking. Values inside
+arbitrary or dynamic nest group keys are intentionally typed as class strings
+instead of exact `${key}:${literal}` unions to avoid TypeScript `TS2590` on
+large Tailwind outputs.
+
 ### Example
 
 Here is a typical setup in a `tw.ts` file:

@@ -49,6 +49,10 @@ arbitrary class strings through `useArbitrary: true` in your `tw.ts` setup.
 Use `useArbitraryNestGroups: true` when you want arbitrary or dynamic variant
 object keys such as `[&_p]`, `data-[size=large]`, `aria-invalid`,
 `data-state`, `group-[.is-published]`, or `group-aria-invalid`.
+Known generated nest groups keep exact prefixed value checking. Values inside
+arbitrary or dynamic nest group keys are intentionally typed as class strings
+instead of exact `${key}:${literal}` unions to avoid TypeScript `TS2590` on
+large Tailwind outputs.
 
 <Callout>
 You can customize the output path and other options. Check out the [`create-tailwind-type` documentation](/create-tailwind-type) for more details.

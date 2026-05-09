@@ -15,6 +15,10 @@ arbitrary class strings at the tool level.
 Use `useArbitraryNestGroups: true` when you want arbitrary or dynamic variant
 object keys such as `[&_p]`, `data-[size=large]`, `aria-invalid`,
 `data-state`, `group-[.is-published]`, or `group-aria-invalid`.
+Known generated nest groups keep exact prefixed value checking. Values inside
+arbitrary or dynamic nest group keys are intentionally typed as class strings
+instead of exact `${key}:${literal}` unions to avoid TypeScript `TS2590` on
+large Tailwind outputs.
 
 ### 2. Install package
 
