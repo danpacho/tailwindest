@@ -52,7 +52,7 @@ const AlertDialogContent = React.forwardRef<
     <AlertDialogOverlay />
     <AlertDialogPrimitive.Content
       ref={ref}
-      className={alertDialogContentAlertDialogPrimitiveContent.class(className)}
+      className={tw.join(alertDialogContentAlertDialogPrimitiveContent.class(), className)}
       {...props}
     />
   </AlertDialogPortal>
@@ -75,7 +75,7 @@ const AlertDialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={alertDialogHeaderDiv.class(className)}
+    className={tw.join(alertDialogHeaderDiv.class(), className)}
     {...props}
   />
 )
@@ -123,7 +123,7 @@ const AlertDialogAction = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Action
     ref={ref}
-    className={tw.join(buttonVariants(), className)}
+    className={tw.join(buttonVariants.class({}), className)}
     {...props}
   />
 ))
@@ -135,7 +135,7 @@ const AlertDialogCancel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Cancel
     ref={ref}
-    className={tw.join("mt-2 sm:mt-0", buttonVariants({ variant: "outline" }), className)}
+    className={tw.join("mt-2 sm:mt-0", buttonVariants.class({ variant: "outline" }), className)}
     {...props}
   />
 ))

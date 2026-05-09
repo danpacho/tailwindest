@@ -1,6 +1,6 @@
 import * as React from "react"
-import { type VariantProps } from "class-variance-authority"
 import { tw } from "~/tw";
+import { type GetVariants } from "tailwindest";
 
 const alertVariants = /**
  * @defaultVariants {
@@ -50,12 +50,12 @@ tw.variants({
 
 const Alert = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
+  React.HTMLAttributes<HTMLDivElement> & GetVariants<typeof alertVariants>
 >(({ className, variant, ...props }, ref) => (
   <div
     ref={ref}
     role="alert"
-    className={tw.join(alertVariants({ variant }), className)}
+    className={tw.join(alertVariants.class({ variant }), className)}
     {...props}
   />
 ))

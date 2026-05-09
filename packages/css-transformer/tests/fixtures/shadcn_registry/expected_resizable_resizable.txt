@@ -70,7 +70,7 @@ const ResizableHandle = ({
   withHandle?: boolean
 }) => (
   <ResizablePrimitive.PanelResizeHandle
-    className={resizableHandleResizablePrimitivePanelResizeHandle.class(className)}
+    className={tw.join(resizableHandleResizablePrimitivePanelResizeHandle.class(), className)}
     {...props}
   >
     {withHandle && (

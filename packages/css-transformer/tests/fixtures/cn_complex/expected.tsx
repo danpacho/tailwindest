@@ -8,7 +8,7 @@ const componentDiv = tw.style({
 
 export function Component({ isActive, className }: { isActive: boolean, className?: string }) {
     return (
-        <div className={componentDiv.class(isActive && "bg-blue-500", className)}>
+        <div className={tw.join(componentDiv.class(), isActive && "bg-blue-500", className)}>
             Content
         </div>
     );

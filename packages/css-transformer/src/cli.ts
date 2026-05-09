@@ -208,7 +208,6 @@ async function createTailwindResolver(cssPath: string) {
         useStringKindVariantsOnly: false,
         useOptionalProperty: false,
         disableVariants: false,
-        useArbitraryVariant: true,
     })
 
     await generator.init()

@@ -24,7 +24,7 @@ const TabsList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={tabsListTabsPrimitiveList.class(className)}
+    className={tw.join(tabsListTabsPrimitiveList.class(), className)}
     {...props}
   />
 ))
@@ -63,7 +63,7 @@ const TabsTrigger = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
-    className={tabsTriggerTabsPrimitiveTrigger.class(className)}
+    className={tw.join(tabsTriggerTabsPrimitiveTrigger.class(), className)}
     {...props}
   />
 ))

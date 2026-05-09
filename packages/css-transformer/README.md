@@ -90,6 +90,97 @@ const style = tw.def({
 })
 ```
 
+### CVA migration
+
+`cva(...)` declarations are rewritten to the matching Tailwindest styler API.
+Static variant maps become `tw.variants(...)`, `VariantProps` becomes
+`GetVariants`, and call sites use `.class(...)` so they match the
+`createTools` signatures.
+
+**Before:**
+
+```tsx
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+
+const buttonVariants = cva("inline-flex items-center", {
+    variants: {
+        variant: {
+            default: "bg-primary text-primary-foreground",
+            outline: "border bg-background",
+        },
+        size: {
+            default: "h-9 px-4",
+            sm: "h-8 px-3",
+        },
+    },
+})
+
+interface ButtonProps extends VariantProps<typeof buttonVariants> {
+    className?: string
+}
+
+function Button({ className, variant, size }: ButtonProps) {
+    return (
+        <button className={cn(buttonVariants({ variant, size, className }))} />
+    )
+}
+```
+
+**After:**
+
+```tsx
+import { tw } from "~/tw"
+import { type GetVariants } from "tailwindest"
+
+const buttonVariants = tw.variants({
+    base: {
+        display: "inline-flex",
+        alignItems: "items-center",
+    },
+    variants: {
+        variant: {
+            default: {
+                backgroundColor: "bg-primary",
+                color: "text-primary-foreground",
+            },
+            outline: {
+                borderWidth: "border",
+                backgroundColor: "bg-background",
+            },
+        },
+        size: {
+            default: {
+                height: "h-9",
+                padding: "px-4",
+            },
+            sm: {
+                height: "h-8",
+                padding: "px-3",
+            },
+        },
+    },
+})
+
+interface ButtonProps extends GetVariants<typeof buttonVariants> {
+    className?: string
+}
+
+function Button({ className, variant, size }: ButtonProps) {
+    return (
+        <button
+            className={tw.join(
+                buttonVariants.class({ variant, size }),
+                className
+            )}
+        />
+    )
+}
+```
+
+When a `cva(...)` declaration has no variant map, it is emitted as `tw.style(...)`
+and call sites use `.class(...)`.
+
 ---
 
 For more details, visit our [official documentation](https://tailwindest.vercel.app/css-transformer).

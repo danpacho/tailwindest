@@ -75,7 +75,7 @@ describe("CnWalker", () => {
 
         // "flex" and "p-4" are static. The rest are dynamic.
         expect(text).toContain(
-            `globalDiv.class(isActive && "text-sm", props.className)`
+            `tw.join(globalDiv.class(), isActive && "text-sm", props.className)`
         )
     })
 
@@ -119,6 +119,23 @@ describe("CnWalker", () => {
 
         const text = sourceFile.getFullText()
         expect(text).toContain(`className={myComponentDiv.class()}`)
+    })
+
+    it("should use tw.join for extracted static styles with dynamic args", () => {
+        const { sourceFile, context } = setup(
+            `const a = cn("flex text-sm", maybeClassName, isActive && "bg-accent")`
+        )
+        const callExpr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.CallExpression
+        )!
+        const walker = new CnWalker()
+
+        walker.walk(callExpr, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(
+            `tw.join(globalDiv.class(), maybeClassName, isActive && "bg-accent")`
+        )
     })
 
     it("should support clsx and classNames", () => {

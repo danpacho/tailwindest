@@ -30,7 +30,7 @@ const HoverCardContent = React.forwardRef<
     ref={ref}
     align={align}
     sideOffset={sideOffset}
-    className={hoverCardContentHoverCardPrimitiveContent.class(className)}
+    className={tw.join(hoverCardContentHoverCardPrimitiveContent.class(), className)}
     {...props}
   />
 ))

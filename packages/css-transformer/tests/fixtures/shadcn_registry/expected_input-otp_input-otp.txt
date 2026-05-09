@@ -66,7 +66,7 @@ const InputOTPSlot = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={inputOTPSlotDiv2.class(isActive && "z-10 ring-1 ring-ring", className)}
+      className={tw.join(inputOTPSlotDiv2.class(), isActive && "z-10 ring-1 ring-ring", className)}
       {...props}
     >
       {char}

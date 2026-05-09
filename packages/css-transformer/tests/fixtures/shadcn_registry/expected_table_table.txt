@@ -81,7 +81,7 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <th
     ref={ref}
-    className={tableHeadTh.class(className)}
+    className={tw.join(tableHeadTh.class(), className)}
     {...props}
   />
 ))

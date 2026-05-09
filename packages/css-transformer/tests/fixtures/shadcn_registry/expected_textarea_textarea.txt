@@ -33,7 +33,7 @@ const Textarea = React.forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <textarea
-      className={textareaTextarea.class(className)}
+      className={tw.join(textareaTextarea.class(), className)}
       ref={ref}
       {...props}
     />

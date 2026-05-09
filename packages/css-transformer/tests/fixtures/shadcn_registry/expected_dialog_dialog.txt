@@ -78,7 +78,7 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      className={dialogContentDialogPrimitiveContent.class(className)}
+      className={tw.join(dialogContentDialogPrimitiveContent.class(), className)}
       {...props}
     >
       {children}
@@ -107,7 +107,7 @@ const DialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={dialogHeaderDiv.class(className)}
+    className={tw.join(dialogHeaderDiv.class(), className)}
     {...props}
   />
 )

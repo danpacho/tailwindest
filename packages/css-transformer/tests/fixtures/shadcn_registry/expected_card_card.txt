@@ -15,7 +15,7 @@ const Card = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cardDiv.class(className)}
+    className={tw.join(cardDiv.class(), className)}
     {...props}
   />
 ))

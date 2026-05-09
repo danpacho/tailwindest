@@ -43,6 +43,17 @@ describe("ImportCollector", () => {
         )
     })
 
+    it("should add type-only named imports", () => {
+        const sourceFile = createSourceFile("")
+        const collector = new ImportCollector()
+        collector.addTypeNamedImport("tailwindest", "GetVariants")
+        collector.applyTo(sourceFile)
+
+        expect(sourceFile.getFullText().trim()).toBe(
+            `import { type GetVariants } from "tailwindest";`
+        )
+    })
+
     it("should remove unused imports and remove whole declaration if empty", () => {
         const sourceFile = createSourceFile(
             `import { cva, VariantProps } from "class-variance-authority";\nimport { cn } from "utils";`

@@ -1,15 +1,32 @@
-import type { SourceFile } from "ts-morph"
+import type {
+    OptionalKind,
+    SourceFile,
+    ImportSpecifierStructure,
+} from "ts-morph"
 
 export class ImportCollector {
-    // Map<modulePath, Set<importName>>
-    private readonly imports = new Map<string, Set<string>>()
+    // Map<modulePath, Map<importName, isTypeOnly>>
+    private readonly imports = new Map<string, Map<string, boolean>>()
     private readonly toRemove = new Set<string>()
 
     public addNamedImport(modulePath: string, name: string): void {
+        this.addImport(modulePath, name, false)
+    }
+
+    public addTypeNamedImport(modulePath: string, name: string): void {
+        this.addImport(modulePath, name, true)
+    }
+
+    private addImport(
+        modulePath: string,
+        name: string,
+        isTypeOnly: boolean
+    ): void {
         if (!this.imports.has(modulePath)) {
-            this.imports.set(modulePath, new Set())
+            this.imports.set(modulePath, new Map())
         }
-        this.imports.get(modulePath)!.add(name)
+        const names = this.imports.get(modulePath)!
+        names.set(name, names.get(name) === true || isTypeOnly)
     }
 
     public registerToRemove(name: string): void {
@@ -34,19 +51,31 @@ export class ImportCollector {
                     .getNamedImports()
                     .map((ni) => ni.getName())
 
-                for (const name of names) {
+                for (const [name, isTypeOnly] of names.entries()) {
                     if (!existingNamedImports.includes(name)) {
-                        existingImport.addNamedImport(name)
+                        existingImport.addNamedImport(
+                            this.toImportSpecifier(name, isTypeOnly)
+                        )
                     }
                 }
             } else {
                 // Create new import declaration
                 sourceFile.addImportDeclaration({
                     moduleSpecifier: modulePath,
-                    namedImports: Array.from(names),
+                    namedImports: Array.from(names.entries()).map(
+                        ([name, isTypeOnly]) =>
+                            this.toImportSpecifier(name, isTypeOnly)
+                    ),
                 })
             }
         }
+    }
+
+    private toImportSpecifier(
+        name: string,
+        isTypeOnly: boolean
+    ): OptionalKind<ImportSpecifierStructure> {
+        return isTypeOnly ? { name, isTypeOnly: true } : { name }
     }
 
     private removeUnusedImports(sourceFile: SourceFile, names: string[]): void {

@@ -25,7 +25,7 @@ const mixedDiv = tw.style({
 export function Mixed({ isActive }: { isActive: boolean }) {
     return (
         <div className={mixedDiv.class()}>
-            <span className={mixedSpan.class(isActive && "text-white")}>
+            <span className={tw.join(mixedSpan.class(), isActive && "text-white")}>
                 Text
             </span>
         </div>

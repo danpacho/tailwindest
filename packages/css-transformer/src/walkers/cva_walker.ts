@@ -1,9 +1,9 @@
 import {
     CallExpression,
     Node,
-    StringLiteral,
     ObjectLiteralExpression,
     PropertyAssignment,
+    SourceFile,
 } from "ts-morph"
 import type { TransformerContext } from "../context"
 import type { TransformResult } from "../types"
@@ -15,14 +15,45 @@ export class CvaWalker implements ClassTransformerWalker {
     public readonly name = "CvaWalker"
 
     public canWalk(node: Node): boolean {
+        if (Node.isIdentifier(node)) {
+            return this.isVariantPropsIdentifier(node)
+        }
+
         if (!Node.isCallExpression(node)) return false
         const expr = node.getExpression()
-        return Node.isIdentifier(expr) && expr.getText() === "cva"
+        if (!Node.isIdentifier(expr)) return false
+
+        const name = expr.getText()
+        return name === "cva" || this.isVariantHelperName(name)
     }
 
     public walk(node: Node, context: TransformerContext): TransformResult {
+        if (Node.isIdentifier(node)) {
+            return this.rewriteVariantPropsIdentifier(node, context)
+        }
+
         if (!Node.isCallExpression(node)) {
             throw new Error("Node is not a CallExpression")
+        }
+
+        const expression = node.getExpression()
+        if (
+            Node.isIdentifier(expression) &&
+            this.isVariantHelperName(expression.getText())
+        ) {
+            const original = node.getText()
+            const location = {
+                line: node.getStartLineNumber(),
+                column: node.getStartLinePos(),
+            }
+            this.rewriteCallSite(node, expression.getText(), true, context)
+            return {
+                success: true,
+                location,
+                original,
+                transformed: node.wasForgotten() ? "" : node.getText(),
+                warnings: [],
+            }
         }
 
         const args = node.getArguments()
@@ -141,14 +172,29 @@ export class CvaWalker implements ClassTransformerWalker {
             }
         }
 
+        const variantName = this.getAssignedVariantName(node)
+        const hasVariants = Object.keys(variantsObj).length > 0
+        const shouldUseVariants =
+            hasVariants ||
+            (variantName
+                ? this.hasVariantExtractorUsage(
+                      node.getSourceFile(),
+                      variantName
+                  )
+                : false)
+
         const transformedAst = {
             base: baseObj,
-            ...(Object.keys(variantsObj).length > 0
+            ...(hasVariants
                 ? { variants: variantsObj }
-                : {}),
+                : shouldUseVariants
+                  ? { variants: {} }
+                  : {}),
         }
 
-        const twCall = `${context.tailwindestIdentifier}.variants(${objectToString(transformedAst, 4)})`
+        const twCall = shouldUseVariants
+            ? `${context.tailwindestIdentifier}.variants(${objectToString(transformedAst, 4)})`
+            : `${context.tailwindestIdentifier}.style(${objectToString(baseObj, 4)})`
         let finalReplacement = twCall
 
         // Handle JSDoc preservation
@@ -171,7 +217,20 @@ export class CvaWalker implements ClassTransformerWalker {
         }
 
         const original = node.getText()
+        const sourceFile = node.getSourceFile()
         node.replaceWithText(finalReplacement)
+
+        if (variantName) {
+            this.rewriteCallSites(
+                sourceFile,
+                variantName,
+                shouldUseVariants,
+                context
+            )
+            if (shouldUseVariants) {
+                this.rewriteVariantProps(sourceFile, variantName, context)
+            }
+        }
 
         // Context updates
         context.imports.addNamedImport(
@@ -187,5 +246,242 @@ export class CvaWalker implements ClassTransformerWalker {
             transformed: finalReplacement,
             warnings,
         }
+    }
+
+    private getAssignedVariantName(node: CallExpression): string | null {
+        const parent = node.getParent()
+        if (!Node.isVariableDeclaration(parent)) return null
+
+        const nameNode = parent.getNameNode()
+        if (!Node.isIdentifier(nameNode)) return null
+
+        return nameNode.getText()
+    }
+
+    private isVariantHelperName(name: string): boolean {
+        return /^[A-Za-z_$][\w$]*Variants$/.test(name)
+    }
+
+    private isVariantPropsIdentifier(node: Node): boolean {
+        if (!Node.isIdentifier(node)) return false
+        if (node.getText() !== "VariantProps") return false
+        return /VariantProps<\s*typeof\s+[A-Za-z_$][\w$]*Variants\s*>/.test(
+            node.getParent().getText()
+        )
+    }
+
+    private rewriteVariantPropsIdentifier(
+        node: Node,
+        context: TransformerContext
+    ): TransformResult {
+        const original = node.getText()
+        const location = {
+            line: node.getStartLineNumber(),
+            column: node.getStartLinePos(),
+        }
+
+        node.replaceWithText("GetVariants")
+        context.imports.registerToRemove("VariantProps")
+        context.imports.addTypeNamedImport("tailwindest", "GetVariants")
+
+        return {
+            success: true,
+            location,
+            original,
+            transformed: "GetVariants",
+            warnings: [],
+        }
+    }
+
+    private hasVariantExtractorUsage(
+        sourceFile: SourceFile,
+        variantName: string
+    ): boolean {
+        let found = false
+        sourceFile.forEachDescendant((candidate) => {
+            if (found) return
+            if (!Node.isIdentifier(candidate)) return
+            const text = candidate.getText()
+            if (text !== "VariantProps" && text !== "GetVariants") return
+            const parentText = candidate.getParent().getText()
+            found = parentText.includes(`typeof ${variantName}`)
+        })
+        return found
+    }
+
+    private rewriteVariantProps(
+        sourceFile: SourceFile,
+        variantName: string,
+        context: TransformerContext
+    ): void {
+        const variantPropIdentifiers: Node[] = []
+        sourceFile.forEachDescendant((candidate) => {
+            if (!Node.isIdentifier(candidate)) return
+            if (candidate.getText() !== "VariantProps") return
+            const parent = candidate.getParent()
+            if (!parent.getText().includes(`typeof ${variantName}`)) return
+            variantPropIdentifiers.push(candidate)
+        })
+
+        if (variantPropIdentifiers.length === 0) return
+
+        for (const identifier of variantPropIdentifiers) {
+            if (identifier.wasForgotten()) continue
+            identifier.replaceWithText("GetVariants")
+        }
+
+        context.imports.registerToRemove("VariantProps")
+        context.imports.addTypeNamedImport("tailwindest", "GetVariants")
+    }
+
+    private rewriteCallSites(
+        sourceFile: SourceFile,
+        variantName: string,
+        hasVariants: boolean,
+        context: TransformerContext
+    ): void {
+        const calls: CallExpression[] = []
+        sourceFile.forEachDescendant((candidate) => {
+            if (!Node.isCallExpression(candidate)) return
+            const expression = candidate.getExpression()
+            if (!Node.isIdentifier(expression)) return
+            if (expression.getText() !== variantName) return
+            calls.push(candidate)
+        })
+
+        for (const call of calls) {
+            if (call.wasForgotten()) continue
+            this.rewriteCallSite(call, variantName, hasVariants, context)
+        }
+    }
+
+    private rewriteCallSite(
+        call: CallExpression,
+        variantName: string,
+        hasVariants: boolean,
+        context: TransformerContext
+    ): void {
+        const args = call.getArguments()
+        const parent = call.getParent()
+        const { variantArg, extraArgs } = hasVariants
+            ? this.splitVariantCallArgs(args)
+            : this.splitPrimitiveCallArgs(args)
+        const replacement = hasVariants
+            ? `${variantName}.class(${variantArg})`
+            : `${variantName}.class(${extraArgs.join(", ")})`
+
+        if (
+            extraArgs.length > 0 &&
+            Node.isCallExpression(parent) &&
+            this.isJoinLikeCall(parent, context)
+        ) {
+            const parentArgs = parent.getArguments()
+            const currentArgIndex = parentArgs.findIndex(
+                (arg) => arg.getStart() === call.getStart()
+            )
+
+            call.replaceWithText(replacement)
+            if (currentArgIndex >= 0) {
+                parent.insertArguments(currentArgIndex + 1, extraArgs)
+            }
+            return
+        }
+
+        const fallbackReplacement =
+            extraArgs.length > 0
+                ? `${context.tailwindestIdentifier}.join(${replacement}, ${extraArgs.join(", ")})`
+                : replacement
+        call.replaceWithText(fallbackReplacement)
+
+        if (extraArgs.length > 0) {
+            context.imports.addNamedImport(
+                context.tailwindestModulePath,
+                context.tailwindestIdentifier
+            )
+        }
+    }
+
+    private splitVariantCallArgs(args: Node[]): {
+        variantArg: string
+        extraArgs: string[]
+    } {
+        if (args.length === 0) {
+            return { variantArg: "{}", extraArgs: [] }
+        }
+
+        const [firstArg, ...restArgs] = args
+        if (!firstArg || !Node.isObjectLiteralExpression(firstArg)) {
+            return {
+                variantArg: firstArg?.getText() ?? "{}",
+                extraArgs: restArgs.map((arg) => arg.getText()),
+            }
+        }
+
+        const variantProperties: string[] = []
+        const extraArgs: string[] = []
+
+        for (const property of firstArg.getProperties()) {
+            if (
+                Node.isPropertyAssignment(property) &&
+                this.isClassNameProperty(property)
+            ) {
+                const initializer = property.getInitializer()
+                if (initializer) extraArgs.push(initializer.getText())
+                continue
+            }
+
+            if (
+                Node.isShorthandPropertyAssignment(property) &&
+                this.isClassNameKey(property.getName())
+            ) {
+                extraArgs.push(property.getName())
+                continue
+            }
+
+            variantProperties.push(property.getText())
+        }
+
+        extraArgs.push(...restArgs.map((arg) => arg.getText()))
+
+        return {
+            variantArg:
+                variantProperties.length === 0
+                    ? "{}"
+                    : `{ ${variantProperties.join(", ")} }`,
+            extraArgs,
+        }
+    }
+
+    private splitPrimitiveCallArgs(args: Node[]): {
+        variantArg: string
+        extraArgs: string[]
+    } {
+        return {
+            variantArg: "{}",
+            extraArgs: args.map((arg) => arg.getText()),
+        }
+    }
+
+    private isClassNameProperty(property: PropertyAssignment): boolean {
+        return this.isClassNameKey(property.getName())
+    }
+
+    private isClassNameKey(key: string): boolean {
+        return key === "class" || key === "className"
+    }
+
+    private isJoinLikeCall(
+        call: CallExpression,
+        context: TransformerContext
+    ): boolean {
+        const expression = call.getExpression()
+        if (Node.isIdentifier(expression)) {
+            return ["cn", "clsx", "classNames"].includes(expression.getText())
+        }
+        if (!Node.isPropertyAccessExpression(expression)) return false
+        return (
+            expression.getExpression().getText() ===
+                context.tailwindestIdentifier && expression.getName() === "join"
+        )
     }
 }

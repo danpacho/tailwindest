@@ -50,7 +50,7 @@ const ChartContainer = React.forwardRef<
       <div
         data-chart={chartId}
         ref={ref}
-        className={chartContainerDiv.class(className)}
+        className={tw.join(chartContainerDiv.class(), className)}
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
@@ -218,7 +218,7 @@ const ChartTooltipContent = React.forwardRef<
     return (
       <div
         ref={ref}
-        className={chartTooltipContentDiv2.class(className)}
+        className={tw.join(chartTooltipContentDiv2.class(), className)}
       >
         {!nestLabel ? tooltipLabel : null}
         <div className={tw.join("grid gap-1.5")}>
@@ -232,7 +232,7 @@ const ChartTooltipContent = React.forwardRef<
               return (
                 <div
                   key={item.dataKey}
-                  className={chartTooltipContentDiv.class(indicator === "dot" && "items-center")}
+                  className={tw.join(chartTooltipContentDiv.class(), indicator === "dot" && "items-center")}
                 >
                   {formatter && item?.value !== undefined && item.name ? (
                     formatter(item.value, item.name, item, index, item.payload)

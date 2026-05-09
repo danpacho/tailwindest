@@ -48,7 +48,7 @@ const Slider = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SliderPrimitive.Root
     ref={ref}
-    className={sliderSliderPrimitiveRoot.class(className)}
+    className={tw.join(sliderSliderPrimitiveRoot.class(), className)}
     {...props}
   >
     <SliderPrimitive.Track className={sliderSliderPrimitiveTrack.class()}>

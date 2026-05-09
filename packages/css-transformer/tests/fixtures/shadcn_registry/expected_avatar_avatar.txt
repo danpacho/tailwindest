@@ -20,7 +20,7 @@ const Avatar = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
-    className={avatarAvatarPrimitiveRoot.class(className)}
+    className={tw.join(avatarAvatarPrimitiveRoot.class(), className)}
     {...props}
   />
 ))
@@ -55,7 +55,7 @@ const AvatarFallback = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Fallback
     ref={ref}
-    className={avatarFallbackAvatarPrimitiveFallback.class(className)}
+    className={tw.join(avatarFallbackAvatarPrimitiveFallback.class(), className)}
     {...props}
   />
 ))

@@ -24,7 +24,7 @@ const Command = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive
     ref={ref}
-    className={commandCommandPrimitive.class(className)}
+    className={tw.join(commandCommandPrimitive.class(), className)}
     {...props}
   />
 ))
@@ -106,7 +106,7 @@ const CommandInput = React.forwardRef<
     <Search className={commandInputSearch.class()} />
     <CommandPrimitive.Input
       ref={ref}
-      className={commandInputCommandPrimitiveInput.class(className)}
+      className={tw.join(commandInputCommandPrimitiveInput.class(), className)}
       {...props}
     />
   </div>
@@ -198,7 +198,7 @@ const CommandItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Item
     ref={ref}
-    className={commandItemCommandPrimitiveItem.class(className)}
+    className={tw.join(commandItemCommandPrimitiveItem.class(), className)}
     {...props}
   />
 ))

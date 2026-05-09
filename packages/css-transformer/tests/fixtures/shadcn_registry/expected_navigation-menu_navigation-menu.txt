@@ -18,7 +18,7 @@ const NavigationMenu = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Root
     ref={ref}
-    className={navigationMenuNavigationMenuPrimitiveRoot.class(className)}
+    className={tw.join(navigationMenuNavigationMenuPrimitiveRoot.class(), className)}
     {...props}
   >
     {children}
@@ -42,7 +42,7 @@ const NavigationMenuList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.List
     ref={ref}
-    className={navigationMenuListNavigationMenuPrimitiveList.class(className)}
+    className={tw.join(navigationMenuListNavigationMenuPrimitiveList.class(), className)}
     {...props}
   />
 ))
@@ -50,41 +50,39 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName
 
 const NavigationMenuItem = NavigationMenuPrimitive.Item
 
-const navigationMenuTriggerStyle = tw.variants({
-    base: {
-        display: "inline-flex",
-        height: "h-9",
-        width: "w-max",
-        alignItems: "items-center",
-        justifyContent: "justify-center",
-        borderRadius: "rounded-md",
-        backgroundColor: "bg-background",
-        padding: ["px-4", "py-2"],
-        fontSize: "text-sm",
-        fontWeight: "font-medium",
-        transitionProperty: "transition-colors",
+const navigationMenuTriggerStyle = tw.style({
+    display: "inline-flex",
+    height: "h-9",
+    width: "w-max",
+    alignItems: "items-center",
+    justifyContent: "justify-center",
+    borderRadius: "rounded-md",
+    backgroundColor: "bg-background",
+    padding: ["px-4", "py-2"],
+    fontSize: "text-sm",
+    fontWeight: "font-medium",
+    transitionProperty: "transition-colors",
+    hover: {
+        backgroundColor: "hover:bg-accent",
+        color: "hover:text-accent-foreground",
+    },
+    focus: {
+        backgroundColor: "focus:bg-accent",
+        color: "focus:text-accent-foreground",
+        outlineStyle: "focus:outline-none",
+    },
+    disabled: {
+        pointerEvents: "disabled:pointer-events-none",
+        opacity: "disabled:opacity-50",
+    },
+    "data-[state=open]": {
+        color: "data-[state=open]:text-accent-foreground",
+        backgroundColor: "data-[state=open]:bg-accent/50",
         hover: {
-            backgroundColor: "hover:bg-accent",
-            color: "hover:text-accent-foreground",
+            backgroundColor: "data-[state=open]:hover:bg-accent",
         },
         focus: {
-            backgroundColor: "focus:bg-accent",
-            color: "focus:text-accent-foreground",
-            outlineStyle: "focus:outline-none",
-        },
-        disabled: {
-            pointerEvents: "disabled:pointer-events-none",
-            opacity: "disabled:opacity-50",
-        },
-        "data-[state=open]": {
-            color: "data-[state=open]:text-accent-foreground",
-            backgroundColor: "data-[state=open]:bg-accent/50",
-            hover: {
-                backgroundColor: "data-[state=open]:hover:bg-accent",
-            },
-            focus: {
-                backgroundColor: "data-[state=open]:focus:bg-accent",
-            },
+            backgroundColor: "data-[state=open]:focus:bg-accent",
         },
     },
 })
@@ -109,7 +107,7 @@ const NavigationMenuTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Trigger
     ref={ref}
-    className={tw.join(navigationMenuTriggerStyle(), className)}
+    className={tw.join(navigationMenuTriggerStyle.class(), className)}
     {...props}
   >
     {children}{" "}
@@ -166,7 +164,7 @@ const NavigationMenuViewport = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div className={navigationMenuViewportDiv.class()}>
     <NavigationMenuPrimitive.Viewport
-      className={navigationMenuViewportNavigationMenuPrimitiveViewport.class(className)}
+      className={tw.join(navigationMenuViewportNavigationMenuPrimitiveViewport.class(), className)}
       ref={ref}
       {...props}
     />
@@ -203,7 +201,7 @@ const NavigationMenuIndicator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.Indicator
     ref={ref}
-    className={navigationMenuIndicatorNavigationMenuPrimitiveIndicator.class(className)}
+    className={tw.join(navigationMenuIndicatorNavigationMenuPrimitiveIndicator.class(), className)}
     {...props}
   >
     <div className={navigationMenuIndicatorDiv.class()} />

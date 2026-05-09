@@ -54,7 +54,7 @@ const Menubar = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <MenubarPrimitive.Root
     ref={ref}
-    className={menubarMenubarPrimitiveRoot.class(className)}
+    className={tw.join(menubarMenubarPrimitiveRoot.class(), className)}
     {...props}
   />
 ))
@@ -87,7 +87,7 @@ const MenubarTrigger = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <MenubarPrimitive.Trigger
     ref={ref}
-    className={menubarTriggerMenubarPrimitiveTrigger.class(className)}
+    className={tw.join(menubarTriggerMenubarPrimitiveTrigger.class(), className)}
     {...props}
   />
 ))
@@ -121,7 +121,7 @@ const MenubarSubTrigger = React.forwardRef<
 >(({ className, inset, children, ...props }, ref) => (
   <MenubarPrimitive.SubTrigger
     ref={ref}
-    className={menubarSubTriggerMenubarPrimitiveSubTrigger.class(inset && "pl-8", className)}
+    className={tw.join(menubarSubTriggerMenubarPrimitiveSubTrigger.class(), inset && "pl-8", className)}
     {...props}
   >
     {children}
@@ -150,7 +150,7 @@ const MenubarSubContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <MenubarPrimitive.SubContent
     ref={ref}
-    className={menubarSubContentMenubarPrimitiveSubContent.class(className)}
+    className={tw.join(menubarSubContentMenubarPrimitiveSubContent.class(), className)}
     {...props}
   />
 ))
@@ -184,7 +184,7 @@ const MenubarContent = React.forwardRef<
         align={align}
         alignOffset={alignOffset}
         sideOffset={sideOffset}
-        className={menubarContentMenubarPrimitiveContent.class(className)}
+        className={tw.join(menubarContentMenubarPrimitiveContent.class(), className)}
         {...props}
       />
     </MenubarPrimitive.Portal>
@@ -221,7 +221,7 @@ const MenubarItem = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <MenubarPrimitive.Item
     ref={ref}
-    className={menubarItemMenubarPrimitiveItem.class(inset && "pl-8", className)}
+    className={tw.join(menubarItemMenubarPrimitiveItem.class(), inset && "pl-8", className)}
     {...props}
   />
 ))
@@ -264,7 +264,7 @@ const MenubarCheckboxItem = React.forwardRef<
 >(({ className, children, checked, ...props }, ref) => (
   <MenubarPrimitive.CheckboxItem
     ref={ref}
-    className={menubarRadioItemMenubarPrimitiveRadioItem.class(className)}
+    className={tw.join(menubarRadioItemMenubarPrimitiveRadioItem.class(), className)}
     checked={checked}
     {...props}
   >
@@ -284,7 +284,7 @@ const MenubarRadioItem = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <MenubarPrimitive.RadioItem
     ref={ref}
-    className={menubarRadioItemMenubarPrimitiveRadioItem.class(className)}
+    className={tw.join(menubarRadioItemMenubarPrimitiveRadioItem.class(), className)}
     {...props}
   >
     <span className={menubarRadioItemSpan.class()}>

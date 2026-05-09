@@ -1,6 +1,6 @@
 import * as React from "react"
-import { type VariantProps } from "class-variance-authority"
 import { tw } from "~/tw";
+import { type GetVariants } from "tailwindest";
 
 const badgeVariants = /**
  * @defaultVariants {
@@ -59,11 +59,11 @@ tw.variants({
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+    GetVariants<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div className={tw.join(badgeVariants({ variant }), className)} {...props} />
+    <div className={tw.join(badgeVariants.class({ variant }), className)} {...props} />
   )
 }
 

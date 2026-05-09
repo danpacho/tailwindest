@@ -45,7 +45,7 @@ const ContextMenuSubTrigger = React.forwardRef<
 >(({ className, inset, children, ...props }, ref) => (
   <ContextMenuPrimitive.SubTrigger
     ref={ref}
-    className={contextMenuSubTriggerContextMenuPrimitiveSubTrigger.class(inset && "pl-8", className)}
+    className={tw.join(contextMenuSubTriggerContextMenuPrimitiveSubTrigger.class(), inset && "pl-8", className)}
     {...props}
   >
     {children}
@@ -74,7 +74,7 @@ const ContextMenuSubContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ContextMenuPrimitive.SubContent
     ref={ref}
-    className={contextMenuSubContentContextMenuPrimitiveSubContent.class(className)}
+    className={tw.join(contextMenuSubContentContextMenuPrimitiveSubContent.class(), className)}
     {...props}
   />
 ))
@@ -102,7 +102,7 @@ const ContextMenuContent = React.forwardRef<
   <ContextMenuPrimitive.Portal>
     <ContextMenuPrimitive.Content
       ref={ref}
-      className={contextMenuContentContextMenuPrimitiveContent.class(className)}
+      className={tw.join(contextMenuContentContextMenuPrimitiveContent.class(), className)}
       {...props}
     />
   </ContextMenuPrimitive.Portal>
@@ -138,7 +138,7 @@ const ContextMenuItem = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.Item
     ref={ref}
-    className={contextMenuItemContextMenuPrimitiveItem.class(inset && "pl-8", className)}
+    className={tw.join(contextMenuItemContextMenuPrimitiveItem.class(), inset && "pl-8", className)}
     {...props}
   />
 ))
@@ -181,7 +181,7 @@ const ContextMenuCheckboxItem = React.forwardRef<
 >(({ className, children, checked, ...props }, ref) => (
   <ContextMenuPrimitive.CheckboxItem
     ref={ref}
-    className={contextMenuRadioItemContextMenuPrimitiveRadioItem.class(className)}
+    className={tw.join(contextMenuRadioItemContextMenuPrimitiveRadioItem.class(), className)}
     checked={checked}
     {...props}
   >
@@ -202,7 +202,7 @@ const ContextMenuRadioItem = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <ContextMenuPrimitive.RadioItem
     ref={ref}
-    className={contextMenuRadioItemContextMenuPrimitiveRadioItem.class(className)}
+    className={tw.join(contextMenuRadioItemContextMenuPrimitiveRadioItem.class(), className)}
     {...props}
   >
     <span className={contextMenuRadioItemSpan.class()}>

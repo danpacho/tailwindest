@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
-import { type VariantProps } from "class-variance-authority"
 import { tw } from "~/tw";
+import { type GetVariants } from "tailwindest";
 
 const labelVariants = tw.variants({
     base: {
@@ -15,16 +15,18 @@ const labelVariants = tw.variants({
             opacity: "peer-disabled:opacity-70",
         },
     },
+    variants: {
+    },
 })
 
 const Label = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
-    VariantProps<typeof labelVariants>
+    GetVariants<typeof labelVariants>
 >(({ className, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
-    className={tw.join(labelVariants(), className)}
+    className={tw.join(labelVariants.class({}), className)}
     {...props}
   />
 ))

@@ -31,7 +31,7 @@ const BreadcrumbList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ol
     ref={ref}
-    className={breadcrumbListOl.class(className)}
+    className={tw.join(breadcrumbListOl.class(), className)}
     {...props}
   />
 ))
@@ -114,7 +114,7 @@ const BreadcrumbEllipsis = ({
   <span
     role="presentation"
     aria-hidden="true"
-    className={breadcrumbEllipsisSpan.class(className)}
+    className={tw.join(breadcrumbEllipsisSpan.class(), className)}
     {...props}
   >
     <MoreHorizontal className={tw.join("h-4 w-4")} />

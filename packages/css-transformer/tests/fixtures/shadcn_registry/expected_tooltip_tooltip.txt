@@ -30,7 +30,7 @@ const TooltipContent = React.forwardRef<
     <TooltipPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
-      className={tooltipContentTooltipPrimitiveContent.class(className)}
+      className={tw.join(tooltipContentTooltipPrimitiveContent.class(), className)}
       {...props}
     />
   </TooltipPrimitive.Portal>

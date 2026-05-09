@@ -64,7 +64,7 @@ const DrawerContent = React.forwardRef<
     <DrawerOverlay />
     <DrawerPrimitive.Content
       ref={ref}
-      className={drawerContentDrawerPrimitiveContent.class(className)}
+      className={tw.join(drawerContentDrawerPrimitiveContent.class(), className)}
       {...props}
     >
       <div className={drawerContentDiv.class()} />
@@ -90,7 +90,7 @@ const DrawerHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={drawerHeaderDiv.class(className)}
+    className={tw.join(drawerHeaderDiv.class(), className)}
     {...props}
   />
 )
@@ -110,7 +110,7 @@ const DrawerFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={drawerFooterDiv.class(className)}
+    className={tw.join(drawerFooterDiv.class(), className)}
     {...props}
   />
 )

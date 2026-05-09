@@ -46,10 +46,7 @@ const PaginationLink = ({
 }: PaginationLinkProps) => (
   <a
     aria-current={isActive ? "page" : undefined}
-    className={tw.join(buttonVariants({
-            variant: isActive ? "outline" : "ghost",
-            size,
-          }), className)}
+    className={tw.join(buttonVariants.class({ variant: isActive ? "outline" : "ghost", size }), className)}
     {...props}
   />
 )
@@ -102,7 +99,7 @@ const PaginationEllipsis = ({
 }: React.ComponentProps<"span">) => (
   <span
     aria-hidden
-    className={paginationEllipsisSpan.class(className)}
+    className={tw.join(paginationEllipsisSpan.class(), className)}
     {...props}
   >
     <MoreHorizontal className={tw.join("h-4 w-4")} />

@@ -130,25 +130,25 @@ function Calendar({
       }}
       classNames={{
         root: tw.join("w-fit", defaultClassNames.root),
-        months: calendarDayPicker8.class(defaultClassNames.months),
+        months: tw.join(calendarDayPicker8.class(), defaultClassNames.months),
         month: tw.join("flex w-full flex-col gap-4", defaultClassNames.month),
-        nav: calendarDayPicker7.class(defaultClassNames.nav),
-        button_previous: calendarDayPicker6.class(buttonVariants({ variant: buttonVariant }), defaultClassNames.button_previous),
-        button_next: calendarDayPicker6.class(buttonVariants({ variant: buttonVariant }), defaultClassNames.button_next),
-        month_caption: calendarDayPicker5.class(defaultClassNames.month_caption),
-        dropdowns: calendarDayPicker4.class(defaultClassNames.dropdowns),
-        dropdown_root: calendarDayPicker3.class(defaultClassNames.dropdown_root),
+        nav: tw.join(calendarDayPicker7.class(), defaultClassNames.nav),
+        button_previous: tw.join(calendarDayPicker6.class(), buttonVariants.class({ variant: buttonVariant }), defaultClassNames.button_previous),
+        button_next: tw.join(calendarDayPicker6.class(), buttonVariants.class({ variant: buttonVariant }), defaultClassNames.button_next),
+        month_caption: tw.join(calendarDayPicker5.class(), defaultClassNames.month_caption),
+        dropdowns: tw.join(calendarDayPicker4.class(), defaultClassNames.dropdowns),
+        dropdown_root: tw.join(calendarDayPicker3.class(), defaultClassNames.dropdown_root),
         dropdown: tw.join("bg-popover absolute inset-0 opacity-0", defaultClassNames.dropdown),
         caption_label: tw.join("select-none font-medium", captionLayout === "label"
                     ? "text-sm"
                     : "[&>svg]:text-muted-foreground flex h-8 items-center gap-1 rounded-md pl-2 pr-1 text-sm [&>svg]:size-3.5", defaultClassNames.caption_label),
         table: "w-full border-collapse",
         weekdays: tw.join("flex", defaultClassNames.weekdays),
-        weekday: calendarDayPicker2.class(defaultClassNames.weekday),
+        weekday: tw.join(calendarDayPicker2.class(), defaultClassNames.weekday),
         week: tw.join("mt-2 flex w-full", defaultClassNames.week),
         week_number_header: tw.join("w-[--cell-size] select-none", defaultClassNames.week_number_header),
         week_number: tw.join("text-muted-foreground select-none text-[0.8rem]", defaultClassNames.week_number),
-        day: calendarDayPicker.class(defaultClassNames.day),
+        day: tw.join(calendarDayPicker.class(), defaultClassNames.day),
         range_start: tw.join("bg-accent rounded-l-md", defaultClassNames.range_start),
         range_middle: tw.join("rounded-none", defaultClassNames.range_middle),
         range_end: tw.join("bg-accent rounded-r-md", defaultClassNames.range_end),
@@ -276,7 +276,7 @@ function CalendarDayButton({
       data-range-start={modifiers.range_start}
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
-      className={calendarDayButtonButton.class(defaultClassNames.day, className)}
+      className={tw.join(calendarDayButtonButton.class(), defaultClassNames.day, className)}
       {...props}
     />
   )

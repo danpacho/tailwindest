@@ -53,7 +53,7 @@ const AccordionTrigger = React.forwardRef<
   <AccordionPrimitive.Header className={tw.join("flex")}>
     <AccordionPrimitive.Trigger
       ref={ref}
-      className={accordionTriggerAccordionPrimitiveTrigger.class(className)}
+      className={tw.join(accordionTriggerAccordionPrimitiveTrigger.class(), className)}
       {...props}
     >
       {children}

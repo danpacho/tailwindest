@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { type VariantProps } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/registry/new-york/hooks/use-mobile"
@@ -24,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/registry/new-york/ui/tooltip"
 import { tw } from "~/tw";
+import { type GetVariants } from "tailwindest";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -270,12 +270,12 @@ const Sidebar = React.forwardRef<
       >
         {/* This is what handles the sidebar gap on desktop */}
         <div
-          className={sidebarDiv3.class(variant === "floating" || variant === "inset"
+          className={tw.join(sidebarDiv3.class(), variant === "floating" || variant === "inset"
                               ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]"
                               : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]")}
         />
         <div
-          className={sidebarDiv2.class(side === "left"
+          className={tw.join(sidebarDiv2.class(), side === "left"
                               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
                               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]", variant === "floating" || variant === "inset"
                               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
@@ -386,7 +386,7 @@ const SidebarRail = React.forwardRef<
       tabIndex={-1}
       onClick={toggleSidebar}
       title="Toggle Sidebar"
-      className={sidebarRailButton.class(className)}
+      className={tw.join(sidebarRailButton.class(), className)}
       {...props}
     />
   )
@@ -421,7 +421,7 @@ const SidebarInset = React.forwardRef<
   return (
     <main
       ref={ref}
-      className={sidebarInsetMain.class(className)}
+      className={tw.join(sidebarInsetMain.class(), className)}
       {...props}
     />
   )
@@ -447,7 +447,7 @@ const SidebarInput = React.forwardRef<
     <Input
       ref={ref}
       data-sidebar="input"
-      className={sidebarInputInput.class(className)}
+      className={tw.join(sidebarInputInput.class(), className)}
       {...props}
     />
   )
@@ -519,7 +519,7 @@ const SidebarContent = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="content"
-      className={sidebarContentDiv.class(className)}
+      className={tw.join(sidebarContentDiv.class(), className)}
       {...props}
     />
   )
@@ -544,7 +544,7 @@ const SidebarGroup = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="group"
-      className={sidebarGroupDiv.class(className)}
+      className={tw.join(sidebarGroupDiv.class(), className)}
       {...props}
     />
   )
@@ -588,7 +588,7 @@ const SidebarGroupLabel = React.forwardRef<
     <Comp
       ref={ref}
       data-sidebar="group-label"
-      className={sidebarGroupLabelComp.class(className)}
+      className={tw.join(sidebarGroupLabelComp.class(), className)}
       {...props}
     />
   )
@@ -638,7 +638,7 @@ const SidebarGroupAction = React.forwardRef<
     <Comp
       ref={ref}
       data-sidebar="group-action"
-      className={sidebarGroupActionComp.class(className)}
+      className={tw.join(sidebarGroupActionComp.class(), className)}
       {...props}
     />
   )
@@ -674,7 +674,7 @@ const SidebarMenu = React.forwardRef<
   <ul
     ref={ref}
     data-sidebar="menu"
-    className={sidebarMenuUl.class(className)}
+    className={tw.join(sidebarMenuUl.class(), className)}
     {...props}
   />
 ))
@@ -778,7 +778,7 @@ const SidebarMenuButton = React.forwardRef<
     asChild?: boolean
     isActive?: boolean
     tooltip?: string | React.ComponentProps<typeof TooltipContent>
-  } & VariantProps<typeof sidebarMenuButtonVariants>
+  } & GetVariants<typeof sidebarMenuButtonVariants>
 >(
   (
     {
@@ -801,7 +801,7 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={tw.join(sidebarMenuButtonVariants({ variant, size }), className)}
+        className={tw.join(sidebarMenuButtonVariants.class({ variant, size }), className)}
         {...props}
       />
     )
@@ -886,7 +886,7 @@ const SidebarMenuAction = React.forwardRef<
     <Comp
       ref={ref}
       data-sidebar="menu-action"
-      className={sidebarMenuActionComp.class(showOnHover &&
+      className={tw.join(sidebarMenuActionComp.class(), showOnHover &&
                 "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0", className)}
       {...props}
     />
@@ -931,7 +931,7 @@ const SidebarMenuBadge = React.forwardRef<
   <div
     ref={ref}
     data-sidebar="menu-badge"
-    className={sidebarMenuBadgeDiv.class(className)}
+    className={tw.join(sidebarMenuBadgeDiv.class(), className)}
     {...props}
   />
 ))
@@ -962,7 +962,7 @@ const SidebarMenuSkeleton = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="menu-skeleton"
-      className={sidebarMenuSkeletonDiv.class(className)}
+      className={tw.join(sidebarMenuSkeletonDiv.class(), className)}
       {...props}
     >
       {showIcon && (
@@ -1007,7 +1007,7 @@ const SidebarMenuSub = React.forwardRef<
   <ul
     ref={ref}
     data-sidebar="menu-sub"
-    className={sidebarMenuSubUl.class(className)}
+    className={tw.join(sidebarMenuSubUl.class(), className)}
     {...props}
   />
 ))
@@ -1070,7 +1070,7 @@ const SidebarMenuSubButton = React.forwardRef<
       data-sidebar="menu-sub-button"
       data-size={size}
       data-active={isActive}
-      className={sidebarMenuSubButtonComp.class(size === "sm" && "text-xs", size === "md" && "text-sm", className)}
+      className={tw.join(sidebarMenuSubButtonComp.class(), size === "sm" && "text-xs", size === "md" && "text-sm", className)}
       {...props}
     />
   )

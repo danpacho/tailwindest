@@ -94,7 +94,7 @@ export class CnWalker implements ClassTransformerWalker {
                     componentName,
                     tagName
                 )
-                finalReplacement = `${constantName}.class(${dynamicArgs.join(", ")})`
+                finalReplacement = `${context.tailwindestIdentifier}.join(${constantName}.class(), ${dynamicArgs.join(", ")})`
             } else {
                 const combinedStatic = staticClassNames.join(" ")
                 finalReplacement = `${context.tailwindestIdentifier}.join("${combinedStatic}", ${dynamicArgs.join(", ")})`
