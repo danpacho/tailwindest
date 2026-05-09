@@ -1,5 +1,3 @@
-import type { CreateCompiledTailwindest } from "tailwindest"
-
 type DesignTailwind = {
     alignItems: string
     backgroundColor: string
@@ -46,12 +44,22 @@ export const tailwindNestGroups = [
 
 type DesignNestGroups = (typeof tailwindNestGroups)[number]
 
-export type DesignSystemStyle = CreateCompiledTailwindest<{
-    tailwind: DesignTailwind
-    tailwindNestGroups: DesignNestGroups
-    useArbitrary: false
-    useArbitraryVariant: true
-}>
+type WithArray<Value extends string> = Value | Value[]
+
+type RawNestedStyle<
+    Tailwind extends Record<string, string>,
+    NestGroups extends string,
+> = {
+    [Nest in NestGroups]?: RawNestedStyle<Tailwind, NestGroups>
+} & {
+    [Property in keyof Tailwind]?: WithArray<Tailwind[Property]>
+} & {
+    [ArbitraryVariant: `${string}[${string}]`]:
+        | RawNestedStyle<Tailwind, NestGroups>
+        | undefined
+}
+
+export type DesignSystemStyle = RawNestedStyle<DesignTailwind, DesignNestGroups>
 
 export type DesignSystemTailwindest = {
     tailwindest: DesignSystemStyle

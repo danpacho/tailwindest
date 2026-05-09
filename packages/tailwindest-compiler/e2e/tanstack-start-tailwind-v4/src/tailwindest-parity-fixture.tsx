@@ -1,5 +1,4 @@
 import { createTools } from "tailwindest"
-import type { CreateCompiledTailwindest } from "tailwindest"
 import type { TailwindNestGroups } from "./tailwind"
 
 type FixtureTailwind = {
@@ -11,17 +10,27 @@ type FixtureTailwind = {
     padding: `px-${string}`
 }
 
-type FixtureCompiledStyle = CreateCompiledTailwindest<{
-    tailwind: FixtureTailwind
-    tailwindNestGroups: TailwindNestGroups
-    useArbitrary: false
-    useArbitraryVariant: true
-}>
+type WithArray<Value extends string> = Value | Value[]
+
+type RawNestedStyle<
+    Tailwind extends Record<string, string>,
+    NestGroups extends string,
+> = {
+    [Nest in NestGroups]?: RawNestedStyle<Tailwind, NestGroups>
+} & {
+    [Property in keyof Tailwind]?: WithArray<Tailwind[Property]>
+} & {
+    [ArbitraryVariant: `${string}[${string}]`]:
+        | RawNestedStyle<Tailwind, NestGroups>
+        | undefined
+}
+
+type FixtureNestedStyle = RawNestedStyle<FixtureTailwind, TailwindNestGroups>
 
 type FixtureTailwindLiteral = FixtureTailwind[keyof FixtureTailwind]
 
 type FixtureTailwindest = {
-    tailwindest: FixtureCompiledStyle
+    tailwindest: FixtureNestedStyle
     tailwindLiteral: FixtureTailwindLiteral
     useArbitrary: false
     useTypedClassLiteral: true

@@ -78,8 +78,8 @@ Required layout characteristics:
 ## Shared Fixture Data Contract
 
 The fixture must define a single typed Tailwindest instance using
-`CreateCompiledTailwindest`. Nested variants must use raw leaf utilities inside
-objects, never synthesized value literals.
+compiler-oriented nested style types. Nested variants must use raw leaf
+utilities inside objects, never synthesized value literals.
 
 Required style keys:
 
@@ -602,10 +602,10 @@ Allowed:
 
 Create a dedicated type test for the design-system fixture:
 
-- `CreateCompiledTailwindest` accepts raw nested leaves:
+- Compiler-oriented nested style types accept raw nested leaves:
     - `dark: { backgroundColor: "bg-slate-900" }`
     - `hover: { backgroundColor: "bg-slate-100" }`
-- `CreateCompiledTailwindest` rejects synthesized nested values:
+- Compiler-oriented nested style types reject synthesized nested values:
     - `dark: { backgroundColor: "dark:bg-slate-900" }`
     - `dark: { hover: { backgroundColor: "dark:hover:bg-slate-800" } }`
 - Top-level class literals still accept normal non-nested utilities.
@@ -680,7 +680,7 @@ The critic must reject the implementation if any item below is missing:
 - Dev/prod computed style snapshots are equal.
 - Screenshots are generated for dev/debug/prod and interaction/mobile states.
 - Bundle runtime-token assertions are scoped to class-output-only cases.
-- Type/DX tests cover `CreateCompiledTailwindest` and legacy
+- Type/DX tests cover compiler-oriented nested style types and legacy
   `CreateTailwindest`.
 - Fallback negative tests exist.
 - `pnpm ts:typecheck` passes.

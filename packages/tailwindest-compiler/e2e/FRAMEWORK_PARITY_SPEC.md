@@ -3,9 +3,8 @@
 ## Goal
 
 Validate that the Tailwindest compiler converges to the same visual result in
-real framework dev and production modes, and that `CreateCompiledTailwindest`
-keeps compiler-oriented authoring types aligned with the runtime compiler
-contract.
+real framework dev and production modes, and that compiler-oriented authoring
+types stay aligned with the runtime compiler contract.
 
 ## Target Frameworks
 
@@ -37,8 +36,8 @@ contract.
 ## Test Contract
 
 Each framework fixture must render a target element whose className is produced
-from `createTools()` and a `CreateCompiledTailwindest`-typed style object. The
-style must cover:
+from `createTools()` and a compiler-oriented nested style object. The style must
+cover:
 
 - Deeply nested variants:
   `dark.hover.focus` must compile from raw leaf utilities into prefixed
@@ -74,9 +73,9 @@ style must cover:
   `ToggleStyler`, `RotaryStyler`, or `VariantsStyler`. This is a scoped fixture
   assertion, not a package-wide guarantee for runtime-preserved APIs.
 - DX type validation:
-  `CreateCompiledTailwindest` must accept raw nested leaf utilities and reject
-  nested synthesized prefixes such as `dark:bg-*`; `CreateTailwindest` must keep
-  its legacy synthesized nested value behavior.
+  compiler-oriented nested style types must accept raw nested leaf utilities and
+  reject nested synthesized prefixes such as `dark:bg-*`; `CreateTailwindest`
+  must keep its legacy synthesized nested value behavior.
 
 ## Expected Commands
 
