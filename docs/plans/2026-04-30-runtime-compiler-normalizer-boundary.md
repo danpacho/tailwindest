@@ -12,12 +12,11 @@ generate prefixes from object paths.
 
 - `CreateTailwindest` is the runtime-oriented style type. Nested values already
   include any required Tailwind prefixes such as `dark:` or `hover:`.
-- `CreateCompiledTailwindest` is compiler-oriented. Nested object keys express
+- Compiler-style nested objects are compiler-oriented. Nested object keys express
   variant paths and leaf values are raw Tailwind utilities.
 - A preserved runtime fallback must execute with correct semantics. Therefore,
-  raw `CreateCompiledTailwindest` objects cannot be blindly preserved as normal
-  `tailwindest` runtime calls when their correctness depends on compiled prefix
-  generation.
+  raw compiler-style objects cannot be blindly preserved as normal `tailwindest`
+  runtime calls when their correctness depends on compiled prefix generation.
 - `@tailwindest/core` should contain only behavior that both runtime and
   compiler can share without semantic policy leakage.
 
@@ -124,7 +123,7 @@ compiler-oriented authoring for final CSS semantics.
 
 Owns compiled-style normalization:
 
-- Converts `CreateCompiledTailwindest` object paths into Tailwind prefixes.
+- Converts compiler-style object paths into Tailwind prefixes.
 - Keeps current exact/fallback diagnostics and candidate provenance.
 - Does not expose the compiled normalizer through `@tailwindest/core`.
 - Fails closed when compiled prefix generation cannot be proven.
@@ -144,8 +143,8 @@ Required longer-term improvement:
 
 ## Fallback Safety Rule
 
-Any call that depends on `CreateCompiledTailwindest` raw nested variant
-normalization must satisfy one of these conditions:
+Any call that depends on raw compiler-style nested variant normalization must
+satisfy one of these conditions:
 
 1. The compiler emits an exact static replacement using compiler-owned
    compiled-style normalization.
@@ -217,8 +216,7 @@ Compiler tests:
   nested variant normalization is a compiler layer, not core runtime behavior.
 - `packages/tailwindest-compiler/README.md` and
   `web/content/docs/compiler.mdx` must distinguish `CreateTailwindest` runtime
-  leaf-prefix semantics from `CreateCompiledTailwindest` compiler path-prefix
-  semantics.
+  leaf-prefix semantics from compiler path-prefix semantics.
 - The core extraction plan must not claim that variant-prefix normalization is
   shared runtime core.
 
@@ -256,8 +254,8 @@ Reject the implementation if any of these are true:
 - A raw compiled-style object can be preserved as normal runtime while requiring
   path-derived prefixes for correctness.
 - Tests only compare runtime to core after both share the same wrong behavior.
-- Documentation suggests `CreateTailwindest` and `CreateCompiledTailwindest`
-  have the same runtime semantics.
+- Documentation suggests runtime and compiler nested style semantics are the
+  same.
 
 ## Open Risk
 

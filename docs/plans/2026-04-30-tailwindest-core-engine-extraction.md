@@ -88,7 +88,7 @@ Keep or rewrite as wrappers:
 
 - `packages/tailwindest/src/tools/create_tools.ts`
     - public generic `createTools<Type>()`
-    - public type-level shaping for `CreateTailwindest`, `CreateCompiledTailwindest`, and literal options
+    - public type-level shaping for `CreateTailwindest` and literal/tool options
 - `packages/tailwindest/src/tools/styler.ts`
     - public `Styler` class API, if it remains exported
     - implementation should delegate static helpers and merge semantics to `@tailwindest/core`

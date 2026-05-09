@@ -14,10 +14,10 @@
 Deprecated Tailwindest compiler experiment for nested variant lowering and
 Tailwind CSS v4 candidate manifest bridging.
 
-`@tailwindest/compiler` was designed to lower `CreateCompiledTailwindest`
-nested variant authoring into exact Tailwind class candidates and class strings,
-then expose those candidates to Tailwind through `@source inline()`. It is no
-longer a release target or a public static optimization contract.
+`@tailwindest/compiler` was designed to lower compiler-oriented nested variant
+authoring into exact Tailwind class candidates and class strings, then expose
+those candidates to Tailwind through `@source inline()`. It is no longer a
+release target or a public static optimization contract.
 
 ## Status
 
@@ -82,10 +82,10 @@ const cssBacked = await compileAsync(source, {
 })
 ```
 
-Use `compileAsync()` with `cssRoot` or `cssSource` when source uses
-`CreateCompiledTailwindest` nested shorthand. Plain `compile()` is intentionally
-file-local; without Tailwind CSS metadata it preserves shorthand-dependent call
-sites as runtime fallbacks instead of guessing variant keys.
+Use `compileAsync()` with `cssRoot` or `cssSource` when source uses nested
+variant shorthand. Plain `compile()` is intentionally file-local; without
+Tailwind CSS metadata it preserves shorthand-dependent call sites as runtime
+fallbacks instead of guessing variant keys.
 
 ## Compile Contract
 

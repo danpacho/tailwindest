@@ -8,10 +8,10 @@
 
 `@tailwindest/compiler` is the Tailwindest compiler layer for nested variant
 lowering and Tailwind CSS v4 candidate manifest bridging. It lowers
-`CreateCompiledTailwindest` nested variant authoring into exact Tailwind class
-candidates and class strings, then exposes those candidates to Tailwind through
-`@source inline()`. It is not a release contract for a general Tailwindest
-partial evaluator.
+compiler-oriented nested variant authoring into exact Tailwind class candidates
+and class strings, then exposes those candidates to Tailwind through `@source
+inline()`. It is not a release contract for a general Tailwindest partial
+evaluator.
 
 This document records the historical internal architecture for Vite 8 and
 Tailwind CSS 4.2.
@@ -240,8 +240,8 @@ merger can be proven.
 ## Nested Variant Semantics
 
 Nested variant prefix generation is a compiler-layer normalization step for
-`CreateCompiledTailwindest` authoring. It is not `tailwindest-core` runtime
-behavior; the runtime package structurally flattens authored leaf strings.
+compiler-oriented authoring. It is not `tailwindest-core` runtime behavior; the
+runtime package structurally flattens authored leaf strings.
 
 Tailwind variant keys in style objects are semantic prefixes. Property keys such
 as `backgroundColor`, `padding`, and `borderColor` do not create prefixes.
