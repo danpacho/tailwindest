@@ -1,5 +1,11 @@
 # tailwindest-css-transform
 
+## 1.0.8
+
+### Patch Changes
+
+- 2b1c820: Preserve unsupported static Tailwind tokens in transformed output, including named group, peer, container, arbitrary declaration, descendant variant, animation, and parenthesized arbitrary value classes.
+
 ## Unreleased
 
 ### Patch Changes
