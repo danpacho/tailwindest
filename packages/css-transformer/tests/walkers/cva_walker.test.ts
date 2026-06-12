@@ -189,6 +189,128 @@ describe("CvaWalker", () => {
         )
     })
 
+    it("should preserve unresolved cva base tokens in rewritten call sites", () => {
+        const { sourceFile, context } = setup(`
+            import { cva } from "class-variance-authority"
+            import { cn } from "@/lib/utils"
+
+            const buttonVariants = cva("peer/menu-button flex text-lg", {
+                variants: {
+                    size: {
+                        lg: "items-center"
+                    }
+                }
+            })
+
+            function Button({ className, size }: { className?: string; size?: "lg" }) {
+                return <button className={cn(buttonVariants({ size, className }))} />
+            }
+        `)
+        const registry = new TransformerRegistry()
+        registry.register(new CvaWalker())
+        registry.register(new CnWalker())
+
+        registry.transform(sourceFile, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(
+            `tw.def(["peer/menu-button"], buttonVariants.style({ size }))`
+        )
+        expect(text).toContain(
+            `className={tw.join(tw.def(["peer/menu-button"], buttonVariants.style({ size })), className)}`
+        )
+    })
+
+    it("should preserve unresolved cva variant tokens conditionally", () => {
+        const { sourceFile, context } = setup(`
+            import { cva } from "class-variance-authority"
+
+            const buttonVariants = cva("flex", {
+                variants: {
+                    size: {
+                        lg: "items-center group-data-[collapsible=icon]:!p-0",
+                        sm: "items-center"
+                    }
+                }
+            })
+
+            const value = buttonVariants({ size })
+        `)
+        const registry = new TransformerRegistry()
+        registry.register(new CvaWalker())
+
+        registry.transform(sourceFile, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(
+            `size === "lg" && "group-data-[collapsible=icon]:!p-0"`
+        )
+        expect(text).toContain(`buttonVariants.style({ size })`)
+    })
+
+    it("should parenthesize non-trivial selected values for preserved variant tokens", () => {
+        const { sourceFile, context } = setup(`
+            import { cva } from "class-variance-authority"
+
+            const buttonVariants = cva("flex", {
+                variants: {
+                    size: {
+                        lg: "items-center group-data-[collapsible=icon]:!p-0",
+                        sm: "items-center"
+                    }
+                }
+            })
+
+            const value = buttonVariants({ size: isLarge ? "lg" : "sm" })
+        `)
+        const registry = new TransformerRegistry()
+        registry.register(new CvaWalker())
+
+        registry.transform(sourceFile, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(
+            `(isLarge ? "lg" : "sm") === "lg" && "group-data-[collapsible=icon]:!p-0"`
+        )
+        expect(text).not.toContain(
+            `isLarge ? "lg" : "sm" === "lg" && "group-data-[collapsible=icon]:!p-0"`
+        )
+    })
+
+    it("should not emit variant preserved tokens without a safe selected value", () => {
+        const { sourceFile, context } = setup(`
+            import { cva } from "class-variance-authority"
+
+            const buttonVariants = cva("flex", {
+                variants: {
+                    size: {
+                        lg: "items-center group-data-[collapsible=icon]:!p-0"
+                    }
+                }
+            })
+
+            const value = buttonVariants(size)
+        `)
+        const registry = new TransformerRegistry()
+        registry.register(new CvaWalker())
+
+        registry.transform(sourceFile, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).not.toContain(`"group-data-[collapsible=icon]:!p-0"`)
+        expect(context.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    level: "warning",
+                    walkerName: "CvaWalker",
+                    message: expect.stringContaining(
+                        "Could not preserve CVA token"
+                    ),
+                }),
+            ])
+        )
+    })
+
     it("should rewrite imported cva variant helpers", () => {
         const { sourceFile, context } = setup(`
             import { type VariantProps } from "class-variance-authority"

@@ -8,11 +8,27 @@ import {
 import type { TransformerContext } from "../context"
 import type { TransformResult } from "../types"
 import type { ClassTransformerWalker } from "./walker_interface"
+import { quoteClassLiteral } from "./utils/class_literal"
 import { objectToString } from "./utils/object_to_string"
+
+type CvaPreservedPlan = {
+    base: string[]
+    variants: Record<string, Record<string, string[]>>
+}
+
+type SplitVariantCallArgsResult = {
+    variantArg: string
+    extraArgs: string[]
+    selectedValues: Record<string, string>
+}
 
 export class CvaWalker implements ClassTransformerWalker {
     public readonly priority = 10
     public readonly name = "CvaWalker"
+    private readonly preservedPlans = new WeakMap<
+        SourceFile,
+        Map<string, CvaPreservedPlan>
+    >()
 
     public canWalk(node: Node): boolean {
         if (Node.isIdentifier(node)) {
@@ -24,7 +40,11 @@ export class CvaWalker implements ClassTransformerWalker {
         if (!Node.isIdentifier(expr)) return false
 
         const name = expr.getText()
-        return name === "cva" || this.isVariantHelperName(name)
+        if (name === "cva") return true
+        return (
+            this.isVariantHelperName(name) &&
+            !this.hasLocalCvaDeclaration(node.getSourceFile(), name)
+        )
     }
 
     public walk(node: Node, context: TransformerContext): TransformResult {
@@ -74,6 +94,7 @@ export class CvaWalker implements ClassTransformerWalker {
 
         const firstArg = args[0]
         let baseObj: Record<string, any> = {}
+        const basePreservedTokens: string[] = []
         const warnings: string[] = []
 
         if (
@@ -81,14 +102,18 @@ export class CvaWalker implements ClassTransformerWalker {
             Node.isNoSubstitutionTemplateLiteral(firstArg)
         ) {
             const baseStr = firstArg.getLiteralText()
-            const tokens = context.analyzer.analyze(baseStr)
-            tokens.forEach((t) => {
+            const basePlan = context.analyzer.plan(baseStr)
+            basePlan.tokens.forEach((t) => {
                 if (t.warning) warnings.push(t.warning)
             })
-            baseObj = context.analyzer.buildObjectTree(tokens)
+            baseObj = basePlan.styleTree
+            basePreservedTokens.push(
+                ...basePlan.preservedTokens.map((token) => token.original)
+            )
         }
 
         const variantsObj: Record<string, any> = {}
+        const preservedVariants: Record<string, Record<string, string[]>> = {}
         let defaultVariantsStr = ""
         let compoundVariantsStr = ""
 
@@ -102,7 +127,8 @@ export class CvaWalker implements ClassTransformerWalker {
                     if (Node.isObjectLiteralExpression(variantsInit)) {
                         for (const variantDef of variantsInit.getProperties()) {
                             if (Node.isPropertyAssignment(variantDef)) {
-                                const variantName = variantDef.getName()
+                                const variantName =
+                                    this.getPropertyKey(variantDef)
                                 const variantOptions =
                                     variantDef.getInitializer()
 
@@ -114,7 +140,8 @@ export class CvaWalker implements ClassTransformerWalker {
                                     variantsObj[variantName] = {}
                                     for (const option of variantOptions.getProperties()) {
                                         if (Node.isPropertyAssignment(option)) {
-                                            const optionName = option.getName()
+                                            const optionName =
+                                                this.getPropertyKey(option)
                                             const optionVal =
                                                 option.getInitializer()
                                             if (
@@ -125,20 +152,38 @@ export class CvaWalker implements ClassTransformerWalker {
                                                     optionVal
                                                 )
                                             ) {
-                                                const tokens =
-                                                    context.analyzer.analyze(
+                                                const optionPlan =
+                                                    context.analyzer.plan(
                                                         optionVal.getLiteralText()
                                                     )
-                                                tokens.forEach((t) => {
-                                                    if (t.warning)
-                                                        warnings.push(t.warning)
-                                                })
+                                                optionPlan.tokens.forEach(
+                                                    (t) => {
+                                                        if (t.warning)
+                                                            warnings.push(
+                                                                t.warning
+                                                            )
+                                                    }
+                                                )
                                                 variantsObj[variantName][
                                                     optionName
-                                                ] =
-                                                    context.analyzer.buildObjectTree(
-                                                        tokens
+                                                ] = optionPlan.styleTree
+
+                                                const preservedTokens =
+                                                    optionPlan.preservedTokens.map(
+                                                        (token) =>
+                                                            token.original
                                                     )
+                                                if (
+                                                    preservedTokens.length > 0
+                                                ) {
+                                                    preservedVariants[
+                                                        variantName
+                                                    ] ??= {}
+                                                    preservedVariants[
+                                                        variantName
+                                                    ][optionName] =
+                                                        preservedTokens
+                                                }
                                             }
                                         }
                                     }
@@ -218,6 +263,12 @@ export class CvaWalker implements ClassTransformerWalker {
 
         const original = node.getText()
         const sourceFile = node.getSourceFile()
+        if (variantName) {
+            this.setPreservedPlan(sourceFile, variantName, {
+                base: basePreservedTokens,
+                variants: preservedVariants,
+            })
+        }
         node.replaceWithText(finalReplacement)
 
         if (variantName) {
@@ -256,6 +307,40 @@ export class CvaWalker implements ClassTransformerWalker {
         if (!Node.isIdentifier(nameNode)) return null
 
         return nameNode.getText()
+    }
+
+    private hasLocalCvaDeclaration(
+        sourceFile: SourceFile,
+        helperName: string
+    ): boolean {
+        let found = false
+        sourceFile.forEachDescendant((candidate) => {
+            if (found) return
+            if (!Node.isVariableDeclaration(candidate)) return
+            const nameNode = candidate.getNameNode()
+            if (!Node.isIdentifier(nameNode)) return
+            if (nameNode.getText() !== helperName) return
+
+            const initializer = candidate.getInitializer()
+            if (!Node.isCallExpression(initializer)) return
+            const expression = initializer.getExpression()
+            found =
+                Node.isIdentifier(expression) && expression.getText() === "cva"
+        })
+        return found
+    }
+
+    private getPropertyKey(property: PropertyAssignment): string {
+        const nameNode = property.getNameNode()
+        if (
+            Node.isStringLiteral(nameNode) ||
+            Node.isNoSubstitutionTemplateLiteral(nameNode) ||
+            Node.isNumericLiteral(nameNode)
+        ) {
+            return nameNode.getLiteralText()
+        }
+
+        return property.getName()
     }
 
     private isVariantHelperName(name: string): boolean {
@@ -363,12 +448,33 @@ export class CvaWalker implements ClassTransformerWalker {
     ): void {
         const args = call.getArguments()
         const parent = call.getParent()
-        const { variantArg, extraArgs } = hasVariants
+        const { variantArg, extraArgs, selectedValues } = hasVariants
             ? this.splitVariantCallArgs(args)
             : this.splitPrimitiveCallArgs(args)
-        const replacement = hasVariants
+        const preservedPlan = this.getPreservedPlan(
+            call.getSourceFile(),
+            variantName
+        )
+        const preservedClassList =
+            preservedPlan && this.hasPreservedTokens(preservedPlan)
+                ? this.buildPreservedClassList(
+                      preservedPlan,
+                      selectedValues,
+                      call,
+                      context
+                  )
+                : []
+
+        const classReplacement = hasVariants
             ? `${variantName}.class(${variantArg})`
             : `${variantName}.class(${extraArgs.join(", ")})`
+        const styleReplacement = hasVariants
+            ? `${variantName}.style(${variantArg})`
+            : `${variantName}.style()`
+        const replacement =
+            preservedClassList.length > 0
+                ? `${context.tailwindestIdentifier}.def([${preservedClassList.join(", ")}], ${styleReplacement})`
+                : classReplacement
 
         if (
             extraArgs.length > 0 &&
@@ -401,12 +507,9 @@ export class CvaWalker implements ClassTransformerWalker {
         }
     }
 
-    private splitVariantCallArgs(args: Node[]): {
-        variantArg: string
-        extraArgs: string[]
-    } {
+    private splitVariantCallArgs(args: Node[]): SplitVariantCallArgsResult {
         if (args.length === 0) {
-            return { variantArg: "{}", extraArgs: [] }
+            return { variantArg: "{}", extraArgs: [], selectedValues: {} }
         }
 
         const [firstArg, ...restArgs] = args
@@ -414,11 +517,13 @@ export class CvaWalker implements ClassTransformerWalker {
             return {
                 variantArg: firstArg?.getText() ?? "{}",
                 extraArgs: restArgs.map((arg) => arg.getText()),
+                selectedValues: {},
             }
         }
 
         const variantProperties: string[] = []
         const extraArgs: string[] = []
+        const selectedValues: Record<string, string> = {}
 
         for (const property of firstArg.getProperties()) {
             if (
@@ -438,6 +543,16 @@ export class CvaWalker implements ClassTransformerWalker {
                 continue
             }
 
+            if (Node.isShorthandPropertyAssignment(property)) {
+                selectedValues[property.getName()] = property.getName()
+            } else if (Node.isPropertyAssignment(property)) {
+                const initializer = property.getInitializer()
+                if (initializer) {
+                    selectedValues[this.getPropertyKey(property)] =
+                        initializer.getText()
+                }
+            }
+
             variantProperties.push(property.getText())
         }
 
@@ -449,25 +564,128 @@ export class CvaWalker implements ClassTransformerWalker {
                     ? "{}"
                     : `{ ${variantProperties.join(", ")} }`,
             extraArgs,
+            selectedValues,
         }
     }
 
-    private splitPrimitiveCallArgs(args: Node[]): {
-        variantArg: string
-        extraArgs: string[]
-    } {
+    private splitPrimitiveCallArgs(args: Node[]): SplitVariantCallArgsResult {
         return {
             variantArg: "{}",
             extraArgs: args.map((arg) => arg.getText()),
+            selectedValues: {},
         }
     }
 
     private isClassNameProperty(property: PropertyAssignment): boolean {
-        return this.isClassNameKey(property.getName())
+        return this.isClassNameKey(this.getPropertyKey(property))
     }
 
     private isClassNameKey(key: string): boolean {
         return key === "class" || key === "className"
+    }
+
+    private setPreservedPlan(
+        sourceFile: SourceFile,
+        helperName: string,
+        plan: CvaPreservedPlan
+    ): void {
+        let sourcePlans = this.preservedPlans.get(sourceFile)
+        if (!sourcePlans) {
+            sourcePlans = new Map()
+            this.preservedPlans.set(sourceFile, sourcePlans)
+        }
+
+        sourcePlans.set(helperName, plan)
+    }
+
+    private getPreservedPlan(
+        sourceFile: SourceFile,
+        helperName: string
+    ): CvaPreservedPlan | undefined {
+        return this.preservedPlans.get(sourceFile)?.get(helperName)
+    }
+
+    private hasPreservedTokens(plan: CvaPreservedPlan): boolean {
+        if (plan.base.length > 0) return true
+
+        return Object.values(plan.variants).some((options) =>
+            Object.values(options).some((tokens) => tokens.length > 0)
+        )
+    }
+
+    private buildPreservedClassList(
+        plan: CvaPreservedPlan,
+        selectedValues: Record<string, string>,
+        call: CallExpression,
+        context: TransformerContext
+    ): string[] {
+        const classList = plan.base.map((token) => quoteClassLiteral(token))
+
+        for (const [variantName, options] of Object.entries(plan.variants)) {
+            const selectedValue = selectedValues[variantName]
+
+            for (const [optionName, tokens] of Object.entries(options)) {
+                if (!selectedValue) {
+                    for (const token of tokens) {
+                        this.addUnsafePreservedDiagnostic(
+                            context,
+                            call,
+                            token,
+                            variantName,
+                            optionName
+                        )
+                    }
+                    continue
+                }
+
+                const comparisonValue =
+                    this.getVariantOptionComparisonValue(optionName)
+                const selectedComparisonValue =
+                    this.formatSelectedValueForComparison(selectedValue)
+                classList.push(
+                    ...tokens.map(
+                        (token) =>
+                            `${selectedComparisonValue} === ${comparisonValue} && ${quoteClassLiteral(token)}`
+                    )
+                )
+            }
+        }
+
+        return classList
+    }
+
+    private formatSelectedValueForComparison(expression: string): string {
+        if (/^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*$/.test(expression)) {
+            return expression
+        }
+
+        return `(${expression})`
+    }
+
+    private getVariantOptionComparisonValue(optionName: string): string {
+        if (optionName === "true" || optionName === "false") {
+            return optionName
+        }
+
+        return quoteClassLiteral(optionName)
+    }
+
+    private addUnsafePreservedDiagnostic(
+        context: TransformerContext,
+        call: CallExpression,
+        token: string,
+        variantName: string,
+        optionName: string
+    ): void {
+        context.diagnostics.push({
+            level: "warning",
+            walkerName: this.name,
+            message: `Could not preserve CVA token ${quoteClassLiteral(token)} for ${variantName}.${optionName}; call site does not expose a safe selected value for "${variantName}".`,
+            location: {
+                line: call.getStartLineNumber(),
+                column: call.getStartLinePos(),
+            },
+        })
     }
 
     private isJoinLikeCall(
