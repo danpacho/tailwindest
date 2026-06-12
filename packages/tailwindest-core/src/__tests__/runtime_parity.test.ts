@@ -12,6 +12,7 @@ import {
     createVariantsModel,
     flattenStyleRecord,
     mergeClassNames,
+    type Merger,
     primitiveClass,
     primitiveStyle,
     rotaryClassFor,
@@ -54,6 +55,48 @@ const baseStyle: Style = {
 }
 
 describe("tailwindest-core runtime parity", () => {
+    test("raw class literals and style objects match runtime without merger", () => {
+        const engine = createEvaluationEngine()
+
+        expect(engine.def(["group/card"], { display: "flex" })).toBe(
+            runtime.def(["group/card"], { display: "flex" })
+        )
+        expect(engine.def(["group/card"], { display: "flex" })).toBe(
+            "group/card flex"
+        )
+        expect(engine.join("group/card", "flex", "text-sm")).toBe(
+            runtime.join("group/card", "flex", "text-sm")
+        )
+        expect(engine.join("group/card", "flex", "text-sm")).toBe(
+            "group/card flex text-sm"
+        )
+    })
+
+    test("custom merger boundaries match runtime def semantics", () => {
+        const runtimeCalls: string[][] = []
+        const coreCalls: string[][] = []
+        const runtimeSpy: Merger = (...args) => {
+            const tokens = args.flat()
+            runtimeCalls.push(tokens)
+            return tokens.join(" ")
+        }
+        const coreSpy: Merger = (...args) => {
+            const tokens = args.flat()
+            coreCalls.push(tokens)
+            return tokens.join(" ")
+        }
+
+        createTools<any>({ merger: runtimeSpy }).def(["p-2"], {
+            padding: "p-4",
+        })
+        createEvaluationEngine({ merger: coreSpy }).def(["p-2"], {
+            padding: "p-4",
+        })
+
+        expect(runtimeCalls).toEqual([["p-4"], ["p-2", "p-4"]])
+        expect(coreCalls).toEqual(runtimeCalls)
+    })
+
     test("join, def, mergeRecord, and mergeProps match runtime semantics", () => {
         const engine = createEvaluationEngine()
         const classList = [

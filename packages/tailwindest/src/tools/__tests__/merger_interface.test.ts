@@ -6,6 +6,44 @@ import type { CreateTailwindest } from "../../create_tailwindest"
 import { twMerge } from "tailwind-merge"
 
 describe("Merger interface", () => {
+    it("preserves raw class literals without a merger", () => {
+        const tw = createTools<any>()
+
+        expect(tw.def(["group/card"], { display: "flex" })).toBe(
+            "group/card flex"
+        )
+        expect(tw.join("group/card", "flex", "text-sm")).toBe(
+            "group/card flex text-sm"
+        )
+    })
+
+    it("uses the supplied merger across class and style boundaries", () => {
+        const tw = createTools<any>({ merger: twMerge })
+
+        expect(tw.def(["p-2"], { padding: "p-4" })).toBe(twMerge("p-2", "p-4"))
+
+        const style = tw.style({ padding: "p-2" })
+        expect(style.class("p-4")).toBe(twMerge("p-2", "p-4"))
+        expect(tw.join(tw.def(["p-2"], { padding: "p-4" }), "p-6")).toBe(
+            twMerge("p-2", "p-4", "p-6")
+        )
+    })
+
+    it("keeps current nested merger call boundaries", () => {
+        const calls: string[][] = []
+        const customMerger: Merger = (...args) => {
+            const tokens = args.flat()
+            calls.push(tokens)
+            return tokens.join(" ")
+        }
+
+        const tw = createTools<any>({ merger: customMerger })
+
+        tw.def(["p-2"], { padding: "p-4" })
+
+        expect(calls).toEqual([["p-4"], ["p-2", "p-4"]])
+    })
+
     it("1. tailwind-merge", () => {
         const merger: Merger = twMerge
         const t = createTools<{
