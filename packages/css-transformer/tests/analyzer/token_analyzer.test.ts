@@ -9,6 +9,7 @@ class MockResolver implements Partial<CSSPropertyResolver> {
         if (className === "bg-accent") return "backgroundColor"
         if (className === "text-sm") return "fontSize"
         if (className === "p-4" || className === "p-2") return "padding"
+        if (className === "gap-(--card-spacing)") return "gap"
         return null // unknown
     }
 }
@@ -61,6 +62,126 @@ describe("TokenAnalyzerImpl", () => {
             const analyzer = new TokenAnalyzerImpl(resolver)
             expect(analyzer.analyze("")).toEqual([])
             expect(analyzer.analyze([])).toEqual([])
+        })
+    })
+
+    describe("plan", () => {
+        it("should preserve every token while classifying structured tokens", () => {
+            const analyzer = new TokenAnalyzerImpl(resolver)
+            const source = "flex group/card hover:bg-accent unknown-xyz"
+            const plan = analyzer.plan(source)
+
+            expect(plan.source).toBe(source)
+            expect(plan.tokens).toEqual([
+                {
+                    original: "flex",
+                    utility: "flex",
+                    variants: [],
+                    property: "display",
+                    kind: "structured",
+                    index: 0,
+                },
+                {
+                    original: "group/card",
+                    utility: "group/card",
+                    variants: [],
+                    property: null,
+                    warning:
+                        "Could not resolve property for utility: group/card",
+                    kind: "preserved",
+                    index: 1,
+                    reason: "unresolved-property",
+                },
+                {
+                    original: "hover:bg-accent",
+                    utility: "bg-accent",
+                    variants: ["hover"],
+                    property: "backgroundColor",
+                    kind: "structured",
+                    index: 2,
+                },
+                {
+                    original: "unknown-xyz",
+                    utility: "unknown-xyz",
+                    variants: [],
+                    property: null,
+                    warning:
+                        "Could not resolve property for utility: unknown-xyz",
+                    kind: "preserved",
+                    index: 3,
+                    reason: "unresolved-property",
+                },
+            ])
+            expect(plan.structuredTokens).toEqual([
+                plan.tokens[0],
+                plan.tokens[2],
+            ])
+            expect(plan.preservedTokens).toEqual([
+                plan.tokens[1],
+                plan.tokens[3],
+            ])
+            expect(plan.styleTree).toEqual({
+                display: "flex",
+                hover: {
+                    backgroundColor: "hover:bg-accent",
+                },
+            })
+            expect(plan.styleTree).toEqual(
+                analyzer.buildObjectTree(plan.structuredTokens)
+            )
+        })
+
+        it("should preserve arbitrary declarations while structuring resolved utilities", () => {
+            const analyzer = new TokenAnalyzerImpl(resolver)
+            const source =
+                "gap-(--card-spacing) data-[size=sm]:[--card-spacing:--spacing(4)]"
+            const plan = analyzer.plan(source)
+
+            expect(plan.tokens).toEqual([
+                {
+                    original: "gap-(--card-spacing)",
+                    utility: "gap-(--card-spacing)",
+                    variants: [],
+                    property: "gap",
+                    kind: "structured",
+                    index: 0,
+                },
+                {
+                    original: "data-[size=sm]:[--card-spacing:--spacing(4)]",
+                    utility: "[--card-spacing:--spacing(4)]",
+                    variants: ["data-[size=sm]"],
+                    property: null,
+                    warning:
+                        "Could not resolve property for utility: [--card-spacing:--spacing(4)]",
+                    kind: "preserved",
+                    index: 1,
+                    reason: "unresolved-property",
+                },
+            ])
+            expect(plan.structuredTokens).toEqual([plan.tokens[0]])
+            expect(plan.preservedTokens).toEqual([plan.tokens[1]])
+            expect(plan.styleTree).toEqual({
+                gap: "gap-(--card-spacing)",
+            })
+            expect(plan.styleTree).toEqual(
+                analyzer.buildObjectTree(plan.structuredTokens)
+            )
+        })
+
+        it("should normalize array source while preserving token classification", () => {
+            const analyzer = new TokenAnalyzerImpl(resolver)
+            const plan = analyzer.plan(["flex", "hover:bg-accent"])
+
+            expect(plan.source).toBe("flex hover:bg-accent")
+            expect(plan.tokens).toHaveLength(2)
+            expect(plan.structuredTokens).toEqual(plan.tokens)
+            expect(plan.preservedTokens).toEqual([])
+            expect(plan.styleTree).toEqual({
+                display: "flex",
+                hover: {
+                    backgroundColor: "hover:bg-accent",
+                },
+            })
         })
     })
 

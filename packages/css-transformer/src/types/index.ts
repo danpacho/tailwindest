@@ -6,6 +6,34 @@ export interface ParsedToken {
     warning?: string
 }
 
+export type PreservedTokenReason =
+    | "unresolved-property"
+    | "unsafe-serialization"
+    | "unsupported-conditional"
+
+export interface StructuredClassToken extends ParsedToken {
+    kind: "structured"
+    index: number
+    property: string
+}
+
+export interface PreservedClassToken extends ParsedToken {
+    kind: "preserved"
+    index: number
+    property: null
+    reason: PreservedTokenReason
+}
+
+export type ClassSourceToken = StructuredClassToken | PreservedClassToken
+
+export interface ClassSourcePlan {
+    source: string
+    tokens: ClassSourceToken[]
+    structuredTokens: StructuredClassToken[]
+    preservedTokens: PreservedClassToken[]
+    styleTree: Record<string, any>
+}
+
 export interface TransformResult {
     success: boolean
     location: { line: number; column: number }

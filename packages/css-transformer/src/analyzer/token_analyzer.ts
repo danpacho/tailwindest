@@ -1,9 +1,16 @@
 import type { CSSPropertyResolver } from "create-tailwind-type"
-import type { ParsedToken } from "../types"
+import type {
+    ClassSourcePlan,
+    ClassSourceToken,
+    ParsedToken,
+    PreservedClassToken,
+    StructuredClassToken,
+} from "../types"
 import { extractVariants, splitClassString } from "./split_utils"
 
 export interface TokenAnalyzer {
     analyze(classNames: string | string[]): ParsedToken[]
+    plan(classNames: string | string[]): ClassSourcePlan
     buildObjectTree(tokens: ParsedToken[]): Record<string, any>
 }
 
@@ -37,6 +44,47 @@ export class TokenAnalyzerImpl implements TokenAnalyzer {
 
             return parsedToken
         })
+    }
+
+    public plan(classNames: string | string[]): ClassSourcePlan {
+        const source = Array.isArray(classNames)
+            ? classNames.join(" ")
+            : classNames
+        const tokens = this.analyze(classNames).map(
+            (token, index): ClassSourceToken => {
+                if (token.property) {
+                    return {
+                        ...token,
+                        kind: "structured",
+                        index,
+                        property: token.property,
+                    }
+                }
+
+                return {
+                    ...token,
+                    kind: "preserved",
+                    index,
+                    property: null,
+                    reason: "unresolved-property",
+                }
+            }
+        )
+        const structuredTokens = tokens.filter(
+            (token): token is StructuredClassToken =>
+                token.kind === "structured"
+        )
+        const preservedTokens = tokens.filter(
+            (token): token is PreservedClassToken => token.kind === "preserved"
+        )
+
+        return {
+            source,
+            tokens,
+            structuredTokens,
+            preservedTokens,
+            styleTree: this.buildObjectTree(structuredTokens),
+        }
     }
 
     public buildObjectTree(tokens: ParsedToken[]): Record<string, any> {
