@@ -1,6 +1,8 @@
+import { tw } from "~/tw";
+
 export function Edge() {
     return (
-        <div className="unknown-xyz custom-class">
+        <div className={tw.join("unknown-xyz custom-class")}>
             Edge
         </div>
     );

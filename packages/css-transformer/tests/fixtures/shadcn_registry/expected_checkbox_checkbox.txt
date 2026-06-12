@@ -34,7 +34,7 @@ const Checkbox = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
-    className={tw.join(checkboxCheckboxPrimitiveRoot.class(), className)}
+    className={tw.join(tw.def(["peer"], checkboxCheckboxPrimitiveRoot.style()), className)}
     {...props}
   >
     <CheckboxPrimitive.Indicator

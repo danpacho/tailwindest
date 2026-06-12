@@ -284,7 +284,7 @@ const Sidebar = React.forwardRef<
         >
           <div
             data-sidebar="sidebar"
-            className={sidebarDiv.class()}
+            className={tw.def(["bg-sidebar", "group-data-[variant=floating]:border-sidebar-border"], sidebarDiv.style())}
           >
             {children}
           </div>
@@ -386,7 +386,7 @@ const SidebarRail = React.forwardRef<
       tabIndex={-1}
       onClick={toggleSidebar}
       title="Toggle Sidebar"
-      className={tw.join(sidebarRailButton.class(), className)}
+      className={tw.join(tw.def(["hover:after:bg-sidebar-border", "group-data-[collapsible=offcanvas]:hover:bg-sidebar"], sidebarRailButton.style()), className)}
       {...props}
     />
   )
@@ -421,7 +421,7 @@ const SidebarInset = React.forwardRef<
   return (
     <main
       ref={ref}
-      className={tw.join(sidebarInsetMain.class(), className)}
+      className={tw.join(tw.def(["flex-1"], sidebarInsetMain.style()), className)}
       {...props}
     />
   )
@@ -447,7 +447,7 @@ const SidebarInput = React.forwardRef<
     <Input
       ref={ref}
       data-sidebar="input"
-      className={tw.join(sidebarInputInput.class(), className)}
+      className={tw.join(tw.def(["focus-visible:ring-sidebar-ring"], sidebarInputInput.style()), className)}
       {...props}
     />
   )
@@ -519,7 +519,7 @@ const SidebarContent = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="content"
-      className={tw.join(sidebarContentDiv.class(), className)}
+      className={tw.join(tw.def(["flex-1"], sidebarContentDiv.style()), className)}
       {...props}
     />
   )
@@ -588,7 +588,7 @@ const SidebarGroupLabel = React.forwardRef<
     <Comp
       ref={ref}
       data-sidebar="group-label"
-      className={tw.join(sidebarGroupLabelComp.class(), className)}
+      className={tw.join(tw.def(["text-sidebar-foreground/70", "ring-sidebar-ring"], sidebarGroupLabelComp.style()), className)}
       {...props}
     />
   )
@@ -638,7 +638,7 @@ const SidebarGroupAction = React.forwardRef<
     <Comp
       ref={ref}
       data-sidebar="group-action"
-      className={tw.join(sidebarGroupActionComp.class(), className)}
+      className={tw.join(tw.def(["text-sidebar-foreground", "ring-sidebar-ring", "hover:bg-sidebar-accent", "hover:text-sidebar-accent-foreground"], sidebarGroupActionComp.style()), className)}
       {...props}
     />
   )
@@ -801,7 +801,7 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={tw.join(sidebarMenuButtonVariants.class({ variant, size }), className)}
+        className={tw.join(tw.def(["peer/menu-button", "ring-sidebar-ring", "hover:bg-sidebar-accent", "hover:text-sidebar-accent-foreground", "active:bg-sidebar-accent", "active:text-sidebar-accent-foreground", "data-[active=true]:bg-sidebar-accent", "data-[active=true]:text-sidebar-accent-foreground", "data-[state=open]:hover:bg-sidebar-accent", "data-[state=open]:hover:text-sidebar-accent-foreground", "group-data-[collapsible=icon]:!size-8", variant === "default" && "hover:bg-sidebar-accent", variant === "default" && "hover:text-sidebar-accent-foreground", variant === "outline" && "hover:bg-sidebar-accent", variant === "outline" && "hover:text-sidebar-accent-foreground"], sidebarMenuButtonVariants.style({ variant, size })), className)}
         {...props}
       />
     )
@@ -886,7 +886,7 @@ const SidebarMenuAction = React.forwardRef<
     <Comp
       ref={ref}
       data-sidebar="menu-action"
-      className={tw.join(sidebarMenuActionComp.class(), showOnHover &&
+      className={tw.join(tw.def(["text-sidebar-foreground", "ring-sidebar-ring", "hover:bg-sidebar-accent", "hover:text-sidebar-accent-foreground", "peer-hover/menu-button:text-sidebar-accent-foreground"], sidebarMenuActionComp.style()), showOnHover &&
                 "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0", className)}
       {...props}
     />
@@ -931,7 +931,7 @@ const SidebarMenuBadge = React.forwardRef<
   <div
     ref={ref}
     data-sidebar="menu-badge"
-    className={tw.join(sidebarMenuBadgeDiv.class(), className)}
+    className={tw.join(tw.def(["text-sidebar-foreground", "peer-hover/menu-button:text-sidebar-accent-foreground", "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground"], sidebarMenuBadgeDiv.style()), className)}
     {...props}
   />
 ))
@@ -1007,7 +1007,7 @@ const SidebarMenuSub = React.forwardRef<
   <ul
     ref={ref}
     data-sidebar="menu-sub"
-    className={tw.join(sidebarMenuSubUl.class(), className)}
+    className={tw.join(tw.def(["border-sidebar-border"], sidebarMenuSubUl.style()), className)}
     {...props}
   />
 ))
@@ -1049,9 +1049,6 @@ const sidebarMenuSubButtonComp = tw.style({
         width: "[&>svg]:size-4",
         flexShrink: "[&>svg]:shrink-0",
     },
-    "group-data-[collapsible=icon]": {
-        display: "group-data-[collapsible=icon]:hidden",
-    },
 });
 
 const SidebarMenuSubButton = React.forwardRef<
@@ -1070,7 +1067,7 @@ const SidebarMenuSubButton = React.forwardRef<
       data-sidebar="menu-sub-button"
       data-size={size}
       data-active={isActive}
-      className={tw.join(sidebarMenuSubButtonComp.class(), size === "sm" && "text-xs", size === "md" && "text-sm", className)}
+      className={tw.join(tw.def(["text-sidebar-foreground", "ring-sidebar-ring", "hover:bg-sidebar-accent", "hover:text-sidebar-accent-foreground", "active:bg-sidebar-accent", "active:text-sidebar-accent-foreground", "[&>svg]:text-sidebar-accent-foreground", "data-[active=true]:bg-sidebar-accent", "data-[active=true]:text-sidebar-accent-foreground"], sidebarMenuSubButtonComp.style()), size === "sm" && "text-xs", size === "md" && "text-sm", "group-data-[collapsible=icon]:hidden", className)}
       {...props}
     />
   )

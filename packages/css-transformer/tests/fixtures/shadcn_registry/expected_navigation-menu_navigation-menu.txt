@@ -18,7 +18,7 @@ const NavigationMenu = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Root
     ref={ref}
-    className={tw.join(navigationMenuNavigationMenuPrimitiveRoot.class(), className)}
+    className={tw.join(tw.def(["flex-1"], navigationMenuNavigationMenuPrimitiveRoot.style()), className)}
     {...props}
   >
     {children}
@@ -42,7 +42,7 @@ const NavigationMenuList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.List
     ref={ref}
-    className={tw.join(navigationMenuListNavigationMenuPrimitiveList.class(), className)}
+    className={tw.join(tw.def(["group", "flex-1"], navigationMenuListNavigationMenuPrimitiveList.style()), className)}
     {...props}
   />
 ))
@@ -107,7 +107,7 @@ const NavigationMenuTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Trigger
     ref={ref}
-    className={tw.join(navigationMenuTriggerStyle.class(), className)}
+    className={tw.join(tw.def(["group"], navigationMenuTriggerStyle.style()), "group", className)}
     {...props}
   >
     {children}{" "}
@@ -164,7 +164,7 @@ const NavigationMenuViewport = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div className={navigationMenuViewportDiv.class()}>
     <NavigationMenuPrimitive.Viewport
-      className={tw.join(navigationMenuViewportNavigationMenuPrimitiveViewport.class(), className)}
+      className={tw.join(tw.def(["origin-top-center", "data-[state=open]:animate-in", "data-[state=closed]:animate-out", "data-[state=closed]:zoom-out-95", "data-[state=open]:zoom-in-90"], navigationMenuViewportNavigationMenuPrimitiveViewport.style()), className)}
       ref={ref}
       {...props}
     />
@@ -201,7 +201,7 @@ const NavigationMenuIndicator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.Indicator
     ref={ref}
-    className={tw.join(navigationMenuIndicatorNavigationMenuPrimitiveIndicator.class(), className)}
+    className={tw.join(tw.def(["data-[state=visible]:animate-in", "data-[state=hidden]:animate-out", "data-[state=hidden]:fade-out", "data-[state=visible]:fade-in"], navigationMenuIndicatorNavigationMenuPrimitiveIndicator.style()), className)}
     {...props}
   >
     <div className={navigationMenuIndicatorDiv.class()} />

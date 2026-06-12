@@ -120,7 +120,7 @@ const SheetContent = React.forwardRef<
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
-      className={tw.join(sheetVariants.class({ side }), className)}
+      className={tw.join(tw.def(["data-[state=open]:animate-in", "data-[state=closed]:animate-out", side === "top" && "data-[state=closed]:slide-out-to-top", side === "top" && "data-[state=open]:slide-in-from-top", side === "bottom" && "data-[state=closed]:slide-out-to-bottom", side === "bottom" && "data-[state=open]:slide-in-from-bottom", side === "left" && "data-[state=closed]:slide-out-to-left", side === "left" && "data-[state=open]:slide-in-from-left", side === "right" && "data-[state=closed]:slide-out-to-right", side === "right" && "data-[state=open]:slide-in-from-right"], sheetVariants.style({ side })), className)}
       {...props}
     >
       <SheetPrimitive.Close className={sheetContentSheetPrimitiveClose.class()}>
