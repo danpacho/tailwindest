@@ -8,6 +8,7 @@ const navigationMenuNavigationMenuPrimitiveRoot = tw.style({
     zIndex: "z-10",
     display: "flex",
     maxWidth: "max-w-max",
+    flex: "flex-1",
     alignItems: "items-center",
     justifyContent: "justify-center",
 });
@@ -18,7 +19,7 @@ const NavigationMenu = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Root
     ref={ref}
-    className={tw.join(tw.def(["flex-1"], navigationMenuNavigationMenuPrimitiveRoot.style()), className)}
+    className={tw.join(navigationMenuNavigationMenuPrimitiveRoot.class(), className)}
     {...props}
   >
     {children}
@@ -30,6 +31,7 @@ NavigationMenu.displayName = NavigationMenuPrimitive.Root.displayName
 
 const navigationMenuListNavigationMenuPrimitiveList = tw.style({
     display: "flex",
+    flex: "flex-1",
     listStyleType: "list-none",
     alignItems: "items-center",
     justifyContent: "justify-center",
@@ -42,7 +44,7 @@ const NavigationMenuList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.List
     ref={ref}
-    className={tw.join(tw.def(["group", "flex-1"], navigationMenuListNavigationMenuPrimitiveList.style()), className)}
+    className={tw.join(tw.def(["group"], navigationMenuListNavigationMenuPrimitiveList.style()), className)}
     {...props}
   />
 ))

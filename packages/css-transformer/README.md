@@ -12,6 +12,9 @@ Automate your migration from standard Tailwind CSS to type-safe **Tailwindest** 
 - **Smart Auto-Import**: Inserts necessary import statements into transformed files automatically.
 - **Source-Safe**: Uses AST (Abstract Syntax Tree) traversal to ensure code logic remains untouched.
 - **Type-Safe**: Generates objects that are 100% compatible with `tailwindest` types.
+- **Typeset-Aware Resolution**: Emits only actual generated Tailwindest record
+  keys. Utility classification is checked against the generated `Tailwind`
+  interface, with Tailwind compiler CSS used only to disambiguate semantics.
 - **Lossless Static Token Preservation**: Keeps Tailwind selector anchors,
   arbitrary declarations, plugin utilities, and unresolved static tokens in the
   generated class stream.
@@ -116,10 +119,13 @@ const value = cn(
 const menuButton = tw.style({
     display: "flex",
     fontSize: "text-sm",
+    hover: {
+        backgroundColor: "hover:bg-sidebar-accent",
+    },
 })
 
 const value = tw.join(
-    tw.def(["peer/menu-button", "hover:bg-sidebar-accent"], menuButton.style()),
+    tw.def(["peer/menu-button"], menuButton.style()),
     className
 )
 ```
@@ -134,7 +140,33 @@ This preservation path covers token families such as:
 - placement animation utilities:
   `data-[side=bottom]:slide-in-from-top-2`
 - descendant variant chains such as `**:data-[slot=kbd]:z-50`
-- parenthesized arbitrary value utilities such as `xs:w-(--popup-width)`
+- parenthesized arbitrary value utilities when the active generated typeset
+  cannot represent their variant key, such as `xs:w-(--popup-width)` in a
+  project whose generated `TailwindNestGroups` does not include `xs`
+
+### Typeset-aware record keys
+
+The transformer does not emit object keys from CSS declaration names. It asks
+`create-tailwind-type` to resolve utilities against the actual generated
+`Tailwind` interface used by Tailwindest.
+
+```tsx
+// Source
+className = "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8"
+
+// Output
+tw.style({
+    "group-has-[[data-sidebar=menu-action]]/menu-item": {
+        padding: "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8",
+    },
+})
+```
+
+This is intentionally `padding`, not `paddingRight`, when the generated
+Tailwindest typeset exposes `pr-*` under the `padding` record key. The shadcn
+registry typecheck gate runs generated output against the real
+`tailwind.2.ts`-style typeset so stale mock type definitions cannot hide
+invalid object keys.
 
 ### CVA migration
 
@@ -267,6 +299,8 @@ The shadcn registry test suite enforces this with:
 - `twMerge(source) === source` stability checks for every collected static
   source
 - transformed-output multiset checks that every input token is present
+- generated `.tsx` typechecks against the actual Tailwindest generated
+  `Tailwind` record key surface
 - targeted historical assertions for group, peer, container, arbitrary
   declaration, animation, descendant-chain, and parenthesized arbitrary-value
   families

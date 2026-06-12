@@ -224,7 +224,7 @@ describe("CvaWalker", () => {
         )
     })
 
-    it("should keep typography structured while preserving unsafe resolved cva base tokens", () => {
+    it("should keep typography and typed named modifier cva base tokens structured", () => {
         const { sourceFile, context } = setup(`
             import { cva } from "class-variance-authority"
             import { cn } from "@/lib/utils"
@@ -250,10 +250,10 @@ describe("CvaWalker", () => {
 
         expect(text).toContain(`fontSize: "text-xs/relaxed"`)
         expect(text).toContain(`color: "text-primary-foreground"`)
+        expect(text).toContain(`"group-focus/context-menu-item":`)
         expect(text).toContain(
-            `tw.def(["group-focus/context-menu-item:text-accent-foreground"], buttonVariants.style({ variant }))`
+            `color: "group-focus/context-menu-item:text-accent-foreground"`
         )
-        expect(text).not.toContain(`"group-focus/context-menu-item":`)
         expect(text).not.toContain(`color: "text-xs/relaxed"`)
     })
 

@@ -8,7 +8,8 @@ dependency.
 
 - Tailwindest runtime style API: `packages/tailwindest/src/tools/create_tools.ts`
 - Runtime authoring type: `CreateTailwindest`
-- Property resolver source: `create-tailwind-type` `CSSPropertyResolver`
+- Property resolver source: `create-tailwind-type` `CSSPropertyResolver` and
+  `TailwindTypesetIndex`
 - AST engine: `ts-morph`
 - Supported source kinds: `.ts`, `.tsx`, `.js`, `.jsx`
 
@@ -41,7 +42,7 @@ collect transform targets
 analyze static class strings
   - split tokens
   - strip variants only for resolver lookup
-  - resolve utility -> Tailwindest property
+  - resolve utility -> generated Tailwindest record key
   - classify unresolved tokens as preserved metadata
   - build nested object tree
   - keep original token at each leaf
@@ -114,6 +115,12 @@ the original source, uses a raw `tw.join(...)` fallback, or reports diagnostics.
 Resolver failure for a supported static source is not deletion; it is preserved
 metadata.
 
+The resolver also guards the Tailwindest object namespace. It may use Tailwind
+compiler CSS output to understand a utility, but emitted object keys must exist
+in the active generated `Tailwind` interface. For example, `pr-8` can compile to
+`padding-right`, but the transformer emits `padding: "pr-8"` when the generated
+typeset stores directional padding utilities under the `padding` record key.
+
 ## Lossless Class Source Plan
 
 Each supported static source is represented as a `ClassSourcePlan`:
@@ -160,3 +167,5 @@ The shadcn registry gate has three layers:
 2. `shadcn_class_preservation.test.ts` proves transformed output contains every
    supported static input token as a multiset.
 3. `shadcn_registry.test.ts` locks the final generated snapshots.
+4. `shadcn_registry_typecheck.test.ts` writes transformed registry output as
+   `.tsx` and typechecks it against the real generated Tailwindest typeset.

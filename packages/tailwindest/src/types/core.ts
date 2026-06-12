@@ -7,10 +7,54 @@ type TailwindCompoundDynamicNestGroupPrefix =
     | "not"
     | "has"
     | "in"
+type TailwindNamedModifierPrefix = "group" | "peer"
+type TailwindContainerQueryPrefix =
+    | "@3xs"
+    | "@2xs"
+    | "@xs"
+    | "@sm"
+    | "@md"
+    | "@lg"
+    | "@xl"
+    | "@2xl"
+    | "@3xl"
+    | "@4xl"
+    | "@5xl"
+    | "@6xl"
+    | "@7xl"
+    | "@max-3xs"
+    | "@max-2xs"
+    | "@max-xs"
+    | "@max-sm"
+    | "@max-md"
+    | "@max-lg"
+    | "@max-xl"
+    | "@max-2xl"
+    | "@max-3xl"
+    | "@max-4xl"
+    | "@max-5xl"
+    | "@max-6xl"
+    | "@max-7xl"
+    | "@min-3xs"
+    | "@min-2xs"
+    | "@min-xs"
+    | "@min-sm"
+    | "@min-md"
+    | "@min-lg"
+    | "@min-xl"
+    | "@min-2xl"
+    | "@min-3xl"
+    | "@min-4xl"
+    | "@min-5xl"
+    | "@min-6xl"
+    | "@min-7xl"
 export type TailwindArbitraryNestGroup =
+    | "**"
     | `[${string}]${string}`
     | `@[${string}]${string}`
+    | `${TailwindContainerQueryPrefix}/${string}`
     | `${string}-[${string}]${string}`
+    | `${TailwindNamedModifierPrefix}-${string}/${string}`
     | `${TailwindDynamicNestGroupPrefix}-${string}`
     | `${TailwindCompoundDynamicNestGroupPrefix}-${TailwindDynamicNestGroupPrefix}-${string}`
 

@@ -35,7 +35,7 @@ tw.variants({
                 color: "text-foreground",
             },
             destructive: {
-                borderWidth: "border-destructive/50",
+                borderColor: "border-destructive/50",
                 color: "text-destructive",
                 dark: {
                     borderWidth: "dark:border-destructive",

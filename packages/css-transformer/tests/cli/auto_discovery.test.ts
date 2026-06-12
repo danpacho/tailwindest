@@ -1,8 +1,11 @@
-import { mkdtemp, mkdir, writeFile } from "node:fs/promises"
+import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { describe, expect, it } from "vitest"
-import { resolveCssTransformerCliConfig } from "../../src/cli/auto_discovery"
+import {
+    ensureTailwindestTransformContract,
+    resolveCssTransformerCliConfig,
+} from "../../src/cli/auto_discovery"
 
 async function makeProject() {
     return mkdtemp(join(tmpdir(), "tailwindest-css-cli-"))
@@ -247,5 +250,94 @@ describe("resolveCssTransformerCliConfig", () => {
         })
 
         expect(config.tailwindestModulePath).toBe("@/styles")
+    })
+})
+
+describe("ensureTailwindestTransformContract", () => {
+    it("adds required arbitrary options to Tailwindest and createTools type literals", async () => {
+        const cwd = await makeProject()
+        const toolsPath = await writeProjectFile(
+            cwd,
+            "src/tw.ts",
+            [
+                "import { createTools, type CreateTailwindest } from 'tailwindest'",
+                "import type { Tailwind, TailwindNestGroups } from './tailwind'",
+                "",
+                "export type Tailwindest = CreateTailwindest<{",
+                "    tailwind: Tailwind",
+                "    tailwindNestGroups: TailwindNestGroups",
+                "}>",
+                "",
+                "export const tw = createTools<{ tailwindest: Tailwindest }>()",
+                "",
+            ].join("\n")
+        )
+
+        const first = await ensureTailwindestTransformContract(toolsPath)
+        const second = await ensureTailwindestTransformContract(toolsPath)
+        const content = await readFile(toolsPath, "utf-8")
+
+        expect(first).toEqual({ changed: true, diagnostics: [] })
+        expect(second).toEqual({ changed: false, diagnostics: [] })
+        expect(content).toContain("useArbitrary: true")
+        expect(content).toContain("useArbitraryNestGroups: true")
+        expect(content).toContain("useTypedClassLiteral: true")
+        expect(content.match(/useArbitrary:/g)).toHaveLength(2)
+        expect(content.match(/useArbitraryNestGroups:/g)).toHaveLength(1)
+        expect(content.match(/useTypedClassLiteral:/g)).toHaveLength(1)
+    })
+
+    it("returns a diagnostic when createTools has no explicit type literal", async () => {
+        const cwd = await makeProject()
+        const toolsPath = await writeProjectFile(
+            cwd,
+            "src/tw.ts",
+            [
+                "import { createTools, type CreateTailwindest } from 'tailwindest'",
+                "import type { Tailwind, TailwindNestGroups } from './tailwind'",
+                "",
+                "export type Tailwindest = CreateTailwindest<{",
+                "    tailwind: Tailwind",
+                "    tailwindNestGroups: TailwindNestGroups",
+                "    useArbitrary: true",
+                "    useArbitraryNestGroups: true",
+                "}>",
+                "",
+                "export const tw = createTools()",
+                "",
+            ].join("\n")
+        )
+
+        const result = await ensureTailwindestTransformContract(toolsPath)
+
+        expect(result.changed).toBe(false)
+        expect(result.diagnostics).toEqual([
+            expect.stringContaining(
+                "Expected createTools<{ ... }> with useArbitrary and useTypedClassLiteral enabled"
+            ),
+        ])
+    })
+
+    it("returns a diagnostic for non-standard Tailwindest setup files", async () => {
+        const cwd = await makeProject()
+        const toolsPath = await writeProjectFile(
+            cwd,
+            "src/tw.ts",
+            "import { createTools } from 'tailwindest'\nexport const tw = createTools()\n"
+        )
+
+        const result = await ensureTailwindestTransformContract(toolsPath)
+
+        expect(result.changed).toBe(false)
+        expect(result.diagnostics).toEqual(
+            expect.arrayContaining([
+                expect.stringContaining(
+                    "Could not verify Tailwindest transform contract"
+                ),
+                expect.stringContaining(
+                    "Could not verify Tailwindest tools contract"
+                ),
+            ])
+        )
     })
 })

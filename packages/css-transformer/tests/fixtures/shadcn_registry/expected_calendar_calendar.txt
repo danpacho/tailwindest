@@ -36,6 +36,7 @@ const calendarDayPicker = tw.style({
 
 const calendarDayPicker2 = tw.style({
     color: "text-muted-foreground",
+    flex: "flex-1",
     userSelect: "select-none",
     borderRadius: "rounded-md",
     fontSize: "text-[0.8rem]",
@@ -144,7 +145,7 @@ function Calendar({
                     : "[&>svg]:text-muted-foreground flex h-8 items-center gap-1 rounded-md pl-2 pr-1 text-sm [&>svg]:size-3.5", defaultClassNames.caption_label),
         table: "w-full border-collapse",
         weekdays: tw.join("flex", defaultClassNames.weekdays),
-        weekday: tw.join(tw.def(["flex-1"], calendarDayPicker2.style()), defaultClassNames.weekday),
+        weekday: tw.join(calendarDayPicker2.class(), defaultClassNames.weekday),
         week: tw.join("mt-2 flex w-full", defaultClassNames.week),
         week_number_header: tw.join("w-[--cell-size] select-none", defaultClassNames.week_number_header),
         week_number: tw.join("text-muted-foreground select-none text-[0.8rem]", defaultClassNames.week_number),
@@ -227,6 +228,12 @@ const calendarDayButtonButton = tw.style({
         color: "data-[range-end=true]:text-primary-foreground",
         borderRadius: "data-[range-end=true]:rounded-md",
     },
+    "group-data-[focused=true]/day": {
+        borderWidth: "group-data-[focused=true]/day:border-ring",
+        boxShadow: ["group-data-[focused=true]/day:ring-ring/50", "group-data-[focused=true]/day:ring-[3px]"],
+        position: "group-data-[focused=true]/day:relative",
+        zIndex: "group-data-[focused=true]/day:z-10",
+    },
     display: "flex",
     aspectRatio: "aspect-square",
     height: "h-auto",
@@ -270,7 +277,7 @@ function CalendarDayButton({
       data-range-start={modifiers.range_start}
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
-      className={tw.join(tw.def(["group-data-[focused=true]/day:border-ring", "group-data-[focused=true]/day:ring-ring/50", "group-data-[focused=true]/day:relative", "group-data-[focused=true]/day:z-10", "group-data-[focused=true]/day:ring-[3px]"], calendarDayButtonButton.style()), defaultClassNames.day, className)}
+      className={tw.join(calendarDayButtonButton.class(), defaultClassNames.day, className)}
       {...props}
     />
   )

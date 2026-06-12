@@ -8,6 +8,10 @@ import type {
 } from "../types"
 import { extractVariants, splitClassString } from "./split_utils"
 
+type VariantAwareResolver = CSSPropertyResolver & {
+    isKnownVariant?: (variant: string) => boolean
+}
+
 const STATE_VARIANTS = [
     "first",
     "last",
@@ -111,6 +115,7 @@ const prefix = (name: string, variants: string[]) =>
 
 const TYPED_VARIANT_KEYS = new Set([
     "*",
+    "**",
     "first-letter",
     "first-line",
     "marker",
@@ -185,6 +190,7 @@ const TYPED_VARIANT_KEYS = new Set([
 function isTypedArbitraryVariant(variant: string): boolean {
     return (
         /^\[[\s\S]+\]$/.test(variant) ||
+        /^(?:group|peer)-[\s\S]+\/[\s\S]+$/.test(variant) ||
         /^(?:not-|group-|peer-|in-|has-)?(?:data|aria|has|nth|nth-last|nth-of-type|nth-last-of-type)-\[[\s\S]+\]$/.test(
             variant
         )
@@ -192,16 +198,25 @@ function isTypedArbitraryVariant(variant: string): boolean {
 }
 
 function isTypedContainerVariant(variant: string): boolean {
-    return /^@(?:min-|max-)?(?:3xs|2xs|xs|sm|md|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl)$/.test(
+    return /^@(?:min-|max-)?(?:3xs|2xs|xs|sm|md|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl)(?:\/[\s\S]+)?$/.test(
         variant
     )
 }
 
-function isTypedVariantKey(variant: string): boolean {
-    if (variant.includes("/") || variant.includes("**")) return false
+function isTypedVariantKey(
+    variant: string,
+    resolver: CSSPropertyResolver
+): boolean {
+    if ((resolver as VariantAwareResolver).isKnownVariant?.(variant)) {
+        return true
+    }
     if (isTypedArbitraryVariant(variant)) return true
     if (isTypedContainerVariant(variant)) return true
     return TYPED_VARIANT_KEYS.has(variant)
+}
+
+function normalizeUtilityForPropertyLookup(utility: string): string {
+    return utility.replace(/^!/, "").replace(/!$/, "")
 }
 
 export interface TokenAnalyzer {
@@ -226,7 +241,9 @@ export class TokenAnalyzerImpl implements TokenAnalyzer {
 
         return tokens.map((token) => {
             const { utility, variants } = extractVariants(token)
-            const property = this.resolver.resolveUnambiguous(utility)
+            const property = this.resolver.resolveUnambiguous(
+                normalizeUtilityForPropertyLookup(utility)
+            )
             const parsedToken: ParsedToken = {
                 original: token,
                 utility,
@@ -251,7 +268,8 @@ export class TokenAnalyzerImpl implements TokenAnalyzer {
                 if (token.property) {
                     if (
                         token.variants.some(
-                            (variant) => !isTypedVariantKey(variant)
+                            (variant) =>
+                                !isTypedVariantKey(variant, this.resolver)
                         )
                     ) {
                         return {

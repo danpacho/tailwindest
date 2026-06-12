@@ -71,7 +71,7 @@ const chartContainerDiv = tw.style({
         fill: "[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground",
     },
     "[&_.recharts-cartesian-grid_line[stroke='#ccc']]": {
-        strokeWidth: "[&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50",
+        stroke: "[&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50",
     },
     "[&_.recharts-curve.recharts-tooltip-cursor]": {
         strokeWidth: "[&_.recharts-curve.recharts-tooltip-cursor]:stroke-border",
@@ -304,7 +304,8 @@ const chartTooltipContentDiv2 = tw.style({
     alignItems: "items-start",
     gap: "gap-1.5",
     borderRadius: "rounded-lg",
-    borderWidth: ["border", "border-border/50"],
+    borderWidth: "border",
+    borderColor: "border-border/50",
     backgroundColor: "bg-background",
     padding: ["px-2.5", "py-1.5"],
     fontSize: "text-xs",

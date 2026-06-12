@@ -38,7 +38,7 @@ describe("CSSPropertyResolver", () => {
 
     it("should initialize generator and create resolver", async () => {
         await generator.init()
-        resolver = generator.createPropertyResolver()
+        resolver = await generator.createTypesetAwarePropertyResolver()
         expect(resolver).toBeDefined()
         expect(resolver).toBeInstanceOf(CSSPropertyResolver)
     })
@@ -135,6 +135,28 @@ describe("CSSPropertyResolver", () => {
             expect(resolver.resolveUnambiguous("text-destructive")).toBe(
                 "color"
             )
+        })
+
+        it("should resolve custom semantic color utilities from Tailwind CSS declarations", () => {
+            expect(resolver.resolveUnambiguous("text-sidebar-foreground")).toBe(
+                "color"
+            )
+            expect(resolver.resolveUnambiguous("bg-sidebar")).toBe(
+                "backgroundColor"
+            )
+            expect(resolver.resolveUnambiguous("border-sidebar-border")).toBe(
+                "borderColor"
+            )
+            expect(resolver.resolveUnambiguous("ring-sidebar-ring")).toBe(
+                "boxShadow"
+            )
+        })
+
+        it("should resolve directional padding utilities to the Tailwindest padding record key", () => {
+            expect(resolver.resolveUnambiguous("pr-8")).toBe("padding")
+            expect(resolver.resolveUnambiguous("pl-8")).toBe("padding")
+            expect(resolver.resolveUnambiguous("px-2")).toBe("padding")
+            expect(resolver.resolveUnambiguous("pt-0")).toBe("padding")
         })
     })
 

@@ -1,6 +1,6 @@
 {
     "name": "tailwindest-css-transform",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "private": false,
     "description": "Tailwindest CSS Transformer",
     "files": [
@@ -23,7 +23,7 @@
     "dependencies": {
         "@clack/prompts": "^1.2.0",
         "commander": "^14.0.3",
-        "create-tailwind-type": "^1.1.4",
+        "create-tailwind-type": "^1.1.6",
         "picocolors": "^1.1.0",
         "ts-morph": "^28.0.0"
     },

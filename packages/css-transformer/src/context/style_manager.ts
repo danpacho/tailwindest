@@ -27,7 +27,7 @@ export class StyleManager {
     /**
      * Registers a style object for extraction or returns an existing identifier.
      *
-     * @param style The resolved CSS property object.
+     * @param style The resolved Tailwindest record-key object.
      * @param node The node where the style is used (to find the insertion point).
      * @param component The name of the enclosing component (default: "Global").
      * @param tag The HTML tag name (default: "Div").

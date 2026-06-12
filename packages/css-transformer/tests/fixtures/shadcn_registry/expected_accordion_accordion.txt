@@ -31,6 +31,7 @@ const accordionTriggerChevronDown = tw.style({
 
 const accordionTriggerAccordionPrimitiveTrigger = tw.style({
     display: "flex",
+    flex: "flex-1",
     alignItems: "items-center",
     justifyContent: "justify-between",
     padding: "py-4",
@@ -53,7 +54,7 @@ const AccordionTrigger = React.forwardRef<
   <AccordionPrimitive.Header className={tw.join("flex")}>
     <AccordionPrimitive.Trigger
       ref={ref}
-      className={tw.join(tw.def(["flex-1"], accordionTriggerAccordionPrimitiveTrigger.style()), className)}
+      className={tw.join(accordionTriggerAccordionPrimitiveTrigger.class(), className)}
       {...props}
     >
       {children}

@@ -85,8 +85,16 @@ export async function createShadcnRegistryHarness() {
     })
 
     await generator.init()
+    const targetTailwindSource = await fs.readFile(
+        path.resolve(__dirname, "../../../tailwindest/tailwind.2.ts"),
+        "utf-8"
+    )
 
-    const analyzer = new TokenAnalyzerImpl(generator.createPropertyResolver())
+    const analyzer = new TokenAnalyzerImpl(
+        await generator.createTypesetAwarePropertyResolver({
+            tailwindSource: targetTailwindSource,
+        })
+    )
     const registry = new TransformerRegistry()
 
     registry.register(new CvaWalker())

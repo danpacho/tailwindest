@@ -4,6 +4,10 @@ import { TokenAnalyzerImpl } from "../../src/analyzer/token_analyzer"
 
 // Mock CSSPropertyResolver
 class MockResolver implements Partial<CSSPropertyResolver> {
+    isKnownVariant(variant: string): boolean {
+        return ["xs"].includes(variant)
+    }
+
     resolveUnambiguous(className: string): string | null {
         if (className === "flex") return "display"
         if (className === "relative") return "position"
@@ -18,12 +22,14 @@ class MockResolver implements Partial<CSSPropertyResolver> {
         if (className === "gap-(--card-spacing)") return "gap"
         if (className === "backdrop-blur-xs") return "backdropFilter"
         if (className === "z-50") return "zIndex"
+        if (className === "pr-8") return "padding"
+        if (className === "size-8") return "width"
         return null // unknown
     }
 }
 
 describe("TokenAnalyzerImpl", () => {
-    const resolver = new MockResolver() as CSSPropertyResolver
+    const resolver = new MockResolver() as unknown as CSSPropertyResolver
 
     describe("analyze", () => {
         it("should analyze basic string", () => {
@@ -205,40 +211,38 @@ describe("TokenAnalyzerImpl", () => {
             })
         })
 
-        it("should preserve resolved tokens with type-unsafe variant chains", () => {
+        it("should structure resolved tokens whose variants match Tailwindest grammar", () => {
             const analyzer = new TokenAnalyzerImpl(resolver)
             const source = [
                 "relative",
                 "w-(--popup-width)",
                 "xs:w-(--popup-width)",
+                "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8",
+                "data-[state=open]:hover:bg-accent",
+                "group-data-[collapsible=icon]:!size-8",
                 "group-focus/context-menu-item:text-accent-foreground",
                 "peer-hover/menu-button:text-accent-foreground",
                 "**:data-[slot=kbd]:z-50",
+                "**:data-[variant=destructive]:**:text-accent-foreground!",
                 "supports-backdrop-filter:backdrop-blur-xs",
             ].join(" ")
             const plan = analyzer.plan(source)
 
             expect(
                 plan.structuredTokens.map((token) => token.original)
-            ).toEqual(["relative", "w-(--popup-width)"])
+            ).toEqual([
+                "relative",
+                "w-(--popup-width)",
+                "xs:w-(--popup-width)",
+                "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8",
+                "data-[state=open]:hover:bg-accent",
+                "group-data-[collapsible=icon]:!size-8",
+                "group-focus/context-menu-item:text-accent-foreground",
+                "peer-hover/menu-button:text-accent-foreground",
+                "**:data-[slot=kbd]:z-50",
+                "**:data-[variant=destructive]:**:text-accent-foreground!",
+            ])
             expect(plan.preservedTokens).toEqual([
-                expect.objectContaining({
-                    original: "xs:w-(--popup-width)",
-                    reason: "unsafe-serialization",
-                }),
-                expect.objectContaining({
-                    original:
-                        "group-focus/context-menu-item:text-accent-foreground",
-                    reason: "unsafe-serialization",
-                }),
-                expect.objectContaining({
-                    original: "peer-hover/menu-button:text-accent-foreground",
-                    reason: "unsafe-serialization",
-                }),
-                expect.objectContaining({
-                    original: "**:data-[slot=kbd]:z-50",
-                    reason: "unsafe-serialization",
-                }),
                 expect.objectContaining({
                     original: "supports-backdrop-filter:backdrop-blur-xs",
                     reason: "unsafe-serialization",
@@ -247,6 +251,66 @@ describe("TokenAnalyzerImpl", () => {
             expect(plan.styleTree).toEqual({
                 position: "relative",
                 width: "w-(--popup-width)",
+                xs: {
+                    width: "xs:w-(--popup-width)",
+                },
+                "group-has-[[data-sidebar=menu-action]]/menu-item": {
+                    padding:
+                        "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8",
+                },
+                "data-[state=open]": {
+                    hover: {
+                        backgroundColor: "data-[state=open]:hover:bg-accent",
+                    },
+                },
+                "group-data-[collapsible=icon]": {
+                    width: "group-data-[collapsible=icon]:!size-8",
+                },
+                "group-focus/context-menu-item": {
+                    color: "group-focus/context-menu-item:text-accent-foreground",
+                },
+                "peer-hover/menu-button": {
+                    color: "peer-hover/menu-button:text-accent-foreground",
+                },
+                "**": {
+                    "data-[slot=kbd]": {
+                        zIndex: "**:data-[slot=kbd]:z-50",
+                    },
+                    "data-[variant=destructive]": {
+                        "**": {
+                            color: "**:data-[variant=destructive]:**:text-accent-foreground!",
+                        },
+                    },
+                },
+            })
+        })
+
+        it("should preserve class markers and arbitrary declarations as raw tokens", () => {
+            const analyzer = new TokenAnalyzerImpl(resolver)
+            const source = [
+                "peer/menu-button",
+                "group/menu-item",
+                "@container/card-header",
+                "[--card-spacing:--spacing(5)]",
+                "data-[size=sm]:[--card-spacing:--spacing(4)]",
+                "flex",
+            ].join(" ")
+            const plan = analyzer.plan(source)
+
+            expect(
+                plan.structuredTokens.map((token) => token.original)
+            ).toEqual(["flex"])
+            expect(plan.preservedTokens.map((token) => token.original)).toEqual(
+                [
+                    "peer/menu-button",
+                    "group/menu-item",
+                    "@container/card-header",
+                    "[--card-spacing:--spacing(5)]",
+                    "data-[size=sm]:[--card-spacing:--spacing(4)]",
+                ]
+            )
+            expect(plan.styleTree).toEqual({
+                display: "flex",
             })
         })
     })

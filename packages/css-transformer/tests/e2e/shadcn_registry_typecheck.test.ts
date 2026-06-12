@@ -19,7 +19,7 @@ describe("Shadcn Registry Typecheck", async () => {
     const inputFiles = await listShadcnInputFiles()
     const harness = await createShadcnRegistryHarness()
 
-    it("fails the typecheck harness for known unsafe Tailwindest object keys", async () => {
+    it("fails the typecheck harness for class marker object keys", async () => {
         const projectRoot = await createTypecheckProjectRoot("negative")
 
         try {
@@ -30,8 +30,8 @@ describe("Shadcn Registry Typecheck", async () => {
                     `import { tw } from "~/tw"`,
                     ``,
                     `tw.style({`,
-                    `    xs: {`,
-                    `        width: "xs:w-(--popup-width)",`,
+                    `    "peer/menu-button": {`,
+                    `        color: "text-red-500",`,
                     `    },`,
                     `})`,
                     ``,
@@ -41,9 +41,141 @@ describe("Shadcn Registry Typecheck", async () => {
             const result = await runTsc(projectRoot)
 
             expect(result.success).toBe(false)
-            expect(result.output).toContain(`'xs' does not exist`)
+            expect(result.output).toContain(
+                `"peer/menu-button"' does not exist`
+            )
         } finally {
             await removeTypecheckProjectRoot(projectRoot)
+        }
+    }, 120_000)
+
+    it("typechecks generated known variants that the classifier structures", async () => {
+        const projectRoot = await createTypecheckProjectRoot("known-variant")
+
+        try {
+            await writeTypecheckSupportFiles(projectRoot)
+            await writeFile(
+                path.join(projectRoot, "known-variant.tsx"),
+                [
+                    `import { tw } from "~/tw"`,
+                    ``,
+                    `tw.style({`,
+                    `    sm: {`,
+                    `        width: "sm:w-(--popup-width)",`,
+                    `    },`,
+                    `})`,
+                    ``,
+                ].join("\n")
+            )
+
+            const result = await runTsc(projectRoot)
+
+            expect(result.output).toBe("")
+            expect(result.success).toBe(true)
+        } finally {
+            await removeTypecheckProjectRoot(projectRoot)
+        }
+    }, 120_000)
+
+    it("requires generated Tailwind record keys for directional padding utilities", async () => {
+        const failingRoot = await createTypecheckProjectRoot(
+            "padding-record-negative"
+        )
+        const passingRoot = await createTypecheckProjectRoot(
+            "padding-record-positive"
+        )
+
+        try {
+            await writeTypecheckSupportFiles(failingRoot)
+            await writeFile(
+                path.join(failingRoot, "padding-record.tsx"),
+                [
+                    `import { tw } from "~/tw"`,
+                    ``,
+                    `tw.style({`,
+                    `    paddingRight: "pr-8",`,
+                    `})`,
+                    ``,
+                    `tw.style({`,
+                    `    "group-has-[[data-sidebar=menu-action]]/menu-item": {`,
+                    `        paddingRight: "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8",`,
+                    `    },`,
+                    `})`,
+                    ``,
+                ].join("\n")
+            )
+
+            const failingResult = await runTsc(failingRoot)
+
+            expect(failingResult.success).toBe(false)
+            expect(failingResult.output).toContain("paddingRight")
+
+            await writeTypecheckSupportFiles(passingRoot)
+            await writeFile(
+                path.join(passingRoot, "padding-record.tsx"),
+                [
+                    `import { tw } from "~/tw"`,
+                    ``,
+                    `tw.style({`,
+                    `    padding: "pr-8",`,
+                    `})`,
+                    ``,
+                    `tw.style({`,
+                    `    "group-has-[[data-sidebar=menu-action]]/menu-item": {`,
+                    `        padding: "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8",`,
+                    `    },`,
+                    `})`,
+                    ``,
+                ].join("\n")
+            )
+
+            const passingResult = await runTsc(passingRoot)
+
+            expect(passingResult.output).toBe("")
+            expect(passingResult.success).toBe(true)
+        } finally {
+            await removeTypecheckProjectRoot(failingRoot)
+            await removeTypecheckProjectRoot(passingRoot)
+        }
+    }, 120_000)
+
+    it("requires createTools useArbitrary for raw def tokens with finite class literals", async () => {
+        const failingRoot = await createTypecheckProjectRoot(
+            "finite-literal-negative"
+        )
+        const passingRoot = await createTypecheckProjectRoot(
+            "finite-literal-positive"
+        )
+
+        try {
+            await writeTypecheckSupportFiles(failingRoot, {
+                twSource: finiteLiteralTwModuleSource(false),
+            })
+            await writeFile(
+                path.join(failingRoot, "raw-def.tsx"),
+                rawDefSource()
+            )
+
+            const failingResult = await runTsc(failingRoot)
+
+            expect(failingResult.success).toBe(false)
+            expect(failingResult.output).toContain("peer/menu-button")
+
+            await writeTypecheckSupportFiles(passingRoot, {
+                twSource: finiteLiteralTwModuleSource(true),
+            })
+            await writeFile(
+                path.join(passingRoot, "raw-def.tsx"),
+                rawDefSource()
+            )
+
+            const passingResult = await runTsc(passingRoot)
+
+            expect(passingResult.output).toBe("")
+            expect(passingResult.success).toBe(true)
+        } finally {
+            await removeTypecheckProjectRoot(failingRoot)
+            await removeTypecheckProjectRoot(passingRoot)
         }
     }, 120_000)
 
@@ -89,14 +221,22 @@ async function removeTypecheckProjectRoot(root: string): Promise<void> {
     await fs.rm(root, { force: true, recursive: true })
 }
 
-async function writeTypecheckSupportFiles(projectRoot: string): Promise<void> {
+async function writeTypecheckSupportFiles(
+    projectRoot: string,
+    options: {
+        twSource?: string
+    } = {}
+): Promise<void> {
     await Promise.all([
         fs.copyFile(
             path.join(repoRoot, "packages/tailwindest/tailwind.2.ts"),
             path.join(projectRoot, "tailwind.ts")
         ),
         writeFile(path.join(projectRoot, "tsconfig.json"), tsconfigJson()),
-        writeFile(path.join(projectRoot, "tw.ts"), twModuleSource()),
+        writeFile(
+            path.join(projectRoot, "tw.ts"),
+            options.twSource ?? twModuleSource()
+        ),
         writeFile(
             path.join(projectRoot, "typecheck-sentinel.ts"),
             typecheckSentinelSource()
@@ -234,6 +374,43 @@ function twModuleSource(): string {
         `    useArbitrary: true`,
         `    useTypedClassLiteral: true`,
         `}>()`,
+        ``,
+    ].join("\n")
+}
+
+function finiteLiteralTwModuleSource(useArbitrary: boolean): string {
+    const createToolsOptions = [
+        `    tailwindest: Tailwindest`,
+        `    tailwindLiteral: TailwindLiteral`,
+        useArbitrary ? `    useArbitrary: true` : null,
+        `    useTypedClassLiteral: true`,
+    ].filter((line): line is string => line !== null)
+
+    return [
+        `import { createTools, type CreateTailwindest, type CreateTailwindLiteral } from "tailwindest"`,
+        `import type { Tailwind, TailwindNestGroups } from "./tailwind"`,
+        ``,
+        `export type Tailwindest = CreateTailwindest<{`,
+        `    tailwind: Tailwind`,
+        `    tailwindNestGroups: TailwindNestGroups`,
+        `    useArbitrary: true`,
+        `    useArbitraryNestGroups: true`,
+        `}>`,
+        ``,
+        `type TailwindLiteral = CreateTailwindLiteral<Tailwind>`,
+        ``,
+        `export const tw = createTools<{`,
+        ...createToolsOptions,
+        `}>()`,
+        ``,
+    ].join("\n")
+}
+
+function rawDefSource(): string {
+    return [
+        `import { tw } from "~/tw"`,
+        ``,
+        `tw.def(["peer/menu-button"], { display: "flex" })`,
         ``,
     ].join("\n")
 }

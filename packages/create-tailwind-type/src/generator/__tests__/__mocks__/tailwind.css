@@ -49,6 +49,12 @@
     --color-chart-3: #264653;
     --color-chart-4: #e9c46a;
     --color-chart-5: #f4a261;
+    --color-sidebar: #fafafa;
+    --color-sidebar-foreground: #18181b;
+    --color-sidebar-border: #e4e4e7;
+    --color-sidebar-ring: #71717a;
+    --color-sidebar-accent: #f4f4f5;
+    --color-sidebar-accent-foreground: #18181b;
 
     /* Font stacks with variable fonts */
     --font-sans:

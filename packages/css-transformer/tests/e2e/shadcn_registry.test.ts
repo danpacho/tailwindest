@@ -66,7 +66,13 @@ describe("Shadcn Registry E2E Tests", async () => {
     })
 
     await generator.init()
-    const resolver = generator.createPropertyResolver()
+    const targetTailwindSource = await fs.readFile(
+        path.resolve(__dirname, "../../../tailwindest/tailwind.2.ts"),
+        "utf-8"
+    )
+    const resolver = await generator.createTypesetAwarePropertyResolver({
+        tailwindSource: targetTailwindSource,
+    })
 
     const analyzer = new TokenAnalyzerImpl(resolver)
     const registry = new TransformerRegistry()

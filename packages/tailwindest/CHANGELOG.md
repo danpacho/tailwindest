@@ -1,5 +1,11 @@
 # tailwindest
 
+## 3.2.10
+
+### Patch Changes
+
+- Fix CSS transformer record-key resolution and typed shadcn output validation
+
 ## 3.2.9
 
 ### Patch Changes

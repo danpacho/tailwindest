@@ -4,6 +4,14 @@ import * as React from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
 import { tw } from "~/tw";
 
+const progressProgressPrimitiveIndicator = tw.style({
+    height: "h-full",
+    width: "w-full",
+    flex: "flex-1",
+    backgroundColor: "bg-primary",
+    transitionProperty: "transition-all",
+});
+
 const progressProgressPrimitiveRoot = tw.style({
     position: "relative",
     height: "h-2",
@@ -23,7 +31,7 @@ const Progress = React.forwardRef<
     {...props}
   >
     <ProgressPrimitive.Indicator
-      className={tw.join("h-full w-full flex-1 bg-primary transition-all")}
+      className={progressProgressPrimitiveIndicator.class()}
       style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
     />
   </ProgressPrimitive.Root>

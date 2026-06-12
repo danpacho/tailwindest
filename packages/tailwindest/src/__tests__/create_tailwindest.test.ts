@@ -3,12 +3,16 @@ import type { CreateTailwindest } from "../create_tailwindest"
 
 type TestTailwind = {
     backgroundColor: "bg-red-500"
+    color: "text-red-500"
     cursor: "cursor-grabbing"
     display: "block"
     margin: "mt-4"
+    opacity: "opacity-100"
+    padding: "pr-8"
+    zIndex: "z-50"
 }
 
-type TestNestGroups = "active" | "group-hover" | "hover"
+type TestNestGroups = "**" | "active" | "group-hover" | "hover" | "xs"
 
 type DefaultStyle = CreateTailwindest<{
     tailwind: TestTailwind
@@ -128,6 +132,70 @@ describe("CreateTailwindest arbitrary nest groups", () => {
             },
             "supports-[display:grid]": {
                 display: "supports-[display:grid]:block",
+            },
+        }
+
+        void style
+    })
+
+    it("supports Tailwind named group, peer, and container modifiers", () => {
+        const style: ArbitraryNestStyle = {
+            xs: {
+                display: "xs:block",
+            },
+            "group-hover/menu-button": {
+                backgroundColor: "group-hover/menu-button:bg-red-500",
+            },
+            "group-focus/context-menu-item": {
+                color: "group-focus/context-menu-item:text-red-500",
+            },
+            "group-focus-within/menu-item": {
+                opacity: "group-focus-within/menu-item:opacity-100",
+            },
+            "group-data-[state=open]/menu-button": {
+                color: "group-data-[state=open]/menu-button:text-red-500",
+            },
+            "group-has-[[data-sidebar=menu-action]]/menu-item": {
+                padding:
+                    "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8",
+            },
+            "peer-hover/menu-button": {
+                color: "peer-hover/menu-button:text-red-500",
+            },
+            "peer-focus/menu-button": {
+                color: "peer-focus/menu-button:text-red-500",
+            },
+            "peer-focus-within/menu-button": {
+                opacity: "peer-focus-within/menu-button:opacity-100",
+            },
+            "peer-data-[size=sm]/menu-button": {
+                margin: "peer-data-[size=sm]/menu-button:mt-4",
+            },
+            "peer-has-[svg]/menu-button": {
+                color: "peer-has-[svg]/menu-button:text-red-500",
+            },
+            "@md/card-header": {
+                display: "@md/card-header:block",
+            },
+            "@max-lg/field-group": {
+                display: "@max-lg/field-group:block",
+            },
+            "@min-md/card": {
+                display: "@min-md/card:block",
+            },
+        }
+
+        void style
+    })
+
+    it("supports repeated descendant arbitrary nesting chains", () => {
+        const style: ArbitraryNestStyle = {
+            "**": {
+                "data-[variant=destructive]": {
+                    "**": {
+                        color: "**:data-[variant=destructive]:**:text-red-500",
+                    },
+                },
             },
         }
 

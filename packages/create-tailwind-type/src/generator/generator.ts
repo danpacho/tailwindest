@@ -11,6 +11,7 @@ import type { TypeSchemaGenerator } from "../type_tools"
 import * as t from "../type_tools"
 import { CSSAnalyzer } from "./css_analyzer"
 import { CSSPropertyResolver } from "./css_property_resolver"
+import { createTailwindTypesetIndex } from "./tailwind_typeset_index"
 import { access, constants, mkdir, readFile, writeFile } from "fs/promises"
 import { basename, dirname, extname, join } from "path"
 import * as ts from "typescript"
@@ -835,7 +836,8 @@ export class TailwindTypeGenerator {
 
     /**
      * Creates a CSSPropertyResolver instance using the generator's initialized state.
-     * The resolver can be used independently to map Tailwind class names to CSS property names.
+     * The resolver can be used independently to map Tailwind class names to
+     * generated Tailwindest record keys.
      * @throws Error if the generator has not been initialized.
      */
     public createPropertyResolver(
@@ -1007,134 +1009,175 @@ export class TailwindTypeGenerator {
         ].join("\n")
     }
 
+    private async createTailwindTypeSource(): Promise<{
+        tailwindSource: string
+        tailwindLiteralSource: string
+        colorVariableSet: Set<string>
+    }> {
+        const tailwindCollection: TailwindCollection = {}
+
+        const compiled = await this.compiler.compileCss(
+            this.classList.map((e) => e[0])
+        )
+
+        const compiledStyleBlock =
+            this.cssAnalyzer.parseStyleDefinition(compiled)
+
+        const colorVariableSet: Set<string> = new Set(
+            compiledStyleBlock
+                .filter((e) => e.property.startsWith("--color"))
+                .map((e) => e.property.replace("--color-", ""))
+        )
+        const colorVariables: Array<string> = Array.from(colorVariableSet)
+
+        const resolver = new CSSPropertyResolver(
+            {
+                candidatesToCss: (candidates) =>
+                    this.ds.candidatesToCss(candidates),
+                parseStyleBlock: (css) => this.cssAnalyzer.parseStyleBlock(css),
+                typeAliasMap: this.typeAliasMap,
+                variants: this.variants,
+                colorVariableSet,
+            },
+            {
+                warn: (msg) => this.$.warn(msg),
+                error: (msg) => this.$.error(msg),
+            }
+        )
+
+        for (const entry of this.classList) {
+            const [className, variants] = entry
+
+            if (this.shouldSkip(className)) {
+                this.$.info(`Skip <${className}>, depreciated at v4.`)
+                continue
+            }
+
+            let property = resolver.resolve(className)
+
+            if (!property) {
+                const isUserDefined =
+                    this.ds.candidatesToCss([className])[0] !== null
+
+                if (isUserDefined) {
+                    property = "custom"
+                    this.$.info(`Mark <${className}> as custom property.`)
+                } else {
+                    this.$.warn(
+                        `Not valid classname <${className}>. Skipped generation.`
+                    )
+                    continue
+                }
+            }
+
+            const assignRecord = (property: string): void => {
+                if (!tailwindCollection[property]) {
+                    tailwindCollection[property] = {
+                        classNames: [],
+                        variants: [],
+                    }
+                }
+
+                tailwindCollection[property]!.classNames.push(className)
+
+                if (variants.modifiers.length === 0) return
+
+                const prevVariantSet = new Set(
+                    tailwindCollection[property]!.variants
+                )
+                variants.modifiers.forEach((variant) => {
+                    if (!prevVariantSet.has(variant)) {
+                        tailwindCollection[property]!.variants.push(variant)
+                    }
+                })
+            }
+            if (Array.isArray(property)) {
+                property.forEach(assignRecord)
+            } else {
+                assignRecord(property)
+            }
+        }
+
+        const colorNames = new Set(colorVariables.map((e) => e.split("-")[0]))
+
+        const optimizedMapList = await this.createOptimizableMapList(
+            tailwindCollection,
+            [
+                // color like
+                (prefixStr) => {
+                    if (colorNames.has(prefixStr)) return false
+                    return true
+                },
+                // number like
+                (prefixStr) => {
+                    if (Number.isNaN(parseFloat(prefixStr))) return true
+                    return false
+                },
+            ]
+        )
+
+        const tailwindSource = await this.generateType({
+            globalReference: { color: colorVariables },
+            optimizationList: optimizedMapList,
+        })
+
+        return {
+            tailwindSource,
+            tailwindLiteralSource:
+                this.createTailwindLiteralSource(tailwindSource),
+            colorVariableSet,
+        }
+    }
+
+    public async createTypesetAwarePropertyResolver(
+        options: {
+            tailwindSource?: string
+        } = {}
+    ): Promise<CSSPropertyResolver> {
+        if (!this._initialized) {
+            throw new Error(
+                "Generator must be initialized before creating resolver"
+            )
+        }
+
+        const { tailwindSource, colorVariableSet } =
+            await this.createTailwindTypeSource()
+        const typesetIndex = createTailwindTypesetIndex({
+            tailwindSource: options.tailwindSource ?? tailwindSource,
+        })
+
+        return new CSSPropertyResolver(
+            {
+                candidatesToCss: (candidates) =>
+                    this.ds.candidatesToCss(candidates),
+                parseStyleBlock: (css) => this.cssAnalyzer.parseStyleBlock(css),
+                typeAliasMap: this.typeAliasMap,
+                variants: this.variants,
+                colorVariableSet,
+                typesetIndex,
+            },
+            {
+                warn: (msg) => this.$.warn(msg),
+                error: (msg) => this.$.error(msg),
+            }
+        )
+    }
+
     public async buildTypes(saveRoot: {
         tailwind: string
         tailwindLiteral?: string
     }) {
         await this.init()
 
-        const uniqueKeySet = new Set<string>(
-            Array.from(this.typeAliasMap.keys())
-        )
-
-        const tailwindCollection: TailwindCollection = {}
-
         try {
-            // symbolic type generation needed
-            const compiled = await this.compiler.compileCss(
-                this.classList.map((e) => e[0])
-            )
-
-            const compiledStyleBlock =
-                this.cssAnalyzer.parseStyleDefinition(compiled)
-
-            const colorVariableSet: Set<string> = new Set(
-                compiledStyleBlock
-                    .filter((e) => e.property.startsWith("--color"))
-                    .map((e) => e.property.replace("--color-", ""))
-            )
-            const colorVariables: Array<string> = Array.from(colorVariableSet)
-
-            const resolver = new CSSPropertyResolver(
-                {
-                    candidatesToCss: (candidates) =>
-                        this.ds.candidatesToCss(candidates),
-                    parseStyleBlock: (css) =>
-                        this.cssAnalyzer.parseStyleBlock(css),
-                    typeAliasMap: this.typeAliasMap,
-                    variants: this.variants,
-                    colorVariableSet,
-                },
-                {
-                    warn: (msg) => this.$.warn(msg),
-                    error: (msg) => this.$.error(msg),
-                }
-            )
-
-            for (const entry of this.classList) {
-                const [className, variants] = entry
-
-                if (this.shouldSkip(className)) {
-                    this.$.info(`Skip <${className}>, depreciated at v4.`)
-                    continue
-                }
-
-                let property = resolver.resolve(className)
-
-                if (!property) {
-                    const isUserDefined =
-                        this.ds.candidatesToCss([className])[0] !== null
-
-                    if (isUserDefined) {
-                        property = "custom"
-                        this.$.info(`Mark <${className}> as custom property.`)
-                    } else {
-                        this.$.warn(
-                            `Not valid classname <${className}>. Skipped generation.`
-                        )
-                        continue
-                    }
-                }
-
-                const assignRecord = (property: string): void => {
-                    if (!tailwindCollection[property]) {
-                        tailwindCollection[property] = {
-                            classNames: [],
-                            variants: [],
-                        }
-                    }
-
-                    tailwindCollection[property]!.classNames.push(className)
-
-                    if (variants.modifiers.length === 0) return
-
-                    const prevVariantSet = new Set(
-                        tailwindCollection[property]!.variants
-                    )
-                    variants.modifiers.forEach((variant) => {
-                        if (!prevVariantSet.has(variant)) {
-                            tailwindCollection[property]!.variants.push(variant)
-                        }
-                    })
-                }
-                if (Array.isArray(property)) {
-                    property.forEach(assignRecord)
-                } else {
-                    assignRecord(property)
-                }
-            }
-
-            const colorNames = new Set(
-                colorVariables.map((e) => e.split("-")[0])
-            )
-
-            const optimizedMapList = await this.createOptimizableMapList(
-                tailwindCollection,
-                [
-                    // color like
-                    (prefixStr) => {
-                        if (colorNames.has(prefixStr)) return false
-                        return true
-                    },
-                    // number like
-                    (prefixStr) => {
-                        if (Number.isNaN(parseFloat(prefixStr))) return true
-                        return false
-                    },
-                ]
-            )
-
-            const tailwind = await this.generateType({
-                globalReference: { color: colorVariables },
-                optimizationList: optimizedMapList,
-            })
-            const tailwindLiteral = this.createTailwindLiteralSource(tailwind)
+            const { tailwindSource, tailwindLiteralSource } =
+                await this.createTailwindTypeSource()
             const tailwindLiteralRoot =
                 saveRoot.tailwindLiteral ??
                 this.resolveTailwindLiteralRoot(saveRoot.tailwind)
 
-            await writeIfNotExists(saveRoot.tailwind, tailwind)
-            await writeIfNotExists(tailwindLiteralRoot, tailwindLiteral)
+            await writeIfNotExists(saveRoot.tailwind, tailwindSource)
+            await writeIfNotExists(tailwindLiteralRoot, tailwindLiteralSource)
         } catch (e) {
             this.$.error("build type error occurred")
             console.error(e)

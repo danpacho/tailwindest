@@ -1,6 +1,7 @@
 import { readdir, readFile } from "node:fs/promises"
 import path from "node:path"
 import { findTailwindCSSRoot } from "create-tailwind-type"
+import { Node, Project, SyntaxKind, TypeLiteralNode } from "ts-morph"
 import type { CssTransformerOutputMode } from "../context/output_mode"
 
 export type CssTransformerCliWalker = "cva" | "cn" | "classname"
@@ -30,6 +31,11 @@ export interface ResolvedCssTransformerCliConfig {
 interface TailwindestDefinition {
     path: string
     identifier: string
+}
+
+export interface TailwindestTransformContractResult {
+    changed: boolean
+    diagnostics: string[]
 }
 
 const DEFAULT_WALKERS: CssTransformerCliWalker[] = ["cva", "cn", "classname"]
@@ -210,6 +216,120 @@ export async function resolveTailwindestModulePath(input: {
         relativePath = `./${relativePath}`
     }
     return stripModuleFileSuffix(relativePath)
+}
+
+export async function ensureTailwindestTransformContract(
+    filePath: string
+): Promise<TailwindestTransformContractResult> {
+    const project = new Project({
+        skipAddingFilesFromTsConfig: true,
+    })
+    const sourceFile = project.addSourceFileAtPath(filePath)
+    const diagnostics: string[] = []
+    const tailwindestTypeLiteral = findCreateTailwindestTypeLiteral(sourceFile)
+
+    if (!tailwindestTypeLiteral) {
+        diagnostics.push(
+            `Could not verify Tailwindest transform contract in ${filePath}. Expected CreateTailwindest<{ ... }> with useArbitrary and useArbitraryNestGroups enabled.`
+        )
+    }
+
+    let changed = false
+    if (tailwindestTypeLiteral) {
+        changed =
+            ensureTrueTypeProperty(tailwindestTypeLiteral, "useArbitrary") ||
+            changed
+        changed =
+            ensureTrueTypeProperty(
+                tailwindestTypeLiteral,
+                "useArbitraryNestGroups"
+            ) || changed
+    }
+
+    const createToolsTypeLiteral = findCreateToolsTypeLiteral(sourceFile)
+    if (!createToolsTypeLiteral) {
+        diagnostics.push(
+            `Could not verify Tailwindest tools contract in ${filePath}. Expected createTools<{ ... }> with useArbitrary and useTypedClassLiteral enabled.`
+        )
+    } else {
+        changed =
+            ensureTrueTypeProperty(createToolsTypeLiteral, "useArbitrary") ||
+            changed
+        changed =
+            ensureTrueTypeProperty(
+                createToolsTypeLiteral,
+                "useTypedClassLiteral"
+            ) || changed
+    }
+
+    if (changed) {
+        await sourceFile.save()
+    }
+
+    return { changed, diagnostics }
+}
+
+function findCreateTailwindestTypeLiteral(
+    sourceFile: ReturnType<Project["addSourceFileAtPath"]>
+): TypeLiteralNode | null {
+    const typeReferences = sourceFile.getDescendantsOfKind(
+        SyntaxKind.TypeReference
+    )
+
+    for (const typeReference of typeReferences) {
+        if (typeReference.getTypeName().getText() !== "CreateTailwindest") {
+            continue
+        }
+
+        const typeArgument = typeReference.getTypeArguments()[0]
+        if (Node.isTypeLiteral(typeArgument)) return typeArgument
+    }
+
+    return null
+}
+
+function findCreateToolsTypeLiteral(
+    sourceFile: ReturnType<Project["addSourceFileAtPath"]>
+): TypeLiteralNode | null {
+    const calls = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression)
+
+    for (const call of calls) {
+        const expression = call.getExpression()
+        if (!Node.isIdentifier(expression)) continue
+        if (expression.getText() !== "createTools") continue
+
+        const typeArgument = call.getTypeArguments()[0]
+        if (Node.isTypeLiteral(typeArgument)) return typeArgument
+        return null
+    }
+
+    return null
+}
+
+function ensureTrueTypeProperty(
+    typeLiteral: TypeLiteralNode,
+    name: string
+): boolean {
+    const property = typeLiteral.getProperty(name)
+
+    if (!property) {
+        typeLiteral.addProperty({
+            name,
+            type: "true",
+        })
+        return true
+    }
+
+    const typeNode = property.getTypeNode()
+    if (typeNode?.getText() === "true") return false
+
+    if (typeNode) {
+        typeNode.replaceWithText("true")
+    } else {
+        property.setType("true")
+    }
+
+    return true
 }
 
 function getTargetDirectory(targetPath: string): string {

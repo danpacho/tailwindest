@@ -22,6 +22,10 @@
             "@tailwindest/tailwind-internal/*": [
                 "./packages/tailwind-internal/src/*"
             ],
+            "create-tailwind-type": [
+                "./packages/create-tailwind-type/src/index.ts"
+            ],
+            "create-tailwind-type/*": ["./packages/create-tailwind-type/src/*"],
             "tailwindest": ["./packages/tailwindest/src/index.ts"],
             "tailwindest/*": ["./packages/tailwindest/src/*"]
         }

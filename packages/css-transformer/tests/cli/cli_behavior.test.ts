@@ -91,6 +91,9 @@ vi.mock("create-tailwind-type", () => ({
         createPropertyResolver() {
             return tailwindMocks.resolver
         }
+        async createTypesetAwarePropertyResolver() {
+            return tailwindMocks.resolver
+        }
     },
     resolveTailwindNodeDir: tailwindMocks.resolveTailwindNodeDir,
     getTailwindVersion: tailwindMocks.getTailwindVersion,

@@ -34,6 +34,7 @@
         "pkg:init": "pnpm test:ci && changeset",
         "pkg:version": "pnpm build && changeset version",
         "pkg:publish": "changeset publish",
+        "pkg:release": "pnpm pkg:publish",
         "pre-commit": "lint-staged",
         "prepare": "husky install"
     },

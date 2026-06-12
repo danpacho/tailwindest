@@ -18,6 +18,7 @@ import {
     isVersionSufficient,
 } from "create-tailwind-type"
 import {
+    ensureTailwindestTransformContract,
     resolveCssTransformerCliConfig,
     resolveTailwindestModulePath,
     type ResolveCssTransformerCliConfigInput,
@@ -95,6 +96,20 @@ export async function runTransform(input: RunTransformInput) {
 
     for (const warning of config.warnings) {
         p.log.warn(warning)
+    }
+
+    if (config.tailwindestToolsPath !== undefined && !config.dryRun) {
+        const contract = await ensureTailwindestTransformContract(
+            config.tailwindestToolsPath
+        )
+        for (const diagnostic of contract.diagnostics) {
+            p.log.warn(diagnostic)
+        }
+        if (contract.changed) {
+            p.log.info(
+                `Enabled useArbitrary and useArbitraryNestGroups in ${path.relative(cwd, config.tailwindestToolsPath)}.`
+            )
+        }
     }
 
     p.note(
@@ -211,7 +226,7 @@ async function createTailwindResolver(cssPath: string) {
     })
 
     await generator.init()
-    return generator.createPropertyResolver()
+    return generator.createTypesetAwarePropertyResolver()
 }
 
 async function collectSourceFiles(targetDir: string): Promise<string[]> {

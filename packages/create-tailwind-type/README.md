@@ -12,6 +12,25 @@ By default this writes both `tailwind.ts` and `tailwind_literal.ts`.
 - `tailwind_literal.ts` exports the precomputed `TailwindLiteral` union for
   typed class string arguments.
 
+The generated `Tailwind` interface is the source of truth for Tailwindest
+record keys. Tools that need to serialize utilities back into Tailwindest
+objects should resolve against `Tailwind[key]` value membership, not raw CSS
+declaration names. For example, Tailwind may compile `pr-8` to
+`padding-right`, but the generated Tailwindest record key can still be
+`padding`:
+
+```ts
+tw.style({
+    padding: "pr-8",
+})
+```
+
+`create-tailwind-type` exposes a typeset-aware resolver path for this purpose.
+It uses the same TypeScript compiler API strategy as `tailwind_literal.ts`
+generation: read the generated `Tailwind` interface, test concrete utilities
+against property value types, and use Tailwind compiler CSS only as a semantic
+tie-breaker.
+
 Arbitrary strings are still controlled by `useArbitrary: true` in your
 `CreateTailwindest` and `createTools` setup.
 Arbitrary and dynamic variant object keys, such as `[&_p]`,

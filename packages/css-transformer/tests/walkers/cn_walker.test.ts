@@ -121,7 +121,7 @@ describe("CnWalker", () => {
         expect(text).not.toContain(`String.raw`)
     })
 
-    it("emits resolved type-unsafe variants through tw.def instead of style keys", () => {
+    it("structures typed variant chains and preserves remaining unsafe variants", () => {
         const { sourceFile, context } = setup(
             `const a = cn("relative w-(--popup-width) xs:w-(--popup-width) group-focus/context-menu-item:text-accent-foreground **:data-[slot=kbd]:z-50 supports-backdrop-filter:backdrop-blur-xs", className)`
         )
@@ -134,11 +134,19 @@ describe("CnWalker", () => {
         const text = sourceFile.getFullText()
 
         expect(text).toContain(
-            `tw.join(tw.def(["xs:w-(--popup-width)", "group-focus/context-menu-item:text-accent-foreground", "**:data-[slot=kbd]:z-50", "supports-backdrop-filter:backdrop-blur-xs"], globalDiv.style()), className)`
+            `tw.join(tw.def(["xs:w-(--popup-width)", "supports-backdrop-filter:backdrop-blur-xs"], globalDiv.style()), className)`
         )
         expect(context.styles.getStyles()[0]?.[1].style).toEqual({
             position: "relative",
             width: "w-(--popup-width)",
+            "group-focus/context-menu-item": {
+                color: "group-focus/context-menu-item:text-accent-foreground",
+            },
+            "**": {
+                "data-[slot=kbd]": {
+                    zIndex: "**:data-[slot=kbd]:z-50",
+                },
+            },
         })
     })
 

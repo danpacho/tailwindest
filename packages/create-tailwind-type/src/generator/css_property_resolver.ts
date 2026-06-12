@@ -1,5 +1,6 @@
 import type { StyleBlock } from "./css_analyzer"
 import type { TailwindTypeAliasMap } from "./generator"
+import type { TailwindTypesetIndex } from "./tailwind_typeset_index"
 import {
     sanitizeTwClass,
     kebabToCamelCase,
@@ -16,6 +17,7 @@ export interface PropertyResolverDeps {
     typeAliasMap: TailwindTypeAliasMap
     variants: string[]
     colorVariableSet: Set<string>
+    typesetIndex?: TailwindTypesetIndex
 }
 
 export interface PropertyResolverLogger {
@@ -278,9 +280,106 @@ export class CSSPropertyResolver {
         return null
     }
 
+    private resolvePropertyFromCSSSignature(css: string): string | null {
+        const cssBlock = this.deps.parseStyleBlock(css)
+        if (!cssBlock) return null
+
+        const keys = Object.keys(cssBlock.styles)
+
+        if (
+            keys.some(
+                (key) =>
+                    key === "--tw-ring-color" ||
+                    key === "--tw-ring-offset-color" ||
+                    key === "--tw-ring-shadow" ||
+                    key === "box-shadow"
+            )
+        ) {
+            return "boxShadow"
+        }
+
+        const propertySet = new Set(
+            keys.filter((key) => !key.startsWith("--")).map(toValidCSSProperty)
+        )
+
+        if (propertySet.has("fontSize")) return "fontSize"
+        if (propertySet.has("color")) return "color"
+        if (propertySet.has("backgroundColor")) return "backgroundColor"
+        if (propertySet.has("borderColor")) return "borderColor"
+
+        if (propertySet.size === 1) {
+            return Array.from(propertySet)[0] ?? null
+        }
+
+        return null
+    }
+
+    private refineByTypeset(
+        className: string,
+        candidates: string | Array<string>,
+        cssSignatureProperty: string | null
+    ): string | Array<string> | null {
+        const candidateList = Array.from(
+            new Set(Array.isArray(candidates) ? candidates : [candidates])
+        )
+        const typesetIndex = this.deps.typesetIndex
+
+        if (!typesetIndex) {
+            if (
+                cssSignatureProperty &&
+                candidateList.includes(cssSignatureProperty)
+            ) {
+                return cssSignatureProperty
+            }
+            return Array.isArray(candidates) ? candidateList : candidateList[0]!
+        }
+
+        const validCandidates = candidateList.filter((candidate) =>
+            typesetIndex.hasKey(candidate)
+        )
+        const matches = typesetIndex.matchUtility(className, validCandidates)
+
+        if (matches.length === 1) return matches[0]!
+
+        if (matches.length > 1) {
+            if (
+                cssSignatureProperty &&
+                matches.includes(cssSignatureProperty)
+            ) {
+                return cssSignatureProperty
+            }
+            return matches
+        }
+
+        if (cssSignatureProperty && typesetIndex.hasKey(cssSignatureProperty)) {
+            return cssSignatureProperty
+        }
+
+        return null
+    }
+
+    private resolveFromCSSSignature(
+        className: string,
+        cssSignatureProperty: string | null
+    ): string | null {
+        if (!cssSignatureProperty) return null
+
+        const typesetIndex = this.deps.typesetIndex
+        if (!typesetIndex) return cssSignatureProperty
+
+        const matches = typesetIndex.matchUtility(className, [
+            cssSignatureProperty,
+        ])
+        if (matches.length === 1) return matches[0]!
+
+        return typesetIndex.hasKey(cssSignatureProperty)
+            ? cssSignatureProperty
+            : null
+    }
+
     /**
-     * Resolve a Tailwind class name to its corresponding CSS property name(s).
-     * @returns The CSS property name, an array of property names, or null if unresolvable.
+     * Resolve a Tailwind class name to its corresponding Tailwindest record key(s).
+     * @returns The Tailwindest record key, an array of record keys, or null if unresolvable.
      */
     public resolve(className: string): string | Array<string> | null {
         // Exceptional case
@@ -303,10 +402,10 @@ export class CSSPropertyResolver {
                     }
                 })
                 if (testResult) {
-                    return property
+                    return this.refineByTypeset(className, property, null)
                 }
             } else {
-                return property
+                return this.refineByTypeset(className, property, null)
             }
         }
 
@@ -316,8 +415,9 @@ export class CSSPropertyResolver {
             return null
         }
 
-        const textProperty = this.resolveTextPropertyFromCSS(className, CSS)
-        if (textProperty) return textProperty
+        const cssSignatureProperty =
+            this.resolveTextPropertyFromCSS(className, CSS) ??
+            this.resolvePropertyFromCSSSignature(CSS)
 
         const tailwindKey: string | null =
             this.generateKey(sanitizeTwClass(className), this.uniqueKeySet) ??
@@ -325,8 +425,18 @@ export class CSSPropertyResolver {
 
         if (tailwindKey === null) {
             const property = this.resolveFallback(className)
+            if (!property) {
+                return this.resolveFromCSSSignature(
+                    className,
+                    cssSignatureProperty
+                )
+            }
 
-            return property
+            return this.refineByTypeset(
+                className,
+                property,
+                cssSignatureProperty
+            )
         }
 
         const propertyAliasPossibility = this.deps.typeAliasMap.get(tailwindKey)
@@ -408,19 +518,43 @@ export class CSSPropertyResolver {
             exactNames.length === 0 && similarNames.length === 0
 
         if (propertyNameNotFounded) {
-            return this.resolveFallback(className)
+            const property = this.resolveFallback(className)
+            if (!property) {
+                return this.resolveFromCSSSignature(
+                    className,
+                    cssSignatureProperty
+                )
+            }
+
+            return this.refineByTypeset(
+                className,
+                property,
+                cssSignatureProperty
+            )
         }
 
         if (exactNames.length >= 1) {
-            return exactNames
+            return this.refineByTypeset(
+                className,
+                exactNames,
+                cssSignatureProperty
+            )
         }
 
         if (similarNames.length === 1) {
             const fallbackByCSS = this.resolveFallback(className)
             if (fallbackByCSS === similarNames[0]) {
-                return fallbackByCSS
+                return this.refineByTypeset(
+                    className,
+                    fallbackByCSS,
+                    cssSignatureProperty
+                )
             }
-            return similarNames[0]!
+            return this.refineByTypeset(
+                className,
+                similarNames[0]!,
+                cssSignatureProperty
+            )
         }
 
         const distinguishSimilarNames = (
@@ -530,13 +664,19 @@ export class CSSPropertyResolver {
             return nameMap.nonColor
         }
 
-        return distinguishSimilarNames(className, similarNames)
+        const typesetResult = this.refineByTypeset(
+            className,
+            similarNames,
+            cssSignatureProperty
+        )
+
+        return typesetResult ?? distinguishSimilarNames(className, similarNames)
     }
 
     /**
      * Resolve a class name to a single unambiguous property name.
      * If the result is an array, returns the first element.
-     * @returns A single CSS property name, or null if unresolvable.
+     * @returns A single Tailwindest record key, or null if unresolvable.
      */
     public resolveUnambiguous(className: string): string | null {
         const result = this.resolve(className)
@@ -545,5 +685,12 @@ export class CSSPropertyResolver {
             return result[0] ?? null
         }
         return result
+    }
+
+    public isKnownVariant(variant: string): boolean {
+        if (this.deps.typesetIndex) {
+            return this.deps.typesetIndex.hasNestGroup(variant)
+        }
+        return this.deps.variants.includes(variant)
     }
 }

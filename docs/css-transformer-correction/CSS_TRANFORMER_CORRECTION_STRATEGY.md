@@ -4,12 +4,15 @@
 
 ## 1. Objective
 
-The CSS transformer must convert supported static Tailwind class sources into Tailwindest code without dropping class tokens.
+The CSS transformer must convert supported static Tailwind class sources into
+Tailwindest code without dropping class tokens and without emitting object keys
+that are not present in the active generated Tailwindest `Tailwind` record.
 
 For the current correction target, the authority goal is:
 
 ```txt
 Every supported static input token is present in the generated Tailwindest output.
+Every structured object key is a generated Tailwindest record key.
 ```
 
 This is intentionally narrower than a universal "preserve arbitrary class order" guarantee. The shadcn registry target is already a complete class-string source. The observed defect is token deletion caused by unresolved Tailwind tokens, not an observed Tailwind conflict-order regression.
@@ -54,10 +57,43 @@ The transformer bug is that it currently treats resolver failure as deletion. Re
 2. Structured style leaves must contain the original Tailwind class literal.
 3. Preserved tokens must be emitted as ordinary JavaScript string literals, not `String.raw`.
 4. Do not map selector anchors, arbitrary declarations, plugin utilities, or unknown tokens to fake CSS properties.
-5. Do not introduce a new public `tw.className` API for this correction.
-6. `tw.def` is allowed as the main mixed raw/structured bridge for shadcn-targeted correction.
-7. Dynamic/user class arguments keep later precedence.
-8. Green snapshots are not sufficient. Preservation specs are the authority.
+5. Do not emit CSS declaration keys such as `paddingRight` unless they are
+   actual keys in the active generated `Tailwind` interface.
+6. Do not introduce a new public `tw.className` API for this correction.
+7. `tw.def` is allowed as the main mixed raw/structured bridge for shadcn-targeted correction.
+8. Dynamic/user class arguments keep later precedence.
+9. Green snapshots are not sufficient. Preservation specs and actual-typeset
+   typecheck specs are the authority.
+
+## 4.1 Typeset-Aware Resolver Invariant
+
+The resolver must treat the generated `Tailwind` interface as the namespace
+authority:
+
+```txt
+utility token
+-> test membership against Tailwind[key] value types
+-> use Tailwind compiler CSS only for semantic tie-breaks
+-> emit only keys that exist in keyof Tailwind
+-> preserve raw when membership cannot be proven
+```
+
+Example:
+
+```ts
+// Source token
+"group-has-[[data-sidebar=menu-action]]/menu-item:pr-8"
+
+// Correct structured output for the current generated typeset
+{
+    "group-has-[[data-sidebar=menu-action]]/menu-item": {
+        padding: "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8",
+    },
+}
+```
+
+`paddingRight` is invalid for the current generated typeset because `pr-*`
+belongs to `Tailwind["padding"]`.
 
 ## 5. Lossless Analyzer Plan
 
@@ -239,6 +275,20 @@ twMerge(inputTokens) == twMerge(serializedTokens)
 
 If metadata cannot be collected for a code path, add targeted walker tests for that path.
 
+### 8.4 Actual Typeset Typecheck
+
+Transformed shadcn output must be written as `.tsx` and checked against the
+actual generated Tailwindest typeset. Mock generated types are allowed for unit
+tests, but they are not sufficient for registry acceptance because they can
+contain stale record keys.
+
+Required sentinels:
+
+```txt
+tw.style({ paddingRight: "pr-8" }) -> typecheck FAIL
+tw.style({ padding: "pr-8" })      -> typecheck PASS
+```
+
 ## 9. Task Order
 
 1. Runtime contract boundary tests.
@@ -262,8 +312,13 @@ The correction is complete only when:
 7. Known historical missing token families are explicitly covered.
 8. Existing shadcn snapshots are updated and reviewed.
 9. No generated output uses `String.raw`.
-10. `pnpm --filter tailwindest-css-transform test` passes.
-11. Runtime tests pass if runtime internals were touched.
+10. Directional utilities such as `pr-8` resolve to the active generated
+    Tailwindest record key, for example `padding`, not stale CSS declaration
+    keys such as `paddingRight`.
+11. Shadcn transformed `.tsx` output typechecks against the actual generated
+    Tailwindest typeset.
+12. `pnpm --filter tailwindest-css-transform test` passes.
+13. Runtime tests pass if runtime internals were touched.
 
 ## 11. Execution Status
 
@@ -292,3 +347,12 @@ git diff --exit-code -- packages/css-transformer/tests/fixtures/shadcn_registry 
 
 Final shadcn transformed snapshots contain the previously missing token
 families in `tw.def(...)`, raw `tw.join(...)`, or structured style leaves.
+
+Additional record-key correction:
+
+| Area                                  | Result                                              |
+| ------------------------------------- | --------------------------------------------------- |
+| Typeset-aware resolver                | Passed                                              |
+| Actual `tailwind.2.ts` typecheck gate | Passed                                              |
+| Directional padding key correction    | `pr-*`, `pl-*`, `px-*`, `pt-*` resolve to `padding` |
+| Invalid key sentinel                  | `paddingRight: "pr-8"` fails typecheck              |

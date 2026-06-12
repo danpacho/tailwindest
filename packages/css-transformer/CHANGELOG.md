@@ -1,5 +1,13 @@
 # tailwindest-css-transform
 
+## 1.0.9
+
+### Patch Changes
+
+- Fix CSS transformer record-key resolution and typed shadcn output validation
+- Updated dependencies
+    - create-tailwind-type@1.1.6
+
 ## 1.0.8
 
 ### Patch Changes

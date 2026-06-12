@@ -1,5 +1,11 @@
 # create-tailwind-type
 
+## 1.1.6
+
+### Patch Changes
+
+- Fix CSS transformer record-key resolution and typed shadcn output validation
+
 ## 1.1.5
 
 ### Patch Changes
