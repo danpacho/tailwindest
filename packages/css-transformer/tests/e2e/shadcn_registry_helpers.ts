@@ -1,13 +1,6 @@
 import fs from "fs/promises"
 import path from "path"
-import {
-    CallExpression,
-    Expression,
-    Node,
-    Project,
-    SourceFile,
-    SyntaxKind,
-} from "ts-morph"
+import { CallExpression, Node, Project, SourceFile, SyntaxKind } from "ts-morph"
 import {
     CSSAnalyzer,
     TailwindCompiler,
@@ -157,9 +150,9 @@ export function collectInputClassSources(
             if (!Node.isJsxExpression(initializer)) return
 
             const expression = initializer.getExpression()
-            const source = expression
-                ? getStaticClassSourceText(expression)
-                : null
+            if (!expression) return
+
+            const source = getStaticClassSourceText(expression)
             if (source !== null) collect(expression, "className", source)
             return
         }
@@ -411,7 +404,7 @@ function collectObjectStringLeafTokens(node: Node): string[] {
 }
 
 function collectClassTokensFromExpression(
-    expression: Expression,
+    expression: Node,
     counts: Map<string, number>
 ) {
     for (const source of collectClassSourcesFromExpression(expression)) {
@@ -419,7 +412,7 @@ function collectClassTokensFromExpression(
     }
 }
 
-function collectClassSourcesFromExpression(expression: Expression): string[] {
+function collectClassSourcesFromExpression(expression: Node): string[] {
     const source = getStaticClassSourceText(expression)
     if (source !== null) return [source]
 
@@ -491,7 +484,7 @@ function getClassMethodTargetIdentifier(call: CallExpression): string | null {
     return Node.isIdentifier(target) ? target.getText() : null
 }
 
-function getStyleMethodTargetIdentifier(expression: Expression): string | null {
+function getStyleMethodTargetIdentifier(expression: Node): string | null {
     if (!Node.isCallExpression(expression)) return null
 
     const callee = expression.getExpression()
