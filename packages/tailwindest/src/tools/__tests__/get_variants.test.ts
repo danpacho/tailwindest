@@ -151,6 +151,15 @@ describe("GetVariants - variants: without boolean | number", () => {
             >
         >(true)
     })
+
+    test("accepts optional prop values as class options", () => {
+        const props: GetVariants<typeof totVariants> = {}
+
+        totVariants.class({
+            color: props.color,
+            size: props.size,
+        })
+    })
 })
 
 describe("GetVariants - variants: with boolean | number", () => {

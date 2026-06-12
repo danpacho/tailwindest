@@ -719,9 +719,6 @@ tw.variants({
             pointerEvents: "disabled:pointer-events-none",
             opacity: "disabled:opacity-50",
         },
-        "group-has-[[data-sidebar=menu-action]]/menu-item": {
-            padding: "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8",
-        },
         "aria-disabled": {
             pointerEvents: "aria-disabled:pointer-events-none",
             opacity: "aria-disabled:opacity-50",
@@ -801,7 +798,7 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={tw.join(tw.def(["peer/menu-button", "ring-sidebar-ring", "hover:bg-sidebar-accent", "hover:text-sidebar-accent-foreground", "active:bg-sidebar-accent", "active:text-sidebar-accent-foreground", "data-[active=true]:bg-sidebar-accent", "data-[active=true]:text-sidebar-accent-foreground", "data-[state=open]:hover:bg-sidebar-accent", "data-[state=open]:hover:text-sidebar-accent-foreground", "group-data-[collapsible=icon]:!size-8", variant === "default" && "hover:bg-sidebar-accent", variant === "default" && "hover:text-sidebar-accent-foreground", variant === "outline" && "hover:bg-sidebar-accent", variant === "outline" && "hover:text-sidebar-accent-foreground"], sidebarMenuButtonVariants.style({ variant, size })), className)}
+        className={tw.join(tw.def(["peer/menu-button", "ring-sidebar-ring", "hover:bg-sidebar-accent", "hover:text-sidebar-accent-foreground", "active:bg-sidebar-accent", "active:text-sidebar-accent-foreground", "group-has-[[data-sidebar=menu-action]]/menu-item:pr-8", "data-[active=true]:bg-sidebar-accent", "data-[active=true]:text-sidebar-accent-foreground", "data-[state=open]:hover:bg-sidebar-accent", "data-[state=open]:hover:text-sidebar-accent-foreground", "group-data-[collapsible=icon]:!size-8", variant === "default" && "hover:bg-sidebar-accent", variant === "default" && "hover:text-sidebar-accent-foreground", variant === "outline" && "hover:bg-sidebar-accent", variant === "outline" && "hover:text-sidebar-accent-foreground"], sidebarMenuButtonVariants.style({ variant, size })), className)}
         {...props}
       />
     )
@@ -859,15 +856,6 @@ const sidebarMenuActionComp = tw.style({
             display: "after:md:hidden",
         },
     },
-    "peer-data-[size=sm]/menu-button": {
-        top: "peer-data-[size=sm]/menu-button:top-1",
-    },
-    "peer-data-[size=default]/menu-button": {
-        top: "peer-data-[size=default]/menu-button:top-1.5",
-    },
-    "peer-data-[size=lg]/menu-button": {
-        top: "peer-data-[size=lg]/menu-button:top-2.5",
-    },
     "group-data-[collapsible=icon]": {
         display: "group-data-[collapsible=icon]:hidden",
     },
@@ -886,7 +874,7 @@ const SidebarMenuAction = React.forwardRef<
     <Comp
       ref={ref}
       data-sidebar="menu-action"
-      className={tw.join(tw.def(["text-sidebar-foreground", "ring-sidebar-ring", "hover:bg-sidebar-accent", "hover:text-sidebar-accent-foreground", "peer-hover/menu-button:text-sidebar-accent-foreground"], sidebarMenuActionComp.style()), showOnHover &&
+      className={tw.join(tw.def(["text-sidebar-foreground", "ring-sidebar-ring", "hover:bg-sidebar-accent", "hover:text-sidebar-accent-foreground", "peer-hover/menu-button:text-sidebar-accent-foreground", "peer-data-[size=sm]/menu-button:top-1", "peer-data-[size=default]/menu-button:top-1.5", "peer-data-[size=lg]/menu-button:top-2.5"], sidebarMenuActionComp.style()), showOnHover &&
                 "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0", className)}
       {...props}
     />
@@ -910,15 +898,6 @@ const sidebarMenuBadgeDiv = tw.style({
     fontSize: "text-xs",
     fontWeight: "font-medium",
     fontVariantNumeric: "tabular-nums",
-    "peer-data-[size=sm]/menu-button": {
-        top: "peer-data-[size=sm]/menu-button:top-1",
-    },
-    "peer-data-[size=default]/menu-button": {
-        top: "peer-data-[size=default]/menu-button:top-1.5",
-    },
-    "peer-data-[size=lg]/menu-button": {
-        top: "peer-data-[size=lg]/menu-button:top-2.5",
-    },
     "group-data-[collapsible=icon]": {
         display: "group-data-[collapsible=icon]:hidden",
     },
@@ -931,7 +910,7 @@ const SidebarMenuBadge = React.forwardRef<
   <div
     ref={ref}
     data-sidebar="menu-badge"
-    className={tw.join(tw.def(["text-sidebar-foreground", "peer-hover/menu-button:text-sidebar-accent-foreground", "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground"], sidebarMenuBadgeDiv.style()), className)}
+    className={tw.join(tw.def(["text-sidebar-foreground", "peer-hover/menu-button:text-sidebar-accent-foreground", "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground", "peer-data-[size=sm]/menu-button:top-1", "peer-data-[size=default]/menu-button:top-1.5", "peer-data-[size=lg]/menu-button:top-2.5"], sidebarMenuBadgeDiv.style()), className)}
     {...props}
   />
 ))

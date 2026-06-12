@@ -8,9 +8,14 @@ import { createContext } from "../../src/context/transformer_context"
 class MockResolver implements Partial<CSSPropertyResolver> {
     resolveUnambiguous(className: string): string | null {
         if (className === "flex") return "display"
+        if (className === "relative") return "position"
         if (className === "text-sm") return "fontSize"
         if (className === "p-4") return "padding"
         if (className === "bg-accent") return "backgroundColor"
+        if (className === "w-(--popup-width)") return "width"
+        if (className === "text-accent-foreground") return "color"
+        if (className === "z-50") return "zIndex"
+        if (className === "backdrop-blur-xs") return "backdropFilter"
         if (className === "gap-(--card-spacing)") return "gap"
         return null
     }
@@ -114,6 +119,27 @@ describe("CnWalker", () => {
             `tw.join(tw.def(["[--card-spacing:--spacing(5)]"], globalDiv.style()), className)`
         )
         expect(text).not.toContain(`String.raw`)
+    })
+
+    it("emits resolved type-unsafe variants through tw.def instead of style keys", () => {
+        const { sourceFile, context } = setup(
+            `const a = cn("relative w-(--popup-width) xs:w-(--popup-width) group-focus/context-menu-item:text-accent-foreground **:data-[slot=kbd]:z-50 supports-backdrop-filter:backdrop-blur-xs", className)`
+        )
+        const callExpr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.CallExpression
+        )!
+        const walker = new CnWalker()
+
+        walker.walk(callExpr, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(
+            `tw.join(tw.def(["xs:w-(--popup-width)", "group-focus/context-menu-item:text-accent-foreground", "**:data-[slot=kbd]:z-50", "supports-backdrop-filter:backdrop-blur-xs"], globalDiv.style()), className)`
+        )
+        expect(context.styles.getStyles()[0]?.[1].style).toEqual({
+            position: "relative",
+            width: "w-(--popup-width)",
+        })
     })
 
     it("preserves static class argument order around dynamic arguments", () => {

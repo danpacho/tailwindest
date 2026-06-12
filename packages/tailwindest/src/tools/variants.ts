@@ -11,7 +11,7 @@ export type VariantsProps<StyleType, VMap extends VariantsRecord<StyleType>> = {
     variants: VMap
 }
 export type VariantOptions<VMap extends VariantsRecord<any>> = {
-    [K in keyof VMap]?: keyof VMap[K]
+    [K in keyof VMap]?: keyof VMap[K] | undefined
 }
 type VariantStylerMap<
     StyleType,

@@ -8,6 +8,202 @@ import type {
 } from "../types"
 import { extractVariants, splitClassString } from "./split_utils"
 
+const STATE_VARIANTS = [
+    "first",
+    "last",
+    "only",
+    "odd",
+    "even",
+    "first-of-type",
+    "last-of-type",
+    "only-of-type",
+    "visited",
+    "target",
+    "open",
+    "default",
+    "checked",
+    "indeterminate",
+    "placeholder-shown",
+    "autofill",
+    "optional",
+    "required",
+    "valid",
+    "invalid",
+    "user-valid",
+    "user-invalid",
+    "in-range",
+    "out-of-range",
+    "read-only",
+    "empty",
+    "focus-within",
+    "hover",
+    "focus",
+    "focus-visible",
+    "active",
+    "enabled",
+    "disabled",
+    "inert",
+]
+
+const VARIANT_OPERATORS = [
+    "in",
+    "has",
+    "aria",
+    "data",
+    "nth",
+    "nth-last",
+    "nth-of-type",
+    "nth-last-of-type",
+]
+
+const DATA_STATE_VARIANTS = [
+    "data-open",
+    "data-closed",
+    "data-checked",
+    "data-unchecked",
+    "data-selected",
+    "data-disabled",
+    "data-active",
+    "data-horizontal",
+    "data-vertical",
+]
+
+const MEDIA_VARIANTS = [
+    "motion-safe",
+    "motion-reduce",
+    "contrast-more",
+    "contrast-less",
+    "max-sm",
+    "max-md",
+    "max-lg",
+    "max-xl",
+    "max-2xl",
+    "sm",
+    "md",
+    "lg",
+    "xl",
+    "2xl",
+    "min-sm",
+    "min-md",
+    "min-lg",
+    "min-xl",
+    "min-2xl",
+    "portrait",
+    "landscape",
+    "ltr",
+    "rtl",
+    "dark",
+    "starting",
+    "print",
+    "forced-colors",
+    "inverted-colors",
+    "pointer-none",
+    "pointer-coarse",
+    "pointer-fine",
+    "any-pointer-none",
+    "any-pointer-coarse",
+    "any-pointer-fine",
+    "noscript",
+]
+
+const prefix = (name: string, variants: string[]) =>
+    variants.map((variant) => `${name}-${variant}`)
+
+const TYPED_VARIANT_KEYS = new Set([
+    "*",
+    "first-letter",
+    "first-line",
+    "marker",
+    "selection",
+    "file",
+    "placeholder",
+    "backdrop",
+    "details-content",
+    "before",
+    "after",
+    "aria-busy",
+    "aria-checked",
+    "aria-disabled",
+    "aria-expanded",
+    "aria-hidden",
+    "aria-pressed",
+    "aria-readonly",
+    "aria-required",
+    "aria-selected",
+    "data",
+    "supports",
+    "not-supports",
+    "not-max",
+    "not-min",
+    "not-@",
+    "not-@max",
+    "not-@min",
+    ...STATE_VARIANTS,
+    ...VARIANT_OPERATORS,
+    ...DATA_STATE_VARIANTS,
+    ...MEDIA_VARIANTS,
+    ...prefix("not", [
+        ...STATE_VARIANTS,
+        ...VARIANT_OPERATORS,
+        ...DATA_STATE_VARIANTS,
+        ...MEDIA_VARIANTS,
+    ]),
+    ...prefix("group", [
+        ...STATE_VARIANTS,
+        ...VARIANT_OPERATORS,
+        ...DATA_STATE_VARIANTS,
+        "ltr",
+        "rtl",
+        "dark",
+    ]),
+    ...prefix("peer", [
+        ...STATE_VARIANTS,
+        ...VARIANT_OPERATORS,
+        ...DATA_STATE_VARIANTS,
+        "ltr",
+        "rtl",
+        "dark",
+    ]),
+    ...prefix("in", [
+        ...STATE_VARIANTS,
+        ...VARIANT_OPERATORS,
+        ...DATA_STATE_VARIANTS,
+        "ltr",
+        "rtl",
+        "dark",
+    ]),
+    ...prefix("has", [
+        ...STATE_VARIANTS,
+        ...VARIANT_OPERATORS,
+        ...DATA_STATE_VARIANTS,
+        "ltr",
+        "rtl",
+        "dark",
+    ]),
+])
+
+function isTypedArbitraryVariant(variant: string): boolean {
+    return (
+        /^\[[\s\S]+\]$/.test(variant) ||
+        /^(?:not-|group-|peer-|in-|has-)?(?:data|aria|has|nth|nth-last|nth-of-type|nth-last-of-type)-\[[\s\S]+\]$/.test(
+            variant
+        )
+    )
+}
+
+function isTypedContainerVariant(variant: string): boolean {
+    return /^@(?:min-|max-)?(?:3xs|2xs|xs|sm|md|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl)$/.test(
+        variant
+    )
+}
+
+function isTypedVariantKey(variant: string): boolean {
+    if (variant.includes("/") || variant.includes("**")) return false
+    if (isTypedArbitraryVariant(variant)) return true
+    if (isTypedContainerVariant(variant)) return true
+    return TYPED_VARIANT_KEYS.has(variant)
+}
+
 export interface TokenAnalyzer {
     analyze(classNames: string | string[]): ParsedToken[]
     plan(classNames: string | string[]): ClassSourcePlan
@@ -53,6 +249,20 @@ export class TokenAnalyzerImpl implements TokenAnalyzer {
         const tokens = this.analyze(classNames).map(
             (token, index): ClassSourceToken => {
                 if (token.property) {
+                    if (
+                        token.variants.some(
+                            (variant) => !isTypedVariantKey(variant)
+                        )
+                    ) {
+                        return {
+                            ...token,
+                            kind: "preserved",
+                            index,
+                            property: null,
+                            reason: "unsafe-serialization",
+                        }
+                    }
+
                     return {
                         ...token,
                         kind: "structured",

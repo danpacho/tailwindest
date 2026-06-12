@@ -114,6 +114,28 @@ describe("CSSPropertyResolver", () => {
             )
             expect(result).toBeNull()
         })
+
+        it("should resolve text size tokens with line-height modifiers to fontSize", () => {
+            expect(resolver.resolveUnambiguous("text-xs")).toBe("fontSize")
+            expect(resolver.resolveUnambiguous("text-xs/relaxed")).toBe(
+                "fontSize"
+            )
+            expect(resolver.resolveUnambiguous("text-[0.625rem]")).toBe(
+                "fontSize"
+            )
+        })
+
+        it("should keep semantic text color tokens mapped to color", () => {
+            expect(resolver.resolveUnambiguous("text-primary-foreground")).toBe(
+                "color"
+            )
+            expect(resolver.resolveUnambiguous("text-muted-foreground")).toBe(
+                "color"
+            )
+            expect(resolver.resolveUnambiguous("text-destructive")).toBe(
+                "color"
+            )
+        })
     })
 
     describe("external instantiation", () => {

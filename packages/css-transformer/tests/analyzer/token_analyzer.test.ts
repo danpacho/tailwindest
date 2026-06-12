@@ -6,10 +6,18 @@ import { TokenAnalyzerImpl } from "../../src/analyzer/token_analyzer"
 class MockResolver implements Partial<CSSPropertyResolver> {
     resolveUnambiguous(className: string): string | null {
         if (className === "flex") return "display"
+        if (className === "relative") return "position"
         if (className === "bg-accent") return "backgroundColor"
         if (className === "text-sm") return "fontSize"
+        if (className === "text-xs/relaxed") return "fontSize"
+        if (className === "text-primary-foreground") return "color"
+        if (className === "text-accent-foreground") return "color"
+        if (className === "text-accent-foreground!") return "color"
         if (className === "p-4" || className === "p-2") return "padding"
+        if (className === "w-(--popup-width)") return "width"
         if (className === "gap-(--card-spacing)") return "gap"
+        if (className === "backdrop-blur-xs") return "backdropFilter"
+        if (className === "z-50") return "zIndex"
         return null // unknown
     }
 }
@@ -181,6 +189,64 @@ describe("TokenAnalyzerImpl", () => {
                 hover: {
                     backgroundColor: "hover:bg-accent",
                 },
+            })
+        })
+
+        it("should classify typography and semantic color tokens independently", () => {
+            const analyzer = new TokenAnalyzerImpl(resolver)
+            const plan = analyzer.plan(
+                "text-xs/relaxed text-primary-foreground"
+            )
+
+            expect(plan.preservedTokens).toEqual([])
+            expect(plan.styleTree).toEqual({
+                fontSize: "text-xs/relaxed",
+                color: "text-primary-foreground",
+            })
+        })
+
+        it("should preserve resolved tokens with type-unsafe variant chains", () => {
+            const analyzer = new TokenAnalyzerImpl(resolver)
+            const source = [
+                "relative",
+                "w-(--popup-width)",
+                "xs:w-(--popup-width)",
+                "group-focus/context-menu-item:text-accent-foreground",
+                "peer-hover/menu-button:text-accent-foreground",
+                "**:data-[slot=kbd]:z-50",
+                "supports-backdrop-filter:backdrop-blur-xs",
+            ].join(" ")
+            const plan = analyzer.plan(source)
+
+            expect(
+                plan.structuredTokens.map((token) => token.original)
+            ).toEqual(["relative", "w-(--popup-width)"])
+            expect(plan.preservedTokens).toEqual([
+                expect.objectContaining({
+                    original: "xs:w-(--popup-width)",
+                    reason: "unsafe-serialization",
+                }),
+                expect.objectContaining({
+                    original:
+                        "group-focus/context-menu-item:text-accent-foreground",
+                    reason: "unsafe-serialization",
+                }),
+                expect.objectContaining({
+                    original: "peer-hover/menu-button:text-accent-foreground",
+                    reason: "unsafe-serialization",
+                }),
+                expect.objectContaining({
+                    original: "**:data-[slot=kbd]:z-50",
+                    reason: "unsafe-serialization",
+                }),
+                expect.objectContaining({
+                    original: "supports-backdrop-filter:backdrop-blur-xs",
+                    reason: "unsafe-serialization",
+                }),
+            ])
+            expect(plan.styleTree).toEqual({
+                position: "relative",
+                width: "w-(--popup-width)",
             })
         })
     })

@@ -257,6 +257,27 @@ export class CSSPropertyResolver {
         return null
     }
 
+    private resolveTextPropertyFromCSS(
+        className: string,
+        css: string
+    ): string | null {
+        if (!className.startsWith("text-")) return null
+
+        const cssBlock = this.deps.parseStyleBlock(css)
+        if (!cssBlock) return null
+
+        const propertySet = new Set(
+            Object.keys(cssBlock.styles)
+                .filter((key) => !key.startsWith("--"))
+                .map(toValidCSSProperty)
+        )
+
+        if (propertySet.has("fontSize")) return "fontSize"
+        if (propertySet.has("color")) return "color"
+
+        return null
+    }
+
     /**
      * Resolve a Tailwind class name to its corresponding CSS property name(s).
      * @returns The CSS property name, an array of property names, or null if unresolvable.
@@ -294,6 +315,9 @@ export class CSSPropertyResolver {
             this.logger?.warn(`Can not transform <${className}> into css.`)
             return null
         }
+
+        const textProperty = this.resolveTextPropertyFromCSS(className, CSS)
+        if (textProperty) return textProperty
 
         const tailwindKey: string | null =
             this.generateKey(sanitizeTwClass(className), this.uniqueKeySet) ??

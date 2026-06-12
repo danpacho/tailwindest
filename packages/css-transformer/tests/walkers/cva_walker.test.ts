@@ -14,6 +14,9 @@ class MockResolver implements Partial<CSSPropertyResolver> {
         if (className === "bg-blue-500") return "backgroundColor"
         if (className === "bg-gray-500") return "backgroundColor"
         if (className === "text-lg") return "fontSize"
+        if (className === "text-xs/relaxed") return "fontSize"
+        if (className === "text-primary-foreground") return "color"
+        if (className === "text-accent-foreground") return "color"
         return null
     }
 }
@@ -219,6 +222,39 @@ describe("CvaWalker", () => {
         expect(text).toContain(
             `className={tw.join(tw.def(["peer/menu-button"], buttonVariants.style({ size })), className)}`
         )
+    })
+
+    it("should keep typography structured while preserving unsafe resolved cva base tokens", () => {
+        const { sourceFile, context } = setup(`
+            import { cva } from "class-variance-authority"
+            import { cn } from "@/lib/utils"
+
+            const buttonVariants = cva("flex text-xs/relaxed group-focus/context-menu-item:text-accent-foreground", {
+                variants: {
+                    variant: {
+                        default: "bg-blue-500 text-primary-foreground"
+                    }
+                }
+            })
+
+            function Button({ className, variant }: { className?: string; variant?: "default" }) {
+                return <button className={cn(buttonVariants({ variant, className }))} />
+            }
+        `)
+        const registry = new TransformerRegistry()
+        registry.register(new CvaWalker())
+        registry.register(new CnWalker())
+
+        registry.transform(sourceFile, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(`fontSize: "text-xs/relaxed"`)
+        expect(text).toContain(`color: "text-primary-foreground"`)
+        expect(text).toContain(
+            `tw.def(["group-focus/context-menu-item:text-accent-foreground"], buttonVariants.style({ variant }))`
+        )
+        expect(text).not.toContain(`"group-focus/context-menu-item":`)
+        expect(text).not.toContain(`color: "text-xs/relaxed"`)
     })
 
     it("should preserve unresolved cva variant tokens conditionally", () => {
