@@ -12,6 +12,11 @@ Automate your migration from standard Tailwind CSS to type-safe **Tailwindest** 
 - **Smart Auto-Import**: Inserts necessary import statements into transformed files automatically.
 - **Source-Safe**: Uses AST (Abstract Syntax Tree) traversal to ensure code logic remains untouched.
 - **Type-Safe**: Generates objects that are 100% compatible with `tailwindest` types.
+- **Lossless Static Token Preservation**: Keeps Tailwind selector anchors,
+  arbitrary declarations, plugin utilities, and unresolved static tokens in the
+  generated class stream.
+- **Registry-Hardened**: Validated against shadcn registry fixtures with merge
+  stability and output token-preservation specs.
 
 ## Installation
 
@@ -75,7 +80,7 @@ const className =
 **After:**
 
 ```tsx
-const style = tw.def({
+const style = tw.style({
     display: "flex",
     alignItems: "items-center",
     justifyContent: "justify-center",
@@ -89,6 +94,47 @@ const style = tw.def({
     transitionProperty: "transition-colors",
 })
 ```
+
+### Preserved raw tokens
+
+Some Tailwind tokens are not direct CSS properties but are still required for
+selectors, variants, animations, or CSS-variable recipes. The transformer
+preserves these tokens with `tw.def(...)` or raw `tw.join(...)`.
+
+**Before:**
+
+```tsx
+const value = cn(
+    "peer/menu-button flex text-sm hover:bg-sidebar-accent",
+    className
+)
+```
+
+**After:**
+
+```tsx
+const menuButton = tw.style({
+    display: "flex",
+    fontSize: "text-sm",
+})
+
+const value = tw.join(
+    tw.def(["peer/menu-button", "hover:bg-sidebar-accent"], menuButton.style()),
+    className
+)
+```
+
+This preservation path covers token families such as:
+
+- named group and peer anchors: `group/card`, `peer/menu-button`
+- named container anchors: `@container/card-header`
+- arbitrary declarations: `[--card-spacing:--spacing(5)]`
+- variant arbitrary declarations:
+  `data-[size=sm]:[--card-spacing:--spacing(4)]`
+- placement animation utilities:
+  `data-[side=bottom]:slide-in-from-top-2`
+- descendant variant chains such as `**:data-[slot=kbd]:z-50`
+- parenthesized arbitrary value utilities such as `xs:w-(--popup-width)`
 
 ### CVA migration
 
@@ -180,6 +226,50 @@ function Button({ className, variant, size }: ButtonProps) {
 
 When a `cva(...)` declaration has no variant map, it is emitted as `tw.style(...)`
 and call sites use `.class(...)`.
+
+When a `cva(...)` declaration contains preserved tokens, call sites use
+`tw.def(..., helper.style(...))`. Base preserved tokens are unconditional;
+variant-option preserved tokens are conditional on the selected option:
+
+```tsx
+const value = tw.join(
+    tw.def(
+        [
+            "peer/menu-button",
+            variant === "outline" && "hover:bg-sidebar-accent",
+        ],
+        sidebarMenuButtonVariants.style({ variant })
+    ),
+    className
+)
+```
+
+If a call site does not expose a safe selected variant value, the transformer
+does not guess. It emits a diagnostic instead of unconditionally applying a
+variant-specific token.
+
+## Preservation Model
+
+The transformer first builds a lossless plan for each supported static class
+source:
+
+- structured tokens: resolver-backed utilities emitted into Tailwindest style
+  objects
+- preserved tokens: unresolved or non-property tokens emitted as class literals
+
+Every supported static input token must be represented in the generated output.
+Exact class order is not treated as a universal guarantee, but dynamic/user
+class arguments keep their later precedence, and static-after-dynamic
+`cn(...)` shapes are not pooled across dynamic arguments.
+
+The shadcn registry test suite enforces this with:
+
+- `twMerge(source) === source` stability checks for every collected static
+  source
+- transformed-output multiset checks that every input token is present
+- targeted historical assertions for group, peer, container, arbitrary
+  declaration, animation, descendant-chain, and parenthesized arbitrary-value
+  families
 
 ---
 

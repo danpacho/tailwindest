@@ -18,6 +18,23 @@ interface ParsedToken {
 `utility` is used only for resolver lookup. Generated object leaves always use
 `original`.
 
+The analyzer also exposes a lossless class-source plan:
+
+```ts
+type ClassSourcePlan = {
+    source: string
+    tokens: ClassSourceToken[]
+    structuredTokens: StructuredClassToken[]
+    preservedTokens: PreservedClassToken[]
+    styleTree: Record<string, any>
+}
+```
+
+`tokens.map((token) => token.original)` must equal the source token stream from
+`splitClassString(source)`. `styleTree` is built only from structured tokens.
+Preserved tokens remain available to walkers for `tw.def(...)` or raw
+`tw.join(...)` serialization.
+
 ## Variant Extraction
 
 Variant prefixes are extracted before resolver lookup:
@@ -75,7 +92,19 @@ The analyzer does not run Tailwind merge.
 ## Diagnostics
 
 If a utility cannot be resolved, the parsed token receives a warning and is
-excluded from the generated object tree.
+excluded from the generated object tree. In the lossless plan, that same token
+is also classified as:
+
+```ts
+{
+    kind: "preserved",
+    property: null,
+    reason: "unresolved-property",
+}
+```
+
+Walkers must treat this as preservation metadata, not as permission to drop the
+class token.
 
 ## Required Tests
 
@@ -86,4 +115,5 @@ excluded from the generated object tree.
 - group-prefixed variants
 - duplicate property array promotion
 - unresolved token diagnostics
+- lossless `plan()` source/token/style-tree consistency
 - mixed supported and unsupported class strings

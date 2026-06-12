@@ -42,6 +42,7 @@ analyze static class strings
   - split tokens
   - strip variants only for resolver lookup
   - resolve utility -> Tailwindest property
+  - classify unresolved tokens as preserved metadata
   - build nested object tree
   - keep original token at each leaf
     |
@@ -109,4 +110,53 @@ tailwindest-transform src \
 ## Safety Model
 
 If the transformer cannot prove that a rewrite is behavior-preserving, it keeps
-the original source and reports diagnostics.
+the original source, uses a raw `tw.join(...)` fallback, or reports diagnostics.
+Resolver failure for a supported static source is not deletion; it is preserved
+metadata.
+
+## Lossless Class Source Plan
+
+Each supported static source is represented as a `ClassSourcePlan`:
+
+```ts
+type ClassSourcePlan = {
+    source: string
+    tokens: ClassSourceToken[]
+    structuredTokens: StructuredClassToken[]
+    preservedTokens: PreservedClassToken[]
+    styleTree: Record<string, any>
+}
+```
+
+Structured tokens are resolver-backed and can be emitted in Tailwindest style
+objects. Preserved tokens are unresolved or non-property class tokens and remain
+ordinary JavaScript string literals in generated class-producing expressions.
+
+## Serialization Contract
+
+The transformer serializes a static source by shape:
+
+| Source shape                       | Output                                      |
+| ---------------------------------- | ------------------------------------------- |
+| all structured and above threshold | `styleConst.class()`                        |
+| structured + preserved             | `tw.def(["preserved"], styleConst.style())` |
+| below threshold                    | `tw.join("original source")`                |
+| no structured tokens               | `tw.join("original source")`                |
+
+For `cn`, `clsx`, and `classNames`, static-after-dynamic arguments are kept in
+argument order with `tw.join(...)`; the walker must not pool later static
+arguments before earlier dynamic ones.
+
+For CVA, preserved base tokens are unconditional. Preserved variant-option
+tokens are conditional on the selected option and emitted through
+`tw.def([...], variants.style(...))` at call sites.
+
+## Registry Gate
+
+The shadcn registry gate has three layers:
+
+1. `shadcn_class_stability.test.ts` proves each supported input source is
+   stable under `tailwind-merge`.
+2. `shadcn_class_preservation.test.ts` proves transformed output contains every
+   supported static input token as a multiset.
+3. `shadcn_registry.test.ts` locks the final generated snapshots.

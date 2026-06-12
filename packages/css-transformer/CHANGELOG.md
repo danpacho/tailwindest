@@ -1,5 +1,18 @@
 # tailwindest-css-transform
 
+## Unreleased
+
+### Patch Changes
+
+- Preserve unsupported static Tailwind tokens during structured conversion by
+  serializing them through `tw.def(...)` or raw `tw.join(...)`.
+- Preserve named group/peer/container anchors, arbitrary declarations,
+  placement animation utilities, descendant variant chains, and parenthesized
+  arbitrary-value utilities in shadcn registry transformations.
+- Preserve CVA base tokens unconditionally and CVA variant-option tokens
+  conditionally at rewritten call sites.
+- Add shadcn registry stability and output token-preservation specs.
+
 ## 1.0.7
 
 ### Patch Changes

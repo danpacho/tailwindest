@@ -16,6 +16,11 @@ preserving source code when exact conversion is not proven.
 Use it when you are moving an existing Tailwind codebase from `className`,
 `cn`, `clsx`, `classNames`, or `cva` strings into Tailwindest styles.
 
+For supported static class sources, the transformer is lossless: every input
+token must be represented in the generated Tailwindest output. Tokens that do
+not resolve to direct CSS properties are preserved as class literals through
+`tw.def(...)` or raw `tw.join(...)`.
+
 ## Install
 
 Run the transformer directly:
@@ -175,6 +180,44 @@ cn("flex px-4", isActive && "bg-red-500", props.className)
 The static part can become a Tailwindest style constant, while dynamic arguments
 remain in the generated `.class(...)` call.
 
+## Preserved Tokens
+
+Some Tailwind tokens are not direct CSS properties. They may anchor selectors,
+configure CSS variables, represent plugin animation utilities, or use variant
+syntax that should stay literal.
+
+For mixed static sources, the transformer emits structured style tokens through
+Tailwindest and preserved tokens through `tw.def(...)`:
+
+```tsx
+cn("group/card flex text-sm [--card-spacing:--spacing(5)]", className)
+```
+
+```tsx
+tw.join(
+    tw.def(["group/card", "[--card-spacing:--spacing(5)]"], cardStyle.style()),
+    className
+)
+```
+
+Preserved token families include:
+
+- named group, peer, and container anchors such as `group/card`,
+  `peer/menu-button`, and `@container/card-header`
+- arbitrary declarations such as `[--cell-size:2rem]`
+- variant arbitrary declarations such as
+  `data-[size=sm]:[--card-spacing:--spacing(4)]`
+- placement animation utilities such as
+  `data-[side=bottom]:slide-in-from-top-2`
+- descendant variant chains such as `**:data-[slot=kbd]:z-50`
+- parenthesized arbitrary values such as `xs:w-(--popup-width)`
+
+All-unresolved static sources are preserved as raw class streams:
+
+```tsx
+className={tw.join("toaster group")}
+```
+
 ### CVA Output
 
 Static `cva(..., { variants: ... })` declarations become `tw.variants(...)`.
@@ -209,10 +252,7 @@ interface ButtonProps extends GetVariants<typeof buttonVariants> {
 function Button({ className, variant }: ButtonProps) {
     return (
         <button
-            className={tw.join(
-                buttonVariants.class({ variant }),
-                className
-            )}
+            className={tw.join(buttonVariants.class({ variant }), className)}
         />
     )
 }
@@ -220,6 +260,27 @@ function Button({ className, variant }: ButtonProps) {
 
 If a `cva(...)` declaration has no variant map, the transformer emits
 `tw.style(...)` and rewrites call sites to `.class(...)`.
+
+When CVA strings contain preserved tokens, call sites switch from `.class(...)`
+to `tw.def(..., helper.style(...))`. Base preserved tokens are unconditional;
+variant-option preserved tokens are conditional on the selected option:
+
+```tsx
+tw.join(
+    tw.def(
+        [
+            "peer/menu-button",
+            variant === "outline" && "hover:bg-sidebar-accent",
+        ],
+        sidebarMenuButtonVariants.style({ variant, size })
+    ),
+    className
+)
+```
+
+If the call site does not expose a safe selected option value, the transformer
+does not emit the variant-specific preserved token unconditionally. It reports a
+diagnostic so the case can be reviewed manually.
 
 ## Conservative Fallback
 
@@ -229,12 +290,15 @@ Common fallback cases:
 
 - template literals with substitutions
 - computed class strings
-- unknown or ambiguous Tailwind utilities
+- unsafe conditional CVA preserved-token serialization
 - runtime-generated `cva` variant maps
 - unsupported `compoundVariants` conversion
 - helper imports still used elsewhere
 
 Run dry-run first and inspect diagnostics before writing files.
+
+Unknown or ambiguous static utilities are not deleted. They are kept as
+preserved class literals when the surrounding source shape is supported.
 
 ## CLI Options
 
@@ -294,9 +358,20 @@ The transformer uses Collect -> Reverse Execute:
 
 1. Parse source with `ts-morph`.
 2. Collect supported transform targets.
-3. Analyze static class strings.
+3. Analyze static class strings into a lossless token plan.
 4. Apply replacements from the end of the file to the beginning.
 5. Apply import edits once.
 6. Return transformed code and diagnostics.
 
 This avoids stale AST ranges and keeps unrelated source code untouched.
+
+## Registry Verification
+
+The shadcn registry suite is the regression gate for token preservation:
+
+- `shadcn_class_stability.test.ts` checks that every supported static input
+  source is stable under `tailwind-merge`.
+- `shadcn_class_preservation.test.ts` transforms every registry fixture and
+  asserts that output class-producing expressions contain every input token as a
+  multiset.
+- `shadcn_registry.test.ts` validates the final transformed snapshots.
