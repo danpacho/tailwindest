@@ -2,7 +2,7 @@ import { Node } from "ts-morph"
 import type { TransformerContext } from "../context"
 import type { TransformResult } from "../types"
 import { ClassTransformerWalker } from "./walker_interface"
-import { objectToString } from "./utils/object_to_string"
+import { serializeClassSource } from "./utils/class_source_serializer"
 import { getEnclosingComponentName, getTagName } from "./utils/naming"
 
 export interface CnWalkerConfig {
@@ -54,70 +54,109 @@ export class CnWalker implements ClassTransformerWalker {
 
         const staticClassNames: string[] = []
         const dynamicArgs: string[] = []
+        const parts: Array<
+            | { kind: "static"; className: string }
+            | { kind: "dynamic"; code: string }
+        > = []
 
         for (const arg of args) {
             if (
                 Node.isStringLiteral(arg) ||
                 Node.isNoSubstitutionTemplateLiteral(arg)
             ) {
-                staticClassNames.push(arg.getLiteralText())
+                const className = arg.getLiteralText()
+                staticClassNames.push(className)
+                parts.push({ kind: "static", className })
             } else {
-                dynamicArgs.push(arg.getText())
+                const code = arg.getText()
+                dynamicArgs.push(code)
+                parts.push({ kind: "dynamic", code })
             }
         }
 
         const warnings: string[] = []
-        let staticObj: Record<string, any> = {}
+        const threshold = this.config.objectThreshold ?? 0
+        const componentName = getEnclosingComponentName(node)
+        const tagName = getTagName(node)
 
-        if (staticClassNames.length > 0) {
-            const tokens = context.analyzer.analyze(staticClassNames)
-            tokens.forEach((t) => {
+        const serializeStaticClassNames = (
+            classNames: string[],
+            rawAsArgumentLiteral: boolean
+        ) => {
+            const plan = context.analyzer.plan(classNames)
+            plan.tokens.forEach((t) => {
                 if (t.warning) warnings.push(t.warning)
             })
-            staticObj = context.analyzer.buildObjectTree(tokens)
+            if (plan.tokens.length === 0) return null
+            return serializeClassSource(
+                plan,
+                context,
+                node,
+                threshold,
+                componentName,
+                tagName,
+                { rawAsArgumentLiteral }
+            )
         }
 
-        const propertyCount = Object.keys(staticObj).length
-        const threshold = this.config.objectThreshold ?? 0
-        const hasStatic = propertyCount > 0
         const hasDynamic = dynamicArgs.length > 0
+        const firstDynamicIndex = parts.findIndex(
+            (part) => part.kind === "dynamic"
+        )
+        const hasStaticAfterDynamic =
+            firstDynamicIndex !== -1 &&
+            parts
+                .slice(firstDynamicIndex + 1)
+                .some((part) => part.kind === "static")
 
         let finalReplacement = ""
 
-        if (hasStatic && hasDynamic) {
-            if (propertyCount >= threshold) {
-                const componentName = getEnclosingComponentName(node)
-                const tagName = getTagName(node)
-                const constantName = context.styles.getOrRegister(
-                    staticObj,
-                    node,
-                    componentName,
-                    tagName
+        if (hasStaticAfterDynamic) {
+            const joinArgs: string[] = []
+            let pendingStaticClassNames: string[] = []
+
+            const flushStaticClassNames = () => {
+                if (pendingStaticClassNames.length === 0) return
+
+                const serialized = serializeStaticClassNames(
+                    pendingStaticClassNames,
+                    true
                 )
-                finalReplacement = `${context.tailwindestIdentifier}.join(${constantName}.class(), ${dynamicArgs.join(", ")})`
-            } else {
-                const combinedStatic = staticClassNames.join(" ")
-                finalReplacement = `${context.tailwindestIdentifier}.join("${combinedStatic}", ${dynamicArgs.join(", ")})`
+                if (serialized) joinArgs.push(serialized.code)
+                pendingStaticClassNames = []
             }
-        } else if (hasStatic && !hasDynamic) {
-            if (propertyCount >= threshold) {
-                const componentName = getEnclosingComponentName(node)
-                const tagName = getTagName(node)
-                const constantName = context.styles.getOrRegister(
-                    staticObj,
-                    node,
-                    componentName,
-                    tagName
-                )
-                finalReplacement = `${constantName}.class()`
-            } else {
-                finalReplacement = `${context.tailwindestIdentifier}.join("${staticClassNames.join(" ")}")`
+
+            for (const part of parts) {
+                if (part.kind === "static") {
+                    pendingStaticClassNames.push(part.className)
+                } else {
+                    flushStaticClassNames()
+                    joinArgs.push(part.code)
+                }
             }
-        } else if (!hasStatic && hasDynamic) {
-            finalReplacement = `${context.tailwindestIdentifier}.join(${dynamicArgs.join(", ")})`
+
+            flushStaticClassNames()
+
+            finalReplacement =
+                joinArgs.length > 0
+                    ? `${context.tailwindestIdentifier}.join(${joinArgs.join(", ")})`
+                    : `""`
         } else {
-            // Nothing resolved
-            finalReplacement = `""`
+            const serializedStatic =
+                staticClassNames.length > 0
+                    ? serializeStaticClassNames(staticClassNames, hasDynamic)
+                    : null
+
+            if (serializedStatic && hasDynamic) {
+                finalReplacement = `${context.tailwindestIdentifier}.join(${serializedStatic.code}, ${dynamicArgs.join(", ")})`
+            } else if (serializedStatic && !hasDynamic) {
+                finalReplacement = serializedStatic.code
+            } else if (!serializedStatic && hasDynamic) {
+                finalReplacement = `${context.tailwindestIdentifier}.join(${dynamicArgs.join(", ")})`
+            } else {
+                // Nothing resolved
+                finalReplacement = `""`
+            }
         }
 
         const original = node.getText()

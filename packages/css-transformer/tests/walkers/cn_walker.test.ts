@@ -11,6 +11,7 @@ class MockResolver implements Partial<CSSPropertyResolver> {
         if (className === "text-sm") return "fontSize"
         if (className === "p-4") return "padding"
         if (className === "bg-accent") return "backgroundColor"
+        if (className === "gap-(--card-spacing)") return "gap"
         return null
     }
 }
@@ -75,7 +76,60 @@ describe("CnWalker", () => {
 
         // "flex" and "p-4" are static. The rest are dynamic.
         expect(text).toContain(
-            `tw.join(globalDiv.class(), isActive && "text-sm", props.className)`
+            `tw.join(globalDiv.class(), isActive && "text-sm", globalDiv2.class(), props.className)`
+        )
+    })
+
+    it("preserves unresolved static tokens before dynamic user classes", () => {
+        const { sourceFile, context } = setup(
+            `const a = cn("group/card flex text-sm bg-accent", className)`
+        )
+        const callExpr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.CallExpression
+        )!
+        const walker = new CnWalker()
+
+        walker.walk(callExpr, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(
+            `tw.join(tw.def(["group/card"], globalDiv.style()), className)`
+        )
+        expect(text).not.toContain(`String.raw`)
+    })
+
+    it("preserves arbitrary declaration tokens before dynamic user classes", () => {
+        const { sourceFile, context } = setup(
+            `const a = cn("gap-(--card-spacing) [--card-spacing:--spacing(5)]", className)`
+        )
+        const callExpr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.CallExpression
+        )!
+        const walker = new CnWalker()
+
+        walker.walk(callExpr, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(
+            `tw.join(tw.def(["[--card-spacing:--spacing(5)]"], globalDiv.style()), className)`
+        )
+        expect(text).not.toContain(`String.raw`)
+    })
+
+    it("preserves static class argument order around dynamic arguments", () => {
+        const { sourceFile, context } = setup(
+            `const a = cn("p-4", className, "flex")`
+        )
+        const callExpr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.CallExpression
+        )!
+        const walker = new CnWalker()
+
+        walker.walk(callExpr, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(
+            `tw.join(globalDiv.class(), className, globalDiv2.class())`
         )
     })
 

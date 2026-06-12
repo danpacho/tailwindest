@@ -2,7 +2,7 @@ import { Node } from "ts-morph"
 import type { TransformerContext } from "../context"
 import type { TransformResult } from "../types"
 import { ClassTransformerWalker } from "./walker_interface"
-import { objectToString } from "./utils/object_to_string"
+import { serializeClassSource } from "./utils/class_source_serializer"
 import { getEnclosingComponentName, getTagName } from "./utils/naming"
 
 export interface ClassNameWalkerConfig {
@@ -82,44 +82,24 @@ export class ClassNameWalker implements ClassTransformerWalker {
             }
         }
 
-        const tokens = context.analyzer.analyze(classString)
+        const plan = context.analyzer.plan(classString)
         const warnings: string[] = []
-        tokens.forEach((t) => {
+        plan.tokens.forEach((t) => {
             if (t.warning) warnings.push(t.warning)
         })
 
-        const staticObj = context.analyzer.buildObjectTree(tokens)
-
-        if (Object.keys(staticObj).length === 0) {
-            return {
-                success: false,
-                location,
-                original: node.getText(),
-                transformed: node.getText(),
-                warnings: [
-                    ...warnings,
-                    "No resolvable properties found in className",
-                ],
-            }
-        }
-
-        const propertyCount = Object.keys(staticObj).length
         const threshold = this.config.objectThreshold ?? 0
-
-        let twCall = ""
-        if (propertyCount >= threshold) {
-            const componentName = getEnclosingComponentName(node)
-            const tagName = getTagName(node)
-            const constantName = context.styles.getOrRegister(
-                staticObj,
-                node,
-                componentName,
-                tagName
-            )
-            twCall = `${constantName}.class()`
-        } else {
-            twCall = `${context.tailwindestIdentifier}.join("${classString}")`
-        }
+        const componentName = getEnclosingComponentName(node)
+        const tagName = getTagName(node)
+        const serialized = serializeClassSource(
+            plan,
+            context,
+            node,
+            threshold,
+            componentName,
+            tagName
+        )
+        const twCall = serialized.code
         const finalReplacement = `className={${twCall}}`
 
         const original = node.getText()

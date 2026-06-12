@@ -83,6 +83,22 @@ describe("ClassNameWalker", () => {
         expect(text).not.toContain(`tw.style`)
     })
 
+    it("preserves unresolved static tokens with tw.def when style object is emitted", () => {
+        const { sourceFile, context } = setup(
+            `const a = <div className="group/card flex text-sm bg-accent" />`
+        )
+        const attr = sourceFile.getFirstDescendantByKind(
+            SyntaxKind.JsxAttribute
+        )!
+        const walker = new ClassNameWalker({ objectThreshold: 2 })
+
+        walker.walk(attr, context)
+        const text = sourceFile.getFullText()
+
+        expect(text).toContain(`tw.def(["group/card"]`)
+        expect(text).not.toContain(`String.raw`)
+    })
+
     it("should not transform empty className", () => {
         const { sourceFile, context } = setup(`const a = <div className="" />`)
         const attr = sourceFile.getFirstDescendantByKind(
